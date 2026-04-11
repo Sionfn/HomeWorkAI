@@ -1,30 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>HomeWork AI</title>
+  <meta charset="UTF-8">
+  <title>HomeWorkAI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #94a3b8;
+      margin-bottom: 30px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      resize: none;
+      outline: none;
+      background: #1e293b;
+      color: white;
+    }
+
+    button {
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #3b82f6;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    .response {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      min-height: 60px;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>School Helper AI</h1>
-  <textarea id="question" placeholder="Ask your question..."></textarea>
-  <br><br>
-  <button onclick="askAI()">Ask</button>
-  <p id="response"></p>
+
+  <h1>HomeWorkAI</h1>
+  <p>Your AI-powered school assistant</p>
+
+  <div class="container">
+    <textarea id="question" rows="4" placeholder="Ask any homework question..."></textarea>
+    <button onclick="askAI()">Ask</button>
+    <div class="response" id="response">Your answer will appear here...</div>
+  </div>
 
   <script>
     async function askAI() {
       const question = document.getElementById("question").value;
 
+      document.getElementById("response").innerText = "Thinking...";
+
       const res = await fetch("/api/ask", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({ question })
       });
 
       const data = await res.json();
+
       document.getElementById("response").innerText = data.answer;
     }
   </script>
+
 </body>
 </html>
-
 <!-- deploy -->
