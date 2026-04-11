@@ -200,8 +200,33 @@ button:hover {
 </div>
 
 <script>
+function getToday() {
+  return new Date().toISOString().split("T")[0];
+}
+
+function getUsage() {
+  const data = JSON.parse(localStorage.getItem("usage")) || {};
+  return data;
+}
+
+function saveUsage(data) {
+  localStorage.setItem("usage", JSON.stringify(data));
+}
+
 async function askAI() {
   const question = document.getElementById("question").value;
+  const today = getToday();
+  let usage = getUsage();
+
+  if (!usage[today]) {
+    usage = { [today]: 0 };
+  }
+
+  if (usage[today] >= 10) {
+    document.getElementById("response").innerText =
+      "⚠️ Daily limit reached (10 questions). Upgrade for unlimited access.";
+    return;
+  }
 
   document.getElementById("response").innerText = "Thinking...";
 
@@ -213,7 +238,11 @@ async function askAI() {
 
   const data = await res.json();
 
-  document.getElementById("response").innerText = data.answer;
+  usage[today] += 1;
+  saveUsage(usage);
+
+  document.getElementById("response").innerText =
+    data.answer + `\n\n(${usage[today]}/10 used today)`;
 }
 </script>
 
