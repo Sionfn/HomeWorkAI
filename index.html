@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HomeWork AI</title>
+</head>
+<body>
+  <h1>School Helper AI</h1>
+  <textarea id="question" placeholder="Ask your question..."></textarea>
+  <br><br>
+  <button onclick="askAI()">Ask</button>
+  <p id="response"></p>
+
+  <script>
+    async function askAI() {
+      const question = document.getElementById("question").value;
+
+      const res = await fetch("/api/ask", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ question })
+      });
+
+      const data = await res.json();
+      document.getElementById("response").innerText = data.answer;
+    }
+  </script>
+</body>
+</html>
