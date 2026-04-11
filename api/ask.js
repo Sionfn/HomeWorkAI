@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     res.status(200).json({
-      answer: data.output[0].content[0].text
+      answer: data.output_text || "No response"
     });
 
   } catch (error) {
