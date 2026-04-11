@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
-  const { question } = req.body;
-
   try {
+    const { question } = req.body;
+
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
@@ -10,17 +10,25 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        input: `You are a helpful school tutor. Explain step-by-step.\n\n${question}`
+        input: question
       })
     });
 
     const data = await response.json();
 
-    res.status(200).json({
-      answer: data.output_text || "No response"
-    });
+    // safer extraction
+    let answer = "No response";
+
+    if (data.output && data.output.length > 0) {
+      const content = data.output[0].content;
+      if (content && content.length > 0) {
+        answer = content[0].text;
+      }
+    }
+
+    res.status(200).json({ answer });
 
   } catch (error) {
-    res.status(500).json({ error: "Something went wrong" });
+    res.status(500).json({ answer: "Error connecting to AI" });
   }
 }
