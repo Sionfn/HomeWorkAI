@@ -43,6 +43,15 @@ body { font-family: system-ui; }
   color: black;
   font-size: 28px;
 }
+
+/* ANIMATION */
+.fade-in {
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn {
+  from { opacity:0; transform: translateY(10px); }
+  to { opacity:1; transform: translateY(0); }
+}
 </style>
 </head>
 
@@ -56,7 +65,6 @@ body { font-family: system-ui; }
 
 <!-- HERO -->
 <section class="py-24 px-6 bg-[#0f172a]">
-
 <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
 
 <div>
@@ -92,7 +100,6 @@ Powered by AI, better than teachers and tutors
 
 <!-- HOW IT WORKS -->
 <section class="max-w-6xl mx-auto py-24 px-6 text-center">
-
 <h2 class="text-4xl title mb-16">How It Works</h2>
 
 <div class="grid md:grid-cols-3 gap-10">
@@ -116,7 +123,6 @@ Powered by AI, better than teachers and tutors
 </div>
 
 </div>
-
 </section>
 
 <div class="section-line"></div>
@@ -133,6 +139,7 @@ Powered by AI, better than teachers and tutors
 
 <div class="grid md:grid-cols-3 gap-8">
 
+<!-- FREE -->
 <div class="bg-[#1e293b] p-8 card">
 <h3>Free</h3>
 <p class="text-4xl">$0</p>
@@ -143,23 +150,37 @@ Powered by AI, better than teachers and tutors
 <button class="btn bg-[#93c5fd] text-black mt-6 w-full">Start</button>
 </div>
 
+<!-- PRO -->
 <div class="bg-[#1e293b] p-8 card scale-105">
 <h3>Pro</h3>
 <p id="proPrice" class="text-4xl">$10/mo</p>
+
+<div id="savePro" class="hidden fade-in mt-2 bg-green-400 text-black px-3 py-1 border-2 border-black inline-block">
+Save $20 yearly
+</div>
+
 <ul class="mt-4 text-gray-300">
 <li>✔ Unlimited questions</li>
 <li>✔ Full solutions</li>
 </ul>
+
 <button class="btn bg-[#a7f3d0] text-black mt-6 w-full">Start Trial</button>
 </div>
 
+<!-- PRO PLUS -->
 <div class="bg-[#1e293b] p-8 card">
 <h3>Pro+</h3>
 <p id="proPlusPrice" class="text-4xl">$20/mo</p>
+
+<div id="savePlus" class="hidden fade-in mt-2 bg-green-400 text-black px-3 py-1 border-2 border-black inline-block">
+Save $90 yearly
+</div>
+
 <ul class="mt-4 text-gray-300">
 <li>✔ Everything in Pro</li>
 <li>✔ Video help</li>
 </ul>
+
 <button class="btn bg-[#fde68a] text-black mt-6 w-full">Go Yearly</button>
 </div>
 
@@ -196,13 +217,26 @@ Start Learning Now
 
 <script>
 function setBilling(type){
+
+const pro = document.getElementById("proPrice");
+const plus = document.getElementById("proPlusPrice");
+
+const savePro = document.getElementById("savePro");
+const savePlus = document.getElementById("savePlus");
+
 if(type==="yearly"){
-document.getElementById("proPrice").innerText="$100/year";
-document.getElementById("proPlusPrice").innerText="$150/year";
-alert("You save $20 with yearly 🎉");
+  pro.innerText="$100/year";
+  plus.innerText="$150/year";
+
+  savePro.classList.remove("hidden");
+  savePlus.classList.remove("hidden");
+
 }else{
-document.getElementById("proPrice").innerText="$10/mo";
-document.getElementById("proPlusPrice").innerText="$20/mo";
+  pro.innerText="$10/mo";
+  plus.innerText="$20/mo";
+
+  savePro.classList.add("hidden");
+  savePlus.classList.add("hidden");
 }
 }
 </script>
