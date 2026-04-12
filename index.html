@@ -8,7 +8,7 @@
 
 <style>
 .section-line {
-  border-top: 3px solid black;
+  border-top: 5px solid black;
 }
 
 .card {
@@ -20,53 +20,40 @@
 .card:hover {
   transform: translateY(-6px);
 }
-
-.fade {
-  animation: fadeIn 0.6s ease;
-}
-
-@keyframes fadeIn {
-  from {opacity:0; transform:translateY(20px);}
-  to {opacity:1; transform:translateY(0);}
-}
 </style>
 </head>
 
 <body class="bg-[#0f172a] text-white">
 
 <!-- NAV -->
-<div class="flex justify-between items-center px-10 py-5 bg-[#1e293b] border-b-4 border-black">
-  <div class="text-lg font-semibold">HomeWorkAI</div>
+<div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black text-black">
+  <div class="font-semibold">HomeWorkAI</div>
 
-  <button onclick="openApp()" class="bg-[#fde68a] text-black px-5 py-2 card">
+  <button onclick="openApp()" class="bg-[#fde68a] px-5 py-2 card">
     Get Started
   </button>
 </div>
 
 <!-- HERO -->
-<section class="py-24 max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center fade">
+<section class="bg-[#c4b5fd] text-black py-24 px-6">
 
-<div>
+<div class="max-w-5xl mx-auto text-center">
+
   <h1 class="text-5xl font-semibold leading-tight">
-    Stuck on <span class="text-[#93c5fd]">Homework?</span><br>
-    We’ve got your back.
+    The Smartest Homework AI<br>
+    <span class="text-[#2563eb]">Better Than a Tutor</span>
   </h1>
 
-  <p class="mt-6 text-gray-400 text-lg">
-    Ask anything and get step-by-step explanations instantly.
+  <p class="mt-6 text-lg text-gray-800 max-w-2xl mx-auto">
+    Instantly solve any problem with step-by-step explanations powered by advanced AI.
+    Learn faster, understand deeper, and stop wasting time.
   </p>
 
-  <div class="mt-8 flex items-center gap-4">
-    <button onclick="openApp()" class="bg-[#93c5fd] text-black px-6 py-3 card">
-      Get Started Free
-    </button>
-    <span class="text-green-400">✔ 10 free questions daily</span>
-  </div>
-</div>
+  <button onclick="openApp()"
+    class="mt-8 bg-[#fde68a] px-8 py-4 card">
+    Start Free — 10 Questions Daily
+  </button>
 
-<div class="card bg-[#1e293b] p-6">
-  <p class="text-gray-400 text-sm">Powered by AI</p>
-  <p class="mt-2">Learn faster, not harder</p>
 </div>
 
 </section>
@@ -76,26 +63,28 @@
 <!-- HOW IT WORKS -->
 <section class="max-w-6xl mx-auto py-24 px-6 text-center">
 
-<h2 class="text-4xl font-semibold mb-16 text-black">How It Works</h2>
+<h2 class="text-4xl font-semibold mb-16 text-white">
+How It Works
+</h2>
 
 <div class="grid md:grid-cols-3 gap-10">
 
-<div class="bg-[#c4b5fd] text-black p-8 card fade">
-<img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png" class="w-14 mx-auto mb-6">
-<h3 class="font-semibold">Screenshot & Solve</h3>
-<p class="mt-3">Snap your homework and get instant help</p>
+<div class="bg-[#c4b5fd] text-black p-8 card">
+  <div class="text-4xl mb-4">📄</div>
+  <h3 class="font-semibold">Ask</h3>
+  <p class="mt-2">Type or paste your question</p>
 </div>
 
-<div class="bg-[#a7f3d0] text-black p-8 card fade">
-<img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" class="w-14 mx-auto mb-6">
-<h3 class="font-semibold">Any Subject</h3>
-<p class="mt-3">Math, science, English — all covered</p>
+<div class="bg-[#a7f3d0] text-black p-8 card">
+  <div class="text-4xl mb-4">🧠</div>
+  <h3 class="font-semibold">Solve</h3>
+  <p class="mt-2">AI breaks it down step-by-step</p>
 </div>
 
-<div class="bg-[#fde68a] text-black p-8 card fade">
-<img src="https://cdn-icons-png.flaticon.com/512/1828/1828911.png" class="w-14 mx-auto mb-6">
-<h3 class="font-semibold">Instant Answers</h3>
-<p class="mt-3">Get clear explanations in seconds</p>
+<div class="bg-[#fde68a] text-black p-8 card">
+  <div class="text-4xl mb-4">⚡</div>
+  <h3 class="font-semibold">Understand</h3>
+  <p class="mt-2">Learn instantly and improve fast</p>
 </div>
 
 </div>
@@ -107,32 +96,34 @@
 <!-- REVIEWS -->
 <section class="max-w-6xl mx-auto py-24 px-6 text-center">
 
-<h2 class="text-3xl font-semibold mb-16">⭐ 4.9 Rating</h2>
+<h2 class="text-3xl font-semibold mb-16">
+⭐ 5 Stars from Students
+</h2>
 
 <div class="grid md:grid-cols-4 gap-6">
 
 <div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=11" class="rounded-full mb-3">
+<img src="https://i.pravatar.cc/40?img=12" class="rounded-full mb-3">
 ⭐⭐⭐⭐⭐
-<p>“Helped me pass math fast.”</p>
+<p>“Saved me in math class.”</p>
 </div>
 
 <div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=22" class="rounded-full mb-3">
+<img src="https://i.pravatar.cc/40?img=23" class="rounded-full mb-3">
 ⭐⭐⭐⭐⭐
-<p>“Way better than Google.”</p>
+<p>“Better than my teacher honestly.”</p>
 </div>
 
 <div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=33" class="rounded-full mb-3">
+<img src="https://i.pravatar.cc/40?img=34" class="rounded-full mb-3">
 ⭐⭐⭐⭐⭐
-<p>“Actually explains everything.”</p>
+<p>“Explains everything perfectly.”</p>
 </div>
 
 <div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=44" class="rounded-full mb-3">
+<img src="https://i.pravatar.cc/40?img=45" class="rounded-full mb-3">
 ⭐⭐⭐⭐⭐
-<p>“Feels like a tutor.”</p>
+<p>“Use it every day now.”</p>
 </div>
 
 </div>
@@ -180,23 +171,24 @@
 
 <div class="section-line"></div>
 
-<!-- CTA -->
-<section class="bg-[#c4b5fd] border-t-4 border-black text-center py-24 px-6">
+<!-- CTA (SMALLER NOW) -->
+<section class="bg-[#c4b5fd] text-black text-center py-16">
 
-<h2 class="text-4xl font-semibold text-black">
-Ready to Ace Your Homework?
+<h2 class="text-2xl font-semibold">
+Start Getting Better Grades Today
 </h2>
 
-<p class="mt-4 text-gray-800">
-Join thousands of students improving their grades
-</p>
-
 <button onclick="openApp()"
-class="mt-8 bg-[#fde68a] text-black px-8 py-4 card">
-Start Learning Now
+class="mt-6 bg-[#fde68a] px-6 py-3 card">
+Open AI
 </button>
 
 </section>
+
+<!-- FOOTER -->
+<footer class="bg-[#c4b5fd] text-black text-center py-6 border-t-4 border-black">
+<p>© 2026 HomeWorkAI. All rights reserved.</p>
+</footer>
 
 <!-- APP -->
 <div id="appScreen" class="hidden fixed inset-0 bg-[#0f172a] flex flex-col z-50">
