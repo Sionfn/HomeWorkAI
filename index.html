@@ -5,117 +5,117 @@
 <title>HomeWorkAI</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Tailwind CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 </head>
 
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-white h-screen flex">
 
-<!-- NAV -->
-<div class="flex justify-between items-center px-8 py-4 bg-white border-b">
-  <div class="font-semibold text-lg">HomeWorkAI</div>
-  <button class="bg-black text-white px-4 py-2 rounded-lg">Login</button>
+<!-- SIDEBAR -->
+<div class="w-64 bg-slate-100 border-r flex flex-col p-4">
+  <div class="text-lg font-semibold mb-4">HomeWorkAI</div>
+
+  <button onclick="newChat()" class="bg-black text-white py-2 rounded-lg">
+    + New Chat
+  </button>
+
+  <div id="history" class="mt-4 text-sm text-slate-600">
+    <!-- chat history -->
+  </div>
 </div>
 
-<!-- HERO -->
-<section class="text-center py-24 px-4 max-w-3xl mx-auto">
-  <h1 class="text-4xl font-semibold leading-tight">
-    AI that helps you actually understand your homework
-  </h1>
+<!-- MAIN -->
+<div class="flex-1 flex flex-col">
 
-  <p class="mt-4 text-slate-600 text-lg">
-    Step-by-step answers. Instant help. Better grades.
-  </p>
+  <!-- CHAT AREA -->
+  <div id="chat" class="flex-1 overflow-y-auto px-6 py-6 space-y-4">
 
-  <button onclick="scrollToTool()" class="mt-6 bg-blue-600 text-white px-6 py-3 rounded-xl">
-    Get Started
-  </button>
-</section>
-
-<!-- TOOL -->
-<section id="tool" class="max-w-2xl mx-auto px-4">
-  <div class="bg-white border rounded-2xl p-6 shadow-sm">
-
-    <textarea id="question"
-      class="w-full border rounded-lg p-3"
-      placeholder="Ask any homework question..."></textarea>
-
-    <button onclick="askAI()"
-      class="w-full mt-3 bg-blue-600 text-white py-3 rounded-xl">
-      Ask AI
-    </button>
-
-    <div id="response"
-      class="mt-4 bg-slate-100 p-4 rounded-lg text-sm">
+    <div class="text-center text-slate-400 mt-20">
+      Ask anything to get started
     </div>
 
   </div>
-</section>
 
-<!-- FEATURES -->
-<section class="max-w-5xl mx-auto py-20 grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
+  <!-- INPUT -->
+  <div class="border-t p-4 flex gap-2">
+    <input
+      id="input"
+      placeholder="Ask your homework question..."
+      class="flex-1 border rounded-lg px-4 py-3 outline-none"
+    />
 
-  <div class="bg-white border rounded-xl p-6 text-center">
-    <h3 class="font-semibold">Instant Answers</h3>
-    <p class="text-slate-600 mt-2">No waiting. Just results.</p>
-  </div>
-
-  <div class="bg-white border rounded-xl p-6 text-center">
-    <h3 class="font-semibold">Step-by-step</h3>
-    <p class="text-slate-600 mt-2">Understand everything.</p>
-  </div>
-
-  <div class="bg-white border rounded-xl p-6 text-center">
-    <h3 class="font-semibold">All subjects</h3>
-    <p class="text-slate-600 mt-2">Math, science, history.</p>
-  </div>
-
-</section>
-
-<!-- PRICING -->
-<section class="max-w-5xl mx-auto py-20 grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
-
-  <div class="bg-white border rounded-2xl p-6">
-    <h3 class="text-xl font-semibold">Free</h3>
-    <p class="text-3xl mt-2">$0</p>
-    <p class="text-slate-600 mt-2">10 questions/day</p>
-    <button class="mt-4 w-full bg-black text-white py-3 rounded-xl">
-      Start Free
+    <button onclick="sendMessage()"
+      class="bg-black text-white px-5 rounded-lg">
+      Send
     </button>
   </div>
 
-  <div class="bg-white border-2 border-blue-600 rounded-2xl p-6">
-    <h3 class="text-xl font-semibold">Pro</h3>
-    <p class="text-3xl mt-2">$9/mo</p>
-    <p class="text-slate-600 mt-2">Unlimited + better AI</p>
-    <button class="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl">
-      Upgrade
-    </button>
-  </div>
-
-</section>
+</div>
 
 <script>
-function scrollToTool(){
-  document.getElementById("tool").scrollIntoView({behavior:"smooth"});
+
+let messages = [];
+
+function newChat(){
+  document.getElementById("chat").innerHTML = `
+    <div class="text-center text-slate-400 mt-20">
+      New chat started
+    </div>
+  `;
 }
 
-async function askAI() {
-  const question = document.getElementById("question").value;
+function addMessage(content, type){
+  const chat = document.getElementById("chat");
 
-  document.getElementById("response").innerText = "Thinking...";
+  const div = document.createElement("div");
+
+  div.className =
+    type === "user"
+      ? "flex justify-end"
+      : "flex justify-start";
+
+  div.innerHTML = `
+    <div class="
+      max-w-xl px-4 py-3 rounded-xl
+      ${type === "user"
+        ? "bg-black text-white"
+        : "bg-slate-100 text-slate-900"}
+    ">
+      ${content}
+    </div>
+  `;
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function sendMessage(){
+  const input = document.getElementById("input");
+  const text = input.value;
+
+  if(!text) return;
+
+  addMessage(text, "user");
+  input.value = "";
+
+  addMessage("Thinking...", "ai");
 
   const res = await fetch("/api/ask", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ question })
+    body: JSON.stringify({ question: text })
   });
 
   const data = await res.json();
 
-  document.getElementById("response").innerText = data.answer;
+  document.querySelectorAll("#chat div")[document.querySelectorAll("#chat div").length - 1]
+    .innerHTML = `
+      <div class="max-w-xl px-4 py-3 rounded-xl bg-slate-100">
+        ${data.answer}
+      </div>
+    `;
 }
+
 </script>
 
 </body>
