@@ -36,23 +36,16 @@ body { font-family: system-ui; }
   font-weight: 800;
 }
 
-/* LOGO */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 800;
-}
-.logo-icon {
-  width: 30px;
-  height: 30px;
-  background: black;
-  color: white;
+.icon-box {
+  width: 80px;
+  height: 80px;
+  margin: auto;
+  border: 3px solid black;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  font-size: 14px;
+  font-size: 40px;
+  background: white;
 }
 </style>
 </head>
@@ -61,12 +54,7 @@ body { font-family: system-ui; }
 
 <!-- HEADER -->
 <div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black text-black">
-  
-  <div class="logo">
-    <div class="logo-icon">🎓</div>
-    HomeWorkAI
-  </div>
-
+  <div class="font-bold text-lg">📚 HomeWorkAI</div>
   <button onclick="openApp()" class="btn bg-[#fde68a]">Get Started</button>
 </div>
 
@@ -115,18 +103,21 @@ body { font-family: system-ui; }
 <div class="grid md:grid-cols-3 gap-10">
 
 <div class="p-8 card text-black bg-[#c4b5fd]">
-<div class="text-5xl">📄</div>
+<div class="icon-box">📄</div>
 <h3 class="mt-4 font-bold">Ask</h3>
+<p class="mt-2">Type your question instantly</p>
 </div>
 
 <div class="p-8 card text-black bg-[#a7f3d0]">
-<div class="text-5xl">🧠</div>
+<div class="icon-box">🧠</div>
 <h3 class="mt-4 font-bold">Solve</h3>
+<p class="mt-2">AI explains step-by-step</p>
 </div>
 
 <div class="p-8 card text-black bg-[#fde68a]">
-<div class="text-5xl">⚡</div>
+<div class="icon-box">⚡</div>
 <h3 class="mt-4 font-bold">Understand</h3>
+<p class="mt-2">Learn faster</p>
 </div>
 
 </div>
@@ -208,7 +199,7 @@ body { font-family: system-ui; }
 
 <div class="section-line"></div>
 
-<!-- CTA (DARK NOW) -->
+<!-- CTA (DARK FIXED) -->
 <section class="bg-[#0f172a] text-center py-20 border-t-4 border-black">
 
 <h2 class="text-3xl title text-white">
@@ -223,16 +214,10 @@ Start Learning Now
 
 <!-- FOOTER -->
 <footer class="bg-[#0f172a] text-center py-6 border-t-4 border-black">
-
-<div class="logo justify-center text-white">
-  <div class="logo-icon">🎓</div>
-  HomeWorkAI
-</div>
-
-<p class="text-gray-400 text-sm mt-2">
+<div class="font-bold">📚 HomeWorkAI</div>
+<p class="text-gray-400 text-sm">
 © 2026 HomeWorkAI. Helping students succeed.
 </p>
-
 </footer>
 
 <script>
