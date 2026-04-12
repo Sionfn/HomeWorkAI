@@ -27,27 +27,45 @@ body { font-family: system-ui; background:#0f172a; }
   border: 2px solid black;
   border-radius: 14px;
   box-shadow: 5px 5px 0 black;
+  transition: 0.25s;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 8px 8px 0 black;
 }
 
 .title { font-weight: 800; }
 
-/* black emoji box */
+/* smaller icon box */
 .icon-box {
-  width: 90px;
-  height: 90px;
-  border: 3px solid black;
+  width: 65px;
+  height: 65px;
+  border: 2px solid black;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: auto;
   background: white;
-  font-size: 34px;
+  font-size: 24px;
 }
 
-/* image hover */
+/* hero image hover */
+.hero-img {
+  transition: 0.3s;
+}
 .hero-img:hover {
   transform: translateY(-6px) scale(1.02);
-  transition: 0.3s;
+}
+
+/* savings animation */
+.save-box {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: 0.4s ease;
+}
+.show-save {
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>
 </head>
@@ -56,14 +74,12 @@ body { font-family: system-ui; background:#0f172a; }
 
 <!-- HEADER -->
 <div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black">
-
   <div class="font-bold text-lg">✦ HomeWorkAI</div>
 
   <button class="btn flex items-center gap-2 bg-white">
     <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20">
     Login with Google
   </button>
-
 </div>
 
 <!-- HERO -->
@@ -72,7 +88,7 @@ body { font-family: system-ui; background:#0f172a; }
 
 <div>
 <h1 class="text-5xl title">
-Stuck on <span class="text-[#93c5fd]">Homework?</span><br>
+Stuck on <span class="text-[#60a5fa]">Homework?</span><br>
 We’ve got your back.
 </h1>
 
@@ -88,7 +104,7 @@ Get Started Free
 <p class="text-green-500 mt-3">✔ 10 free questions daily</p>
 </div>
 
-<div class="bg-white">
+<div>
 <img src="https://images.pexels.com/photos/3769981/pexels-photo-3769981.jpeg"
 class="rounded-lg w-full object-cover hero-img border-2 border-black">
 
@@ -112,19 +128,19 @@ Powered by OpenAI • Trusted by students
 
 <div class="p-8 card bg-[#c4b5fd]">
 <div class="icon-box">📷</div>
-<h3 class="mt-6 font-bold text-lg">Upload Question</h3>
+<h3 class="mt-4 font-bold">Upload Question</h3>
 <p class="mt-2">Take a picture or type your problem.</p>
 </div>
 
 <div class="p-8 card bg-[#a7f3d0]">
 <div class="icon-box">🧠</div>
-<h3 class="mt-6 font-bold text-lg">AI Solves It</h3>
+<h3 class="mt-4 font-bold">AI Solves It</h3>
 <p class="mt-2">Step-by-step explanations instantly.</p>
 </div>
 
 <div class="p-8 card bg-[#fde68a]">
 <div class="icon-box">📈</div>
-<h3 class="mt-6 font-bold text-lg">Learn Faster</h3>
+<h3 class="mt-4 font-bold">Learn Faster</h3>
 <p class="mt-2">Understand and improve your grades.</p>
 </div>
 
@@ -134,7 +150,7 @@ Powered by OpenAI • Trusted by students
 
 <div class="section-line"></div>
 
-<!-- REVIEWS -->
+<!-- REVIEWS (UNCHANGED) -->
 <section class="py-24 px-6 bg-white text-center">
 <div class="max-w-6xl mx-auto">
 
@@ -143,23 +159,16 @@ Powered by OpenAI • Trusted by students
 <div class="grid md:grid-cols-4 gap-6">
 
 <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=1" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Saved my grades.”</p></div>
-
 <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=2" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“I used to get stuck for hours. Now I understand everything step-by-step and can solve problems on my own.”</p></div>
-
 <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=3" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Best homework tool I’ve ever used.”</p></div>
-
 <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=4" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Helped me prepare for tests way better than studying notes.”</p></div>
 
 <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=5" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Makes homework actually make sense.”</p></div>
-
 <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=6" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Went from failing algebra to getting A’s in 2 weeks.”</p></div>
-
 <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=7" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Actually teaches instead of just answering.”</p></div>
-
 <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=8" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Homework used to stress me out every night. Now I finish faster and understand everything.”</p></div>
 
 </div>
-
 </div>
 </section>
 
@@ -182,20 +191,23 @@ Powered by OpenAI • Trusted by students
 <div class="bg-white p-8 card">
 <h3>Free</h3>
 <p class="text-4xl">$0</p>
+<p class="mt-2 text-gray-500">Basic access for quick help</p>
 <button class="btn bg-[#93c5fd] mt-6 w-full">Start</button>
 </div>
 
 <div class="bg-white p-8 card scale-105">
 <h3>Pro</h3>
 <p id="proPrice" class="text-4xl">$10/mo</p>
-<div id="savePro" class="hidden mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">Save $20 yearly</div>
+<div id="savePro" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">Save $20 yearly</div>
+<p class="mt-2 text-gray-500">Unlimited answers + step-by-step</p>
 <button class="btn bg-[#a7f3d0] mt-6 w-full">Start Free Trial</button>
 </div>
 
 <div class="bg-white p-8 card">
 <h3>Pro+</h3>
 <p id="proPlusPrice" class="text-4xl">$20/mo</p>
-<div id="savePlus" class="hidden mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">Save $90 yearly</div>
+<div id="savePlus" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">Save $90 yearly</div>
+<p class="mt-2 text-gray-500">Everything + video explanations</p>
 <button class="btn bg-[#fde68a] mt-6 w-full">Start Free Trial</button>
 </div>
 
@@ -231,13 +243,15 @@ const savePlus = document.getElementById("savePlus");
 if(type==="yearly"){
   pro.innerText="$100/year";
   plus.innerText="$150/year";
-  savePro.classList.remove("hidden");
-  savePlus.classList.remove("hidden");
+
+  setTimeout(()=>savePro.classList.add("show-save"),200);
+  setTimeout(()=>savePlus.classList.add("show-save"),300);
+
 }else{
   pro.innerText="$10/mo";
   plus.innerText="$20/mo";
-  savePro.classList.add("hidden");
-  savePlus.classList.add("hidden");
+  savePro.classList.remove("show-save");
+  savePlus.classList.remove("show-save");
 }
 }
 
