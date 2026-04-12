@@ -34,6 +34,16 @@ body { font-family: system-ui; background:#0f172a; }
   box-shadow: 8px 8px 0 black;
 }
 
+/* 🔥 yearly animation */
+.animate-pop {
+  animation: pop 0.4s ease;
+}
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05) translateY(-4px); }
+  100% { transform: scale(1); }
+}
+
 .title { font-weight: 800; }
 
 .icon-box {
@@ -80,7 +90,7 @@ body { font-family: system-ui; background:#0f172a; }
 </div>
 
 <!-- HERO -->
-<section id="home" class="py-24 px-6 bg-white">
+<section class="py-24 px-6 bg-white">
 <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
 
 <div>
@@ -150,7 +160,7 @@ Get accurate answers instantly with AI that explains every step clearly and help
 
 <div class="section-line"></div>
 
-<!-- REVIEWS -->
+<!-- REVIEWS (FULL 8 RESTORED) -->
 <section class="py-24 px-6 bg-white text-center">
 <div class="max-w-6xl mx-auto">
 
@@ -160,13 +170,18 @@ Trusted by students worldwide to improve grades, save time, and actually underst
 </p>
 
 <div class="grid md:grid-cols-4 gap-6">
-<!-- (reviews unchanged) -->
-<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=1" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Saved my grades.”</p></div>
-<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=2" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“I used to get stuck for hours...”</p></div>
-<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=3" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Best homework tool...”</p></div>
-<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=4" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Helped me prepare...”</p></div>
-</div>
 
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=1" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Saved my grades.”</p></div>
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=2" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“I used to get stuck for hours. Now I understand everything step-by-step and can solve problems on my own.”</p></div>
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=3" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Best homework tool I’ve ever used.”</p></div>
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=4" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Helped me prepare for tests way better than studying notes.”</p></div>
+
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=5" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Makes homework actually make sense.”</p></div>
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=6" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Went from failing algebra to getting A’s in 2 weeks.”</p></div>
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=7" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Actually teaches instead of just answering.”</p></div>
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=8" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Homework used to stress me out every night. Now I finish faster and understand everything.”</p></div>
+
+</div>
 </div>
 </section>
 
@@ -184,58 +199,43 @@ Trusted by students worldwide to improve grades, save time, and actually underst
 <button onclick="setBilling('yearly')" class="btn bg-white">Yearly</button>
 </div>
 
-<div class="grid md:grid-cols-3 gap-8">
+<div class="grid md:grid-cols-3 gap-8" id="pricingCards">
 
 <div class="bg-white p-8 card">
 <h3>Free</h3>
 <p class="text-4xl">$0</p>
-
 <ul class="mt-4 text-left space-y-2">
 <li>✔ 10 questions per day</li>
 <li>✔ Basic AI answers</li>
 <li>✔ Standard response speed</li>
 <li>✔ Access to all subjects</li>
 </ul>
-
 <button class="btn bg-[#93c5fd] mt-6 w-full">Start</button>
 </div>
 
 <div class="bg-white p-8 card scale-105">
 <h3>Pro</h3>
 <p id="proPrice" class="text-4xl">$10/mo</p>
-
-<div id="savePro" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">
-Save $20 yearly
-</div>
-
+<div id="savePro" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">Save $20 yearly</div>
 <ul class="mt-4 text-left space-y-2">
 <li>✔ Unlimited questions</li>
-<li>✔ Full step-by-step solutions</li>
-<li>✔ Faster AI responses</li>
-<li>✔ Priority processing</li>
-<li>✔ Better accuracy & explanations</li>
+<li>✔ Step-by-step solutions</li>
+<li>✔ Faster responses</li>
+<li>✔ Priority support</li>
 </ul>
-
 <button class="btn bg-[#a7f3d0] mt-6 w-full">Start Free Trial</button>
 </div>
 
 <div class="bg-white p-8 card">
 <h3>Pro+</h3>
 <p id="proPlusPrice" class="text-4xl">$20/mo</p>
-
-<div id="savePlus" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">
-Save $90 yearly
-</div>
-
+<div id="savePlus" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">Save $90 yearly</div>
 <ul class="mt-4 text-left space-y-2">
 <li>✔ Everything in Pro</li>
-<li>✔ Video-style explanations</li>
-<li>✔ Deep concept breakdowns</li>
-<li>✔ Best AI model responses</li>
-<li>✔ Highest priority speed</li>
-<li>✔ Advanced learning insights</li>
+<li>✔ Video explanations</li>
+<li>✔ Deep learning insights</li>
+<li>✔ Fastest response speed</li>
 </ul>
-
 <button class="btn bg-[#fde68a] mt-6 w-full">Start Free Trial</button>
 </div>
 
@@ -263,10 +263,16 @@ Save $90 yearly
 
 <script>
 function setBilling(type){
+const cards = document.querySelectorAll("#pricingCards .card");
 const pro = document.getElementById("proPrice");
 const plus = document.getElementById("proPlusPrice");
 const savePro = document.getElementById("savePro");
 const savePlus = document.getElementById("savePlus");
+
+cards.forEach(card => {
+  card.classList.add("animate-pop");
+  setTimeout(()=>card.classList.remove("animate-pop"),400);
+});
 
 if(type==="yearly"){
   pro.innerText="$100/year";
