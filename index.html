@@ -8,9 +8,9 @@
 <style>
 body {
   margin: 0;
-  font-family: Inter, system-ui, sans-serif;
-  background: #020617;
-  color: white;
+  font-family: Inter, system-ui;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 /* NAV */
@@ -18,281 +18,266 @@ body {
   display: flex;
   justify-content: space-between;
   padding: 20px 40px;
+  background: white;
+  position: sticky;
+  top: 0;
 }
 
 .logo {
   font-weight: bold;
-  font-size: 20px;
 }
 
-.login {
-  background: white;
-  color: black;
+.nav button {
+  background: #c7e9ff;
+  border: none;
   padding: 8px 16px;
   border-radius: 10px;
-  cursor: pointer;
 }
 
 /* HERO */
 .hero {
-  text-align: center;
-  padding: 100px 20px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 80px 40px;
+  flex-wrap: wrap;
+}
+
+.hero-text {
+  max-width: 500px;
 }
 
 .hero h1 {
-  font-size: 3.5rem;
-}
-
-.hero span {
-  background: linear-gradient(90deg,#3b82f6,#06b6d4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 3rem;
 }
 
 .hero p {
-  color: #94a3b8;
-  font-size: 1.2rem;
+  color: #475569;
 }
 
-.cta {
+.hero button {
   margin-top: 20px;
-}
-
-button {
+  background: #a7f3d0;
   padding: 14px;
   border-radius: 12px;
-  border: none;
-  cursor: pointer;
 }
 
-.primary {
-  background: linear-gradient(90deg,#3b82f6,#06b6d4);
-  color: white;
+.hero img {
+  width: 400px;
+  border-radius: 20px;
 }
 
-/* CARD */
-.main {
+/* REVIEWS */
+.reviews {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.review-grid {
   display: flex;
+  gap: 20px;
   justify-content: center;
-  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.review {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  width: 250px;
+}
+
+/* FEATURES */
+.features {
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.feature-grid {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.feature {
+  background: #e0f2fe;
+  padding: 25px;
+  border-radius: 16px;
+  width: 250px;
+}
+
+/* TOOL */
+.tool {
+  padding: 80px 20px;
+  text-align: center;
 }
 
 .card {
-  width: 90%;
-  max-width: 700px;
-  background: rgba(255,255,255,0.05);
+  background: white;
   padding: 25px;
   border-radius: 20px;
+  max-width: 600px;
+  margin: auto;
 }
 
 textarea {
   width: 100%;
   padding: 15px;
   border-radius: 12px;
-  border: none;
-  background: #0f172a;
-  color: white;
 }
 
-.ask {
+button.ask {
   width: 100%;
   margin-top: 10px;
-  background: linear-gradient(90deg,#3b82f6,#06b6d4);
+  background: #a7f3d0;
 }
 
 .response {
   margin-top: 15px;
+  background: #f1f5f9;
   padding: 15px;
-  background: #0f172a;
   border-radius: 12px;
-}
-
-/* FEATURES */
-.features {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin: 80px 20px;
-  flex-wrap: wrap;
-}
-
-.feature {
-  background: rgba(255,255,255,0.05);
-  padding: 25px;
-  border-radius: 16px;
-  width: 250px;
-  text-align: center;
-}
-
-/* REVIEWS */
-.reviews {
-  text-align: center;
-  margin: 80px 20px;
-}
-
-.review-cards {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.review {
-  background: rgba(255,255,255,0.05);
-  padding: 20px;
-  border-radius: 16px;
-  width: 260px;
 }
 
 /* PRICING */
 .pricing {
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.pricing-grid {
   display: flex;
-  justify-content: center;
   gap: 20px;
-  margin: 80px 20px;
+  justify-content: center;
   flex-wrap: wrap;
 }
 
 .plan {
-  background: rgba(255,255,255,0.05);
+  background: white;
   padding: 25px;
   border-radius: 20px;
-  width: 260px;
-  text-align: center;
+  width: 280px;
+}
+
+.plan ul {
+  text-align: left;
 }
 
 .highlight {
-  border: 2px solid #3b82f6;
+  border: 3px solid #38bdf8;
 }
 
-.price {
-  font-size: 26px;
-}
-
-/* FOOTER */
-.footer {
-  text-align: center;
-  padding: 40px;
-  color: #94a3b8;
+/* SIDE ADS */
+.side {
+  position: fixed;
+  top: 200px;
+  right: 20px;
+  background: #e0f2fe;
+  padding: 15px;
+  border-radius: 12px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- NAV -->
 <div class="nav">
   <div class="logo">HomeWorkAI</div>
-  <div class="login">Login</div>
+  <button>Login</button>
 </div>
 
 <!-- HERO -->
-<div class="hero">
-  <h1>Study Smarter with <span>AI</span></h1>
-  <p>Get instant homework help, step-by-step explanations, and better grades.</p>
-  <div class="cta">
-    <button class="primary">Start Free</button>
+<section class="hero">
+  <div class="hero-text">
+    <h1>Get Better Grades with AI</h1>
+    <p>Instant answers, step-by-step explanations, and smarter studying.</p>
+    <button onclick="scrollToTool()">Get Started Free</button>
   </div>
-</div>
 
-<!-- MAIN TOOL -->
-<div class="main">
+  <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7">
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews">
+  <h2>Trusted by 10,000+ Students</h2>
+  <div class="review-grid">
+    <div class="review">⭐️⭐️⭐️⭐️⭐️ “Saved my GPA”</div>
+    <div class="review">⭐️⭐️⭐️⭐️⭐️ “Best homework AI ever”</div>
+    <div class="review">⭐️⭐️⭐️⭐️⭐️ “Better than Chegg”</div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <h2>Why HomeWorkAI?</h2>
+  <div class="feature-grid">
+    <div class="feature">⚡ Instant Answers</div>
+    <div class="feature">🧠 Step-by-Step Help</div>
+    <div class="feature">📚 All Subjects</div>
+  </div>
+</section>
+
+<!-- TOOL -->
+<section class="tool" id="tool">
+  <h2>Try It Now</h2>
   <div class="card">
-    <textarea id="question" rows="4" placeholder="Ask any homework question..."></textarea>
+    <textarea id="question" placeholder="Ask a question..."></textarea>
     <button class="ask" onclick="askAI()">Ask AI</button>
     <div id="response" class="response"></div>
   </div>
-</div>
-
-<!-- FEATURES -->
-<div class="features">
-  <div class="feature">
-    <h3>⚡ Instant Answers</h3>
-    <p>No waiting. Get solutions immediately.</p>
-  </div>
-  <div class="feature">
-    <h3>🧠 Step-by-Step Help</h3>
-    <p>Understand every part of the solution.</p>
-  </div>
-  <div class="feature">
-    <h3>📚 All Subjects</h3>
-    <p>Math, science, history, and more.</p>
-  </div>
-</div>
-
-<!-- REVIEWS -->
-<div class="reviews">
-  <h2>Trusted by Students</h2>
-  <div class="review-cards">
-    <div class="review">“This helped me pass my math test 🔥”</div>
-    <div class="review">“Way better than googling answers”</div>
-    <div class="review">“Explains everything so clearly”</div>
-  </div>
-</div>
+</section>
 
 <!-- PRICING -->
-<div class="pricing">
-  <div class="plan">
-    <h3>Free</h3>
-    <div class="price">$0</div>
-    <p>10 questions/day</p>
-    <button onclick="selectPlan('free')">Start Free</button>
-  </div>
+<section class="pricing">
+  <h2>Pricing</h2>
 
-  <div class="plan highlight">
-    <h3>Pro</h3>
-    <div class="price">$9/mo</div>
-    <p>Unlimited questions + faster AI</p>
-    <button onclick="selectPlan('pro')" class="primary">Upgrade</button>
-  </div>
+  <div class="pricing-grid">
 
-  <div class="plan">
-    <h3>Pro+</h3>
-    <div class="price">$19/mo</div>
-    <p>Best AI + priority support</p>
-    <button onclick="selectPlan('proplus')" class="primary">Go Pro+</button>
-  </div>
-</div>
+    <div class="plan">
+      <h3>Free</h3>
+      <p>$0</p>
+      <ul>
+        <li>10 questions/day</li>
+        <li>Basic answers</li>
+      </ul>
+    </div>
 
-<!-- FOOTER -->
-<div class="footer">
-  © 2026 HomeWorkAI. All rights reserved.
+    <div class="plan highlight">
+      <h3>Pro</h3>
+      <p>$9/mo</p>
+      <ul>
+        <li>Unlimited questions</li>
+        <li>Step-by-step breakdowns</li>
+        <li>Faster responses</li>
+      </ul>
+    </div>
+
+    <div class="plan">
+      <h3>Pro+</h3>
+      <p>$19/mo</p>
+      <ul>
+        <li>Everything in Pro</li>
+        <li>Advanced explanations</li>
+        <li>Video-style learning</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- SIDE -->
+<div class="side">
+  🎁 Free trial available
 </div>
 
 <script>
-let currentPlan = "free";
-
-function selectPlan(plan) {
-  currentPlan = plan;
-  alert("Plan changed to " + plan.toUpperCase());
-}
-
-function getToday() {
-  return new Date().toISOString().split("T")[0];
-}
-
-function getUsage() {
-  return JSON.parse(localStorage.getItem("usage")) || {};
-}
-
-function saveUsage(data) {
-  localStorage.setItem("usage", JSON.stringify(data));
+function scrollToTool() {
+  document.getElementById("tool").scrollIntoView({behavior: "smooth"});
 }
 
 async function askAI() {
   const question = document.getElementById("question").value;
-  const today = getToday();
-  let usage = getUsage();
-
-  if (!usage[today]) usage[today] = 0;
-
-  const limit = currentPlan === "free" ? 10 : Infinity;
-
-  if (usage[today] >= limit) {
-    document.getElementById("response").innerText =
-      "⚠️ Daily limit reached. Upgrade for unlimited.";
-    return;
-  }
 
   document.getElementById("response").innerText = "Thinking...";
 
@@ -304,11 +289,7 @@ async function askAI() {
 
   const data = await res.json();
 
-  usage[today]++;
-  saveUsage(usage);
-
-  document.getElementById("response").innerText =
-    data.answer + `\n\n(${usage[today]}/${limit === Infinity ? "∞" : limit})`;
+  document.getElementById("response").innerText = data.answer;
 }
 </script>
 
