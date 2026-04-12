@@ -1,56 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>HomeWorkAI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 
 <body class="bg-white text-gray-900">
 
 <!-- NAV -->
-<div class="flex justify-between px-8 py-4 border-b">
-  <div class="font-semibold">HomeWorkAI</div>
-  <button class="bg-gray-900 text-white px-4 py-2 rounded-lg">Login</button>
-</div>
+<header class="flex justify-between items-center px-8 py-5 border-b bg-white sticky top-0">
+  <h1 class="font-semibold text-lg">HomeWorkAI</h1>
+  <div class="flex gap-3">
+    <button class="px-4 py-2 rounded-lg border">Login</button>
+    <button class="px-4 py-2 bg-black text-white rounded-lg">Get Started</button>
+  </div>
+</header>
 
 <!-- HERO -->
-<section class="text-center py-24 max-w-3xl mx-auto">
-  <h1 class="text-4xl font-semibold leading-tight">
-    Get Homework Help Instantly with AI
+<section class="text-center py-24 px-4 max-w-3xl mx-auto">
+  <h1 class="text-5xl font-semibold leading-tight">
+    AI That Helps You Actually Learn
   </h1>
 
-  <p class="mt-4 text-gray-600">
-    Snap, type, or ask any question and get step-by-step answers.
+  <p class="mt-5 text-lg text-gray-600">
+    Stop copying answers. Understand everything step-by-step with AI.
   </p>
 
-  <button onclick="scrollToTool()"
-    class="mt-6 bg-blue-600 text-white px-6 py-3 rounded-xl">
-    Get Started
-  </button>
-
-  <img
-    src="https://images.unsplash.com/photo-1509062522246-3755977927d7"
-    class="mt-10 rounded-xl shadow mx-auto"
-    width="500"
-  >
+  <div class="mt-8 flex justify-center gap-4">
+    <button onclick="scrollToTool()" class="bg-black text-white px-6 py-3 rounded-xl">
+      Try It Now
+    </button>
+    <button class="border px-6 py-3 rounded-xl">
+      View Pricing
+    </button>
+  </div>
 </section>
 
 <!-- TRUST -->
-<section class="text-center py-10">
-  <p class="text-gray-500">⭐ Trusted by 50,000+ students</p>
+<section class="text-center py-10 text-gray-500">
+  ⭐ Trusted by 25,000+ students worldwide
 </section>
 
 <!-- TOOL -->
-<section id="tool" class="max-w-xl mx-auto px-4 py-12">
-  <div class="border rounded-2xl p-6 shadow-sm">
+<section id="tool" class="max-w-2xl mx-auto px-4">
+  <div class="bg-white border rounded-2xl p-6 shadow-sm">
 
     <textarea id="question"
-      class="w-full border rounded-lg p-3"
+      class="w-full border rounded-lg p-4"
       placeholder="Ask your homework question..."></textarea>
 
     <button onclick="askAI()"
-      class="w-full mt-3 bg-blue-600 text-white py-3 rounded-xl">
+      class="w-full mt-4 bg-black text-white py-3 rounded-xl">
       Ask AI
     </button>
 
@@ -62,69 +66,93 @@
 </section>
 
 <!-- FEATURES -->
-<section class="max-w-5xl mx-auto grid md:grid-cols-3 gap-6 px-4 py-20">
+<section class="max-w-6xl mx-auto py-24 px-6 grid md:grid-cols-3 gap-10 text-center">
 
-  <div class="text-center">
-    <h3 class="font-semibold">Instant Answers</h3>
-    <p class="text-gray-600 mt-2">Get results immediately</p>
+  <div>
+    <h3 class="font-semibold text-lg">Instant Answers</h3>
+    <p class="text-gray-600 mt-2">Get solutions immediately</p>
   </div>
 
-  <div class="text-center">
-    <h3 class="font-semibold">Step-by-Step</h3>
-    <p class="text-gray-600 mt-2">Understand every solution</p>
+  <div>
+    <h3 class="font-semibold text-lg">Step-by-Step</h3>
+    <p class="text-gray-600 mt-2">Understand every concept</p>
   </div>
 
-  <div class="text-center">
-    <h3 class="font-semibold">All Subjects</h3>
-    <p class="text-gray-600 mt-2">Math, science, more</p>
+  <div>
+    <h3 class="font-semibold text-lg">All Subjects</h3>
+    <p class="text-gray-600 mt-2">Math, science, history</p>
   </div>
 
 </section>
 
 <!-- HOW IT WORKS -->
-<section class="max-w-4xl mx-auto text-center py-20">
+<section class="max-w-5xl mx-auto text-center py-20 px-6">
 
-  <h2 class="text-2xl font-semibold">How it works</h2>
+  <h2 class="text-3xl font-semibold">How it works</h2>
+
+  <div class="mt-12 grid md:grid-cols-3 gap-8">
+
+    <div>
+      <h4 class="font-semibold">1. Ask</h4>
+      <p class="text-gray-600 mt-2">Type your question</p>
+    </div>
+
+    <div>
+      <h4 class="font-semibold">2. AI solves</h4>
+      <p class="text-gray-600 mt-2">Get instant explanation</p>
+    </div>
+
+    <div>
+      <h4 class="font-semibold">3. Learn</h4>
+      <p class="text-gray-600 mt-2">Understand clearly</p>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- REVIEWS -->
+<section class="max-w-5xl mx-auto py-20 px-6 text-center">
+
+  <h2 class="text-3xl font-semibold">Students Love It</h2>
 
   <div class="mt-10 grid md:grid-cols-3 gap-6">
 
-    <div>
-      <p class="font-semibold">1. Ask</p>
-      <p class="text-gray-600">Type your question</p>
-    </div>
-
-    <div>
-      <p class="font-semibold">2. AI Solves</p>
-      <p class="text-gray-600">Instant explanation</p>
-    </div>
-
-    <div>
-      <p class="font-semibold">3. Learn</p>
-      <p class="text-gray-600">Understand the concept</p>
-    </div>
+    <div class="border p-6 rounded-xl">⭐️⭐️⭐️⭐️⭐️ “Helped me pass math”</div>
+    <div class="border p-6 rounded-xl">⭐️⭐️⭐️⭐️⭐️ “Way better than Google”</div>
+    <div class="border p-6 rounded-xl">⭐️⭐️⭐️⭐️⭐️ “Explains everything clearly”</div>
 
   </div>
 
 </section>
 
 <!-- PRICING -->
-<section class="max-w-4xl mx-auto grid md:grid-cols-2 gap-6 px-4 py-20">
+<section class="max-w-5xl mx-auto py-20 px-6 grid md:grid-cols-3 gap-6">
 
   <div class="border rounded-xl p-6">
     <h3 class="font-semibold">Free</h3>
-    <p class="text-2xl mt-2">$0</p>
+    <p class="text-3xl mt-2">$0</p>
     <p class="text-gray-600 mt-2">10 questions/day</p>
-    <button class="mt-4 w-full bg-gray-900 text-white py-2 rounded-lg">
+    <button class="mt-6 w-full bg-black text-white py-3 rounded-lg">
       Start Free
     </button>
   </div>
 
-  <div class="border-2 border-blue-600 rounded-xl p-6">
+  <div class="border-2 border-black rounded-xl p-6">
     <h3 class="font-semibold">Pro</h3>
-    <p class="text-2xl mt-2">$9/mo</p>
-    <p class="text-gray-600 mt-2">Unlimited + better answers</p>
-    <button class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg">
+    <p class="text-3xl mt-2">$9/mo</p>
+    <p class="text-gray-600 mt-2">Unlimited + faster AI</p>
+    <button class="mt-6 w-full bg-black text-white py-3 rounded-lg">
       Upgrade
+    </button>
+  </div>
+
+  <div class="border rounded-xl p-6">
+    <h3 class="font-semibold">Pro+</h3>
+    <p class="text-3xl mt-2">$19/mo</p>
+    <p class="text-gray-600 mt-2">Best AI + priority</p>
+    <button class="mt-6 w-full bg-black text-white py-3 rounded-lg">
+      Go Pro+
     </button>
   </div>
 
