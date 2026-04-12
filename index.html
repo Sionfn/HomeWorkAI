@@ -31,6 +31,19 @@ body { font-family: system-ui; background:#0f172a; }
 
 .title { font-weight: 800; }
 
+.icon-box {
+  width: 90px;
+  height: 90px;
+  border: 3px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  background: white;
+  color: black;
+  font-size: 34px;
+}
+
 /* animation */
 .hero-img {
   animation: float 4s ease-in-out infinite;
@@ -52,7 +65,7 @@ body { font-family: system-ui; background:#0f172a; }
 </div>
 
 <!-- HERO -->
-<section id="home" class="py-24 px-6 bg-white w-full">
+<section id="home" class="py-24 px-6 bg-white">
 <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
 
 <div>
@@ -87,28 +100,29 @@ Powered by OpenAI • Trusted by students
 <div class="section-line"></div>
 
 <!-- HOW IT WORKS -->
-<section class="py-24 px-6 bg-white w-full text-center">
+<section class="py-24 px-6 bg-white text-center">
 <div class="max-w-6xl mx-auto">
+
 <h2 class="text-4xl title mb-6">How It Works</h2>
 
-<div class="grid md:grid-cols-3 gap-10 mt-10">
+<div class="grid md:grid-cols-3 gap-12 mt-12">
 
 <div class="p-8 card bg-[#c4b5fd]">
-📷
-<h3 class="mt-4 font-bold">Upload Question</h3>
-<p>Take a picture or type your problem.</p>
+<div class="icon-box">📷</div>
+<h3 class="mt-6 font-bold text-lg">Upload Question</h3>
+<p class="mt-2">Take a picture or type your problem.</p>
 </div>
 
 <div class="p-8 card bg-[#a7f3d0]">
-🧠
-<h3 class="mt-4 font-bold">AI Solves It</h3>
-<p>Step-by-step explanations instantly.</p>
+<div class="icon-box">🧠</div>
+<h3 class="mt-6 font-bold text-lg">AI Solves It</h3>
+<p class="mt-2">Step-by-step explanations instantly.</p>
 </div>
 
 <div class="p-8 card bg-[#fde68a]">
-📈
-<h3 class="mt-4 font-bold">Learn Faster</h3>
-<p>Understand and improve your grades.</p>
+<div class="icon-box">📈</div>
+<h3 class="mt-6 font-bold text-lg">Learn Faster</h3>
+<p class="mt-2">Understand and improve your grades.</p>
 </div>
 
 </div>
@@ -117,8 +131,8 @@ Powered by OpenAI • Trusted by students
 
 <div class="section-line"></div>
 
-<!-- REVIEWS -->
-<section class="py-24 px-6 bg-white w-full text-center">
+<!-- REVIEWS (UNCHANGED STYLE) -->
+<section class="py-24 px-6 bg-white text-center">
 <div class="max-w-6xl mx-auto">
 
 <h2 class="text-3xl title mb-16">⭐ 5 Stars from Students</h2>
@@ -149,16 +163,11 @@ Powered by OpenAI • Trusted by students
 <div class="section-line"></div>
 
 <!-- PRICING -->
-<section id="pricing" class="py-24 px-6 bg-white w-full text-center">
-
+<section id="pricing" class="py-24 px-6 bg-white text-center">
 <div class="max-w-6xl mx-auto">
 
-<h2 class="text-3xl title mb-4">Simple Pricing</h2>
-
-<div class="flex justify-center gap-4 mb-10">
-<button onclick="setBilling('monthly')" class="btn bg-white">Monthly</button>
-<button onclick="setBilling('yearly')" class="btn bg-white">Yearly</button>
-</div>
+<h2 class="text-3xl title mb-2">Simple Pricing</h2>
+<p class="text-gray-600 mb-10">Choose a plan that fits your learning needs</p>
 
 <div class="grid md:grid-cols-3 gap-8">
 
@@ -170,20 +179,19 @@ Powered by OpenAI • Trusted by students
 
 <div class="bg-white p-8 card scale-105">
 <h3>Pro</h3>
-<p id="proPrice" class="text-4xl">$10/mo</p>
-<button class="btn bg-[#a7f3d0] mt-6 w-full">Start Trial</button>
+<p class="text-4xl">$10/mo</p>
+<button class="btn bg-[#a7f3d0] mt-6 w-full">Start Free Trial</button>
 </div>
 
 <div class="bg-white p-8 card">
 <h3>Pro+</h3>
-<p id="proPlusPrice" class="text-4xl">$20/mo</p>
+<p class="text-4xl">$20/mo</p>
 <button class="btn bg-[#fde68a] mt-6 w-full">Start Free Trial</button>
 </div>
 
 </div>
 
 </div>
-
 </section>
 
 <div class="section-line"></div>
@@ -204,11 +212,6 @@ Powered by OpenAI • Trusted by students
 </footer>
 
 <script>
-function setBilling(type){
-document.getElementById("proPrice").innerText = type==="yearly" ? "$100/year" : "$10/mo";
-document.getElementById("proPlusPrice").innerText = type==="yearly" ? "$150/year" : "$20/mo";
-}
-
 function scrollToSection(id){
 document.getElementById(id).scrollIntoView({behavior:"smooth"});
 }
