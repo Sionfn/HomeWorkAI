@@ -36,7 +36,6 @@ body { font-family: system-ui; background:#0f172a; }
 
 .title { font-weight: 800; }
 
-/* smaller icon box */
 .icon-box {
   width: 65px;
   height: 65px;
@@ -49,7 +48,6 @@ body { font-family: system-ui; background:#0f172a; }
   font-size: 24px;
 }
 
-/* hero image hover */
 .hero-img {
   transition: 0.3s;
 }
@@ -57,7 +55,6 @@ body { font-family: system-ui; background:#0f172a; }
   transform: translateY(-6px) scale(1.02);
 }
 
-/* savings animation */
 .save-box {
   opacity: 0;
   transform: translateY(10px);
@@ -122,7 +119,10 @@ Powered by OpenAI • Trusted by students
 <section class="py-24 px-6 bg-white text-center">
 <div class="max-w-6xl mx-auto">
 
-<h2 class="text-4xl title mb-6">How It Works</h2>
+<h2 class="text-4xl title mb-4">How It Works</h2>
+<p class="text-gray-600 mb-10">
+Get accurate answers instantly with AI that explains every step clearly and helps you actually learn.
+</p>
 
 <div class="grid md:grid-cols-3 gap-12 mt-12">
 
@@ -150,11 +150,14 @@ Powered by OpenAI • Trusted by students
 
 <div class="section-line"></div>
 
-<!-- REVIEWS (UNCHANGED) -->
+<!-- REVIEWS -->
 <section class="py-24 px-6 bg-white text-center">
 <div class="max-w-6xl mx-auto">
 
-<h2 class="text-3xl title mb-16">⭐ 5 Stars from Students</h2>
+<h2 class="text-3xl title mb-4">⭐ 5 Stars from Students</h2>
+<p class="text-gray-600 mb-12">
+Trusted by students worldwide to improve grades, save time, and actually understand their homework.
+</p>
 
 <div class="grid md:grid-cols-4 gap-6">
 
@@ -243,10 +246,8 @@ const savePlus = document.getElementById("savePlus");
 if(type==="yearly"){
   pro.innerText="$100/year";
   plus.innerText="$150/year";
-
   setTimeout(()=>savePro.classList.add("show-save"),200);
   setTimeout(()=>savePlus.classList.add("show-save"),300);
-
 }else{
   pro.innerText="$10/mo";
   plus.innerText="$20/mo";
