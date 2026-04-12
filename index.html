@@ -102,12 +102,9 @@
   <!-- HEADER -->
   <div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black">
     <div class="font-bold text-lg">✦ HomeWorkAI</div>
-    <button onclick="loginGoogle()" class="btn flex items-center gap-2 bg-white">
-  <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="Google">
-  Login with Google
-</button>
+    <button id="googleLoginBtn" onclick="handleGoogleLogin()" class="btn flex items-center gap-2 bg-white">
       <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="Google">
-      Login with Google
+      <span id="loginBtnText">Login with Google</span>
     </button>
   </div>
 
@@ -363,6 +360,75 @@
     <p class="text-gray-400 text-sm">© 2026 HomeWorkAI. Helping students succeed.</p>
   </footer>
 
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-analytics.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
+      authDomain: "homeworkai-6364c.firebaseapp.com",
+      projectId: "homeworkai-6364c",
+      storageBucket: "homeworkai-6364c.firebasestorage.app",
+      messagingSenderId: "486462619999",
+      appId: "1:486462619999:web:885753530368f657d3f6ea",
+      measurementId: "G-9Q99SL0FBX"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Make auth functions available globally
+    window.firebaseAuth = auth;
+    window.googleProvider = provider;
+    window.signInWithPopup = signInWithPopup;
+    window.signOut = signOut;
+
+    // Listen for auth state changes
+    onAuthStateChanged(auth, (user) => {
+      const loginBtnText = document.getElementById('loginBtnText');
+      const googleLoginBtn = document.getElementById('googleLoginBtn');
+      
+      if (user) {
+        // User is signed in
+        loginBtnText.textContent = user.displayName || user.email;
+        googleLoginBtn.onclick = handleLogout;
+      } else {
+        // User is signed out
+        loginBtnText.textContent = 'Login with Google';
+        googleLoginBtn.onclick = handleGoogleLogin;
+      }
+    });
+
+    // Google Login function
+    window.handleGoogleLogin = async function() {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        console.log('Signed in as:', user.displayName);
+      } catch (error) {
+        console.error('Login error:', error.message);
+        alert('Login failed: ' + error.message);
+      }
+    };
+
+    // Logout function
+    window.handleLogout = async function() {
+      try {
+        await signOut(auth);
+        console.log('Signed out');
+      } catch (error) {
+        console.error('Logout error:', error.message);
+      }
+    };
+  </script>
+
   <script>
     let billing = 'monthly';
     let isLoading = false;
@@ -474,29 +540,6 @@ ${question}
       }, 2000);
     }
   </script>
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
-    authDomain: "homeworkai-6364c.firebaseapp.com",
-    projectId: "homeworkai-6364c",
-    storageBucket: "homeworkai-6364c.firebasestorage.app",
-    messagingSenderId: "486462619999",
-    appId: "1:486462619999:web:885753530368f657d3f6ea",
-    measurementId: "G-9Q99SL0FBX"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 </body>
 </html>
 <!-- deploy -->
