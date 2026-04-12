@@ -4,21 +4,49 @@
 <meta charset="UTF-8">
 <title>HomeWorkAI</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-.section-line {
-  border-top: 5px solid black;
+body {
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
-.card {
-  border: 3px solid black;
+.section-line {
+  border-top: 4px solid black;
+}
+
+/* BETTER BUTTONS */
+.btn {
+  border: 2px solid black;
+  padding: 12px 20px;
+  font-weight: 600;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 4px 4px 0 black;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
   box-shadow: 6px 6px 0 black;
+}
+
+/* CARDS */
+.card {
+  border: 2px solid black;
+  border-radius: 14px;
+  box-shadow: 5px 5px 0 black;
   transition: 0.25s;
 }
 
 .card:hover {
   transform: translateY(-6px);
+}
+
+/* TITLES */
+.title {
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 </style>
 </head>
@@ -27,44 +55,49 @@
 
 <!-- HEADER -->
 <div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black text-black">
-  
-  <div class="flex items-center gap-2 font-semibold">
+  <div class="flex items-center gap-2 font-bold text-lg">
     ✦ HomeWorkAI
   </div>
 
-  <button onclick="openApp()" class="bg-[#fde68a] px-5 py-2 card">
+  <button onclick="openApp()" class="btn bg-[#fde68a]">
     Get Started
   </button>
-
 </div>
 
-<!-- HERO (CENTERED, NO IMAGE, YOUR STYLE) -->
-<section class="bg-[#0f172a] py-28 px-6 text-center">
+<!-- HERO -->
+<section class="py-24 px-6 bg-[#111827]">
 
-<div class="max-w-3xl mx-auto">
+<div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
 
-  <h1 class="text-5xl font-semibold leading-tight">
+<div>
+  <h1 class="text-5xl title leading-tight">
     Stuck on <span class="text-[#93c5fd]">Homework?</span><br>
-    We’ve got your back!
+    We’ve got your back.
   </h1>
 
   <p class="mt-6 text-gray-400 text-lg">
-    Take a screenshot or type your question. Our AI tutor explains everything step-by-step.
-    It's like having a genius friend that never gets tired.
+    Instantly solve problems with step-by-step explanations.
+    Better than a tutor, faster than Google.
   </p>
 
-  <div class="mt-8 flex justify-center items-center gap-4">
-
-    <button onclick="openApp()" class="bg-[#c4b5fd] text-black px-6 py-3 card">
-      Get Started Free
+  <div class="mt-8 flex gap-4 items-center">
+    <button onclick="openApp()" class="btn bg-[#c4b5fd] text-black">
+      Start Free Trial
     </button>
-
     <span class="text-green-400">✔ 10 free questions daily</span>
-
   </div>
-
 </div>
 
+<div class="card p-3 bg-[#1e293b]">
+  <img src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b"
+  class="rounded-lg">
+
+  <div class="mt-3 bg-[#fde68a] text-black px-3 py-1 inline-block text-sm border-2 border-black">
+    Powered by AI
+  </div>
+</div>
+
+</div>
 </section>
 
 <div class="section-line"></div>
@@ -72,28 +105,26 @@
 <!-- HOW IT WORKS -->
 <section class="max-w-6xl mx-auto py-24 px-6 text-center">
 
-<h2 class="text-4xl font-semibold mb-16 text-white">
-How It Works
-</h2>
+<h2 class="text-4xl title mb-16">How It Works</h2>
 
 <div class="grid md:grid-cols-3 gap-10">
 
 <div class="bg-[#c4b5fd] text-black p-8 card">
 📄
-<h3 class="mt-3 font-semibold">Ask</h3>
-<p class="mt-2">Type or paste your question</p>
+<h3 class="mt-3 font-bold">Ask</h3>
+<p class="mt-2">Type your question instantly</p>
 </div>
 
 <div class="bg-[#a7f3d0] text-black p-8 card">
 🧠
-<h3 class="mt-3 font-semibold">Solve</h3>
+<h3 class="mt-3 font-bold">Solve</h3>
 <p class="mt-2">AI explains step-by-step</p>
 </div>
 
 <div class="bg-[#fde68a] text-black p-8 card">
 ⚡
-<h3 class="mt-3 font-semibold">Understand</h3>
-<p class="mt-2">Learn instantly</p>
+<h3 class="mt-3 font-bold">Understand</h3>
+<p class="mt-2">Learn faster than ever</p>
 </div>
 
 </div>
@@ -105,34 +136,32 @@ How It Works
 <!-- REVIEWS -->
 <section class="max-w-6xl mx-auto py-24 px-6 text-center">
 
-<h2 class="text-3xl font-semibold mb-16">
-⭐ 5 Stars from Students
-</h2>
+<h2 class="text-3xl title mb-16">⭐ 5 Stars from Students</h2>
 
 <div class="grid md:grid-cols-4 gap-6">
 
 <div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=12" class="rounded-full mb-3">
+<img src="https://i.pravatar.cc/40?img=1" class="rounded-full mb-3">
 ⭐⭐⭐⭐⭐
-<p>“Better than my teacher.”</p>
+<p>“This saved my GPA.”</p>
 </div>
 
 <div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=23" class="rounded-full mb-3">
+<img src="https://i.pravatar.cc/40?img=2" class="rounded-full mb-3">
 ⭐⭐⭐⭐⭐
-<p>“Helped me pass math.”</p>
+<p>“Way better than YouTube.”</p>
 </div>
 
 <div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=34" class="rounded-full mb-3">
+<img src="https://i.pravatar.cc/40?img=3" class="rounded-full mb-3">
 ⭐⭐⭐⭐⭐
-<p>“Explains everything.”</p>
+<p>“Explains everything perfectly.”</p>
 </div>
 
 <div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=45" class="rounded-full mb-3">
+<img src="https://i.pravatar.cc/40?img=4" class="rounded-full mb-3">
 ⭐⭐⭐⭐⭐
-<p>“Use it daily now.”</p>
+<p>“I use it every day.”</p>
 </div>
 
 </div>
@@ -144,34 +173,57 @@ How It Works
 <!-- PRICING -->
 <section class="max-w-6xl mx-auto py-24 px-6 text-center">
 
-<h2 class="text-3xl font-semibold mb-10">Simple Pricing</h2>
-
-<div class="mb-10">
-<button onclick="setBilling('monthly')" class="px-4 py-2 bg-[#1e293b] border border-black">Monthly</button>
-<button onclick="setBilling('yearly')" class="px-4 py-2 bg-[#1e293b] border border-black">Yearly</button>
-</div>
+<h2 class="text-3xl title mb-12">Pricing</h2>
 
 <div class="grid md:grid-cols-3 gap-8">
 
+<!-- FREE -->
 <div class="bg-[#93c5fd] text-black p-8 card">
-<h3>Free</h3>
-<p class="text-4xl">$0</p>
-<p>10 questions/day</p>
-<button onclick="openApp()" class="mt-6 w-full bg-black text-white py-3">Start</button>
+<h3 class="text-xl font-bold">Free</h3>
+<p class="text-4xl font-bold mt-2">$0</p>
+
+<ul class="mt-6 space-y-2 text-left">
+<li>✔ 10 questions per day</li>
+<li>✔ All subjects</li>
+<li>✔ Basic answers</li>
+</ul>
+
+<button onclick="openApp()" class="btn bg-black text-white mt-6 w-full">
+Start Free
+</button>
 </div>
 
+<!-- PRO -->
 <div class="bg-[#a7f3d0] text-black p-8 card scale-105">
-<h3>Pro</h3>
-<p id="proPrice" class="text-4xl">$10/mo</p>
-<p>Unlimited questions</p>
-<button class="mt-6 w-full bg-black text-white py-3">Upgrade</button>
+<h3 class="text-xl font-bold">Pro</h3>
+<p id="proPrice" class="text-4xl font-bold mt-2">$10/mo</p>
+
+<ul class="mt-6 space-y-2 text-left">
+<li>✔ Unlimited questions</li>
+<li>✔ Step-by-step solutions</li>
+<li>✔ Faster responses</li>
+</ul>
+
+<button class="btn bg-black text-white mt-6 w-full">
+Start Free Trial
+</button>
 </div>
 
+<!-- PRO+ -->
 <div class="bg-[#fde68a] text-black p-8 card">
-<h3>Pro+</h3>
-<p id="proPlusPrice" class="text-4xl">$20/mo</p>
-<p>Best value</p>
-<button class="mt-6 w-full bg-black text-white py-3">Go Pro+</button>
+<h3 class="text-xl font-bold">Pro+</h3>
+<p id="proPlusPrice" class="text-4xl font-bold mt-2">$20/mo</p>
+
+<ul class="mt-6 space-y-2 text-left">
+<li>✔ Everything in Pro</li>
+<li>✔ Video explanations</li>
+<li>✔ Priority AI</li>
+<li>✔ Best results</li>
+</ul>
+
+<button class="btn bg-black text-white mt-6 w-full">
+Start Free Trial
+</button>
 </div>
 
 </div>
@@ -183,29 +235,26 @@ How It Works
 <!-- CTA -->
 <section class="bg-[#c4b5fd] text-black text-center py-20 border-t-4 border-black">
 
-<h2 class="text-3xl font-semibold">
+<h2 class="text-3xl title">
 Ready to Ace Your Homework?
 </h2>
 
 <p class="mt-3 text-gray-800">
-Join thousands of students improving their grades
+Start learning smarter today
 </p>
 
-<button onclick="openApp()"
-class="mt-6 bg-[#fde68a] px-8 py-4 card">
+<button onclick="openApp()" class="btn bg-[#fde68a] mt-6">
 Start Learning Now
 </button>
 
 </section>
 
-<!-- FOOTER -->
-<footer class="bg-[#c4b5fd] text-black text-center py-6 border-t-4 border-black">
+<!-- FOOTER (DARK NOW) -->
+<footer class="bg-black text-white text-center py-6 border-t-4 border-black">
 
-<div class="flex justify-center items-center gap-2 mb-2">
-  ✦ <span class="font-semibold">HomeWorkAI</span>
-</div>
+<div class="font-bold mb-2">✦ HomeWorkAI</div>
 
-<p class="text-sm">
+<p class="text-gray-400 text-sm">
 © 2026 HomeWorkAI. Helping students succeed.
 </p>
 
@@ -234,31 +283,15 @@ Send
 function openApp(){document.getElementById("appScreen").classList.remove("hidden")}
 function closeApp(){document.getElementById("appScreen").classList.add("hidden")}
 
-function setBilling(type){
-if(type==="yearly"){
-document.getElementById("proPrice").innerText="$100/year"
-document.getElementById("proPlusPrice").innerText="$150/year"
-}else{
-document.getElementById("proPrice").innerText="$10/mo"
-document.getElementById("proPlusPrice").innerText="$20/mo"
-}
-}
-
-function addMessage(text,type){
-const chat=document.getElementById("chat");
-const div=document.createElement("div");
-div.innerHTML=`<div class="p-3 my-2 ${type==="user"?"text-right bg-[#93c5fd] text-black":"bg-[#1e293b]"}">${text}</div>`;
-chat.appendChild(div);
-}
-
 async function sendMessage(){
 const input=document.getElementById("input");
 const text=input.value;
 if(!text)return;
 
-addMessage(text,"user");
+const chat=document.getElementById("chat");
+
+chat.innerHTML += `<div class="text-right p-2">${text}</div>`;
 input.value="";
-addMessage("Thinking...","ai");
 
 const res=await fetch("/api/ask",{
 method:"POST",
@@ -268,8 +301,7 @@ body:JSON.stringify({question:text})
 
 const data=await res.json();
 
-document.querySelector("#chat div:last-child").innerHTML =
-`<div class="p-3 my-2 bg-[#1e293b]">${data.answer}</div>`;
+chat.innerHTML += `<div class="p-2">${data.answer}</div>`;
 }
 </script>
 
