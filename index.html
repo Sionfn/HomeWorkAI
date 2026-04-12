@@ -754,8 +754,9 @@ ${question}
       }, 2000);
     }
 
-    function showAuthMessage(msg) {
-  const authDiv = document.getElementById('authMessage');
+    showAuthMessage("Login required to continue.");
+handleLogin();
+return;
 
   authDiv.innerHTML = `
     <p class="font-semibold">${msg}</p>
