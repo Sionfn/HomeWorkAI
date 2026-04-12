@@ -1,121 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>HomeWorkAI</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://cdn.tailwindcss.com"></script>
-
 </head>
 
-<body class="bg-white h-screen flex">
+<body class="bg-white text-gray-900">
 
-<!-- SIDEBAR -->
-<div class="w-64 bg-slate-100 border-r flex flex-col p-4">
-  <div class="text-lg font-semibold mb-4">HomeWorkAI</div>
-
-  <button onclick="newChat()" class="bg-black text-white py-2 rounded-lg">
-    + New Chat
-  </button>
-
-  <div id="history" class="mt-4 text-sm text-slate-600">
-    <!-- chat history -->
-  </div>
+<!-- NAV -->
+<div class="flex justify-between px-8 py-4 border-b">
+  <div class="font-semibold">HomeWorkAI</div>
+  <button class="bg-gray-900 text-white px-4 py-2 rounded-lg">Login</button>
 </div>
 
-<!-- MAIN -->
-<div class="flex-1 flex flex-col">
+<!-- HERO -->
+<section class="text-center py-24 max-w-3xl mx-auto">
+  <h1 class="text-4xl font-semibold leading-tight">
+    Get Homework Help Instantly with AI
+  </h1>
 
-  <!-- CHAT AREA -->
-  <div id="chat" class="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+  <p class="mt-4 text-gray-600">
+    Snap, type, or ask any question and get step-by-step answers.
+  </p>
 
-    <div class="text-center text-slate-400 mt-20">
-      Ask anything to get started
+  <button onclick="scrollToTool()"
+    class="mt-6 bg-blue-600 text-white px-6 py-3 rounded-xl">
+    Get Started
+  </button>
+
+  <img
+    src="https://images.unsplash.com/photo-1509062522246-3755977927d7"
+    class="mt-10 rounded-xl shadow mx-auto"
+    width="500"
+  >
+</section>
+
+<!-- TRUST -->
+<section class="text-center py-10">
+  <p class="text-gray-500">⭐ Trusted by 50,000+ students</p>
+</section>
+
+<!-- TOOL -->
+<section id="tool" class="max-w-xl mx-auto px-4 py-12">
+  <div class="border rounded-2xl p-6 shadow-sm">
+
+    <textarea id="question"
+      class="w-full border rounded-lg p-3"
+      placeholder="Ask your homework question..."></textarea>
+
+    <button onclick="askAI()"
+      class="w-full mt-3 bg-blue-600 text-white py-3 rounded-xl">
+      Ask AI
+    </button>
+
+    <div id="response"
+      class="mt-4 bg-gray-100 p-4 rounded-lg text-sm">
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="max-w-5xl mx-auto grid md:grid-cols-3 gap-6 px-4 py-20">
+
+  <div class="text-center">
+    <h3 class="font-semibold">Instant Answers</h3>
+    <p class="text-gray-600 mt-2">Get results immediately</p>
+  </div>
+
+  <div class="text-center">
+    <h3 class="font-semibold">Step-by-Step</h3>
+    <p class="text-gray-600 mt-2">Understand every solution</p>
+  </div>
+
+  <div class="text-center">
+    <h3 class="font-semibold">All Subjects</h3>
+    <p class="text-gray-600 mt-2">Math, science, more</p>
+  </div>
+
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="max-w-4xl mx-auto text-center py-20">
+
+  <h2 class="text-2xl font-semibold">How it works</h2>
+
+  <div class="mt-10 grid md:grid-cols-3 gap-6">
+
+    <div>
+      <p class="font-semibold">1. Ask</p>
+      <p class="text-gray-600">Type your question</p>
+    </div>
+
+    <div>
+      <p class="font-semibold">2. AI Solves</p>
+      <p class="text-gray-600">Instant explanation</p>
+    </div>
+
+    <div>
+      <p class="font-semibold">3. Learn</p>
+      <p class="text-gray-600">Understand the concept</p>
     </div>
 
   </div>
 
-  <!-- INPUT -->
-  <div class="border-t p-4 flex gap-2">
-    <input
-      id="input"
-      placeholder="Ask your homework question..."
-      class="flex-1 border rounded-lg px-4 py-3 outline-none"
-    />
+</section>
 
-    <button onclick="sendMessage()"
-      class="bg-black text-white px-5 rounded-lg">
-      Send
+<!-- PRICING -->
+<section class="max-w-4xl mx-auto grid md:grid-cols-2 gap-6 px-4 py-20">
+
+  <div class="border rounded-xl p-6">
+    <h3 class="font-semibold">Free</h3>
+    <p class="text-2xl mt-2">$0</p>
+    <p class="text-gray-600 mt-2">10 questions/day</p>
+    <button class="mt-4 w-full bg-gray-900 text-white py-2 rounded-lg">
+      Start Free
     </button>
   </div>
 
-</div>
+  <div class="border-2 border-blue-600 rounded-xl p-6">
+    <h3 class="font-semibold">Pro</h3>
+    <p class="text-2xl mt-2">$9/mo</p>
+    <p class="text-gray-600 mt-2">Unlimited + better answers</p>
+    <button class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg">
+      Upgrade
+    </button>
+  </div>
+
+</section>
 
 <script>
-
-let messages = [];
-
-function newChat(){
-  document.getElementById("chat").innerHTML = `
-    <div class="text-center text-slate-400 mt-20">
-      New chat started
-    </div>
-  `;
+function scrollToTool(){
+  document.getElementById("tool").scrollIntoView({behavior:"smooth"});
 }
 
-function addMessage(content, type){
-  const chat = document.getElementById("chat");
+async function askAI() {
+  const question = document.getElementById("question").value;
 
-  const div = document.createElement("div");
-
-  div.className =
-    type === "user"
-      ? "flex justify-end"
-      : "flex justify-start";
-
-  div.innerHTML = `
-    <div class="
-      max-w-xl px-4 py-3 rounded-xl
-      ${type === "user"
-        ? "bg-black text-white"
-        : "bg-slate-100 text-slate-900"}
-    ">
-      ${content}
-    </div>
-  `;
-
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-async function sendMessage(){
-  const input = document.getElementById("input");
-  const text = input.value;
-
-  if(!text) return;
-
-  addMessage(text, "user");
-  input.value = "";
-
-  addMessage("Thinking...", "ai");
+  document.getElementById("response").innerText = "Thinking...";
 
   const res = await fetch("/api/ask", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ question: text })
+    body: JSON.stringify({ question })
   });
 
   const data = await res.json();
 
-  document.querySelectorAll("#chat div")[document.querySelectorAll("#chat div").length - 1]
-    .innerHTML = `
-      <div class="max-w-xl px-4 py-3 rounded-xl bg-slate-100">
-        ${data.answer}
-      </div>
-    `;
+  document.getElementById("response").innerText = data.answer;
 }
-
 </script>
 
 </body>
