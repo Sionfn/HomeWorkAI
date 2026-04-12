@@ -9,7 +9,7 @@
 body {
   margin: 0;
   font-family: Inter, system-ui;
-  background: #ffffff;
+  background: #f9fafb;
   color: #0f172a;
 }
 
@@ -17,8 +17,9 @@ body {
 .nav {
   display: flex;
   justify-content: space-between;
-  padding: 24px 40px;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 20px 40px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .logo {
@@ -26,41 +27,45 @@ body {
 }
 
 .nav button {
-  background: #0f172a;
-  color: white;
+  background: #e0f2fe;
   border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
 }
 
 /* HERO */
 .hero {
   text-align: center;
-  padding: 120px 20px 80px;
+  padding: 100px 20px 60px;
   max-width: 700px;
   margin: auto;
 }
 
 .hero h1 {
-  font-size: 3rem;
+  font-size: 2.8rem;
   font-weight: 600;
-  line-height: 1.2;
 }
 
 .hero p {
-  margin-top: 16px;
   color: #64748b;
-  font-size: 18px;
+  margin-top: 10px;
 }
 
 .hero button {
-  margin-top: 24px;
+  margin-top: 20px;
   padding: 14px 24px;
   border-radius: 10px;
   border: none;
-  background: #2563eb;
+  background: #22c55e;
   color: white;
   font-size: 16px;
+}
+
+/* IMAGE */
+.hero img {
+  margin-top: 40px;
+  width: 100%;
+  border-radius: 16px;
 }
 
 /* TOOL */
@@ -71,16 +76,17 @@ body {
 }
 
 .card {
-  border: 1px solid #e2e8f0;
+  background: white;
   border-radius: 16px;
   padding: 20px;
+  border: 1px solid #e5e7eb;
 }
 
 textarea {
   width: 100%;
   padding: 14px;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e5e7eb;
 }
 
 .ask {
@@ -89,14 +95,14 @@ textarea {
   padding: 14px;
   border-radius: 10px;
   border: none;
-  background: #2563eb;
+  background: #22c55e;
   color: white;
 }
 
 .response {
   margin-top: 15px;
-  padding: 15px;
   background: #f1f5f9;
+  padding: 15px;
   border-radius: 10px;
 }
 
@@ -110,11 +116,31 @@ textarea {
 }
 
 .feature {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
   text-align: center;
 }
 
-.feature h3 {
-  margin-top: 10px;
+/* REVIEWS */
+.reviews {
+  text-align: center;
+  margin: 100px auto;
+  max-width: 900px;
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
+  gap: 20px;
+}
+
+.review {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
 }
 
 /* PRICING */
@@ -123,17 +149,18 @@ textarea {
   margin: 100px auto;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
-  gap: 30px;
+  gap: 20px;
 }
 
 .plan {
-  border: 1px solid #e2e8f0;
+  background: white;
   padding: 25px;
   border-radius: 16px;
+  border: 1px solid #e5e7eb;
 }
 
-.plan h3 {
-  margin-bottom: 10px;
+.highlight {
+  border: 2px solid #22c55e;
 }
 
 .plan button {
@@ -142,48 +169,63 @@ textarea {
   padding: 12px;
   border-radius: 10px;
   border: none;
-  background: #0f172a;
+  background: #22c55e;
   color: white;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
 }
 </style>
 </head>
 
 <body>
 
+<!-- NAV -->
 <div class="nav">
   <div class="logo">HomeWorkAI</div>
   <button>Login</button>
 </div>
 
+<!-- HERO -->
 <div class="hero">
-  <h1>AI that actually helps you understand your homework</h1>
-  <p>Get step-by-step answers instantly. Stop guessing. Start learning.</p>
-  <button onclick="scrollToTool()">Get Started</button>
+  <h1>Your AI Homework Assistant</h1>
+  <p>Get answers instantly. Understand every step. Improve your grades.</p>
+  <button onclick="scrollToTool()">Get Started Free</button>
+
+  <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7">
 </div>
 
+<!-- TOOL -->
 <div class="tool" id="tool">
   <div class="card">
-    <textarea id="question" placeholder="Ask your question..."></textarea>
+    <textarea id="question" placeholder="Ask any homework question..."></textarea>
     <button class="ask" onclick="askAI()">Ask AI</button>
     <div id="response" class="response"></div>
   </div>
 </div>
 
+<!-- FEATURES -->
 <div class="features">
-  <div class="feature">
-    <h3>Instant Answers</h3>
-    <p>No waiting, no searching</p>
-  </div>
-  <div class="feature">
-    <h3>Step-by-step help</h3>
-    <p>Actually learn, not copy</p>
-  </div>
-  <div class="feature">
-    <h3>All subjects</h3>
-    <p>Math, science, history</p>
+  <div class="feature">⚡ Instant Answers</div>
+  <div class="feature">🧠 Step-by-Step Help</div>
+  <div class="feature">📚 All Subjects</div>
+</div>
+
+<!-- REVIEWS -->
+<div class="reviews">
+  <h2>Students Love It</h2>
+  <div class="review-grid">
+    <div class="review">⭐️⭐️⭐️⭐️⭐️ “Helped me get an A”</div>
+    <div class="review">⭐️⭐️⭐️⭐️⭐️ “Better than Google”</div>
+    <div class="review">⭐️⭐️⭐️⭐️⭐️ “Explains everything clearly”</div>
   </div>
 </div>
 
+<!-- PRICING -->
 <div class="pricing">
   <div class="plan">
     <h3>Free</h3>
@@ -192,12 +234,17 @@ textarea {
     <button>Start Free</button>
   </div>
 
-  <div class="plan">
+  <div class="plan highlight">
     <h3>Pro</h3>
     <p>$9/mo</p>
-    <p>Unlimited + better answers</p>
+    <p>Unlimited + better AI</p>
     <button>Upgrade</button>
   </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  © 2026 HomeWorkAI
 </div>
 
 <script>
