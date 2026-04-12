@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-body { font-family: system-ui; }
+body { font-family: system-ui; background:#0f172a; }
 .section-line { border-top: 4px solid black; }
 
 .btn {
@@ -31,32 +31,19 @@ body { font-family: system-ui; }
 
 .title { font-weight: 800; }
 
-.icon-box {
-  width: 70px;
-  height: 70px;
-  border: 3px solid black;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: auto;
-  background: white;
-  color: black;
-  font-size: 28px;
-}
-
-/* 🔥 IMAGE ANIMATION */
+/* animation */
 .hero-img {
   animation: float 4s ease-in-out infinite;
 }
 @keyframes float {
-  0% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-10px) scale(1.02); }
-  100% { transform: translateY(0px) scale(1); }
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }
 </style>
 </head>
 
-<body class="bg-[#0f172a] text-black scroll-smooth">
+<body class="text-black">
 
 <!-- HEADER -->
 <div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black">
@@ -64,8 +51,8 @@ body { font-family: system-ui; }
   <button onclick="scrollToSection('pricing')" class="btn bg-[#fde68a]">Login with Google</button>
 </div>
 
-<!-- HERO (WHITE NOW) -->
-<section id="home" class="py-24 px-6 bg-white">
+<!-- HERO -->
+<section id="home" class="py-24 px-6 bg-white w-full">
 <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
 
 <div>
@@ -89,7 +76,7 @@ Get Started Free
 <div class="card p-3 bg-[#1e293b]">
 <img src="https://images.pexels.com/photos/3769981/pexels-photo-3769981.jpeg" class="rounded-lg w-full object-cover hero-img">
 
-<div class="mt-3 bg-[#bbf7d0] text-black px-3 py-1 inline-block border-2 border-black">
+<div class="mt-3 bg-[#bbf7d0] px-3 py-1 inline-block border-2 border-black">
 Powered by OpenAI • Trusted by students
 </div>
 </div>
@@ -99,105 +86,100 @@ Powered by OpenAI • Trusted by students
 
 <div class="section-line"></div>
 
-<!-- HOW IT WORKS (WHITE) -->
-<section class="max-w-6xl mx-auto py-24 px-6 text-center bg-white">
+<!-- HOW IT WORKS -->
+<section class="py-24 px-6 bg-white w-full text-center">
+<div class="max-w-6xl mx-auto">
 <h2 class="text-4xl title mb-6">How It Works</h2>
-<p class="text-gray-600 mb-10">Powered by advanced AI that explains every step clearly</p>
 
-<div class="grid md:grid-cols-3 gap-10">
+<div class="grid md:grid-cols-3 gap-10 mt-10">
 
 <div class="p-8 card bg-[#c4b5fd]">
-<div class="icon-box">📷</div>
+📷
 <h3 class="mt-4 font-bold">Upload Question</h3>
 <p>Take a picture or type your problem.</p>
 </div>
 
 <div class="p-8 card bg-[#a7f3d0]">
-<div class="icon-box">🧠</div>
+🧠
 <h3 class="mt-4 font-bold">AI Solves It</h3>
-<p>Advanced AI breaks it down step-by-step.</p>
+<p>Step-by-step explanations instantly.</p>
 </div>
 
 <div class="p-8 card bg-[#fde68a]">
-<div class="icon-box">📈</div>
+📈
 <h3 class="mt-4 font-bold">Learn Faster</h3>
 <p>Understand and improve your grades.</p>
 </div>
 
 </div>
+</div>
 </section>
 
 <div class="section-line"></div>
 
-<!-- REVIEWS (WHITE) -->
-<section class="max-w-6xl mx-auto py-24 px-6 text-center bg-white">
+<!-- REVIEWS -->
+<section class="py-24 px-6 bg-white w-full text-center">
+<div class="max-w-6xl mx-auto">
+
 <h2 class="text-3xl title mb-16">⭐ 5 Stars from Students</h2>
 
 <div class="grid md:grid-cols-4 gap-6">
 
-<div class="bg-[#1e293b] text-white p-6 card"><img src="https://i.pravatar.cc/40?u=1" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Saved my grades.”</p></div>
-<div class="bg-[#1e293b] text-white p-6 card"><img src="https://i.pravatar.cc/40?u=2" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“I used to get stuck for hours. Now I understand everything step-by-step.”</p></div>
-<div class="bg-[#1e293b] text-white p-6 card"><img src="https://i.pravatar.cc/40?u=3" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Best homework tool I’ve ever used.”</p></div>
-<div class="bg-[#1e293b] text-white p-6 card"><img src="https://i.pravatar.cc/40?u=4" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Helped me prepare for tests way better than notes.”</p></div>
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=1" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Saved my grades.”</p></div>
 
-<div class="bg-[#1e293b] text-white p-6 card"><img src="https://i.pravatar.cc/40?u=5" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Makes homework actually make sense.”</p></div>
-<div class="bg-[#1e293b] text-white p-6 card"><img src="https://i.pravatar.cc/40?u=6" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Went from failing algebra to A’s.”</p></div>
-<div class="bg-[#1e293b] text-white p-6 card"><img src="https://i.pravatar.cc/40?u=7" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Actually teaches instead of answering.”</p></div>
-<div class="bg-[#1e293b] text-white p-6 card"><img src="https://i.pravatar.cc/40?u=8" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Homework is finally easy.”</p></div>
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=2" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“I used to get stuck for hours. Now I understand everything step-by-step and can solve problems on my own.”</p></div>
+
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=3" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Best homework tool I’ve ever used.”</p></div>
+
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=4" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Helped me prepare for tests way better than studying notes.”</p></div>
+
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=5" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Makes homework actually make sense.”</p></div>
+
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=6" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Went from failing algebra to getting A’s in 2 weeks.”</p></div>
+
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=7" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Actually teaches instead of just answering.”</p></div>
+
+<div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=8" class="rounded-full mb-3">⭐⭐⭐⭐⭐<p>“Homework used to stress me out every night. Now I finish faster and understand everything.”</p></div>
+
+</div>
 
 </div>
 </section>
 
 <div class="section-line"></div>
 
-<!-- PRICING (WHITE) -->
-<section id="pricing" class="max-w-6xl mx-auto py-24 px-6 text-center bg-white">
+<!-- PRICING -->
+<section id="pricing" class="py-24 px-6 bg-white w-full text-center">
+
+<div class="max-w-6xl mx-auto">
 
 <h2 class="text-3xl title mb-4">Simple Pricing</h2>
 
 <div class="flex justify-center gap-4 mb-10">
-<button onclick="setBilling('monthly')" class="btn bg-black text-white">Monthly</button>
-<button onclick="setBilling('yearly')" class="btn bg-black text-white">Yearly</button>
+<button onclick="setBilling('monthly')" class="btn bg-white">Monthly</button>
+<button onclick="setBilling('yearly')" class="btn bg-white">Yearly</button>
 </div>
 
 <div class="grid md:grid-cols-3 gap-8">
 
-<div class="bg-[#1e293b] text-white p-8 card">
+<div class="bg-white p-8 card">
 <h3>Free</h3>
 <p class="text-4xl">$0</p>
-<ul class="mt-4 text-left">
-<li>✔ 10 questions/day</li>
-<li>✔ Basic answers</li>
-</ul>
 <button class="btn bg-[#93c5fd] mt-6 w-full">Start</button>
 </div>
 
-<div class="bg-[#1e293b] text-white p-8 card scale-105">
+<div class="bg-white p-8 card scale-105">
 <h3>Pro</h3>
 <p id="proPrice" class="text-4xl">$10/mo</p>
-<div id="savePro" class="hidden mt-2 bg-green-400 text-black px-3 py-1 border-2 border-black inline-block">
-Save $20 yearly
-</div>
-<ul class="mt-4 text-left">
-<li>✔ Unlimited questions</li>
-<li>✔ Step-by-step solutions</li>
-<li>✔ Faster answers</li>
-</ul>
 <button class="btn bg-[#a7f3d0] mt-6 w-full">Start Trial</button>
 </div>
 
-<div class="bg-[#1e293b] text-white p-8 card">
+<div class="bg-white p-8 card">
 <h3>Pro+</h3>
 <p id="proPlusPrice" class="text-4xl">$20/mo</p>
-<div id="savePlus" class="hidden mt-2 bg-green-400 text-black px-3 py-1 border-2 border-black inline-block">
-Save $90 yearly
-</div>
-<ul class="mt-4 text-left">
-<li>✔ Everything in Pro</li>
-<li>✔ Video explanations</li>
-<li>✔ Best results</li>
-</ul>
 <button class="btn bg-[#fde68a] mt-6 w-full">Start Free Trial</button>
+</div>
+
 </div>
 
 </div>
@@ -223,22 +205,8 @@ Save $90 yearly
 
 <script>
 function setBilling(type){
-const pro = document.getElementById("proPrice");
-const plus = document.getElementById("proPlusPrice");
-const savePro = document.getElementById("savePro");
-const savePlus = document.getElementById("savePlus");
-
-if(type==="yearly"){
-  pro.innerText="$100/year";
-  plus.innerText="$150/year";
-  savePro.classList.remove("hidden");
-  savePlus.classList.remove("hidden");
-}else{
-  pro.innerText="$10/mo";
-  plus.innerText="$20/mo";
-  savePro.classList.add("hidden");
-  savePlus.classList.add("hidden");
-}
+document.getElementById("proPrice").innerText = type==="yearly" ? "$100/year" : "$10/mo";
+document.getElementById("proPlusPrice").innerText = type==="yearly" ? "$150/year" : "$20/mo";
 }
 
 function scrollToSection(id){
