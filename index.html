@@ -34,19 +34,25 @@ body { font-family: system-ui; }
 
 .title {
   font-weight: 800;
-  letter-spacing: -0.02em;
 }
 
-.icon-box {
-  width: 80px;
-  height: 80px;
-  margin: auto;
-  border: 3px solid black;
+/* LOGO */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+.logo-icon {
+  width: 30px;
+  height: 30px;
+  background: black;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40px;
-  background: white;
+  border-radius: 6px;
+  font-size: 14px;
 }
 </style>
 </head>
@@ -55,7 +61,12 @@ body { font-family: system-ui; }
 
 <!-- HEADER -->
 <div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black text-black">
-  <div class="font-bold text-lg">✦ HomeWorkAI</div>
+  
+  <div class="logo">
+    <div class="logo-icon">🎓</div>
+    HomeWorkAI
+  </div>
+
   <button onclick="openApp()" class="btn bg-[#fde68a]">Get Started</button>
 </div>
 
@@ -104,21 +115,18 @@ body { font-family: system-ui; }
 <div class="grid md:grid-cols-3 gap-10">
 
 <div class="p-8 card text-black bg-[#c4b5fd]">
-<div class="icon-box">📄</div>
+<div class="text-5xl">📄</div>
 <h3 class="mt-4 font-bold">Ask</h3>
-<p class="mt-2">Type your question instantly</p>
 </div>
 
 <div class="p-8 card text-black bg-[#a7f3d0]">
-<div class="icon-box">🧠</div>
+<div class="text-5xl">🧠</div>
 <h3 class="mt-4 font-bold">Solve</h3>
-<p class="mt-2">AI explains step-by-step</p>
 </div>
 
 <div class="p-8 card text-black bg-[#fde68a]">
-<div class="icon-box">⚡</div>
+<div class="text-5xl">⚡</div>
 <h3 class="mt-4 font-bold">Understand</h3>
-<p class="mt-2">Learn faster</p>
 </div>
 
 </div>
@@ -179,37 +187,19 @@ body { font-family: system-ui; }
 <div class="bg-[#93c5fd] text-black p-8 card">
 <h3 class="font-bold">Free</h3>
 <p class="text-4xl font-bold">$0</p>
-<ul class="mt-4 text-left space-y-2">
-<li>✔ 10 questions/day</li>
-<li>✔ All subjects</li>
-</ul>
-<button onclick="openApp()" class="btn bg-[#c4b5fd] text-black mt-6 w-full">
-Start Free
-</button>
+<button onclick="openApp()" class="btn bg-[#93c5fd] mt-6 w-full">Start Free</button>
 </div>
 
 <div class="bg-[#a7f3d0] text-black p-8 card scale-105">
 <h3 class="font-bold">Pro</h3>
 <p id="proPrice" class="text-4xl font-bold">$10/mo</p>
-<ul class="mt-4 text-left space-y-2">
-<li>✔ Unlimited questions</li>
-<li>✔ Step-by-step solutions</li>
-</ul>
-<button class="btn bg-[#c4b5fd] text-black mt-6 w-full">
-Start Free Trial
-</button>
+<button class="btn bg-[#a7f3d0] mt-6 w-full">Start Free Trial</button>
 </div>
 
 <div class="bg-[#fde68a] text-black p-8 card">
 <h3 class="font-bold">Pro+</h3>
 <p id="proPlusPrice" class="text-4xl font-bold">$20/mo</p>
-<ul class="mt-4 text-left space-y-2">
-<li>✔ Everything in Pro</li>
-<li>✔ Video explanations</li>
-</ul>
-<button class="btn bg-[#c4b5fd] text-black mt-6 w-full">
-Start Free Trial
-</button>
+<button class="btn bg-[#fde68a] mt-6 w-full">Start Free Trial</button>
 </div>
 
 </div>
@@ -218,14 +208,14 @@ Start Free Trial
 
 <div class="section-line"></div>
 
-<!-- CTA -->
-<section class="bg-[#c4b5fd] text-center py-20 border-t-4 border-black">
+<!-- CTA (DARK NOW) -->
+<section class="bg-[#0f172a] text-center py-20 border-t-4 border-black">
 
 <h2 class="text-3xl title text-white">
 Ready to Ace Your Homework?
 </h2>
 
-<button onclick="openApp()" class="btn bg-[#fde68a] mt-6">
+<button onclick="openApp()" class="btn bg-[#1e293b] text-white mt-6">
 Start Learning Now
 </button>
 
@@ -233,33 +223,20 @@ Start Learning Now
 
 <!-- FOOTER -->
 <footer class="bg-[#0f172a] text-center py-6 border-t-4 border-black">
-<div class="font-bold">✦ HomeWorkAI</div>
-<p class="text-gray-400 text-sm">
+
+<div class="logo justify-center text-white">
+  <div class="logo-icon">🎓</div>
+  HomeWorkAI
+</div>
+
+<p class="text-gray-400 text-sm mt-2">
 © 2026 HomeWorkAI. Helping students succeed.
 </p>
+
 </footer>
 
-<!-- APP -->
-<div id="appScreen" class="hidden fixed inset-0 bg-[#0f172a] flex flex-col z-50">
-
-<div class="flex justify-between p-4 border-b border-gray-800">
-<div>HomeWorkAI</div>
-<button onclick="closeApp()">Close</button>
-</div>
-
-<div id="chat" class="flex-1 p-6 overflow-y-auto"></div>
-
-<div class="p-4 border-t border-gray-800 flex gap-2">
-<input id="input" class="flex-1 bg-[#1e293b] px-4 py-3" placeholder="Ask..." />
-<button onclick="sendMessage()" class="bg-[#93c5fd] text-black px-6">Send</button>
-</div>
-
-</div>
-
 <script>
-function openApp(){document.getElementById("appScreen").classList.remove("hidden")}
-function closeApp(){document.getElementById("appScreen").classList.add("hidden")}
-
+function openApp(){alert("Open AI app")}
 function setBilling(type){
 if(type==="yearly"){
 document.getElementById("proPrice").innerText="$100/year"
@@ -268,27 +245,6 @@ document.getElementById("proPlusPrice").innerText="$150/year"
 document.getElementById("proPrice").innerText="$10/mo"
 document.getElementById("proPlusPrice").innerText="$20/mo"
 }
-}
-
-async function sendMessage(){
-const input=document.getElementById("input");
-const text=input.value;
-if(!text)return;
-
-const chat=document.getElementById("chat");
-
-chat.innerHTML += `<div class="text-right p-2">${text}</div>`;
-input.value="";
-
-const res=await fetch("/api/ask",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({question:text})
-});
-
-const data=await res.json();
-
-chat.innerHTML += `<div class="p-2">${data.answer}</div>`;
 }
 </script>
 
