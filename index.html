@@ -7,170 +7,234 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
+.section-line {
+  border-top: 3px solid #000;
+}
+
+.card {
+  border: 3px solid #000;
+  box-shadow: 6px 6px 0 #000;
+}
+
 .card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   transition: 0.25s;
 }
 </style>
+
 </head>
 
 <body class="bg-[#0f172a] text-white">
 
 <!-- NAV -->
-<div class="flex justify-between items-center px-10 py-5 border-b border-gray-800">
+<div class="flex justify-between items-center px-10 py-5 bg-[#1e293b] border-b-4 border-black">
   <div class="text-lg font-semibold">HomeWorkAI</div>
 
-  <button onclick="openApp()"
-    class="bg-[#fde68a] text-black px-5 py-2 rounded-lg">
+  <button onclick="openApp()" class="bg-[#fde68a] text-black px-5 py-2 card">
     Get Started
   </button>
 </div>
 
 <!-- HERO -->
-<section class="text-center py-28 max-w-3xl mx-auto px-4">
+<section class="py-24 max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
 
+<div>
   <h1 class="text-5xl font-semibold leading-tight">
-    Stop Guessing. Start Understanding.
+    Stuck on <span class="text-[#93c5fd]">Homework?</span><br>
+    We’ve got your back.
   </h1>
 
   <p class="mt-6 text-gray-400 text-lg">
-    Get real explanations, not just answers. Built for students who actually want to improve.
+    Ask anything and get clear, step-by-step explanations instantly.
   </p>
 
-  <button onclick="openApp()"
-    class="mt-8 bg-[#93c5fd] text-black px-8 py-4 rounded-xl text-lg">
-    Try It Free
-  </button>
+  <div class="mt-8 flex items-center gap-4">
+    <button onclick="openApp()" class="bg-[#93c5fd] text-black px-6 py-3 card">
+      Get Started Free
+    </button>
+
+    <span class="text-green-400">✔ 10 free questions daily</span>
+  </div>
+</div>
+
+<div class="card bg-[#1e293b] p-6">
+  <p class="text-gray-400 text-sm">Powered by AI</p>
+  <p class="mt-2">Learn faster with instant help</p>
+</div>
 
 </section>
 
-<!-- HOW IT WORKS (MATCHES YOUR STYLE) -->
-<section class="max-w-6xl mx-auto py-24 px-6">
+<div class="section-line"></div>
 
-<h2 class="text-3xl font-semibold text-center mb-16">
-How It Works
-</h2>
+<!-- HOW IT WORKS -->
+<section class="max-w-6xl mx-auto py-24 px-6 text-center">
+
+<h2 class="text-3xl font-semibold mb-16">How It Works</h2>
 
 <div class="grid md:grid-cols-3 gap-8">
 
-  <div class="bg-[#c4b5fd] text-black p-8 rounded-xl card border-2 border-black">
-    <h3 class="font-semibold text-lg">Ask Anything</h3>
-    <p class="mt-3">
-      Type or paste your homework question and get instant help.
-    </p>
-  </div>
+<div class="bg-[#c4b5fd] text-black p-8 card">
+<h3 class="font-semibold">Ask</h3>
+<p class="mt-2">Type your homework question</p>
+</div>
 
-  <div class="bg-[#a7f3d0] text-black p-8 rounded-xl card border-2 border-black">
-    <h3 class="font-semibold text-lg">Get Explanation</h3>
-    <p class="mt-3">
-      See step-by-step breakdowns so you actually understand.
-    </p>
-  </div>
+<div class="bg-[#a7f3d0] text-black p-8 card">
+<h3 class="font-semibold">Understand</h3>
+<p class="mt-2">See step-by-step solutions</p>
+</div>
 
-  <div class="bg-[#fde68a] text-black p-8 rounded-xl card border-2 border-black">
-    <h3 class="font-semibold text-lg">Improve Faster</h3>
-    <p class="mt-3">
-      Learn quicker and stop wasting time searching online.
-    </p>
-  </div>
+<div class="bg-[#fde68a] text-black p-8 card">
+<h3 class="font-semibold">Improve</h3>
+<p class="mt-2">Learn faster and smarter</p>
+</div>
 
 </div>
 
 </section>
 
-<!-- REVIEWS -->
-<section class="max-w-6xl mx-auto py-24 px-6 text-center">
+<div class="section-line"></div>
 
-<p class="text-gray-400 mb-12">
-⭐ 4.9 rating • 50,000+ students
-</p>
+<!-- REVIEWS -->
+<section class="max-w-6xl mx-auto py-24 px-6">
+
+<h2 class="text-3xl font-semibold text-center mb-16">
+⭐ 4.9 Rating from Students
+</h2>
 
 <div class="grid md:grid-cols-4 gap-6">
 
-  <div class="bg-[#1e293b] p-6 rounded-xl">
-    ⭐⭐⭐⭐⭐
-    <p class="mt-3 text-gray-300">“Helped me pass algebra fast.”</p>
-  </div>
+<!-- REVIEW -->
+<div class="bg-[#1e293b] p-6 card">
+<div class="flex items-center gap-3 mb-3">
+<img src="https://i.pravatar.cc/40?img=11" class="rounded-full">
+<div>
+<p class="text-sm">Ethan M.</p>
+<p class="text-xs text-gray-400">High School</p>
+</div>
+</div>
+⭐⭐⭐⭐⭐
+<p class="mt-2 text-gray-300">“Helped me pass algebra in 2 weeks.”</p>
+</div>
 
-  <div class="bg-[#1e293b] p-6 rounded-xl">
-    ⭐⭐⭐⭐⭐
-    <p class="mt-3 text-gray-300">“Way better than Google.”</p>
-  </div>
+<div class="bg-[#1e293b] p-6 card">
+<div class="flex items-center gap-3 mb-3">
+<img src="https://i.pravatar.cc/40?img=22" class="rounded-full">
+<div>
+<p class="text-sm">Sofia R.</p>
+<p class="text-xs text-gray-400">Student</p>
+</div>
+</div>
+⭐⭐⭐⭐⭐
+<p class="mt-2 text-gray-300">“Actually explains everything clearly.”</p>
+</div>
 
-  <div class="bg-[#1e293b] p-6 rounded-xl">
-    ⭐⭐⭐⭐⭐
-    <p class="mt-3 text-gray-300">“Actually explains everything.”</p>
-  </div>
+<div class="bg-[#1e293b] p-6 card">
+<div class="flex items-center gap-3 mb-3">
+<img src="https://i.pravatar.cc/40?img=33" class="rounded-full">
+<div>
+<p class="text-sm">Noah T.</p>
+<p class="text-xs text-gray-400">College</p>
+</div>
+</div>
+⭐⭐⭐⭐⭐
+<p class="mt-2 text-gray-300">“Way better than searching answers.”</p>
+</div>
 
-  <div class="bg-[#1e293b] p-6 rounded-xl">
-    ⭐⭐⭐⭐⭐
-    <p class="mt-3 text-gray-300">“Feels like a private tutor.”</p>
-  </div>
+<div class="bg-[#1e293b] p-6 card">
+<div class="flex items-center gap-3 mb-3">
+<img src="https://i.pravatar.cc/40?img=44" class="rounded-full">
+<div>
+<p class="text-sm">Maya L.</p>
+<p class="text-xs text-gray-400">Student</p>
+</div>
+</div>
+⭐⭐⭐⭐⭐
+<p class="mt-2 text-gray-300">“Feels like a personal tutor.”</p>
+</div>
 
 </div>
 
 </section>
 
-<!-- PRICING -->
-<section class="max-w-6xl mx-auto py-28 px-6 text-center">
+<div class="section-line"></div>
 
-<h2 class="text-3xl font-semibold mb-16">Simple Pricing</h2>
+<!-- PRICING -->
+<section class="max-w-6xl mx-auto py-24 px-6 text-center">
+
+<h2 class="text-3xl font-semibold mb-10">Simple Pricing</h2>
+
+<!-- TOGGLE -->
+<div class="mb-10">
+<button onclick="setBilling('monthly')" class="px-4 py-2 bg-[#1e293b] border border-black">Monthly</button>
+<button onclick="setBilling('yearly')" class="px-4 py-2 bg-[#1e293b] border border-black">Yearly</button>
+</div>
 
 <div class="grid md:grid-cols-3 gap-8">
 
 <!-- FREE -->
-<div class="bg-[#93c5fd] text-black p-8 rounded-xl card border-2 border-black">
-  <h3 class="font-semibold text-lg">Free</h3>
-  <p class="text-4xl mt-3">$0</p>
+<div class="bg-[#93c5fd] text-black p-8 card">
+<h3>Free</h3>
+<p class="text-4xl mt-2">$0</p>
+<p class="text-sm mt-1">Forever</p>
 
-  <ul class="mt-6 space-y-2 text-left">
-    <li>✔ 10 questions/day</li>
-    <li>✔ Instant answers</li>
-  </ul>
+<ul class="mt-4 text-left">
+<li>✔ 10 questions/day</li>
+<li>✔ Instant answers</li>
+</ul>
 
-  <button onclick="openApp()"
-    class="mt-6 w-full bg-black text-white py-3 rounded-lg">
-    Start Free
-  </button>
+<button onclick="openApp()" class="mt-6 w-full bg-black text-white py-3">
+Start Free
+</button>
 </div>
 
 <!-- PRO -->
-<div class="bg-[#a7f3d0] text-black p-8 rounded-xl card border-4 border-black scale-105">
-  <h3 class="font-semibold text-lg">Pro</h3>
-  <p class="text-4xl mt-3">$10/mo</p>
+<div class="bg-[#a7f3d0] text-black p-8 card">
+<h3>Pro</h3>
+<p id="proPrice" class="text-4xl mt-2">$10/mo</p>
 
-  <ul class="mt-6 space-y-2 text-left">
-    <li>✔ Unlimited questions</li>
-    <li>✔ Full explanations</li>
-    <li>✔ Faster AI</li>
-  </ul>
+<ul class="mt-4 text-left">
+<li>✔ Unlimited questions</li>
+<li>✔ Full explanations</li>
+</ul>
 
-  <button onclick="buyPlan('Pro')"
-    class="mt-6 w-full bg-black text-white py-3 rounded-lg">
-    Upgrade
-  </button>
+<button class="mt-6 w-full bg-black text-white py-3">
+Upgrade
+</button>
 </div>
 
 <!-- PRO+ -->
-<div class="bg-[#fde68a] text-black p-8 rounded-xl card border-2 border-black">
-  <h3 class="font-semibold text-lg">Pro+</h3>
-  <p class="text-4xl mt-3">$20/mo</p>
-  <p class="text-sm mt-1">$150/year</p>
+<div class="bg-[#fde68a] text-black p-8 card">
+<h3>Pro+</h3>
+<p id="proPlusPrice" class="text-4xl mt-2">$20/mo</p>
 
-  <ul class="mt-6 space-y-2 text-left">
-    <li>✔ Everything in Pro</li>
-    <li>✔ Step-by-step breakdowns</li>
-    <li>✔ Video explanations</li>
-    <li>✔ Priority support</li>
-  </ul>
+<ul class="mt-4 text-left">
+<li>✔ Step-by-step breakdowns</li>
+<li>✔ Video explanations</li>
+<li>✔ Priority support</li>
+</ul>
 
-  <button onclick="buyPlan('Pro+')"
-    class="mt-6 w-full bg-black text-white py-3 rounded-lg">
-    Go Pro+
-  </button>
+<button class="mt-6 w-full bg-black text-white py-3">
+Go Pro+
+</button>
 </div>
 
 </div>
+
+</section>
+
+<div class="section-line"></div>
+
+<!-- FINAL CTA -->
+<section class="text-center py-24">
+
+<h2 class="text-3xl font-semibold">
+Start Getting Better Grades Today
+</h2>
+
+<button onclick="openApp()"
+class="mt-6 bg-[#93c5fd] text-black px-8 py-4 card">
+Open AI Helper
+</button>
 
 </section>
 
@@ -178,21 +242,17 @@ How It Works
 <div id="appScreen" class="hidden fixed inset-0 bg-[#0f172a] flex flex-col z-50">
 
 <div class="flex justify-between p-4 border-b border-gray-800">
-  <div>HomeWorkAI</div>
-  <button onclick="closeApp()">Close</button>
+<div>HomeWorkAI</div>
+<button onclick="closeApp()">Close</button>
 </div>
 
 <div id="chat" class="flex-1 p-6 overflow-y-auto"></div>
 
 <div class="p-4 border-t border-gray-800 flex gap-2">
-  <input id="input"
-    class="flex-1 bg-[#1e293b] rounded-lg px-4 py-3"
-    placeholder="Ask your question..." />
-
-  <button onclick="sendMessage()"
-    class="bg-[#93c5fd] text-black px-6 rounded-lg">
-    Send
-  </button>
+<input id="input" class="flex-1 bg-[#1e293b] px-4 py-3" placeholder="Ask..." />
+<button onclick="sendMessage()" class="bg-[#93c5fd] text-black px-6">
+Send
+</button>
 </div>
 
 </div>
@@ -200,35 +260,43 @@ How It Works
 <script>
 function openApp(){document.getElementById("appScreen").classList.remove("hidden")}
 function closeApp(){document.getElementById("appScreen").classList.add("hidden")}
-function buyPlan(plan){alert("Checkout: " + plan)}
+
+function setBilling(type){
+if(type==="yearly"){
+document.getElementById("proPrice").innerText="$100/year"
+document.getElementById("proPlusPrice").innerText="$150/year"
+}else{
+document.getElementById("proPrice").innerText="$10/mo"
+document.getElementById("proPlusPrice").innerText="$20/mo"
+}
+}
 
 function addMessage(text,type){
-  const chat=document.getElementById("chat");
-  const div=document.createElement("div");
-  div.className=type==="user"?"text-right":"text-left";
-  div.innerHTML=`<div class="inline-block px-4 py-3 rounded-xl ${type==="user"?"bg-[#93c5fd] text-black":"bg-[#1e293b]"}">${text}</div>`;
-  chat.appendChild(div);
+const chat=document.getElementById("chat");
+const div=document.createElement("div");
+div.innerHTML=`<div class="p-3 my-2 ${type==="user"?"text-right bg-[#93c5fd] text-black":"bg-[#1e293b]"}">${text}</div>`;
+chat.appendChild(div);
 }
 
 async function sendMessage(){
-  const input=document.getElementById("input");
-  const text=input.value;
-  if(!text)return;
+const input=document.getElementById("input");
+const text=input.value;
+if(!text)return;
 
-  addMessage(text,"user");
-  input.value="";
-  addMessage("Thinking...","ai");
+addMessage(text,"user");
+input.value="";
+addMessage("Thinking...","ai");
 
-  const res=await fetch("/api/ask",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({question:text})
-  });
+const res=await fetch("/api/ask",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({question:text})
+});
 
-  const data=await res.json();
+const data=await res.json();
 
-  document.querySelector("#chat div:last-child").innerHTML =
-    `<div class="inline-block px-4 py-3 rounded-xl bg-[#1e293b]">${data.answer}</div>`;
+document.querySelector("#chat div:last-child").innerHTML =
+`<div class="p-3 my-2 bg-[#1e293b]">${data.answer}</div>`;
 }
 </script>
 
