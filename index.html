@@ -28,20 +28,11 @@ body { font-family: system-ui; background:#0f172a; }
   border-radius: 14px;
   box-shadow: 5px 5px 0 black;
   transition: 0.25s;
+  position: relative;
 }
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 8px 8px 0 black;
-}
-
-/* 🔥 yearly animation */
-.animate-pop {
-  animation: pop 0.4s ease;
-}
-@keyframes pop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05) translateY(-4px); }
-  100% { transform: scale(1); }
 }
 
 .title { font-weight: 800; }
@@ -65,6 +56,19 @@ body { font-family: system-ui; background:#0f172a; }
   transform: translateY(-6px) scale(1.02);
 }
 
+/* pricing highlight */
+.popular-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #a7f3d0;
+  border: 2px solid black;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .save-box {
   opacity: 0;
   transform: translateY(10px);
@@ -73,6 +77,16 @@ body { font-family: system-ui; background:#0f172a; }
 .show-save {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* yearly animation */
+.animate-pop {
+  animation: pop 0.4s ease;
+}
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05) translateY(-4px); }
+  100% { transform: scale(1); }
 }
 </style>
 </head>
@@ -160,7 +174,7 @@ Get accurate answers instantly with AI that explains every step clearly and help
 
 <div class="section-line"></div>
 
-<!-- REVIEWS (FULL 8 RESTORED) -->
+<!-- REVIEWS -->
 <section class="py-24 px-6 bg-white text-center">
 <div class="max-w-6xl mx-auto">
 
@@ -201,41 +215,58 @@ Trusted by students worldwide to improve grades, save time, and actually underst
 
 <div class="grid md:grid-cols-3 gap-8" id="pricingCards">
 
+<!-- FREE -->
 <div class="bg-white p-8 card">
 <h3>Free</h3>
 <p class="text-4xl">$0</p>
+
 <ul class="mt-4 text-left space-y-2">
 <li>✔ 10 questions per day</li>
 <li>✔ Basic AI answers</li>
 <li>✔ Standard response speed</li>
 <li>✔ Access to all subjects</li>
 </ul>
-<button class="btn bg-[#93c5fd] mt-6 w-full">Start</button>
+
+<button class="btn bg-[#93c5fd] mt-6 w-full">Start Now</button>
 </div>
 
+<!-- PRO -->
 <div class="bg-white p-8 card scale-105">
+<div class="popular-badge">MOST POPULAR</div>
+
 <h3>Pro</h3>
 <p id="proPrice" class="text-4xl">$10/mo</p>
-<div id="savePro" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">Save $20 yearly</div>
+
+<div id="savePro" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">
+Save $20 yearly
+</div>
+
 <ul class="mt-4 text-left space-y-2">
 <li>✔ Unlimited questions</li>
 <li>✔ Step-by-step solutions</li>
 <li>✔ Faster responses</li>
 <li>✔ Priority support</li>
 </ul>
+
 <button class="btn bg-[#a7f3d0] mt-6 w-full">Start Free Trial</button>
 </div>
 
+<!-- PRO+ -->
 <div class="bg-white p-8 card">
 <h3>Pro+</h3>
 <p id="proPlusPrice" class="text-4xl">$20/mo</p>
-<div id="savePlus" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">Save $90 yearly</div>
+
+<div id="savePlus" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">
+Save $90 yearly
+</div>
+
 <ul class="mt-4 text-left space-y-2">
 <li>✔ Everything in Pro</li>
 <li>✔ Video explanations</li>
 <li>✔ Deep learning insights</li>
 <li>✔ Fastest response speed</li>
 </ul>
+
 <button class="btn bg-[#fde68a] mt-6 w-full">Start Free Trial</button>
 </div>
 
