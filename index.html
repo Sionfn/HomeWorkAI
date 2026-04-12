@@ -9,7 +9,7 @@
 body {
   margin: 0;
   font-family: Inter, system-ui, sans-serif;
-  background: radial-gradient(circle at top, #0f172a, #020617);
+  background: #020617;
   color: white;
 }
 
@@ -22,6 +22,7 @@ body {
 
 .logo {
   font-weight: bold;
+  font-size: 20px;
 }
 
 .login {
@@ -30,18 +31,12 @@ body {
   padding: 8px 16px;
   border-radius: 10px;
   cursor: pointer;
-  transition: 0.2s;
-}
-
-.login:hover {
-  transform: scale(1.05);
 }
 
 /* HERO */
 .hero {
   text-align: center;
-  padding: 80px 20px;
-  animation: fadeIn 1s ease;
+  padding: 100px 20px 60px;
 }
 
 .hero h1 {
@@ -56,36 +51,30 @@ body {
 
 .hero p {
   color: #94a3b8;
+  font-size: 1.2rem;
 }
 
-/* BUTTONS */
+.cta {
+  margin-top: 20px;
+}
+
 button {
   padding: 14px;
   border-radius: 12px;
   border: none;
   cursor: pointer;
-  transition: 0.2s;
 }
 
 .primary {
   background: linear-gradient(90deg,#3b82f6,#06b6d4);
-}
-
-.primary:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(59,130,246,0.5);
-}
-
-.secondary {
-  background: transparent;
-  border: 1px solid #475569;
   color: white;
 }
 
-/* MAIN CARD */
+/* CARD */
 .main {
   display: flex;
   justify-content: center;
+  margin-top: 40px;
 }
 
 .card {
@@ -94,8 +83,6 @@ button {
   background: rgba(255,255,255,0.05);
   padding: 25px;
   border-radius: 20px;
-  backdrop-filter: blur(10px);
-  animation: fadeInUp 0.6s ease;
 }
 
 textarea {
@@ -118,7 +105,43 @@ textarea {
   padding: 15px;
   background: #0f172a;
   border-radius: 12px;
-  white-space: pre-wrap;
+}
+
+/* FEATURES */
+.features {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 80px 20px;
+  flex-wrap: wrap;
+}
+
+.feature {
+  background: rgba(255,255,255,0.05);
+  padding: 25px;
+  border-radius: 16px;
+  width: 250px;
+  text-align: center;
+}
+
+/* REVIEWS */
+.reviews {
+  text-align: center;
+  margin: 80px 20px;
+}
+
+.review-cards {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.review {
+  background: rgba(255,255,255,0.05);
+  padding: 20px;
+  border-radius: 16px;
+  width: 260px;
 }
 
 /* PRICING */
@@ -134,34 +157,23 @@ textarea {
   background: rgba(255,255,255,0.05);
   padding: 25px;
   border-radius: 20px;
-  width: 250px;
+  width: 260px;
   text-align: center;
-  transition: 0.3s;
 }
 
-.plan:hover {
-  transform: translateY(-10px);
+.highlight {
+  border: 2px solid #3b82f6;
 }
 
 .price {
-  font-size: 24px;
+  font-size: 26px;
 }
 
-/* ANIMATIONS */
-@keyframes fadeIn {
-  from {opacity:0}
-  to {opacity:1}
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity:0;
-    transform:translateY(20px);
-  }
-  to {
-    opacity:1;
-    transform:translateY(0);
-  }
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
 }
 </style>
 </head>
@@ -176,11 +188,14 @@ textarea {
 
 <!-- HERO -->
 <div class="hero">
-  <h1>AI That Solves Your <span>Homework</span></h1>
-  <p>Step-by-step answers instantly. Learn smarter, not harder.</p>
+  <h1>Study Smarter with <span>AI</span></h1>
+  <p>Get instant homework help, step-by-step explanations, and better grades.</p>
+  <div class="cta">
+    <button class="primary">Start Free</button>
+  </div>
 </div>
 
-<!-- MAIN -->
+<!-- MAIN TOOL -->
 <div class="main">
   <div class="card">
     <textarea id="question" rows="4" placeholder="Ask any homework question..."></textarea>
@@ -189,9 +204,34 @@ textarea {
   </div>
 </div>
 
+<!-- FEATURES -->
+<div class="features">
+  <div class="feature">
+    <h3>⚡ Instant Answers</h3>
+    <p>No waiting. Get solutions immediately.</p>
+  </div>
+  <div class="feature">
+    <h3>🧠 Step-by-Step Help</h3>
+    <p>Understand every part of the solution.</p>
+  </div>
+  <div class="feature">
+    <h3>📚 All Subjects</h3>
+    <p>Math, science, history, and more.</p>
+  </div>
+</div>
+
+<!-- REVIEWS -->
+<div class="reviews">
+  <h2>Trusted by Students</h2>
+  <div class="review-cards">
+    <div class="review">“This helped me pass my math test 🔥”</div>
+    <div class="review">“Way better than googling answers”</div>
+    <div class="review">“Explains everything so clearly”</div>
+  </div>
+</div>
+
 <!-- PRICING -->
 <div class="pricing">
-
   <div class="plan">
     <h3>Free</h3>
     <div class="price">$0</div>
@@ -199,20 +239,24 @@ textarea {
     <button onclick="selectPlan('free')">Start Free</button>
   </div>
 
-  <div class="plan">
+  <div class="plan highlight">
     <h3>Pro</h3>
     <div class="price">$9/mo</div>
-    <p>Unlimited questions</p>
+    <p>Unlimited questions + faster AI</p>
     <button onclick="selectPlan('pro')" class="primary">Upgrade</button>
   </div>
 
   <div class="plan">
     <h3>Pro+</h3>
     <div class="price">$19/mo</div>
-    <p>Best AI model</p>
+    <p>Best AI + priority support</p>
     <button onclick="selectPlan('proplus')" class="primary">Go Pro+</button>
   </div>
+</div>
 
+<!-- FOOTER -->
+<div class="footer">
+  © 2026 HomeWorkAI. All rights reserved.
 </div>
 
 <script>
@@ -220,12 +264,7 @@ let currentPlan = "free";
 
 function selectPlan(plan) {
   currentPlan = plan;
-
-  alert(
-    plan === "free"
-      ? "You are on the Free plan"
-      : "Upgrade successful (demo). " + plan.toUpperCase() + " activated 🚀"
-  );
+  alert("Plan changed to " + plan.toUpperCase());
 }
 
 function getToday() {
@@ -269,7 +308,7 @@ async function askAI() {
   saveUsage(usage);
 
   document.getElementById("response").innerText =
-    data.answer + `\n\n(${usage[today]}/${limit === Infinity ? "∞" : limit} used today)`;
+    data.answer + `\n\n(${usage[today]}/${limit === Infinity ? "∞" : limit})`;
 }
 </script>
 
