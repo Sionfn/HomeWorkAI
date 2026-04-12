@@ -14,7 +14,7 @@
 .card {
   border: 3px solid black;
   box-shadow: 6px 6px 0 black;
-  transition: all 0.25s ease;
+  transition: 0.25s;
 }
 
 .card:hover {
@@ -25,47 +25,49 @@
 
 <body class="bg-[#0f172a] text-white">
 
-<!-- NAV -->
+<!-- HEADER -->
 <div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black text-black">
   
-  <!-- LOGO -->
   <div class="flex items-center gap-2 font-semibold">
-    ✦ <span>HomeWorkAI</span>
+    ✦ HomeWorkAI
   </div>
 
   <button onclick="openApp()" class="bg-[#fde68a] px-5 py-2 card">
     Get Started
   </button>
+
 </div>
 
-<!-- HERO (UNCHANGED STYLE, CENTERED NOW) -->
-<section class="bg-[#c4b5fd] text-black py-24 px-6 text-center">
+<!-- HERO (CENTERED, NO IMAGE, YOUR STYLE) -->
+<section class="bg-[#0f172a] py-28 px-6 text-center">
 
 <div class="max-w-3xl mx-auto">
 
   <h1 class="text-5xl font-semibold leading-tight">
-    The Smartest Homework AI<br>
-    <span class="text-[#2563eb]">Better Than a Tutor</span>
+    Stuck on <span class="text-[#93c5fd]">Homework?</span><br>
+    We’ve got your back!
   </h1>
 
-  <p class="mt-6 text-lg text-gray-800">
-    Instantly solve any problem with step-by-step explanations powered by advanced AI.
-    Learn faster, understand deeper, and stop wasting time.
+  <p class="mt-6 text-gray-400 text-lg">
+    Take a screenshot or type your question. Our AI tutor explains everything step-by-step.
+    It's like having a genius friend that never gets tired.
   </p>
 
-  <button onclick="openApp()"
-    class="mt-8 bg-[#fde68a] px-8 py-4 card">
-    Start Free — 10 Questions Daily
-  </button>
+  <div class="mt-8 flex justify-center items-center gap-4">
+
+    <button onclick="openApp()" class="bg-[#c4b5fd] text-black px-6 py-3 card">
+      Get Started Free
+    </button>
+
+    <span class="text-green-400">✔ 10 free questions daily</span>
+
+  </div>
 
 </div>
 
 </section>
 
 <div class="section-line"></div>
-
-<!-- DARK CONTENT STARTS -->
-<div class="bg-[#0f172a]">
 
 <!-- HOW IT WORKS -->
 <section class="max-w-6xl mx-auto py-24 px-6 text-center">
@@ -77,21 +79,21 @@ How It Works
 <div class="grid md:grid-cols-3 gap-10">
 
 <div class="bg-[#c4b5fd] text-black p-8 card">
-  <div class="text-4xl mb-4">📄</div>
-  <h3 class="font-semibold">Ask</h3>
-  <p class="mt-2">Type or paste your question</p>
+📄
+<h3 class="mt-3 font-semibold">Ask</h3>
+<p class="mt-2">Type or paste your question</p>
 </div>
 
 <div class="bg-[#a7f3d0] text-black p-8 card">
-  <div class="text-4xl mb-4">🧠</div>
-  <h3 class="font-semibold">Solve</h3>
-  <p class="mt-2">AI explains step-by-step</p>
+🧠
+<h3 class="mt-3 font-semibold">Solve</h3>
+<p class="mt-2">AI explains step-by-step</p>
 </div>
 
 <div class="bg-[#fde68a] text-black p-8 card">
-  <div class="text-4xl mb-4">⚡</div>
-  <h3 class="font-semibold">Understand</h3>
-  <p class="mt-2">Learn instantly</p>
+⚡
+<h3 class="mt-3 font-semibold">Understand</h3>
+<p class="mt-2">Learn instantly</p>
 </div>
 
 </div>
@@ -176,16 +178,34 @@ How It Works
 
 </section>
 
-</div>
+<div class="section-line"></div>
 
-<!-- FOOTER (FULL DARK NOW) -->
-<footer class="bg-[#020617] text-center py-8 border-t-4 border-black">
+<!-- CTA -->
+<section class="bg-[#c4b5fd] text-black text-center py-20 border-t-4 border-black">
 
-<div class="flex justify-center items-center gap-2 mb-3">
+<h2 class="text-3xl font-semibold">
+Ready to Ace Your Homework?
+</h2>
+
+<p class="mt-3 text-gray-800">
+Join thousands of students improving their grades
+</p>
+
+<button onclick="openApp()"
+class="mt-6 bg-[#fde68a] px-8 py-4 card">
+Start Learning Now
+</button>
+
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-[#c4b5fd] text-black text-center py-6 border-t-4 border-black">
+
+<div class="flex justify-center items-center gap-2 mb-2">
   ✦ <span class="font-semibold">HomeWorkAI</span>
 </div>
 
-<p class="text-gray-400 text-sm">
+<p class="text-sm">
 © 2026 HomeWorkAI. Helping students succeed.
 </p>
 
