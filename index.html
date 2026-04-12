@@ -5,11 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HomeWorkAI - AI Homework Helper</title>
   <meta name="description" content="Instant answers with step-by-step explanations. Better than tutors and teachers.">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="keywords" content="homework help, AI tutor, study helper, math solver, learning app">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; }
-    
-    .section-line { border-top: 4px solid black; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #000;
+      background: #0f172a;
+    }
+
+    .heading {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .section-line {
+      border-top: 4px solid black;
+    }
 
     .btn {
       border: 2px solid black;
@@ -19,6 +39,10 @@
       box-shadow: 4px 4px 0 black;
       transition: 0.2s;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
     }
     .btn:hover {
       transform: translateY(-3px);
@@ -37,7 +61,17 @@
       box-shadow: 8px 8px 0 black;
     }
 
-    .title { font-weight: 800; }
+    .hero-card {
+      border: 2px solid black;
+      border-radius: 14px;
+      box-shadow: 6px 6px 0 black;
+      transition: all 0.25s ease;
+      overflow: hidden;
+    }
+    .hero-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 10px 10px 0 black;
+    }
 
     .icon-box {
       width: 65px;
@@ -49,13 +83,21 @@
       margin: auto;
       background: white;
       font-size: 24px;
+      border-radius: 12px;
     }
 
-    .hero-img {
-      transition: 0.3s;
-    }
-    .hero-img:hover {
-      transform: translateY(-6px) scale(1.02);
+    .save-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 2px solid #059669;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
     }
 
     .popular-badge {
@@ -65,19 +107,38 @@
       transform: translateX(-50%);
       background: #a7f3d0;
       border: 2px solid black;
-      padding: 4px 10px;
+      padding: 4px 12px;
       font-size: 12px;
       font-weight: 700;
+      border-radius: 20px;
+      white-space: nowrap;
     }
 
-    .save-box {
+    .save-badge {
       opacity: 0;
-      transform: translateY(10px);
-      transition: 0.4s ease;
+      transform: translateY(10px) scale(0.95);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      height: 0;
+      overflow: hidden;
     }
-    .show-save {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
+    .save-badge.show-save {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      height: auto;
+      margin-top: 12px;
+    }
+
+    .review-card {
+      padding: 20px;
+      border-radius: 16px;
+      border: 2px solid black;
+      box-shadow: 4px 4px 0 black;
+      transition: all 0.25s;
+      text-align: left;
+    }
+    .review-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 6px 6px 0 black;
     }
 
     .animate-pop {
@@ -85,54 +146,170 @@
     }
     @keyframes pop {
       0% { transform: scale(1); }
-      50% { transform: scale(1.05) translateY(-4px); }
+      50% { transform: scale(1.03) translateY(-4px); }
       100% { transform: scale(1); }
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
     .animate-spin {
       animation: spin 1s linear infinite;
     }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hidden { display: none; }
+    .flex { display: flex; }
+    .grid { display: grid; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .gap-5 { gap: 20px; }
+    .gap-8 { gap: 32px; }
+    .gap-12 { gap: 48px; }
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+    .font-bold { font-weight: 700; }
+    .font-semibold { font-weight: 600; }
+    .text-sm { font-size: 14px; }
+    .text-xs { font-size: 12px; }
+    .text-lg { font-size: 18px; }
+    .text-xl { font-size: 20px; }
+    .text-2xl { font-size: 24px; }
+    .text-3xl { font-size: 30px; }
+    .text-4xl { font-size: 36px; }
+    .text-5xl { font-size: 48px; }
+    .max-w-6xl { max-width: 1152px; }
+    .max-w-4xl { max-width: 896px; }
+    .max-w-2xl { max-width: 672px; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+    .mt-4 { margin-top: 16px; }
+    .mt-6 { margin-top: 24px; }
+    .mt-8 { margin-top: 32px; }
+    .mt-10 { margin-top: 40px; }
+    .mt-12 { margin-top: 48px; }
+    .mb-2 { margin-bottom: 8px; }
+    .mb-3 { margin-bottom: 12px; }
+    .mb-4 { margin-bottom: 16px; }
+    .mb-6 { margin-bottom: 24px; }
+    .mb-10 { margin-bottom: 40px; }
+    .mb-12 { margin-bottom: 48px; }
+    .p-4 { padding: 16px; }
+    .p-5 { padding: 20px; }
+    .p-6 { padding: 24px; }
+    .p-8 { padding: 32px; }
+    .px-3 { padding-left: 12px; padding-right: 12px; }
+    .px-6 { padding-left: 24px; padding-right: 24px; }
+    .py-1 { padding-top: 4px; padding-bottom: 4px; }
+    .py-4 { padding-top: 16px; padding-bottom: 16px; }
+    .py-6 { padding-top: 24px; padding-bottom: 24px; }
+    .py-8 { padding-top: 32px; padding-bottom: 32px; }
+    .py-16 { padding-top: 64px; padding-bottom: 64px; }
+    .pt-3 { padding-top: 12px; }
+    .pr-14 { padding-right: 56px; }
+    .rounded-full { border-radius: 9999px; }
+    .rounded-lg { border-radius: 8px; }
+    .rounded-xl { border-radius: 12px; }
+    .rounded-2xl { border-radius: 16px; }
+    .w-full { width: 100%; }
+    .min-w-0 { min-width: 0; }
+    .flex-1 { flex: 1; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .leading-tight { line-height: 1.25; }
+    .leading-relaxed { line-height: 1.625; }
+    .tracking-tight { letter-spacing: -0.025em; }
+    .space-y-3 > * + * { margin-top: 12px; }
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .fixed { position: fixed; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .z-50 { z-index: 50; }
+    .overflow-hidden { overflow: hidden; }
+    .object-cover { object-fit: cover; }
+    .border-t { border-top-width: 1px; border-top-style: solid; }
+    .flex-wrap { flex-wrap: wrap; }
+    .inline-block { display: inline-block; }
+    .inline-flex { display: inline-flex; }
+    .whitespace-pre-line { white-space: pre-line; }
+
+    .text-gray-400 { color: #9ca3af; }
+    .text-gray-500 { color: #6b7280; }
+    .text-gray-600 { color: #4b5563; }
+    .text-gray-700 { color: #374151; }
+    .text-gray-800 { color: #1f2937; }
+    .text-green-500 { color: #22c55e; }
+    .text-amber-400 { color: #fbbf24; }
+    .bg-white { background: white; }
+    .bg-purple { background: #c4b5fd; }
+    .bg-green { background: #a7f3d0; }
+    .bg-yellow { background: #fde68a; }
+
+    @media (min-width: 640px) {
+      .sm-inline { display: inline; }
+      .sm-hidden { display: none; }
+      .sm-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 768px) {
+      .md-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+      .md-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+      .md-grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+      .md-py-24 { padding-top: 96px; padding-bottom: 96px; }
+      .md-py-20 { padding-top: 80px; padding-bottom: 80px; }
+      .md-px-10 { padding-left: 40px; padding-right: 40px; }
+      .md-p-8 { padding: 32px; }
+      .md-text-4xl { font-size: 36px; }
+      .md-text-5xl { font-size: 48px; }
+      .md-scale-105 { transform: scale(1.05); }
+      .md-gap-12 { gap: 48px; }
+    }
   </style>
 </head>
-<body class="text-black" style="background: #0f172a;">
-
+<body>
   <!-- HEADER -->
-  <div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black">
-    <div class="font-bold text-lg">✦ HomeWorkAI</div>
-    <button id="googleLoginBtn" onclick="handleGoogleLogin()" class="btn flex items-center gap-2 bg-white">
-      <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="Google">
-      <span id="loginBtnText">Login with Google</span>
+  <header class="flex justify-between items-center px-6 md-px-10 py-4" style="background: #c4b5fd; border-bottom: 4px solid black;">
+    <div class="flex items-center gap-2">
+      <img src="logo.jpg" width="40" height="40" alt="HomeWorkAI Logo" style="border-radius: 8px; border: 2px solid black;">
+      <span class="font-semibold text-lg tracking-tight heading">HomeWorkAI</span>
+    </div>
+    <button id="loginBtn" class="btn bg-white flex items-center gap-2" onclick="handleLogin()">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google">
+      <span id="loginText">Login with Google</span>
     </button>
-  </div>
+  </header>
 
   <!-- HERO -->
-  <section class="py-24 px-6 bg-white">
-    <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+  <section class="py-16 md-py-24 px-6" style="background: white;">
+    <div class="max-w-6xl mx-auto grid md-grid-cols-2 gap-12 items-center">
       <div>
-        <h1 class="text-5xl title">
-          Stuck on <span class="text-[#60a5fa]">Homework?</span><br>
+        <h1 class="text-4xl md-text-5xl font-bold leading-tight heading">
+          Stuck on <span style="color: #60a5fa;">Homework?</span><br>
           We've got your back.
         </h1>
         <p class="mt-6 text-gray-600 text-lg">
           Instant answers with step-by-step explanations.
           Better than tutors and teachers.
         </p>
-        <button onclick="scrollToAI()" class="btn bg-[#c4b5fd] mt-8">
+        <button class="btn mt-8" style="background: #c4b5fd;" onclick="scrollToAI()">
           Get Started Free
         </button>
         <p class="text-green-500 mt-3">✔ 10 free questions daily</p>
       </div>
       <div>
-        <img 
-          src="https://raw.githubusercontent.com/Sionfn/HomeWorkAI/refs/heads/main/KpNCqHlKPhjoLrIsecGasT6Q6TlWXUTglR8TbrzymygH2u-bPmPOtfDxYbVBZYXFRZfC3NCD3BUURscaJHB6woNIFKxnzgpsB956vPfj2m2Nk2VvXGRzrZnhQ13303yTZOp6X2nNdwQNNDRGjA-TGzQZ07E8uFeca4K0h1u8rvb1rG8y6sq_otVtBpWaXCOk.jpeg"
-          class="rounded-lg w-full object-cover hero-img border-2 border-black"
-          alt="HomeWorkAI Preview"
-        >
-        <div class="mt-3 bg-[#bbf7d0] px-3 py-1 inline-block border-2 border-black">
-          Powered by OpenAI • Trusted by students
+        <div class="hero-card">
+          <img 
+            src="https://raw.githubusercontent.com/Sionfn/HomeWorkAI/refs/heads/main/KpNCqHlKPhjoLrIsecGasT6Q6TlWXUTglR8TbrzymygH2u-bPmPOtfDxYbVBZYXFRZfC3NCD3BUURscaJHB6woNIFKxnzgpsB956vPfj2m2Nk2VvXGRzrZnhQ13303yTZOp6X2nNdwQNNDRGjA-TGzQZ07E8uFeca4K0h1u8rvb1rG8y6sq_otVtBpWaXCOk.jpeg"
+            class="rounded-xl w-full object-cover"
+            alt="HomeWorkAI Preview"
+            style="display: block;"
+          >
+        </div>
+        <div class="mt-3 px-3 py-1 inline-block text-sm rounded-lg" style="background: #a7f3d0; border: 2px solid black;">
+          Powered by OpenAI - Trusted by students
         </div>
       </div>
     </div>
@@ -141,27 +318,27 @@
   <div class="section-line"></div>
 
   <!-- HOW IT WORKS -->
-  <section class="py-24 px-6 bg-white text-center">
+  <section class="py-16 md-py-24 px-6 text-center" style="background: white;">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-4xl title mb-4">How It Works</h2>
-      <p class="text-gray-600 mb-10">
+      <h2 class="text-3xl md-text-4xl font-bold mb-4 heading">How It Works</h2>
+      <p class="text-gray-600 mb-10 max-w-2xl mx-auto">
         Get accurate answers instantly with AI that explains every step clearly and helps you actually learn.
       </p>
-      <div class="grid md:grid-cols-3 gap-12 mt-12">
-        <div class="p-8 card bg-[#c4b5fd]">
+      <div class="grid md-grid-cols-3 gap-8 md-gap-12 mt-12">
+        <div class="p-8 card" style="background: #c4b5fd;">
           <div class="icon-box">📷</div>
-          <h3 class="mt-4 font-bold">Upload Question</h3>
-          <p class="mt-2">Take a picture or type your problem.</p>
+          <h3 class="mt-4 font-bold text-lg heading">Upload Question</h3>
+          <p class="mt-2 text-gray-700">Take a picture or type your problem.</p>
         </div>
-        <div class="p-8 card bg-[#a7f3d0]">
+        <div class="p-8 card" style="background: #a7f3d0;">
           <div class="icon-box">🧠</div>
-          <h3 class="mt-4 font-bold">AI Solves It</h3>
-          <p class="mt-2">Step-by-step explanations instantly.</p>
+          <h3 class="mt-4 font-bold text-lg heading">AI Solves It</h3>
+          <p class="mt-2 text-gray-700">Step-by-step explanations instantly.</p>
         </div>
-        <div class="p-8 card bg-[#fde68a]">
+        <div class="p-8 card" style="background: #fde68a;">
           <div class="icon-box">📈</div>
-          <h3 class="mt-4 font-bold">Learn Faster</h3>
-          <p class="mt-2">Understand and improve your grades.</p>
+          <h3 class="mt-4 font-bold text-lg heading">Learn Faster</h3>
+          <p class="mt-2 text-gray-700">Understand and improve your grades.</p>
         </div>
       </div>
     </div>
@@ -170,21 +347,14 @@
   <div class="section-line"></div>
 
   <!-- REVIEWS -->
-  <section class="py-24 px-6 bg-white text-center">
+  <section class="py-16 md-py-24 px-6 text-center" style="background: white;">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-3xl title mb-4">⭐ 5 Stars from Students</h2>
-      <p class="text-gray-600 mb-12">
+      <h2 class="text-2xl md-text-3xl font-bold mb-4 heading">What Students Are Saying</h2>
+      <p class="text-gray-600 mb-12 max-w-2xl mx-auto">
         Trusted by students worldwide to improve grades, save time, and actually understand their homework.
       </p>
-      <div class="grid md:grid-cols-4 gap-6">
-        <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=1" class="rounded-full mb-3" alt="Student">⭐⭐⭐⭐⭐<p>"Saved my grades."</p></div>
-        <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=2" class="rounded-full mb-3" alt="Student">⭐⭐⭐⭐⭐<p>"I used to get stuck for hours. Now I understand everything step-by-step and can solve problems on my own."</p></div>
-        <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=3" class="rounded-full mb-3" alt="Student">⭐⭐⭐⭐⭐<p>"Best homework tool I've ever used."</p></div>
-        <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=4" class="rounded-full mb-3" alt="Student">⭐⭐⭐⭐⭐<p>"Helped me prepare for tests way better than studying notes."</p></div>
-        <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=5" class="rounded-full mb-3" alt="Student">⭐⭐⭐⭐⭐<p>"Makes homework actually make sense."</p></div>
-        <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=6" class="rounded-full mb-3" alt="Student">⭐⭐⭐⭐⭐<p>"Went from failing algebra to getting A's in 2 weeks."</p></div>
-        <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=7" class="rounded-full mb-3" alt="Student">⭐⭐⭐⭐⭐<p>"Actually teaches instead of just answering."</p></div>
-        <div class="bg-white p-6 card"><img src="https://i.pravatar.cc/40?u=8" class="rounded-full mb-3" alt="Student">⭐⭐⭐⭐⭐<p>"Homework used to stress me out every night. Now I finish faster and understand everything."</p></div>
+      <div class="grid sm-grid-cols-2 md-grid-cols-4 gap-5" id="reviews">
+        <!-- Reviews will be rendered here -->
       </div>
     </div>
   </section>
@@ -192,76 +362,69 @@
   <div class="section-line"></div>
 
   <!-- AI SECTION -->
-  <section id="ai-helper" class="py-24 px-6 bg-white">
+  <section id="ai-helper" class="py-16 md-py-24 px-6" style="background: white;">
     <div class="max-w-4xl mx-auto">
       <div class="text-center mb-12">
-        <h2 class="text-4xl title mb-4">🧠 Ask HomeWorkAI</h2>
+        <h2 class="text-3xl md-text-4xl font-bold mb-4 heading">🧠 Ask HomeWorkAI</h2>
         <p class="text-gray-600">
           Type your homework question below and get instant step-by-step explanations.
         </p>
       </div>
 
-      <div class="card bg-[#c4b5fd] p-8">
+      <div class="card p-6 md-p-8" style="background: #c4b5fd;">
         <div class="mb-6">
-          <label class="font-bold mb-2 block">Your Question</label>
+          <label class="font-bold mb-2 heading" style="display: block;">Your Question</label>
           <div class="relative">
             <textarea
               id="questionInput"
               placeholder="Type your homework question here... (e.g., 'How do I solve 2x + 5 = 15?')"
-              class="w-full p-4 pr-12 border-2 border-black rounded-lg min-h-[120px] resize-none bg-white"
+              style="width: 100%; padding: 16px; padding-right: 56px; border: 2px solid black; border-radius: 8px; min-height: 120px; resize: none; background: white; font-size: 16px;"
             ></textarea>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
             <button 
-              class="absolute bottom-3 right-3 p-2 bg-white border-2 border-black rounded-lg hover:bg-gray-100 transition"
-              title="Upload image (coming soon)"
+              onclick="document.getElementById('fileInput').click()"
+              style="position: absolute; bottom: 12px; right: 12px; padding: 10px; background: white; border: 2px solid black; border-radius: 8px; cursor: pointer; transition: transform 0.2s;"
+              onmouseover="this.style.transform='scale(1.05)'"
+              onmouseout="this.style.transform='scale(1)'"
+              title="Upload image"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" fill="#e0f2fe" stroke="#3b82f6" stroke-width="2"/>
+                <circle cx="9" cy="9" r="2" fill="#fde047" stroke="#eab308" stroke-width="1.5"/>
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" stroke="#22c55e" stroke-width="2"/>
+              </svg>
             </button>
           </div>
         </div>
 
+        <div id="authMessage" class="mb-4 p-4 rounded-lg text-center hidden" style="background: #fef3c7; border: 2px solid black;"></div>
+
         <button 
-          id="askButton"
+          id="askBtn"
           onclick="handleAskQuestion()"
-          class="btn bg-[#a7f3d0] w-full flex items-center justify-center gap-2"
+          class="btn w-full flex items-center justify-center gap-2"
+          style="background: #a7f3d0;"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m22 2-7 20-4-9-9-4Z"/>
+            <path d="M22 2 11 13"/>
+          </svg>
           Get Answer
         </button>
 
-        <div id="answerContainer" class="mt-6 p-6 bg-white border-2 border-black rounded-lg hidden">
-          <div class="flex items-center gap-2 mb-4">
-            <div class="icon-box" style="width: 40px; height: 40px; font-size: 16px;">🧠</div>
-            <span class="font-bold">HomeWorkAI Response</span>
-          </div>
-          <div id="answerText" class="prose prose-sm max-w-none whitespace-pre-line"></div>
-        </div>
+        <div id="answerBox" class="mt-6 p-6 rounded-lg hidden" style="background: white; border: 2px solid black;"></div>
 
-        <div class="mt-6 flex flex-wrap gap-2">
-          <span class="text-sm font-medium">Try asking:</span>
-          <button 
-            onclick="setQuestion('How do I solve quadratic equations?')"
-            class="text-sm bg-white px-3 py-1 border-2 border-black rounded-full hover:bg-gray-100"
-          >
-            Quadratic equations
-          </button>
-          <button 
-            onclick="setQuestion('Explain photosynthesis step by step')"
-            class="text-sm bg-white px-3 py-1 border-2 border-black rounded-full hover:bg-gray-100"
-          >
-            Photosynthesis
-          </button>
-          <button 
-            onclick="setQuestion('What caused World War 1?')"
-            class="text-sm bg-white px-3 py-1 border-2 border-black rounded-full hover:bg-gray-100"
-          >
-            World War 1
-          </button>
+        <div class="mt-6 flex flex-wrap gap-2 items-center">
+          <span class="text-sm font-semibold">Try asking:</span>
+          <button onclick="setQuestion('How do I solve quadratic equations?')" class="text-sm px-3 py-1 rounded-full" style="background: white; border: 2px solid black; cursor: pointer;">Quadratic equations</button>
+          <button onclick="setQuestion('Explain photosynthesis step by step')" class="text-sm px-3 py-1 rounded-full" style="background: white; border: 2px solid black; cursor: pointer;">Photosynthesis</button>
+          <button onclick="setQuestion('What caused World War 1?')" class="text-sm px-3 py-1 rounded-full" style="background: white; border: 2px solid black; cursor: pointer;">World War 1</button>
         </div>
       </div>
 
       <div class="mt-8 text-center">
         <p class="text-gray-600 mb-4">Want unlimited questions with faster responses?</p>
-        <button onclick="scrollToPricing()" class="btn bg-[#fde68a]">
+        <button onclick="scrollToPricing()" class="btn" style="background: #fde68a;">
           View Pricing Plans
         </button>
       </div>
@@ -271,73 +434,61 @@
   <div class="section-line"></div>
 
   <!-- PRICING -->
-  <section id="pricing" class="py-24 px-6 bg-white text-center">
+  <section id="pricing" class="py-16 md-py-24 px-6 text-center" style="background: white;">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-3xl title mb-2">Simple Pricing</h2>
+      <h2 class="text-2xl md-text-3xl font-bold mb-2 heading">Simple Pricing</h2>
       <p class="text-gray-600 mb-10">Choose a plan that fits your learning needs</p>
 
       <div class="flex justify-center gap-4 mb-10">
-        <button 
-          id="monthlyBtn"
-          onclick="setBilling('monthly')" 
-          class="btn bg-[#c4b5fd]"
-        >
-          Monthly
-        </button>
-        <button 
-          id="yearlyBtn"
-          onclick="setBilling('yearly')" 
-          class="btn bg-white"
-        >
-          Yearly
-        </button>
+        <button id="monthlyBtn" class="btn" style="background: #c4b5fd;" onclick="setBilling('monthly')">Monthly</button>
+        <button id="yearlyBtn" class="btn bg-white" onclick="setBilling('yearly')">Yearly</button>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-8" id="pricingCards">
+      <div class="grid md-grid-cols-3 gap-8">
         <!-- FREE -->
-        <div id="freeCard" class="bg-white p-8 card">
-          <h3>Free</h3>
-          <p class="text-4xl">$0</p>
-          <ul class="mt-4 text-left space-y-2">
-            <li>✔ 10 questions per day</li>
-            <li>✔ Basic AI answers</li>
-            <li>✔ Standard response speed</li>
-            <li>✔ Access to all subjects</li>
+        <div class="card p-8" style="background: white;">
+          <h3 class="text-xl font-bold heading">Free</h3>
+          <p class="text-4xl font-bold mt-2">$0</p>
+          <ul class="mt-6 text-left space-y-3">
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> 10 questions per day</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Basic AI answers</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Standard response speed</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Access to all subjects</li>
           </ul>
-          <button onclick="scrollToAI()" class="btn bg-[#93c5fd] mt-6 w-full">Start Now</button>
+          <button onclick="scrollToAI()" class="btn mt-6 w-full" style="background: #93c5fd;">Start Now</button>
         </div>
 
         <!-- PRO -->
-        <div id="proCard" class="bg-white p-8 card scale-105">
+        <div class="card p-8 md-scale-105 relative" style="background: white;">
           <div class="popular-badge">MOST POPULAR</div>
-          <h3>Pro</h3>
-          <p id="proPrice" class="text-4xl">$10/mo</p>
-          <div id="proSave" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">
-            Save $20 yearly
+          <h3 class="text-xl font-bold heading">Premium</h3>
+          <p class="text-4xl font-bold mt-2" id="proPrice">$9.99/mo</p>
+          <div class="save-badge mt-3" id="proSave">
+            <span class="save-pill">Save $39.89/year</span>
           </div>
-          <ul class="mt-4 text-left space-y-2">
-            <li>✔ Unlimited questions</li>
-            <li>✔ Step-by-step solutions</li>
-            <li>✔ Faster responses</li>
-            <li>✔ Priority support</li>
+          <ul class="mt-6 text-left space-y-3">
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Unlimited questions</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Step-by-step solutions</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Faster responses</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Priority support</li>
           </ul>
-          <button onclick="scrollToAI()" class="btn bg-[#a7f3d0] mt-6 w-full">Start Free Trial</button>
+          <button onclick="handlePurchase('Premium')" class="btn mt-6 w-full" style="background: #a7f3d0;">Get Premium</button>
         </div>
 
         <!-- PRO+ -->
-        <div id="proPlusCard" class="bg-white p-8 card">
-          <h3>Pro+</h3>
-          <p id="proPlusPrice" class="text-4xl">$20/mo</p>
-          <div id="proPlusSave" class="save-box mt-2 bg-green-400 px-3 py-1 border-2 border-black inline-block">
-            Save $90 yearly
+        <div class="card p-8" style="background: white;">
+          <h3 class="text-xl font-bold heading">Premium+</h3>
+          <p class="text-4xl font-bold mt-2" id="proPlusPrice">$14.99/mo</p>
+          <div class="save-badge mt-3" id="proPlusSave">
+            <span class="save-pill">Save $59.89/year</span>
           </div>
-          <ul class="mt-4 text-left space-y-2">
-            <li>✔ Everything in Pro</li>
-            <li>✔ Video explanations</li>
-            <li>✔ Deep learning insights</li>
-            <li>✔ Fastest response speed</li>
+          <ul class="mt-6 text-left space-y-3">
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Everything in Premium</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Video explanations</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Deep learning insights</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✔</span> Fastest response speed</li>
           </ul>
-          <button onclick="scrollToAI()" class="btn bg-[#fde68a] mt-6 w-full">Start Free Trial</button>
+          <button onclick="handlePurchase('Premium+')" class="btn mt-6 w-full" style="background: #fde68a;">Get Premium+</button>
         </div>
       </div>
     </div>
@@ -346,28 +497,56 @@
   <div class="section-line"></div>
 
   <!-- CTA -->
-  <section class="bg-[#c4b5fd] text-center py-20">
-    <h2 class="text-3xl title">Ready to Ace Your Homework?</h2>
-    <p class="mt-3 text-gray-600">Join thousands of students improving grades with AI.</p>
+  <section class="text-center py-16 md-py-20 px-6" style="background: #c4b5fd;">
+    <h2 class="text-2xl md-text-3xl font-bold heading">Ready to Ace Your Homework?</h2>
+    <p class="mt-3 text-gray-700">Join thousands of students improving grades with AI.</p>
     <div class="flex justify-center">
-      <button onclick="scrollToAI()" class="btn bg-[#fde68a] mt-6">✦ Start Learning Now</button>
+      <button onclick="scrollToAI()" class="btn mt-6" style="background: #fde68a;">✦ Start Learning Now</button>
     </div>
   </section>
 
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="fixed inset-0 flex items-center justify-center z-50 p-4 hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+    <div class="rounded-2xl p-8 relative" style="background: white; max-width: 28rem; width: 100%; border: 4px solid black; box-shadow: 8px 8px 0 black;">
+      <button onclick="closeLoginModal()" class="absolute" style="top: 16px; right: 16px; color: #6b7280; cursor: pointer; background: none; border: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+        </svg>
+      </button>
+      
+      <div class="text-center mb-6">
+        <div class="flex items-center justify-center gap-2 mb-4">
+          <img src="logo.jpg" width="48" height="48" alt="HomeWorkAI Logo" style="border-radius: 8px; border: 2px solid black;">
+        </div>
+        <h3 class="text-2xl font-bold heading">Login Required</h3>
+        <p class="text-gray-600 mt-2" id="modalPlanText">Sign in to continue</p>
+      </div>
+      
+      <button onclick="handleModalLogin()" class="btn bg-white w-full flex items-center justify-center gap-3 text-lg">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="24" height="24" alt="Google">
+        Continue with Google
+      </button>
+      
+      <p class="text-center text-sm text-gray-500 mt-6">
+        By continuing, you agree to our Terms of Service and Privacy Policy.
+      </p>
+    </div>
+  </div>
+
   <!-- FOOTER -->
-  <footer class="bg-[#0f172a] text-white text-center py-6 border-t-4 border-black">
-    <div class="font-bold">✦ HomeWorkAI</div>
+  <footer class="text-center py-8" style="background: #0f172a; color: white; border-top: 4px solid black;">
+    <div class="flex items-center justify-center gap-2 mb-2">
+      <img src="logo.jpg" width="32" height="32" alt="HomeWorkAI Logo" style="border-radius: 8px;">
+      <span class="font-semibold text-lg tracking-tight heading">HomeWorkAI</span>
+    </div>
     <p class="text-gray-400 text-sm">© 2026 HomeWorkAI. Helping students succeed.</p>
   </footer>
 
   <!-- Firebase SDK -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-analytics.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-    // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
       authDomain: "homeworkai-6364c.firebaseapp.com",
@@ -378,61 +557,105 @@
       measurementId: "G-9Q99SL0FBX"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Make auth functions available globally
-    window.firebaseAuth = auth;
-    window.googleProvider = provider;
-    window.signInWithPopup = signInWithPopup;
-    window.signOut = signOut;
+    window.currentUser = null;
+    window.selectedPlan = null;
 
-    // Listen for auth state changes
     onAuthStateChanged(auth, (user) => {
-      const loginBtnText = document.getElementById('loginBtnText');
-      const googleLoginBtn = document.getElementById('googleLoginBtn');
-      
-      if (user) {
-        // User is signed in
-        loginBtnText.textContent = user.displayName || user.email;
-        googleLoginBtn.onclick = handleLogout;
-      } else {
-        // User is signed out
-        loginBtnText.textContent = 'Login with Google';
-        googleLoginBtn.onclick = handleGoogleLogin;
-      }
+      window.currentUser = user;
+      updateLoginButton();
     });
 
-    // Google Login function
-    window.handleGoogleLogin = async function() {
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        console.log('Signed in as:', user.displayName);
-      } catch (error) {
-        console.error('Login error:', error.message);
-        alert('Login failed: ' + error.message);
+    window.handleLogin = async function() {
+      if (window.currentUser) {
+        await signOut(auth);
+      } else {
+        await signInWithPopup(auth, provider);
       }
     };
 
-    // Logout function
-    window.handleLogout = async function() {
-      try {
-        await signOut(auth);
-        console.log('Signed out');
-      } catch (error) {
-        console.error('Logout error:', error.message);
+    window.handleModalLogin = async function() {
+      await signInWithPopup(auth, provider);
+      closeLoginModal();
+      if (window.selectedPlan) {
+        setTimeout(() => handlePurchase(window.selectedPlan), 500);
       }
     };
+
+    function updateLoginButton() {
+      const loginText = document.getElementById('loginText');
+      if (window.currentUser) {
+        loginText.textContent = window.currentUser.displayName || window.currentUser.email || 'Account';
+      } else {
+        loginText.textContent = 'Login with Google';
+      }
+    }
   </script>
 
   <script>
+    // State
     let billing = 'monthly';
-    let isLoading = false;
+    const DAILY_LIMIT = 10;
 
+    function getTodayKey() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function getUsageData() {
+      const stored = localStorage.getItem('homeworkai_usage');
+      if (stored) {
+        const data = JSON.parse(stored);
+        if (data.date !== getTodayKey()) {
+          return { date: getTodayKey(), count: 0, freeUsed: data.freeUsed || false };
+        }
+        return data;
+      }
+      return { date: getTodayKey(), count: 0, freeUsed: false };
+    }
+
+    function setUsageData(data) {
+      localStorage.setItem('homeworkai_usage', JSON.stringify(data));
+    }
+
+    // Render reviews
+    const reviews = [
+      { id: 1, name: 'Sarah M.', handle: '@sarahm_22', text: 'Saved my grades. I went from a C to an A in calculus!', time: '2h', bg: '#c4b5fd' },
+      { id: 2, name: 'Jake T.', handle: '@jaket_codes', text: 'I used to get stuck for hours. Now I understand everything step-by-step and can solve problems on my own.', time: '5h', bg: '#a7f3d0' },
+      { id: 3, name: 'Emily R.', handle: '@emilyreads', text: 'Best homework tool I have ever used. Period.', time: '1d', bg: '#fde68a' },
+      { id: 4, name: 'Marcus L.', handle: '@marcusl', text: 'Helped me prepare for tests way better than studying notes.', time: '1d', bg: '#c4b5fd' },
+      { id: 5, name: 'Olivia K.', handle: '@oliviak_', text: 'Makes homework actually make sense. My parents are impressed!', time: '2d', bg: '#a7f3d0' },
+      { id: 6, name: 'David W.', handle: '@david_wins', text: 'Went from failing algebra to getting A grades in 2 weeks. Not even kidding.', time: '3d', bg: '#fde68a' },
+      { id: 7, name: 'Ava P.', handle: '@avapatel', text: 'Actually teaches instead of just answering. This is how learning should be.', time: '4d', bg: '#c4b5fd' },
+      { id: 8, name: 'Noah C.', handle: '@noahc_student', text: 'Homework used to stress me out every night. Now I finish faster and understand everything.', time: '5d', bg: '#a7f3d0' },
+    ];
+
+    function renderReviews() {
+      const container = document.getElementById('reviews');
+      container.innerHTML = reviews.map(review => `
+        <div class="review-card" style="background: ${review.bg};">
+          <div class="flex items-center gap-3 mb-3">
+            <img src="https://i.pravatar.cc/44?u=${review.id + 100}" width="44" height="44" style="border-radius: 50%; border: 2px solid black;" alt="${review.name}">
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-sm truncate">${review.name}</p>
+              <p class="text-xs text-gray-600 truncate">${review.handle}</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-800 leading-relaxed">${review.text}</p>
+          <div class="flex items-center justify-between mt-3 pt-3 border-t" style="border-color: rgba(0,0,0,0.1);">
+            <div class="flex" style="gap: 2px;">
+              ${[1,2,3,4,5].map(() => `<svg class="text-amber-400" style="width: 16px; height: 16px; fill: #fbbf24;" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>`).join('')}
+            </div>
+            <span class="text-xs text-gray-500">${review.time}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+    renderReviews();
+
+    // Functions
     function scrollToAI() {
       document.getElementById('ai-helper').scrollIntoView({ behavior: 'smooth' });
     }
@@ -441,70 +664,61 @@
       document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function setQuestion(text) {
-      document.getElementById('questionInput').value = text;
-    }
-
     function setBilling(type) {
       billing = type;
+      document.getElementById('monthlyBtn').style.background = type === 'monthly' ? '#c4b5fd' : 'white';
+      document.getElementById('yearlyBtn').style.background = type === 'yearly' ? '#c4b5fd' : 'white';
       
-      const monthlyBtn = document.getElementById('monthlyBtn');
-      const yearlyBtn = document.getElementById('yearlyBtn');
-      const proPrice = document.getElementById('proPrice');
-      const proPlusPrice = document.getElementById('proPlusPrice');
-      const proSave = document.getElementById('proSave');
-      const proPlusSave = document.getElementById('proPlusSave');
-      const freeCard = document.getElementById('freeCard');
-      const proCard = document.getElementById('proCard');
-      const proPlusCard = document.getElementById('proPlusCard');
+      document.getElementById('proPrice').textContent = type === 'monthly' ? '$9.99/mo' : '$79.99/yr';
+      document.getElementById('proPlusPrice').textContent = type === 'monthly' ? '$14.99/mo' : '$119.99/yr';
+      
+      document.getElementById('proSave').className = type === 'yearly' ? 'save-badge show-save' : 'save-badge';
+      document.getElementById('proPlusSave').className = type === 'yearly' ? 'save-badge show-save' : 'save-badge';
+    }
 
-      if (type === 'monthly') {
-        monthlyBtn.classList.remove('bg-white');
-        monthlyBtn.classList.add('bg-[#c4b5fd]');
-        yearlyBtn.classList.remove('bg-[#c4b5fd]');
-        yearlyBtn.classList.add('bg-white');
-        proPrice.textContent = '$10/mo';
-        proPlusPrice.textContent = '$20/mo';
-        proSave.classList.remove('show-save');
-        proPlusSave.classList.remove('show-save');
-      } else {
-        yearlyBtn.classList.remove('bg-white');
-        yearlyBtn.classList.add('bg-[#c4b5fd]');
-        monthlyBtn.classList.remove('bg-[#c4b5fd]');
-        monthlyBtn.classList.add('bg-white');
-        proPrice.textContent = '$100/year';
-        proPlusPrice.textContent = '$150/year';
-        proSave.classList.add('show-save');
-        proPlusSave.classList.add('show-save');
+    function setQuestion(q) {
+      document.getElementById('questionInput').value = q;
+    }
+
+    function handlePurchase(plan) {
+      if (!window.currentUser) {
+        window.selectedPlan = plan;
+        document.getElementById('modalPlanText').textContent = `Sign in to continue with your ${plan} plan`;
+        document.getElementById('loginModal').classList.remove('hidden');
+        return;
       }
+      alert(`Proceeding to checkout for ${plan} plan. Payment integration coming soon!`);
+    }
 
-      // Animate cards
-      [freeCard, proCard, proPlusCard].forEach(card => {
-        card.classList.add('animate-pop');
-        setTimeout(() => card.classList.remove('animate-pop'), 400);
-      });
+    function closeLoginModal() {
+      document.getElementById('loginModal').classList.add('hidden');
     }
 
     function handleAskQuestion() {
-      const questionInput = document.getElementById('questionInput');
-      const askButton = document.getElementById('askButton');
-      const answerContainer = document.getElementById('answerContainer');
-      const answerText = document.getElementById('answerText');
-      const question = questionInput.value.trim();
+      const question = document.getElementById('questionInput').value.trim();
+      if (!question) return;
 
-      if (!question || isLoading) return;
+      const usage = getUsageData();
 
-      isLoading = true;
-      answerContainer.classList.add('hidden');
-      
-      askButton.innerHTML = `
-        <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-        AI is thinking...
-      `;
-      askButton.disabled = true;
-      askButton.style.opacity = '0.5';
-      askButton.style.cursor = 'not-allowed';
-      questionInput.disabled = true;
+      if (!window.currentUser) {
+        if (usage.freeUsed) {
+          showAuthMessage("Login with Google to continue using HomeworkAI.");
+          return;
+        }
+        usage.freeUsed = true;
+        setUsageData(usage);
+      } else {
+        if (usage.count >= DAILY_LIMIT) {
+          showAuthMessage("Daily limit reached. Come back tomorrow or upgrade.");
+          return;
+        }
+        usage.count++;
+        setUsageData(usage);
+      }
+
+      const askBtn = document.getElementById('askBtn');
+      askBtn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> AI is thinking...';
+      askBtn.disabled = true;
 
       setTimeout(() => {
         const answer = `Great question! Here's a step-by-step explanation:
@@ -525,22 +739,38 @@ ${question}
 
 💡 **Pro Tip:** Practice similar problems to reinforce your understanding.`;
 
-        answerText.textContent = answer;
-        answerContainer.classList.remove('hidden');
-        
-        askButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-          Get Answer
+        const answerBox = document.getElementById('answerBox');
+        answerBox.innerHTML = `
+          <div class="flex items-center gap-2 mb-4">
+            <div class="icon-box" style="width: 40px; height: 40px; font-size: 16px;">🧠</div>
+            <span class="font-bold heading">HomeWorkAI Response</span>
+          </div>
+          <div class="whitespace-pre-line text-gray-700">${answer}</div>
         `;
-        askButton.disabled = false;
-        askButton.style.opacity = '1';
-        askButton.style.cursor = 'pointer';
-        questionInput.disabled = false;
-        isLoading = false;
+        answerBox.classList.remove('hidden');
+
+        askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Get Answer';
+        askBtn.disabled = false;
       }, 2000);
     }
+
+    function showAuthMessage(msg) {
+      const authDiv = document.getElementById('authMessage');
+      authDiv.innerHTML = `
+        <p class="font-semibold">${msg}</p>
+        ${msg.includes("Login") ? `<button onclick="handleLogin()" class="btn bg-white mt-2 inline-flex items-center gap-2"><img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google"> Login with Google</button>` : ''}
+      `;
+      authDiv.classList.remove('hidden');
+    }
+
+    // File input handler
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        document.getElementById('questionInput').value += `\n[Image attached: ${file.name}]`;
+      }
+    });
   </script>
 </body>
 </html>
-<!-- deploy -->
 <!-- deploy -->
