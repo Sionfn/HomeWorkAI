@@ -755,13 +755,23 @@ ${question}
     }
 
     function showAuthMessage(msg) {
-      const authDiv = document.getElementById('authMessage');
-      authDiv.innerHTML = `
-        <p class="font-semibold">${msg}</p>
-        ${msg.includes("Login") ? `<button onclick="handleLogin()" class="btn bg-white mt-2 inline-flex items-center gap-2"><img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google"> Login with Google</button>` : ''}
-      `;
-      authDiv.classList.remove('hidden');
-    }
+  const authDiv = document.getElementById('authMessage');
+
+  authDiv.innerHTML = `
+    <p class="font-semibold">${msg}</p>
+    <button onclick="handleLogin()" class="btn bg-white mt-2 inline-flex items-center gap-2">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20">
+      Login with Google
+    </button>
+  `;
+
+  authDiv.classList.remove('hidden');
+
+  // 🔥 AUTO OPEN LOGIN POPUP
+  setTimeout(() => {
+    handleLogin();
+  }, 300);
+}
 
     // File input handler
     document.getElementById('fileInput').addEventListener('change', function(e) {
