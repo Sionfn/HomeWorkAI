@@ -44,9 +44,11 @@ body { font-family: system-ui; background:#0f172a; }
 }
 </style>
 
+<!-- ✅ SAFE SCRIPT (outside style) -->
 <script>
 function scrollToSection(id){
-  document.getElementById(id).scrollIntoView({behavior:"smooth"});
+  const el = document.getElementById(id);
+  if(el){ el.scrollIntoView({behavior:"smooth"}); }
 }
 
 function goAI(){
@@ -88,6 +90,56 @@ Get Started Free
 
 <div class="section-line"></div>
 
+<!-- HOW IT WORKS -->
+<section class="py-24 px-6 bg-white text-center">
+<h2 class="text-3xl title mb-6">How It Works</h2>
+
+<div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+
+<div class="card p-6 bg-[#c4b5fd]">
+<div class="text-2xl">📷</div>
+<h3 class="font-bold mt-2">Upload</h3>
+<p>Take a photo or type your question</p>
+</div>
+
+<div class="card p-6 bg-[#a7f3d0]">
+<div class="text-2xl">🧠</div>
+<h3 class="font-bold mt-2">AI Solves</h3>
+<p>Step-by-step explanation instantly</p>
+</div>
+
+<div class="card p-6 bg-[#fde68a]">
+<div class="text-2xl">📈</div>
+<h3 class="font-bold mt-2">Improve</h3>
+<p>Learn and boost your grades</p>
+</div>
+
+</div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- REVIEWS -->
+<section class="py-24 px-6 bg-white text-center">
+<h2 class="text-3xl title mb-6">⭐ 5 Stars from Students</h2>
+
+<div class="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+
+<div class="card p-4">⭐⭐⭐⭐⭐ Helped me pass math</div>
+<div class="card p-4">⭐⭐⭐⭐⭐ Way better than tutors</div>
+<div class="card p-4">⭐⭐⭐⭐⭐ Explains everything clearly</div>
+<div class="card p-4">⭐⭐⭐⭐⭐ I use it every day</div>
+
+<div class="card p-4">⭐⭐⭐⭐⭐ Saved so much time</div>
+<div class="card p-4">⭐⭐⭐⭐⭐ Actually teaches you</div>
+<div class="card p-4">⭐⭐⭐⭐⭐ Best homework tool</div>
+<div class="card p-4">⭐⭐⭐⭐⭐ My grades improved fast</div>
+
+</div>
+</section>
+
+<div class="section-line"></div>
+
 <!-- PRICING -->
 <section id="pricing" class="py-24 px-6 bg-white text-center">
 
@@ -97,7 +149,7 @@ Get Started Free
 
 <div class="card p-8">
 <h3 class="text-xl font-bold">Free</h3>
-<p class="text-3xl mt-2">$0</p>
+<p class="text-3xl">$0</p>
 <ul class="mt-4 text-left">
 <li>✔ 10 questions daily</li>
 <li>✔ Basic answers</li>
@@ -107,7 +159,7 @@ Get Started Free
 
 <div class="card p-8 scale-105">
 <h3 class="text-xl font-bold">Pro</h3>
-<p class="text-3xl mt-2">$10/mo</p>
+<p class="text-3xl">$10/mo</p>
 <ul class="mt-4 text-left">
 <li>✔ Unlimited questions</li>
 <li>✔ Step-by-step answers</li>
@@ -117,7 +169,7 @@ Get Started Free
 
 <div class="card p-8">
 <h3 class="text-xl font-bold">Pro+</h3>
-<p class="text-3xl mt-2">$20/mo</p>
+<p class="text-3xl">$20/mo</p>
 <ul class="mt-4 text-left">
 <li>✔ Everything in Pro</li>
 <li>✔ Best AI responses</li>
