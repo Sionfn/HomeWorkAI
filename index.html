@@ -32,22 +32,20 @@ body { font-family: system-ui; }
 }
 .card:hover { transform: translateY(-6px); }
 
-.title {
-  font-weight: 800;
-}
+.title { font-weight: 800; }
 
-/* BLACK & WHITE ICON BOX */
+/* ICON BOX (matches your screenshot style) */
 .icon-box {
-  width: 80px;
-  height: 80px;
-  margin: auto;
+  width: 70px;
+  height: 70px;
   border: 3px solid black;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 38px;
+  margin: auto;
   background: white;
   color: black;
+  font-size: 28px;
 }
 </style>
 </head>
@@ -56,51 +54,39 @@ body { font-family: system-ui; }
 
 <!-- HEADER -->
 <div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black text-black">
-  <div class="font-bold text-lg flex items-center gap-2">
-    <div class="w-6 h-6 bg-black text-white flex items-center justify-center text-xs font-bold">H</div>
-    HomeWorkAI
+  <div class="flex items-center gap-2 font-bold text-lg">
+    ✦ HomeWorkAI
   </div>
-  <button onclick="openApp()" class="btn bg-[#fde68a]">Get Started</button>
+  <button class="btn bg-[#fde68a]">Login with Google</button>
 </div>
 
-<!-- HERO -->
-<section class="py-24 px-6 bg-[#111827]">
+<!-- HERO (NOW FULL DARK) -->
+<section class="py-24 px-6 bg-[#0f172a]">
 
-<div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+<div class="max-w-6xl mx-auto text-center">
 
-<div>
-  <h1 class="text-5xl title">
-    Stuck on <span class="text-[#93c5fd]">Homework?</span><br>
-    We’ve got your back.
-  </h1>
+<h1 class="text-5xl title">
+  Stuck on <span class="text-[#93c5fd]">Homework?</span><br>
+  We’ve got your back.
+</h1>
 
-  <p class="mt-6 text-gray-400 text-lg">
-    Instantly solve any question with clear, step-by-step explanations.
-    Built to outperform tutors and teachers.
-  </p>
+<p class="mt-6 text-gray-400 text-lg max-w-xl mx-auto">
+  Instantly solve any problem with powerful AI. Step-by-step answers,
+  faster than tutors and easier than studying alone.
+</p>
 
-  <div class="mt-8 flex gap-4 items-center">
-    <button onclick="openApp()" class="btn bg-[#c4b5fd] text-black">
-      Start Free Trial
-    </button>
-    <span class="text-green-400">✔ 10 free questions daily</span>
-  </div>
-</div>
+<button class="btn bg-[#c4b5fd] text-black mt-8">
+  Get Started Free
+</button>
 
-<div class="card p-3 bg-[#1e293b]">
-  <img src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b" class="rounded-lg">
-
-  <div class="mt-3 bg-[#fde68a] text-black px-3 py-1 inline-block border-2 border-black">
-    Powered by AI, better than teachers and tutors
-  </div>
-</div>
+<p class="text-green-400 mt-3">✔ 10 free questions daily</p>
 
 </div>
 </section>
 
 <div class="section-line"></div>
 
-<!-- HOW IT WORKS -->
+<!-- HOW IT WORKS (MATCHES YOUR IMAGE STYLE) -->
 <section class="max-w-6xl mx-auto py-24 px-6 text-center">
 
 <h2 class="text-4xl title mb-16">How It Works</h2>
@@ -108,21 +94,21 @@ body { font-family: system-ui; }
 <div class="grid md:grid-cols-3 gap-10">
 
 <div class="p-8 card text-black bg-[#c4b5fd]">
-<div class="icon-box">✎</div>
-<h3 class="mt-4 font-bold">Ask Anything</h3>
-<p class="mt-2">Type or paste any homework problem and get instant help.</p>
+<div class="icon-box">📷</div>
+<h3 class="mt-4 font-bold">Screenshot & Solve</h3>
+<p class="mt-2">Snap a photo or paste your question for instant help.</p>
 </div>
 
 <div class="p-8 card text-black bg-[#a7f3d0]">
-<div class="icon-box">⌘</div>
-<h3 class="mt-4 font-bold">AI Solves It</h3>
-<p class="mt-2">Advanced AI breaks it down step-by-step so you actually understand.</p>
+<div class="icon-box">📖</div>
+<h3 class="mt-4 font-bold">Any Subject</h3>
+<p class="mt-2">Math, science, English — everything covered.</p>
 </div>
 
 <div class="p-8 card text-black bg-[#fde68a]">
-<div class="icon-box">✓</div>
-<h3 class="mt-4 font-bold">Learn Faster</h3>
-<p class="mt-2">Improve grades, save time, and stop guessing answers.</p>
+<div class="icon-box">⚡</div>
+<h3 class="mt-4 font-bold">Instant Answers</h3>
+<p class="mt-2">Detailed solutions in seconds, not hours.</p>
 </div>
 
 </div>
@@ -131,71 +117,65 @@ body { font-family: system-ui; }
 
 <div class="section-line"></div>
 
-<!-- REVIEWS -->
+<!-- PRICING (NOW DETAILED LIKE YOUR IMAGE) -->
 <section class="max-w-6xl mx-auto py-24 px-6 text-center">
 
-<h2 class="text-3xl title mb-16">⭐ 5 Stars from Students</h2>
-
-<div class="grid md:grid-cols-4 gap-6">
-
-<div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=1" class="rounded-full mb-3">
-⭐⭐⭐⭐⭐
-<p>“Saved my grades.”</p>
-</div>
-
-<div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=2" class="rounded-full mb-3">
-⭐⭐⭐⭐⭐
-<p>“Better than YouTube.”</p>
-</div>
-
-<div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=3" class="rounded-full mb-3">
-⭐⭐⭐⭐⭐
-<p>“Super clear answers.”</p>
-</div>
-
-<div class="bg-[#1e293b] p-6 card">
-<img src="https://i.pravatar.cc/40?img=4" class="rounded-full mb-3">
-⭐⭐⭐⭐⭐
-<p>“Use it every day.”</p>
-</div>
-
-</div>
-
-</section>
-
-<div class="section-line"></div>
-
-<!-- PRICING -->
-<section class="max-w-6xl mx-auto py-24 px-6 text-center">
-
-<h2 class="text-3xl title mb-10">Pricing</h2>
-
-<div class="mb-10 flex justify-center gap-4">
-<button onclick="setBilling('monthly')" class="btn bg-[#1e293b]">Monthly</button>
-<button onclick="setBilling('yearly')" class="btn bg-[#1e293b]">Yearly</button>
-</div>
+<h2 class="text-3xl title mb-4">Simple Pricing</h2>
+<p class="text-gray-400 mb-10">Start free, upgrade when you need more</p>
 
 <div class="grid md:grid-cols-3 gap-8">
 
+<!-- FREE -->
 <div class="bg-[#1e293b] p-8 card">
-<h3 class="font-bold">Free</h3>
-<p class="text-4xl font-bold">$0</p>
-<button onclick="openApp()" class="btn bg-[#93c5fd] text-black mt-6 w-full">Start Free</button>
+<h3 class="font-bold text-xl">Free</h3>
+<p class="text-4xl font-bold">$0<span class="text-sm">/month</span></p>
+
+<ul class="mt-6 space-y-2 text-left text-gray-300">
+<li>✔ 10 questions per day</li>
+<li>✔ All subjects</li>
+<li>✔ Basic answers</li>
+<li>✔ Image upload</li>
+</ul>
+
+<button class="btn bg-[#93c5fd] text-black mt-6 w-full">
+Get Started
+</button>
 </div>
 
+<!-- MONTHLY -->
 <div class="bg-[#1e293b] p-8 card scale-105">
-<h3 class="font-bold">Pro</h3>
-<p id="proPrice" class="text-4xl font-bold">$10/mo</p>
-<button class="btn bg-[#a7f3d0] text-black mt-6 w-full">Start Free Trial</button>
+<h3 class="font-bold text-xl">Monthly</h3>
+<p class="text-4xl font-bold">$10<span class="text-sm">/month</span></p>
+
+<ul class="mt-6 space-y-2 text-left text-gray-300">
+<li>✔ Unlimited questions</li>
+<li>✔ Full explanations</li>
+<li>✔ Faster responses</li>
+<li>✔ Priority access</li>
+</ul>
+
+<button class="btn bg-[#a7f3d0] text-black mt-6 w-full">
+Start Free Trial
+</button>
 </div>
 
+<!-- YEARLY -->
 <div class="bg-[#1e293b] p-8 card">
-<h3 class="font-bold">Pro+</h3>
-<p id="proPlusPrice" class="text-4xl font-bold">$20/mo</p>
-<button class="btn bg-[#fde68a] text-black mt-6 w-full">Start Free Trial</button>
+<h3 class="font-bold text-xl">Yearly</h3>
+<p class="text-4xl font-bold">$100<span class="text-sm">/year</span></p>
+
+<p class="text-green-400 mt-2">Save $20</p>
+
+<ul class="mt-6 space-y-2 text-left text-gray-300">
+<li>✔ Everything in Monthly</li>
+<li>✔ Best value</li>
+<li>✔ Priority support</li>
+<li>✔ Faster AI access</li>
+</ul>
+
+<button class="btn bg-[#fde68a] text-black mt-6 w-full">
+Go Yearly
+</button>
 </div>
 
 </div>
@@ -204,14 +184,19 @@ body { font-family: system-ui; }
 
 <div class="section-line"></div>
 
-<!-- CTA -->
+<!-- CTA (IMPROVED) -->
 <section class="bg-[#c4b5fd] text-center py-20 border-t-4 border-black">
 
 <h2 class="text-3xl title text-black">
 Ready to Ace Your Homework?
 </h2>
 
-<button onclick="openApp()" class="btn bg-[#fde68a] text-black mt-6">
+<p class="mt-4 text-black max-w-xl mx-auto">
+Join thousands of students improving grades, saving time,
+and understanding concepts faster with AI.
+</p>
+
+<button class="btn bg-[#fde68a] text-black mt-6">
 Start Learning Now
 </button>
 
@@ -219,24 +204,11 @@ Start Learning Now
 
 <!-- FOOTER -->
 <footer class="bg-[#0f172a] text-center py-6 border-t-4 border-black">
-<div class="font-bold">■ HomeWorkAI</div>
+<div class="font-bold">✦ HomeWorkAI</div>
 <p class="text-gray-400 text-sm">
 © 2026 HomeWorkAI. Helping students succeed.
 </p>
 </footer>
-
-<script>
-function openApp(){alert("Open AI app")}
-function setBilling(type){
-if(type==="yearly"){
-document.getElementById("proPrice").innerText="$100/year"
-document.getElementById("proPlusPrice").innerText="$150/year"
-}else{
-document.getElementById("proPrice").innerText="$10/mo"
-document.getElementById("proPlusPrice").innerText="$20/mo"
-}
-}
-</script>
 
 </body>
 </html>
