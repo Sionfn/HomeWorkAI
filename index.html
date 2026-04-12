@@ -86,6 +86,28 @@ body { font-family: system-ui; background:#0f172a; }
   50% { transform: scale(1.05) translateY(-4px); }
   100% { transform: scale(1); }
 }
+
+/* AI PAGE */
+.ai-page {
+  display:none;
+  min-height:100vh;
+  background:#0f172a;
+  color:white;
+  padding:40px;
+}
+
+.ai-box {
+  max-width:700px;
+  margin:auto;
+}
+
+input, textarea {
+  width:100%;
+  padding:12px;
+  border-radius:8px;
+  border:2px solid black;
+  color:black;
+}
 </style>
 </head>
 
@@ -95,8 +117,7 @@ body { font-family: system-ui; background:#0f172a; }
 <div class="flex justify-between items-center px-10 py-5 bg-[#c4b5fd] border-b-4 border-black">
   <div class="font-bold text-lg">✦ HomeWorkAI</div>
 
-  <button onclick="login()" class="btn flex items-center gap-2 bg-white">
-    <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20">
+  <button onclick="alert('Google login soon')" class="btn bg-white">
     Login with Google
   </button>
 </div>
@@ -124,7 +145,7 @@ Get Started Free
 </div>
 
 <div>
-<img src="https://raw.githubusercontent.com/Sionfn/HomeWorkAI/refs/heads/main/KpNCqHlKPhjoLrIsecGasT6Q6TlWXUTglR8TbrzymygH2u-bPmPOtfDxYbVBZYXFRZfC3NCD3BUURscaJHB6woNIFKxnzgpsB956vPfj2m2Nk2VvXGRzrZnhQ13303yTZOp6X2nNdwQNNDRGjA-TGzQZ07E8uFeca4K0h1u8rvb1rG8y6sq_otVtBpWaXCOk.jpeg"
+<img src="https://raw.githubusercontent.com/Sionfn/HomeWorkAI/main/KpNCqHlKPhjoLrIsecGasT6Q6TlWXUTglR8TbrzymygH2u-bPmPOtfDxYbVBZYXFRZfC3NCD3BUURscaJHB6woNIFKxnzgpsB956vPfj2m2Nk2VvXGRzrZnhQ13303yTZOp6X2nNdwQNNDRGjA-TGzQZ07E8uFeca4K0h1u8rvb1rG8y6sq_otVtBpWaXCOk.jpeg"
 class="rounded-lg w-full object-cover hero-img border-2 border-black">
 
 <div class="mt-3 bg-[#bbf7d0] px-3 py-1 inline-block border-2 border-black">
@@ -137,65 +158,33 @@ Powered by OpenAI • Trusted by students
 
 <div class="section-line"></div>
 
-<!-- HOW IT WORKS -->
+<!-- REVIEWS BACK -->
 <section class="py-24 px-6 bg-white text-center">
-<div class="max-w-6xl mx-auto">
-
-<h2 class="text-4xl title mb-4">How It Works</h2>
-<p class="text-gray-600 mb-10">
-Get accurate answers instantly with AI that explains every step clearly and helps you actually learn.
-</p>
-
-<div class="grid md:grid-cols-3 gap-12 mt-12">
-
-<div class="p-8 card bg-[#c4b5fd]">
-<div class="icon-box">📷</div>
-<h3 class="mt-4 font-bold">Upload Question</h3>
-<p class="mt-2">Take a picture or type your problem.</p>
-</div>
-
-<div class="p-8 card bg-[#a7f3d0]">
-<div class="icon-box">🧠</div>
-<h3 class="mt-4 font-bold">AI Solves It</h3>
-<p class="mt-2">Step-by-step explanations instantly.</p>
-</div>
-
-<div class="p-8 card bg-[#fde68a]">
-<div class="icon-box">📈</div>
-<h3 class="mt-4 font-bold">Learn Faster</h3>
-<p class="mt-2">Understand and improve your grades.</p>
-</div>
-
-</div>
-</div>
-</section>
-
-<div class="section-line"></div>
-
-<!-- REVIEWS -->
-<section class="py-24 px-6 bg-white text-center">
-<div class="max-w-6xl mx-auto">
-
 <h2 class="text-3xl title mb-4">⭐ 5 Stars from Students</h2>
-<p class="text-gray-600 mb-12">
-Trusted by students worldwide to improve grades, save time, and actually understand their homework.
-</p>
+<p class="text-gray-600 mb-12">Trusted by students worldwide</p>
 
 <div class="grid md:grid-cols-4 gap-6">
-<!-- reviews unchanged -->
-</div>
+
+<div class="card p-6">⭐⭐⭐⭐⭐<p>Saved my grades.</p></div>
+<div class="card p-6">⭐⭐⭐⭐⭐<p>Actually explains everything.</p></div>
+<div class="card p-6">⭐⭐⭐⭐⭐<p>Best tool ever.</p></div>
+<div class="card p-6">⭐⭐⭐⭐⭐<p>Helped me pass tests.</p></div>
+
+<div class="card p-6">⭐⭐⭐⭐⭐<p>Way easier homework now.</p></div>
+<div class="card p-6">⭐⭐⭐⭐⭐<p>From failing to A's.</p></div>
+<div class="card p-6">⭐⭐⭐⭐⭐<p>Teaches not just answers.</p></div>
+<div class="card p-6">⭐⭐⭐⭐⭐<p>No more stress.</p></div>
 
 </div>
 </section>
 
 <div class="section-line"></div>
 
-<!-- PRICING -->
+<!-- PRICING FIXED -->
 <section id="pricing" class="py-24 px-6 bg-white text-center">
-<div class="max-w-6xl mx-auto">
 
 <h2 class="text-3xl title mb-2">Simple Pricing</h2>
-<p class="text-gray-600 mb-10">Choose a plan that fits your learning needs</p>
+<p class="text-gray-600 mb-10">Choose a plan</p>
 
 <div class="flex justify-center gap-4 mb-10">
 <button onclick="setBilling('monthly')" class="btn bg-white">Monthly</button>
@@ -204,61 +193,70 @@ Trusted by students worldwide to improve grades, save time, and actually underst
 
 <div class="grid md:grid-cols-3 gap-8" id="pricingCards">
 
-<!-- FREE -->
-<div class="bg-white p-8 card">
+<div class="card p-8">
 <h3>Free</h3>
-<p class="text-4xl">$0</p>
-<button onclick="scrollToSection('cta')" class="btn bg-[#93c5fd] mt-6 w-full">Start Now</button>
+<p>$0</p>
+<ul class="text-left mt-4">
+<li>✔ 10 questions</li>
+<li>✔ basic answers</li>
+</ul>
+<button onclick="goAI()" class="btn mt-6 w-full">Start Now</button>
 </div>
 
-<!-- PRO -->
-<div class="bg-white p-8 card scale-105">
+<div class="card p-8 scale-105">
 <div class="popular-badge">MOST POPULAR</div>
 <h3>Pro</h3>
-<p id="proPrice" class="text-4xl">$10/mo</p>
-<button onclick="scrollToSection('cta')" class="btn bg-[#a7f3d0] mt-6 w-full">Start Free Trial</button>
+<p id="proPrice">$10/mo</p>
+<div id="savePro" class="save-box">Save $20 yearly</div>
+<ul class="text-left mt-4">
+<li>✔ unlimited</li>
+<li>✔ step by step</li>
+<li>✔ faster</li>
+</ul>
+<button onclick="goAI()" class="btn mt-6 w-full">Free Trial</button>
 </div>
 
-<!-- PRO+ -->
-<div class="bg-white p-8 card">
+<div class="card p-8">
 <h3>Pro+</h3>
-<p id="proPlusPrice" class="text-4xl">$20/mo</p>
-<button onclick="scrollToSection('cta')" class="btn bg-[#fde68a] mt-6 w-full">Start Free Trial</button>
+<p id="proPlusPrice">$20/mo</p>
+<div id="savePlus" class="save-box">Save $90 yearly</div>
+<ul class="text-left mt-4">
+<li>✔ everything</li>
+<li>✔ videos</li>
+<li>✔ best AI</li>
+</ul>
+<button onclick="goAI()" class="btn mt-6 w-full">Free Trial</button>
 </div>
 
 </div>
 
-</div>
 </section>
 
 <div class="section-line"></div>
 
 <!-- CTA -->
-<section id="cta" class="bg-[#c4b5fd] text-center py-20">
+<section class="bg-[#c4b5fd] text-center py-20">
 <h2 class="text-3xl title">Ready to Ace Your Homework?</h2>
-<p class="mt-3 text-gray-600">Join thousands of students improving grades with AI.</p>
-<div class="flex justify-center">
-<button onclick="scrollToTop()" class="btn bg-[#fde68a] mt-6">✦ Start Learning Now</button>
-</div>
+<p class="text-gray-600 mt-3">Join thousands of students</p>
+<button onclick="goAI()" class="btn mt-6">Start Learning Now</button>
 </section>
 
-<!-- FOOTER -->
-<footer class="bg-[#0f172a] text-white text-center py-6 border-t-4 border-black">
-<div class="font-bold">✦ HomeWorkAI</div>
-<p class="text-gray-400 text-sm">© 2026 HomeWorkAI. Helping students succeed.</p>
-</footer>
+<!-- AI PAGE -->
+<div id="aiPage" class="ai-page">
+<div class="ai-box">
+<h2 class="text-3xl mb-6">Ask HomeworkAI</h2>
+
+<textarea placeholder="Type your homework question..."></textarea>
+
+<button class="btn mt-4 w-full bg-[#fde68a]">Get Answer</button>
+
+<button onclick="goHome()" class="btn mt-4 w-full">← Back</button>
+</div>
+</div>
 
 <script>
 function scrollToSection(id){
 document.getElementById(id).scrollIntoView({behavior:"smooth"});
-}
-
-function scrollToTop(){
-window.scrollTo({top:0, behavior:"smooth"});
-}
-
-function login(){
-alert("Google login coming soon 🚀");
 }
 
 function setBilling(type){
@@ -266,12 +264,27 @@ const pro = document.getElementById("proPrice");
 const plus = document.getElementById("proPlusPrice");
 
 if(type==="yearly"){
-  pro.innerText="$100/year";
-  plus.innerText="$150/year";
+pro.innerText="$100/year";
+plus.innerText="$150/year";
+
+setTimeout(()=>savePro.classList.add("show-save"),200);
+setTimeout(()=>savePlus.classList.add("show-save"),300);
+
 }else{
-  pro.innerText="$10/mo";
-  plus.innerText="$20/mo";
+pro.innerText="$10/mo";
+plus.innerText="$20/mo";
+savePro.classList.remove("show-save");
+savePlus.classList.remove("show-save");
 }
+}
+
+function goAI(){
+document.body.style.display="none";
+document.getElementById("aiPage").style.display="block";
+}
+
+function goHome(){
+location.reload();
 }
 </script>
 
