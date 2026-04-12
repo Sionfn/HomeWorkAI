@@ -9,7 +9,7 @@
 body {
   margin: 0;
   font-family: Inter, system-ui, sans-serif;
-  background: #020617;
+  background: radial-gradient(circle at top, #0f172a, #020617);
   color: white;
 }
 
@@ -22,7 +22,6 @@ body {
 
 .logo {
   font-weight: bold;
-  font-size: 18px;
 }
 
 .login {
@@ -31,17 +30,22 @@ body {
   padding: 8px 16px;
   border-radius: 10px;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+.login:hover {
+  transform: scale(1.05);
 }
 
 /* HERO */
 .hero {
   text-align: center;
   padding: 80px 20px;
+  animation: fadeIn 1s ease;
 }
 
 .hero h1 {
   font-size: 3.5rem;
-  font-weight: 700;
 }
 
 .hero span {
@@ -52,25 +56,24 @@ body {
 
 .hero p {
   color: #94a3b8;
-  font-size: 1.2rem;
 }
 
 /* BUTTONS */
-.hero-buttons {
-  margin-top: 20px;
-}
-
 button {
   padding: 14px;
   border-radius: 12px;
   border: none;
-  margin: 5px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .primary {
   background: linear-gradient(90deg,#3b82f6,#06b6d4);
-  color: white;
+}
+
+.primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(59,130,246,0.5);
 }
 
 .secondary {
@@ -83,7 +86,6 @@ button {
 .main {
   display: flex;
   justify-content: center;
-  margin-top: 40px;
 }
 
 .card {
@@ -93,6 +95,7 @@ button {
   padding: 25px;
   border-radius: 20px;
   backdrop-filter: blur(10px);
+  animation: fadeInUp 0.6s ease;
 }
 
 textarea {
@@ -118,23 +121,6 @@ textarea {
   white-space: pre-wrap;
 }
 
-/* FEATURES */
-.features {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin: 80px 20px;
-  flex-wrap: wrap;
-}
-
-.feature {
-  background: rgba(255,255,255,0.05);
-  padding: 20px;
-  border-radius: 16px;
-  width: 220px;
-  text-align: center;
-}
-
 /* PRICING */
 .pricing {
   display: flex;
@@ -150,11 +136,32 @@ textarea {
   border-radius: 20px;
   width: 250px;
   text-align: center;
+  transition: 0.3s;
+}
+
+.plan:hover {
+  transform: translateY(-10px);
 }
 
 .price {
   font-size: 24px;
-  margin: 10px 0;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from {opacity:0}
+  to {opacity:1}
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to {
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 </style>
 </head>
@@ -171,11 +178,6 @@ textarea {
 <div class="hero">
   <h1>AI That Solves Your <span>Homework</span></h1>
   <p>Step-by-step answers instantly. Learn smarter, not harder.</p>
-
-  <div class="hero-buttons">
-    <button class="primary">Start Free</button>
-    <button class="secondary">View Pricing</button>
-  </div>
 </div>
 
 <!-- MAIN -->
@@ -187,44 +189,45 @@ textarea {
   </div>
 </div>
 
-<!-- FEATURES -->
-<div class="features">
-  <div class="feature">
-    <h3>⚡ Instant Answers</h3>
-    <p>Get solutions in seconds</p>
-  </div>
-  <div class="feature">
-    <h3>🧠 Smart Explanations</h3>
-    <p>Understand every step</p>
-  </div>
-  <div class="feature">
-    <h3>📚 All Subjects</h3>
-    <p>Math, science, history & more</p>
-  </div>
-</div>
-
 <!-- PRICING -->
 <div class="pricing">
+
   <div class="plan">
     <h3>Free</h3>
     <div class="price">$0</div>
     <p>10 questions/day</p>
+    <button onclick="selectPlan('free')">Start Free</button>
   </div>
 
   <div class="plan">
     <h3>Pro</h3>
     <div class="price">$9/mo</div>
     <p>Unlimited questions</p>
+    <button onclick="selectPlan('pro')" class="primary">Upgrade</button>
   </div>
 
   <div class="plan">
     <h3>Pro+</h3>
     <div class="price">$19/mo</div>
     <p>Best AI model</p>
+    <button onclick="selectPlan('proplus')" class="primary">Go Pro+</button>
   </div>
+
 </div>
 
 <script>
+let currentPlan = "free";
+
+function selectPlan(plan) {
+  currentPlan = plan;
+
+  alert(
+    plan === "free"
+      ? "You are on the Free plan"
+      : "Upgrade successful (demo). " + plan.toUpperCase() + " activated 🚀"
+  );
+}
+
 function getToday() {
   return new Date().toISOString().split("T")[0];
 }
@@ -244,9 +247,11 @@ async function askAI() {
 
   if (!usage[today]) usage[today] = 0;
 
-  if (usage[today] >= 10) {
+  const limit = currentPlan === "free" ? 10 : Infinity;
+
+  if (usage[today] >= limit) {
     document.getElementById("response").innerText =
-      "⚠️ Daily limit reached (10). Upgrade for unlimited.";
+      "⚠️ Daily limit reached. Upgrade for unlimited.";
     return;
   }
 
@@ -264,7 +269,7 @@ async function askAI() {
   saveUsage(usage);
 
   document.getElementById("response").innerText =
-    data.answer + `\n\n(${usage[today]}/10 used today)`;
+    data.answer + `\n\n(${usage[today]}/${limit === Infinity ? "∞" : limit} used today)`;
 }
 </script>
 
