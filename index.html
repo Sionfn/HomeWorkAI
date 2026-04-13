@@ -8,7 +8,7 @@
   <meta name="keywords" content="homework help, AI tutor, study helper, math solver, learning app">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -17,14 +17,31 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: #000;
       background: #0f172a;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     .heading {
-      font-family: 'Space Grotesk', system-ui, sans-serif;
-      letter-spacing: -0.02em;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+    }
+
+    .section-title {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+
+    @media (min-width: 768px) {
+      .section-title {
+        font-size: 40px;
+      }
     }
 
     .section-line {
@@ -33,11 +50,12 @@
 
     .btn {
       border: 2px solid black;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-weight: 600;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
       box-shadow: 4px 4px 0 black;
-      transition: 0.2s;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -48,12 +66,21 @@
       transform: translateY(-3px);
       box-shadow: 6px 6px 0 black;
     }
+    .btn:active {
+      transform: translateY(-1px);
+      box-shadow: 3px 3px 0 black;
+    }
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
 
     .card {
       border: 2px solid black;
-      border-radius: 14px;
+      border-radius: 16px;
       box-shadow: 5px 5px 0 black;
-      transition: 0.25s;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
     }
     .card:hover {
@@ -63,7 +90,7 @@
 
     .hero-card {
       border: 2px solid black;
-      border-radius: 14px;
+      border-radius: 16px;
       box-shadow: 6px 6px 0 black;
       transition: all 0.25s ease;
       overflow: hidden;
@@ -83,7 +110,7 @@
       margin: auto;
       background: white;
       font-size: 24px;
-      border-radius: 12px;
+      border-radius: 14px;
     }
 
     .save-pill {
@@ -95,7 +122,7 @@
       padding: 6px 14px;
       border-radius: 50px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       border: 2px solid #059669;
       box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
     }
@@ -107,11 +134,27 @@
       transform: translateX(-50%);
       background: #a7f3d0;
       border: 2px solid black;
-      padding: 4px 12px;
+      padding: 5px 14px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
       border-radius: 20px;
       white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+
+    .trial-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 2px solid #2563eb;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+      margin-top: 8px;
     }
 
     .save-badge {
@@ -129,11 +172,11 @@
     }
 
     .review-card {
-      padding: 20px;
-      border-radius: 16px;
+      padding: 22px;
+      border-radius: 18px;
       border: 2px solid black;
       box-shadow: 4px 4px 0 black;
-      transition: all 0.25s;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       text-align: left;
     }
     .review-card:hover {
@@ -176,6 +219,15 @@
       justify-content: center;
     }
 
+    .review-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid black;
+      object-fit: cover;
+      background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    }
+
     .hidden { display: none; }
     .flex { display: flex; }
     .grid { display: grid; }
@@ -191,6 +243,7 @@
     .text-center { text-align: center; }
     .text-left { text-align: left; }
     .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
     .font-semibold { font-weight: 600; }
     .text-sm { font-size: 14px; }
     .text-xs { font-size: 12px; }
@@ -228,6 +281,7 @@
     .py-6 { padding-top: 24px; padding-bottom: 24px; }
     .py-8 { padding-top: 32px; padding-bottom: 32px; }
     .py-16 { padding-top: 64px; padding-bottom: 64px; }
+    .py-20 { padding-top: 80px; padding-bottom: 80px; }
     .pt-3 { padding-top: 12px; }
     .pr-14 { padding-right: 56px; }
     .rounded-full { border-radius: 9999px; }
@@ -237,11 +291,13 @@
     .w-full { width: 100%; }
     .min-w-0 { min-width: 0; }
     .flex-1 { flex: 1; }
+    .flex-col { flex-direction: column; }
     .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .leading-tight { line-height: 1.25; }
     .leading-relaxed { line-height: 1.625; }
     .tracking-tight { letter-spacing: -0.025em; }
     .space-y-3 > * + * { margin-top: 12px; }
+    .space-y-4 > * + * { margin-top: 16px; }
     .relative { position: relative; }
     .absolute { position: absolute; }
     .fixed { position: fixed; }
@@ -286,14 +342,42 @@
       .md-scale-105 { transform: scale(1.05); }
       .md-gap-12 { gap: 48px; }
     }
+
+    /* iPhone-style image icon */
+    .iphone-image-icon {
+      width: 65px;
+      height: 65px;
+      border: 2px solid black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-radius: 14px;
+      position: relative;
+    }
+
+    .iphone-image-icon svg {
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    }
+
+    /* Pricing card enhancements */
+    .pricing-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pricing-card .btn {
+      margin-top: auto;
+    }
   </style>
 </head>
 <body>
   <!-- HEADER -->
   <header class="flex justify-between items-center px-6 md-px-10 py-4" style="background: #c4b5fd; border-bottom: 4px solid black;">
     <div class="flex items-center gap-2">
-      <img src="logo.jpg" width="40" height="40" alt="HomeWorkAI Logo" style="border-radius: 8px; border: 2px solid black;">
-      <span class="font-semibold text-lg tracking-tight heading">HomeWorkAI</span>
+      <img src="logo.jpg" width="40" height="40" alt="HomeWorkAI Logo" style="border-radius: 10px; border: 2px solid black;">
+      <span class="font-extrabold text-lg tracking-tight heading">HomeWorkAI</span>
     </div>
     <button id="loginBtn" class="btn bg-white flex items-center gap-2" onclick="handleLogin()">
       <!-- Default: Google icon, Logged in: User's profile picture -->
@@ -308,18 +392,18 @@
   <section class="py-16 md-py-24 px-6" style="background: white;">
     <div class="max-w-6xl mx-auto grid md-grid-cols-2 gap-12 items-center">
       <div>
-        <h1 class="text-4xl md-text-5xl font-bold leading-tight heading">
+        <h1 class="text-4xl md-text-5xl font-extrabold leading-tight heading">
           Stuck on <span style="color: #60a5fa;">Homework?</span><br>
           We've got your back.
         </h1>
-        <p class="mt-6 text-gray-600 text-lg">
+        <p class="mt-6 text-gray-600 text-lg leading-relaxed">
           Instant answers with step-by-step explanations.
           Better than tutors and teachers.
         </p>
         <button class="btn mt-8" style="background: #c4b5fd;" onclick="scrollToAI()">
           Get Started Free
         </button>
-        <p class="text-green-500 mt-3">&#10004; 10 free questions daily</p>
+        <p class="text-green-500 mt-3 font-semibold">&#10004; 10 free questions daily</p>
       </div>
       <div>
         <div class="hero-card">
@@ -330,7 +414,7 @@
             style="display: block;"
           >
         </div>
-        <div class="mt-3 px-3 py-1 inline-block text-sm rounded-lg" style="background: #a7f3d0; border: 2px solid black;">
+        <div class="mt-3 px-3 py-1 inline-block text-sm rounded-lg font-semibold" style="background: #a7f3d0; border: 2px solid black;">
           Powered by OpenAI - Trusted by students
         </div>
       </div>
@@ -342,25 +426,30 @@
   <!-- HOW IT WORKS -->
   <section class="py-16 md-py-24 px-6 text-center" style="background: white;">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-3xl md-text-4xl font-bold mb-4 heading">How It Works</h2>
-      <p class="text-gray-600 mb-10 max-w-2xl mx-auto">
+      <h2 class="section-title mb-4">How It Works</h2>
+      <p class="text-gray-600 mb-10 max-w-2xl mx-auto text-lg leading-relaxed">
         Get accurate answers instantly with AI that explains every step clearly and helps you actually learn.
       </p>
       <div class="grid md-grid-cols-3 gap-8 md-gap-12 mt-12">
         <div class="p-8 card" style="background: #c4b5fd;">
-          <div class="icon-box">&#128247;</div>
-          <h3 class="mt-4 font-bold text-lg heading">Upload Question</h3>
-          <p class="mt-2 text-gray-700">Take a picture or type your problem.</p>
+          <div class="iphone-image-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1f2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+              <circle cx="12" cy="13" r="3"/>
+            </svg>
+          </div>
+          <h3 class="mt-4 font-extrabold text-lg heading">Upload Question</h3>
+          <p class="mt-2 text-gray-700 leading-relaxed">Take a picture or type your problem.</p>
         </div>
         <div class="p-8 card" style="background: #a7f3d0;">
           <div class="icon-box">&#129504;</div>
-          <h3 class="mt-4 font-bold text-lg heading">AI Solves It</h3>
-          <p class="mt-2 text-gray-700">Step-by-step explanations instantly.</p>
+          <h3 class="mt-4 font-extrabold text-lg heading">AI Solves It</h3>
+          <p class="mt-2 text-gray-700 leading-relaxed">Step-by-step explanations instantly.</p>
         </div>
         <div class="p-8 card" style="background: #fde68a;">
           <div class="icon-box">&#128200;</div>
-          <h3 class="mt-4 font-bold text-lg heading">Learn Faster</h3>
-          <p class="mt-2 text-gray-700">Understand and improve your grades.</p>
+          <h3 class="mt-4 font-extrabold text-lg heading">Learn Faster</h3>
+          <p class="mt-2 text-gray-700 leading-relaxed">Understand and improve your grades.</p>
         </div>
       </div>
     </div>
@@ -369,10 +458,10 @@
   <div class="section-line"></div>
 
   <!-- REVIEWS -->
-  <section class="py-16 md-py-24 px-6 text-center" style="background: white;">
+  <section class="py-20 md-py-24 px-6 text-center" style="background: white;">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-2xl md-text-3xl font-bold mb-4 heading">What Students Are Saying</h2>
-      <p class="text-gray-600 mb-12 max-w-2xl mx-auto">
+      <h2 class="section-title mb-4">What Students Are Saying</h2>
+      <p class="text-gray-600 mb-12 max-w-2xl mx-auto text-lg leading-relaxed">
         Trusted by students worldwide to improve grades, save time, and actually understand their homework.
       </p>
       <div class="grid sm-grid-cols-2 md-grid-cols-4 gap-5" id="reviews">
@@ -387,31 +476,31 @@
   <section id="ai-helper" class="py-16 md-py-24 px-6" style="background: white;">
     <div class="max-w-4xl mx-auto">
       <div class="text-center mb-12">
-        <h2 class="text-3xl md-text-4xl font-bold mb-4 heading">&#129504; Ask HomeWorkAI</h2>
-        <p class="text-gray-600">
+        <h2 class="section-title mb-4">&#129504; Ask HomeWorkAI</h2>
+        <p class="text-gray-600 text-lg leading-relaxed">
           Type your homework question below and get instant step-by-step explanations.
         </p>
       </div>
 
       <div class="card p-6 md-p-8" style="background: #c4b5fd;">
         <div class="mb-6">
-          <label class="font-bold mb-2 heading" style="display: block;">Your Question</label>
+          <label class="font-extrabold mb-3 heading" style="display: block; font-size: 16px;">Your Question</label>
           <div class="relative">
             <textarea
               id="questionInput"
               placeholder="Type your homework question here... (e.g., 'How do I solve 2x + 5 = 15?')"
-              style="width: 100%; padding: 16px; padding-right: 56px; border: 2px solid black; border-radius: 8px; min-height: 120px; resize: none; background: white; font-size: 16px;"
+              style="width: 100%; padding: 16px; padding-right: 56px; border: 2px solid black; border-radius: 10px; min-height: 120px; resize: none; background: white; font-size: 16px; font-family: inherit; line-height: 1.5;"
             ></textarea>
             <input type="file" id="fileInput" accept="image/*" style="display: none;">
             <button 
               onclick="document.getElementById('fileInput').click()"
-              style="position: absolute; bottom: 12px; right: 12px; padding: 10px; background: white; border: 2px solid black; border-radius: 8px; cursor: pointer; transition: transform 0.2s;"
-              onmouseover="this.style.transform='scale(1.05)'"
-              onmouseout="this.style.transform='scale(1)'"
+              style="position: absolute; bottom: 12px; right: 12px; padding: 10px; background: white; border: 2px solid black; border-radius: 10px; cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);"
+              onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='2px 2px 0 black';"
+              onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';"
               title="Upload image"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" fill="#e0f2fe" stroke="#3b82f6" stroke-width="2"/>
+                <rect width="18" height="18" x="3" y="3" rx="3" ry="3" fill="#e0f2fe" stroke="#3b82f6" stroke-width="2"/>
                 <circle cx="9" cy="9" r="2" fill="#fde047" stroke="#eab308" stroke-width="1.5"/>
                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" stroke="#22c55e" stroke-width="2"/>
               </svg>
@@ -423,7 +512,7 @@
           id="askBtn"
           onclick="handleAskQuestion()"
           class="btn w-full flex items-center justify-center gap-2"
-          style="background: #a7f3d0;"
+          style="background: #a7f3d0; font-size: 16px;"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="m22 2-7 20-4-9-9-4Z"/>
@@ -435,10 +524,10 @@
         <div id="answerBox" class="mt-6 p-6 rounded-lg hidden" style="background: white; border: 2px solid black;"></div>
 
         <div class="mt-6 flex flex-wrap gap-2 items-center">
-          <span class="text-sm font-semibold">Try asking:</span>
-          <button onclick="setQuestion('How do I solve quadratic equations?')" class="text-sm px-3 py-1 rounded-full" style="background: white; border: 2px solid black; cursor: pointer;">Quadratic equations</button>
-          <button onclick="setQuestion('Explain photosynthesis step by step')" class="text-sm px-3 py-1 rounded-full" style="background: white; border: 2px solid black; cursor: pointer;">Photosynthesis</button>
-          <button onclick="setQuestion('What caused World War 1?')" class="text-sm px-3 py-1 rounded-full" style="background: white; border: 2px solid black; cursor: pointer;">World War 1</button>
+          <span class="text-sm font-bold">Try asking:</span>
+          <button onclick="setQuestion('How do I solve quadratic equations?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background: white; border: 2px solid black; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">Quadratic equations</button>
+          <button onclick="setQuestion('Explain photosynthesis step by step')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background: white; border: 2px solid black; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">Photosynthesis</button>
+          <button onclick="setQuestion('What caused World War 1?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background: white; border: 2px solid black; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">World War 1</button>
         </div>
       </div>
 
@@ -456,8 +545,8 @@
   <!-- PRICING -->
   <section id="pricing" class="py-16 md-py-24 px-6 text-center" style="background: white;">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-2xl md-text-3xl font-bold mb-2 heading">Simple Pricing</h2>
-      <p class="text-gray-600 mb-10">Choose a plan that fits your learning needs</p>
+      <h2 class="section-title mb-2">Simple Pricing</h2>
+      <p class="text-gray-600 mb-10 text-lg">Choose a plan that fits your learning needs</p>
 
       <div class="flex justify-center gap-4 mb-10">
         <button id="monthlyBtn" class="btn" style="background: #c4b5fd;" onclick="setBilling('monthly')">Monthly</button>
@@ -466,49 +555,63 @@
 
       <div class="grid md-grid-cols-3 gap-8">
         <!-- FREE -->
-        <div class="card p-8" style="background: white;">
-          <h3 class="text-xl font-bold heading">Free</h3>
-          <p class="text-4xl font-bold mt-2">$0</p>
-          <ul class="mt-6 text-left space-y-3">
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> 10 questions per day</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Basic AI answers</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Standard response speed</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Access to all subjects</li>
+        <div class="card pricing-card p-8" style="background: white;">
+          <h3 class="text-xl font-extrabold heading">Free</h3>
+          <p class="text-4xl font-extrabold mt-2">$0</p>
+          <ul class="mt-6 text-left space-y-4">
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> 10 questions per day</li>
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Basic AI answers</li>
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Standard response speed</li>
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Access to all subjects</li>
           </ul>
           <button onclick="scrollToAI()" class="btn mt-6 w-full" style="background: #93c5fd;">Start Now</button>
         </div>
 
         <!-- PRO -->
-        <div class="card p-8 md-scale-105 relative" style="background: white;">
+        <div class="card pricing-card p-8 md-scale-105 relative" style="background: white;">
           <div class="popular-badge">MOST POPULAR</div>
-          <h3 class="text-xl font-bold heading">Premium</h3>
-          <p class="text-4xl font-bold mt-2" id="proPrice">$9.99/mo</p>
+          <h3 class="text-xl font-extrabold heading">Premium</h3>
+          <p class="text-4xl font-extrabold mt-2" id="proPrice">$9.99/mo</p>
+          <div class="trial-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 8v4l3 3"/>
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+            3-Day Free Trial
+          </div>
           <div class="save-badge mt-3" id="proSave">
             <span class="save-pill">Save $39.89/year</span>
           </div>
-          <ul class="mt-6 text-left space-y-3">
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Unlimited questions</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Step-by-step solutions</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Faster responses</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Priority support</li>
+          <ul class="mt-6 text-left space-y-4">
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Unlimited questions</li>
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Step-by-step solutions</li>
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Faster responses</li>
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Priority support</li>
           </ul>
-          <button onclick="handlePurchase('Premium')" class="btn mt-6 w-full" style="background: #a7f3d0;">Get Premium</button>
+          <button onclick="handlePurchase('Premium')" class="btn mt-6 w-full" style="background: #a7f3d0;">Start 3-Day Free Trial</button>
         </div>
 
         <!-- PRO+ -->
-        <div class="card p-8" style="background: white;">
-          <h3 class="text-xl font-bold heading">Premium+</h3>
-          <p class="text-4xl font-bold mt-2" id="proPlusPrice">$14.99/mo</p>
+        <div class="card pricing-card p-8" style="background: white;">
+          <h3 class="text-xl font-extrabold heading">Premium+</h3>
+          <p class="text-4xl font-extrabold mt-2" id="proPlusPrice">$14.99/mo</p>
+          <div class="trial-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 8v4l3 3"/>
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+            3-Day Free Trial
+          </div>
           <div class="save-badge mt-3" id="proPlusSave">
             <span class="save-pill">Save $59.89/year</span>
           </div>
-          <ul class="mt-6 text-left space-y-3">
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Everything in Premium</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Video explanations</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Deep learning insights</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">&#10004;</span> Fastest response speed</li>
+          <ul class="mt-6 text-left space-y-4">
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Everything in Premium</li>
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Video explanations</li>
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Deep learning insights</li>
+            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Fastest response speed</li>
           </ul>
-          <button onclick="handlePurchase('Premium+')" class="btn mt-6 w-full" style="background: #fde68a;">Get Premium+</button>
+          <button onclick="handlePurchase('Premium+')" class="btn mt-6 w-full" style="background: #fde68a;">Start 3-Day Free Trial</button>
         </div>
       </div>
     </div>
@@ -518,8 +621,8 @@
 
   <!-- CTA -->
   <section class="text-center py-16 md-py-20 px-6" style="background: #c4b5fd;">
-    <h2 class="text-2xl md-text-3xl font-bold heading">Ready to Ace Your Homework?</h2>
-    <p class="mt-3 text-gray-700">Join thousands of students improving grades with AI.</p>
+    <h2 class="section-title">Ready to Ace Your Homework?</h2>
+    <p class="mt-4 text-gray-700 text-lg">Join thousands of students improving grades with AI.</p>
     <div class="flex justify-center">
       <button onclick="scrollToAI()" class="btn mt-6" style="background: #fde68a;">&#10022; Start Learning Now</button>
     </div>
@@ -529,7 +632,7 @@
   <footer class="text-center py-8" style="background: #0f172a; color: white; border-top: 4px solid black;">
     <div class="flex items-center justify-center gap-2 mb-2">
       <img src="logo.jpg" width="32" height="32" alt="HomeWorkAI Logo" style="border-radius: 8px;">
-      <span class="font-semibold text-lg tracking-tight heading">HomeWorkAI</span>
+      <span class="font-extrabold text-lg tracking-tight heading">HomeWorkAI</span>
     </div>
     <p class="text-gray-400 text-sm">&copy; 2026 HomeWorkAI. Helping students succeed.</p>
   </footer>
@@ -671,6 +774,18 @@
       localStorage.setItem('homeworkai_usage', JSON.stringify(data));
     }
 
+    // Avatar URLs - using UI Avatars for consistent, professional look
+    const avatarColors = [
+      '7c3aed', // purple
+      '059669', // green  
+      'f59e0b', // amber
+      '3b82f6', // blue
+      'ec4899', // pink
+      '06b6d4', // cyan
+      'ef4444', // red
+      '8b5cf6', // violet
+    ];
+
     // Render reviews
     const reviews = [
       { id: 1, name: 'Sarah M.', handle: '@sarahm_22', text: 'Saved my grades. I went from a C to an A in calculus!', time: '2h', bg: '#c4b5fd' },
@@ -683,14 +798,20 @@
       { id: 8, name: 'Noah C.', handle: '@noahc_student', text: 'Homework used to stress me out every night. Now I finish faster and understand everything.', time: '5d', bg: '#a7f3d0' },
     ];
 
+    function getAvatarUrl(name, index) {
+      const color = avatarColors[index % avatarColors.length];
+      const encodedName = encodeURIComponent(name);
+      return `https://ui-avatars.com/api/?name=${encodedName}&background=${color}&color=fff&size=96&font-size=0.4&bold=true`;
+    }
+
     function renderReviews() {
       const container = document.getElementById('reviews');
-      container.innerHTML = reviews.map(review => `
+      container.innerHTML = reviews.map((review, index) => `
         <div class="review-card" style="background: ${review.bg};">
           <div class="flex items-center gap-3 mb-3">
-            <img src="https://i.pravatar.cc/44?u=${review.id + 100}" width="44" height="44" style="border-radius: 50%; border: 2px solid black;" alt="${review.name}">
+            <img src="${getAvatarUrl(review.name, index)}" class="review-avatar" alt="${review.name}">
             <div class="flex-1 min-w-0">
-              <p class="font-semibold text-sm truncate">${review.name}</p>
+              <p class="font-bold text-sm truncate">${review.name}</p>
               <p class="text-xs text-gray-600 truncate">${review.handle}</p>
             </div>
           </div>
@@ -699,7 +820,7 @@
             <div class="flex" style="gap: 2px;">
               ${[1,2,3,4,5].map(() => `<svg class="text-amber-400" style="width: 16px; height: 16px; fill: #fbbf24;" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>`).join('')}
             </div>
-            <span class="text-xs text-gray-500">${review.time}</span>
+            <span class="text-xs text-gray-500 font-semibold">${review.time}</span>
           </div>
         </div>
       `).join('');
@@ -747,8 +868,8 @@
       modal.innerHTML = `
         <div class="rounded-2xl p-8 relative text-center" style="background: white; max-width: 24rem; width: 100%; border: 4px solid black; box-shadow: 8px 8px 0 black;">
           <div class="text-4xl mb-4">&#127881;</div>
-          <h3 class="text-xl font-bold heading mb-2">Almost There!</h3>
-          <p class="text-gray-600 mb-6">Proceeding to checkout for <strong>${plan}</strong> plan.<br>Payment integration coming soon!</p>
+          <h3 class="text-xl font-extrabold heading mb-2">Starting Your 3-Day Free Trial!</h3>
+          <p class="text-gray-600 mb-6">You're about to start a free trial for <strong>${plan}</strong>.<br>Cancel anytime within 3 days - no charge!</p>
           <button onclick="this.closest('.fixed').remove()" class="btn" style="background: #a7f3d0;">Got it!</button>
         </div>
       `;
@@ -787,7 +908,7 @@
         modal.innerHTML = `
           <div class="rounded-2xl p-8 relative text-center" style="background: white; max-width: 24rem; width: 100%; border: 4px solid black; box-shadow: 8px 8px 0 black;">
             <div class="text-4xl mb-4">&#9200;</div>
-            <h3 class="text-xl font-bold heading mb-2">Daily Limit Reached</h3>
+            <h3 class="text-xl font-extrabold heading mb-2">Daily Limit Reached</h3>
             <p class="text-gray-600 mb-6">You've used all 10 free questions today.<br>Come back tomorrow or upgrade for unlimited access!</p>
             <div class="flex gap-3 justify-center">
               <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
@@ -839,9 +960,9 @@ ${question}
         answerBox.innerHTML = `
           <div class="flex items-center gap-2 mb-4">
             <div class="icon-box" style="width: 40px; height: 40px; font-size: 16px;">&#129504;</div>
-            <span class="font-bold heading">HomeWorkAI Response</span>
+            <span class="font-extrabold heading">HomeWorkAI Response</span>
           </div>
-          <div class="whitespace-pre-line text-gray-700">${answer}</div>
+          <div class="whitespace-pre-line text-gray-700 leading-relaxed">${answer}</div>
         `;
         answerBox.classList.remove('hidden');
 
