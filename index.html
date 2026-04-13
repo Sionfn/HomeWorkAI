@@ -343,22 +343,30 @@
       .md-gap-12 { gap: 48px; }
     }
 
-    /* iPhone-style image icon */
-    .iphone-image-icon {
-      width: 65px;
-      height: 65px;
-      border: 2px solid black;
+    /* iPhone-style upload button for AI chat */
+    .upload-image-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: auto;
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-      border-radius: 14px;
-      position: relative;
+      background: linear-gradient(145deg, #3b82f6 0%, #2563eb 100%);
+      border: 2px solid #1d4ed8;
+      border-radius: 12px;
+      cursor: pointer;
+      color: white;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
     }
-
-    .iphone-image-icon svg {
-      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    .upload-image-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+    }
+    .upload-image-btn:active {
+      transform: scale(0.98);
     }
 
     /* Pricing card enhancements */
@@ -380,7 +388,6 @@
       <span class="font-extrabold text-lg tracking-tight heading">HomeWorkAI</span>
     </div>
     <button id="loginBtn" class="btn bg-white flex items-center gap-2" onclick="handleLogin()">
-      <!-- Default: Google icon, Logged in: User's profile picture -->
       <span id="loginIcon">
         <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google">
       </span>
@@ -404,6 +411,15 @@
           Get Started Free
         </button>
         <p class="text-green-500 mt-3 font-semibold">&#10004; 10 free questions daily</p>
+        <div class="mt-4 flex items-center gap-3">
+          <div class="flex" style="margin-left: -8px;">
+            <img src="https://ui-avatars.com/api/?name=A&background=7c3aed&color=fff&size=32&bold=true" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="">
+            <img src="https://ui-avatars.com/api/?name=B&background=059669&color=fff&size=32&bold=true" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="">
+            <img src="https://ui-avatars.com/api/?name=C&background=f59e0b&color=fff&size=32&bold=true" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="">
+            <img src="https://ui-avatars.com/api/?name=D&background=3b82f6&color=fff&size=32&bold=true" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="">
+          </div>
+          <span class="text-sm text-gray-600"><strong>2,847</strong> students helped today</span>
+        </div>
       </div>
       <div>
         <div class="hero-card">
@@ -414,8 +430,15 @@
             style="display: block;"
           >
         </div>
-        <div class="mt-3 px-3 py-1 inline-block text-sm rounded-lg font-semibold" style="background: #a7f3d0; border: 2px solid black;">
-          Powered by OpenAI - Trusted by students
+        <div class="flex flex-wrap gap-2 mt-3">
+          <div class="px-3 py-1 inline-flex items-center gap-1 text-sm rounded-lg font-semibold" style="background: #a7f3d0; border: 2px solid black;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            Powered by OpenAI
+          </div>
+          <div class="px-3 py-1 inline-flex items-center gap-1 text-sm rounded-lg font-semibold" style="background: #fde68a; border: 2px solid black;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            4.9/5 Rating
+          </div>
         </div>
       </div>
     </div>
@@ -432,12 +455,7 @@
       </p>
       <div class="grid md-grid-cols-3 gap-8 md-gap-12 mt-12">
         <div class="p-8 card" style="background: #c4b5fd;">
-          <div class="iphone-image-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1f2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
-              <circle cx="12" cy="13" r="3"/>
-            </svg>
-          </div>
+          <div class="icon-box">&#128247;</div>
           <h3 class="mt-4 font-extrabold text-lg heading">Upload Question</h3>
           <p class="mt-2 text-gray-700 leading-relaxed">Take a picture or type your problem.</p>
         </div>
@@ -494,15 +512,12 @@
             <input type="file" id="fileInput" accept="image/*" style="display: none;">
             <button 
               onclick="document.getElementById('fileInput').click()"
-              style="position: absolute; bottom: 12px; right: 12px; padding: 10px; background: white; border: 2px solid black; border-radius: 10px; cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);"
-              onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='2px 2px 0 black';"
-              onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';"
-              title="Upload image"
+              class="upload-image-btn"
+              title="Upload image of your question"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <rect width="18" height="18" x="3" y="3" rx="3" ry="3" fill="#e0f2fe" stroke="#3b82f6" stroke-width="2"/>
-                <circle cx="9" cy="9" r="2" fill="#fde047" stroke="#eab308" stroke-width="1.5"/>
-                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" stroke="#22c55e" stroke-width="2"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                <circle cx="12" cy="13" r="3"/>
               </svg>
             </button>
           </div>
@@ -546,7 +561,11 @@
   <section id="pricing" class="py-16 md-py-24 px-6 text-center" style="background: white;">
     <div class="max-w-6xl mx-auto">
       <h2 class="section-title mb-2">Simple Pricing</h2>
-      <p class="text-gray-600 mb-10 text-lg">Choose a plan that fits your learning needs</p>
+      <p class="text-gray-600 mb-4 text-lg">Choose a plan that fits your learning needs</p>
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-10" style="background: #fef3c7; border: 2px solid #f59e0b;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <span class="font-bold text-sm" style="color: #92400e;">30-Day Money-Back Guarantee</span>
+      </div>
 
       <div class="flex justify-center gap-4 mb-10">
         <button id="monthlyBtn" class="btn" style="background: #c4b5fd;" onclick="setBilling('monthly')">Monthly</button>
@@ -656,16 +675,13 @@
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Global state
     window.currentUser = null;
     window.pendingAction = null;
 
-    // Listen for auth state changes
     onAuthStateChanged(auth, (user) => {
       window.currentUser = user;
       updateLoginButton();
       
-      // If user just logged in and there's a pending action, execute it
       if (user && window.pendingAction) {
         if (window.pendingAction.type === 'askQuestion') {
           setTimeout(() => {
@@ -680,9 +696,7 @@
       }
     });
 
-    // Trigger Google login directly
     window.triggerGoogleLogin = async function(pendingActionType, pendingActionData) {
-      // Set pending action before login
       if (pendingActionType === 'askQuestion') {
         window.pendingAction = { type: 'askQuestion' };
       } else if (pendingActionType === 'purchase') {
@@ -691,7 +705,6 @@
       
       try {
         await signInWithPopup(auth, provider);
-        // onAuthStateChanged will handle the pending action
       } catch (error) {
         window.pendingAction = null;
         if (error.code !== 'auth/popup-closed-by-user') {
@@ -700,7 +713,6 @@
       }
     };
 
-    // Header login button handler
     window.handleLogin = async function() {
       if (window.currentUser) {
         await signOut(auth);
@@ -722,14 +734,12 @@
       const loginIcon = document.getElementById('loginIcon');
       
       if (window.currentUser) {
-        // Show user's profile picture and name
         const photoURL = window.currentUser.photoURL;
         const displayName = window.currentUser.displayName || window.currentUser.email || 'Account';
         
         if (photoURL) {
           loginIcon.innerHTML = `<img src="${photoURL}" class="user-avatar" alt="Profile" referrerpolicy="no-referrer">`;
         } else {
-          // Default avatar SVG if no photo
           loginIcon.innerHTML = `
             <div class="default-avatar">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -741,7 +751,6 @@
         }
         loginText.textContent = displayName;
       } else {
-        // Show Google icon when logged out
         loginIcon.innerHTML = `<img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google">`;
         loginText.textContent = 'Login with Google';
       }
@@ -749,7 +758,6 @@
   </script>
 
   <script>
-    // State
     let billing = 'monthly';
     const DAILY_LIMIT = 10;
 
@@ -761,7 +769,6 @@
       const stored = localStorage.getItem('homeworkai_usage');
       if (stored) {
         const data = JSON.parse(stored);
-        // Reset if it's a new day
         if (data.date !== getTodayKey()) {
           return { date: getTodayKey(), count: 0, freeUsed: data.freeUsed || false };
         }
@@ -774,19 +781,10 @@
       localStorage.setItem('homeworkai_usage', JSON.stringify(data));
     }
 
-    // Avatar URLs - using UI Avatars for consistent, professional look
     const avatarColors = [
-      '7c3aed', // purple
-      '059669', // green  
-      'f59e0b', // amber
-      '3b82f6', // blue
-      'ec4899', // pink
-      '06b6d4', // cyan
-      'ef4444', // red
-      '8b5cf6', // violet
+      '7c3aed', '059669', 'f59e0b', '3b82f6', 'ec4899', '06b6d4', 'ef4444', '8b5cf6',
     ];
 
-    // Render reviews
     const reviews = [
       { id: 1, name: 'Sarah M.', handle: '@sarahm_22', text: 'Saved my grades. I went from a C to an A in calculus!', time: '2h', bg: '#c4b5fd' },
       { id: 2, name: 'Jake T.', handle: '@jaket_codes', text: 'I used to get stuck for hours. Now I understand everything step-by-step and can solve problems on my own.', time: '5h', bg: '#a7f3d0' },
@@ -827,7 +825,6 @@
     }
     renderReviews();
 
-    // Functions
     function scrollToAI() {
       document.getElementById('ai-helper').scrollIntoView({ behavior: 'smooth' });
     }
@@ -852,7 +849,6 @@
       document.getElementById('questionInput').value = q;
     }
 
-    // Purchase handler - directly trigger Google login if not logged in
     function handlePurchase(plan) {
       if (!window.currentUser) {
         window.triggerGoogleLogin('purchase', plan);
@@ -879,28 +875,23 @@
       document.body.appendChild(modal);
     }
 
-    // AI Question handler - directly trigger Google login if not logged in
     function handleAskQuestion() {
       const question = document.getElementById('questionInput').value.trim();
       if (!question) return;
 
       const usage = getUsageData();
 
-      // Check if user needs to login
       if (!window.currentUser) {
-        // Allow one free use without login
         if (usage.freeUsed) {
           window.triggerGoogleLogin('askQuestion');
           return;
         }
-        // Mark free use as consumed and proceed
         usage.freeUsed = true;
         setUsageData(usage);
         executeAskQuestion();
         return;
       }
 
-      // User is logged in - check daily limit
       if (usage.count >= DAILY_LIMIT) {
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 flex items-center justify-center z-50 p-4';
@@ -923,7 +914,6 @@
         return;
       }
 
-      // Increment usage and proceed
       usage.count++;
       setUsageData(usage);
       executeAskQuestion();
@@ -971,7 +961,6 @@ ${question}
       }, 2000);
     }
 
-    // File input handler
     document.getElementById('fileInput').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (file) {
