@@ -397,8 +397,6 @@
           </div>
         </div>
 
-        <div id="authMessage" class="mb-4 p-4 rounded-lg text-center hidden" style="background: #fef3c7; border: 2px solid black;"></div>
-
         <button 
           id="askBtn"
           onclick="handleAskQuestion()"
@@ -506,8 +504,8 @@
   </section>
 
   <!-- LOGIN MODAL -->
-  <div id="loginModal" class="fixed inset-0 flex items-center justify-center z-50 p-4 hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
-    <div class="rounded-2xl p-8 relative" style="background: white; max-width: 28rem; width: 100%; border: 4px solid black; box-shadow: 8px 8px 0 black;">
+  <div id="loginModal" class="fixed inset-0 flex items-center justify-center z-50 p-4 hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);" onclick="handleModalBackdropClick(event)">
+    <div class="rounded-2xl p-8 relative" style="background: white; max-width: 28rem; width: 100%; border: 4px solid black; box-shadow: 8px 8px 0 black;" onclick="event.stopPropagation()">
       <button onclick="closeLoginModal()" class="absolute" style="top: 16px; right: 16px; color: #6b7280; cursor: pointer; background: none; border: none;">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
@@ -519,10 +517,10 @@
           <img src="logo.jpg" width="48" height="48" alt="HomeWorkAI Logo" style="border-radius: 8px; border: 2px solid black;">
         </div>
         <h3 class="text-2xl font-bold heading">Login Required</h3>
-        <p class="text-gray-600 mt-2" id="modalPlanText">Sign in to continue</p>
+        <p class="text-gray-600 mt-2" id="modalMessage">Sign in to continue using HomeWorkAI</p>
       </div>
       
-      <button onclick="handleModalLogin()" class="btn bg-white w-full flex items-center justify-center gap-3 text-lg">
+      <button id="modalLoginBtn" onclick="handleModalLogin()" class="btn bg-white w-full flex items-center justify-center gap-3 text-lg">
         <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="24" height="24" alt="Google">
         Continue with Google
       </button>
@@ -561,27 +559,71 @@
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
+    // Global state
     window.currentUser = null;
-    window.selectedPlan = null;
+    window.pendingAction = null; // Track what action to perform after login
 
+    // Listen for auth state changes
     onAuthStateChanged(auth, (user) => {
       window.currentUser = user;
       updateLoginButton();
+      
+      // If user just logged in and there's a pending action, execute it
+      if (user && window.pendingAction) {
+        closeLoginModal();
+        
+        if (window.pendingAction.type === 'askQuestion') {
+          // Small delay to ensure modal is closed, then ask question
+          setTimeout(() => {
+            executeAskQuestion();
+          }, 300);
+        } else if (window.pendingAction.type === 'purchase') {
+          setTimeout(() => {
+            executePurchase(window.pendingAction.plan);
+          }, 300);
+        }
+        
+        window.pendingAction = null;
+      }
     });
 
+    // Header login button handler
     window.handleLogin = async function() {
       if (window.currentUser) {
         await signOut(auth);
+        window.currentUser = null;
+        updateLoginButton();
       } else {
-        await signInWithPopup(auth, provider);
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (error) {
+          if (error.code !== 'auth/popup-closed-by-user') {
+            console.error('Login error:', error);
+          }
+        }
       }
     };
 
+    // Modal login button handler
     window.handleModalLogin = async function() {
-      await signInWithPopup(auth, provider);
-      closeLoginModal();
-      if (window.selectedPlan) {
-        setTimeout(() => handlePurchase(window.selectedPlan), 500);
+      const modalBtn = document.getElementById('modalLoginBtn');
+      const originalContent = modalBtn.innerHTML;
+      
+      // Show loading state
+      modalBtn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Signing in...';
+      modalBtn.disabled = true;
+      
+      try {
+        await signInWithPopup(auth, provider);
+        // onAuthStateChanged will handle the rest (closing modal and executing pending action)
+      } catch (error) {
+        // Restore button state on error
+        modalBtn.innerHTML = originalContent;
+        modalBtn.disabled = false;
+        
+        if (error.code !== 'auth/popup-closed-by-user') {
+          console.error('Login error:', error);
+        }
       }
     };
 
@@ -608,6 +650,7 @@
       const stored = localStorage.getItem('homeworkai_usage');
       if (stored) {
         const data = JSON.parse(stored);
+        // Reset if it's a new day
         if (data.date !== getTodayKey()) {
           return { date: getTodayKey(), count: 0, freeUsed: data.freeUsed || false };
         }
@@ -680,41 +723,118 @@
       document.getElementById('questionInput').value = q;
     }
 
-    function handlePurchase(plan) {
-      if (!window.currentUser) {
-        window.selectedPlan = plan;
-        document.getElementById('modalPlanText').textContent = `Sign in to continue with your ${plan} plan`;
-        document.getElementById('loginModal').classList.remove('hidden');
-        return;
-      }
-      alert(`Proceeding to checkout for ${plan} plan. Payment integration coming soon!`);
+    // Modal functions
+    function showLoginModal(message) {
+      document.getElementById('modalMessage').textContent = message || 'Sign in to continue using HomeWorkAI';
+      document.getElementById('loginModal').classList.remove('hidden');
+      
+      // Reset modal button state
+      const modalBtn = document.getElementById('modalLoginBtn');
+      modalBtn.innerHTML = '<img src="https://www.svgrepo.com/show/475656/google-color.svg" width="24" height="24" alt="Google"> Continue with Google';
+      modalBtn.disabled = false;
     }
 
     function closeLoginModal() {
       document.getElementById('loginModal').classList.add('hidden');
+      // Clear pending action if user closes modal without logging in
+      if (!window.currentUser) {
+        window.pendingAction = null;
+      }
     }
 
+    function handleModalBackdropClick(event) {
+      // Only close if clicking the backdrop itself, not the modal content
+      if (event.target === event.currentTarget) {
+        closeLoginModal();
+      }
+    }
+
+    // Purchase handler
+    function handlePurchase(plan) {
+      if (!window.currentUser) {
+        // Set pending action and show modal
+        window.pendingAction = { type: 'purchase', plan: plan };
+        showLoginModal(`Sign in to continue with your ${plan} plan`);
+        return;
+      }
+      executePurchase(plan);
+    }
+
+    function executePurchase(plan) {
+      // This would integrate with your payment system
+      // For now, showing a message that payment is coming soon
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 flex items-center justify-center z-50 p-4';
+      modal.style.cssText = 'background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);';
+      modal.innerHTML = `
+        <div class="rounded-2xl p-8 relative text-center" style="background: white; max-width: 24rem; width: 100%; border: 4px solid black; box-shadow: 8px 8px 0 black;">
+          <div class="text-4xl mb-4">🎉</div>
+          <h3 class="text-xl font-bold heading mb-2">Almost There!</h3>
+          <p class="text-gray-600 mb-6">Proceeding to checkout for <strong>${plan}</strong> plan.<br>Payment integration coming soon!</p>
+          <button onclick="this.closest('.fixed').remove()" class="btn" style="background: #a7f3d0;">Got it!</button>
+        </div>
+      `;
+      modal.onclick = function(e) {
+        if (e.target === modal) modal.remove();
+      };
+      document.body.appendChild(modal);
+    }
+
+    // AI Question handler
     function handleAskQuestion() {
       const question = document.getElementById('questionInput').value.trim();
       if (!question) return;
 
       const usage = getUsageData();
 
+      // Check if user needs to login
       if (!window.currentUser) {
+        // Allow one free use without login
         if (usage.freeUsed) {
-          showAuthMessage("Login with Google to continue using HomeworkAI.");
+          // Set pending action and show modal
+          window.pendingAction = { type: 'askQuestion' };
+          showLoginModal('Login with Google to continue using HomeWorkAI');
           return;
         }
+        // Mark free use as consumed and proceed
         usage.freeUsed = true;
         setUsageData(usage);
-      } else {
-        if (usage.count >= DAILY_LIMIT) {
-          showAuthMessage("Daily limit reached. Come back tomorrow or upgrade.");
-          return;
-        }
-        usage.count++;
-        setUsageData(usage);
+        executeAskQuestion();
+        return;
       }
+
+      // User is logged in - check daily limit
+      if (usage.count >= DAILY_LIMIT) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 flex items-center justify-center z-50 p-4';
+        modal.style.cssText = 'background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);';
+        modal.innerHTML = `
+          <div class="rounded-2xl p-8 relative text-center" style="background: white; max-width: 24rem; width: 100%; border: 4px solid black; box-shadow: 8px 8px 0 black;">
+            <div class="text-4xl mb-4">⏰</div>
+            <h3 class="text-xl font-bold heading mb-2">Daily Limit Reached</h3>
+            <p class="text-gray-600 mb-6">You've used all 10 free questions today.<br>Come back tomorrow or upgrade for unlimited access!</p>
+            <div class="flex gap-3 justify-center">
+              <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
+              <button onclick="this.closest('.fixed').remove(); scrollToPricing();" class="btn" style="background: #a7f3d0;">View Plans</button>
+            </div>
+          </div>
+        `;
+        modal.onclick = function(e) {
+          if (e.target === modal) modal.remove();
+        };
+        document.body.appendChild(modal);
+        return;
+      }
+
+      // Increment usage and proceed
+      usage.count++;
+      setUsageData(usage);
+      executeAskQuestion();
+    }
+
+    function executeAskQuestion() {
+      const question = document.getElementById('questionInput').value.trim();
+      if (!question) return;
 
       const askBtn = document.getElementById('askBtn');
       askBtn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> AI is thinking...';
@@ -752,15 +872,6 @@ ${question}
         askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Get Answer';
         askBtn.disabled = false;
       }, 2000);
-    }
-
-    function showAuthMessage(msg) {
-      const authDiv = document.getElementById('authMessage');
-      authDiv.innerHTML = `
-        <p class="font-semibold">${msg}</p>
-        ${msg.includes("Login") ? `<button onclick="handleLogin()" class="btn bg-white mt-2 inline-flex items-center gap-2"><img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google"> Login with Google</button>` : ''}
-      `;
-      authDiv.classList.remove('hidden');
     }
 
     // File input handler
