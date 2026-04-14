@@ -216,6 +216,54 @@
       .md-gap-12{gap:48px;}
       .md-scale-105{transform:scale(1.05);}
     }
+
+    /* ── AI Response Chat UI ──────────────────────────────────────── */
+    .ai-response-box { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    .resp-header { display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e5e7eb; }
+    .resp-brain { width:40px;height:40px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+    .resp-title { font-weight:800;font-size:16px;letter-spacing:-0.02em; }
+    .resp-plan-tag { font-size:11px;font-weight:700;background:#f3f4f6;border:1.5px solid #d1d5db;border-radius:6px;padding:2px 8px;color:#6b7280;margin-left:auto; }
+
+    .resp-final { background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:14px 18px;margin-bottom:14px; }
+    .resp-final-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#15803d;margin-bottom:4px; }
+    .resp-final-text { font-weight:800;font-size:16px;color:#14532d;line-height:1.4; }
+
+    .resp-steps-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#6b7280;margin:14px 0 8px; }
+    .resp-step { display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f3f4f6; }
+    .resp-step:last-child { border-bottom:none; }
+    .resp-step-num { min-width:28px;height:28px;background:#c4b5fd;border:2px solid black;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0; }
+    .resp-step-text { color:#1f2937;line-height:1.65;font-size:14px;padding-top:4px; }
+
+    .resp-explanation { background:#eff6ff;border:2px solid #3b82f6;border-radius:12px;padding:14px 18px;margin-top:14px; }
+    .resp-explanation-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#1d4ed8;margin-bottom:6px; }
+    .resp-explanation-text { color:#1e3a8a;font-size:14px;line-height:1.7; }
+
+    .resp-insight { background:#fdf4ff;border:2px solid #a855f7;border-radius:12px;padding:14px 18px;margin-top:10px; }
+    .resp-insight-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#7e22ce;margin-bottom:6px; }
+    .resp-insight-text { color:#581c87;font-size:14px;line-height:1.7; }
+
+    .resp-tip { background:#fefce8;border:2px solid #ca8a04;border-radius:12px;padding:14px 18px;margin-top:10px;display:flex;gap:10px;align-items:flex-start; }
+    .resp-tip-icon { font-size:18px;flex-shrink:0;margin-top:1px; }
+    .resp-tip-text { color:#92400e;font-size:14px;line-height:1.65; }
+    .resp-tip-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#b45309;margin-bottom:3px; }
+
+    .resp-videos { margin-top:18px;border-top:2px solid #e5e7eb;padding-top:16px; }
+    .resp-videos-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#6b7280;margin-bottom:10px; }
+    .resp-video-link { display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:2px solid black;border-radius:10px;margin-bottom:8px;text-decoration:none;transition:all 0.15s;box-shadow:2px 2px 0 black; }
+    .resp-video-link:hover { transform:translateY(-2px);box-shadow:4px 4px 0 black;background:#fff5f5; }
+    .resp-video-title { font-size:13px;font-weight:700;color:#1f2937;flex:1; }
+    .resp-video-ext { margin-left:auto;flex-shrink:0; }
+
+    /* Settings modal */
+    .settings-modal { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;padding:16px; }
+    .settings-modal.open { display:flex; }
+    .settings-panel { background:white;max-width:28rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:20px;overflow:hidden; }
+    .settings-header { background:var(--purple);border-bottom:3px solid black;padding:20px 24px;display:flex;align-items:center;justify-content:space-between; }
+    .settings-body { padding:24px; }
+    .settings-row { display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:2px solid #f3f4f6; }
+    .settings-row:last-child { border-bottom:none; }
+    .settings-label { font-size:13px;color:#6b7280;font-weight:600;margin-top:2px; }
+
   </style>
 </head>
 <body>
@@ -264,6 +312,10 @@
           <span id="dropdownEmail"></span>
           <div id="dropdownPlan" style="margin-top:4px;font-size:11px;font-weight:800;color:#7c3aed;"></div>
         </div>
+        <button class="dropdown-item" onclick="openSettings()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Account &amp; Plan
+        </button>
         <button class="dropdown-item" onclick="handleSwitchAccount()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
           Switch Account
@@ -947,41 +999,95 @@
       });
 
       const data = await res.json();
-      const formatted = (data.answer || data.error || "No response received.")
-        .split("\n")
-        .map(line => {
-          line = line.trim();
-          if (!line) return '<div style="height:8px;"></div>';
+
+      // ── Rich response renderer ──────────────────────────────────────────
+      function renderResponse(answer, videos, plan) {
+        const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+
+        let finalAnswerText = "";
+        let stepsHtml = "";
+        let explanationText = "";
+        let insightText = "";
+        let tipText = "";
+        let otherLines = [];
+
+        let mode = "other";
+        for (const line of lines) {
           if (line.startsWith("Final Answer:")) {
-            return `<div style="background:#f0fdf4;border:2px solid #16a34a;border-radius:10px;padding:10px 14px;margin-bottom:8px;font-weight:700;font-size:15px;color:#15803d;">${line}</div>`;
-          }
-          if (line.startsWith("Step-by-step:")) {
-            return `<div style="font-weight:800;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;margin-top:4px;margin-bottom:4px;">${line}</div>`;
-          }
-          if (line.startsWith("Tip:")) {
-            return `<div style="background:#fefce8;border:2px solid #ca8a04;border-radius:10px;padding:10px 14px;margin-top:8px;font-size:14px;color:#92400e;">💡 ${line}</div>`;
-          }
-          if (/^\d+\./.test(line)) {
+            finalAnswerText = line.replace("Final Answer:", "").trim();
+          } else if (line.startsWith("Step-by-step:")) {
+            mode = "steps";
+          } else if (line.startsWith("Explanation:")) {
+            mode = "explanation";
+            const inline = line.replace("Explanation:", "").trim();
+            if (inline) explanationText += inline + " ";
+          } else if (line.startsWith("Deeper Insight:")) {
+            mode = "insight";
+            const inline = line.replace("Deeper Insight:", "").trim();
+            if (inline) insightText += inline + " ";
+          } else if (line.startsWith("Tip:")) {
+            mode = "tip";
+            tipText = line.replace("Tip:", "").trim();
+          } else if (mode === "steps" && /^\d+\./.test(line)) {
             const num = line.match(/^(\d+)\./)[1];
             const text = line.replace(/^\d+\.\s*/, "");
-            return `<div style="display:flex;gap:10px;align-items:flex-start;padding:6px 0;"><div style="min-width:26px;height:26px;background:#c4b5fd;border:2px solid black;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">${num}</div><div style="color:#374151;line-height:1.6;font-size:14px;padding-top:2px;">${text}</div></div>`;
+            stepsHtml += `<div class="resp-step"><div class="resp-step-num">${num}</div><div class="resp-step-text">${text}</div></div>`;
+          } else if (mode === "explanation") {
+            explanationText += line + " ";
+          } else if (mode === "insight") {
+            insightText += line + " ";
+          } else if (mode === "tip") {
+            tipText += " " + line;
+          } else {
+            otherLines.push(line);
           }
-          return `<div style="color:#374151;line-height:1.7;font-size:14px;">${line}</div>`;
-        })
-        .join("");
-      let videosHtml = '';
-      if (data.videos && data.videos.length > 0) {
-        const videoItems = data.videos.map(v => {
-          // v may be "Title: X Link: URL" or just a title string
-          let title = v, href = '';
-          const linkMatch = v.match(/Title:\s*(.+?)\s*Link:\s*(https?:\/\/\S+)/i);
-          if (linkMatch) { title = linkMatch[1]; href = linkMatch[2]; }
-          else { href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(v); }
-          return `<a href="${href}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border:2px solid black;border-radius:8px;margin-bottom:6px;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg><span style="font-size:13px;font-weight:600;color:#1f2937;">${title}</span><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="margin-left:auto;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`;
-        }).join('');
-        videosHtml = `<div style="margin-top:16px;border-top:2px solid #e5e7eb;padding-top:14px;"><div style="font-weight:800;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;margin-bottom:8px;">&#127909; Recommended Videos</div>${videoItems}</div>`;
+        }
+
+        const planTag = plan === "pro_plus" ? "Pro+" : plan === "pro" ? "Pro" : "Free";
+
+        let html = `<div class="ai-response-box">`;
+        html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI Response</div><div class="resp-plan-tag">${planTag}</div></div>`;
+
+        if (finalAnswerText) {
+          html += `<div class="resp-final"><div class="resp-final-label">Final Answer</div><div class="resp-final-text">${finalAnswerText}</div></div>`;
+        }
+
+        if (stepsHtml) {
+          html += `<div class="resp-steps-label">Step-by-step</div><div>${stepsHtml}</div>`;
+        }
+
+        if (otherLines.length > 0) {
+          html += otherLines.map(l => `<div style="color:#374151;line-height:1.7;font-size:14px;margin:3px 0;">${l}</div>`).join("");
+        }
+
+        if (explanationText.trim()) {
+          html += `<div class="resp-explanation"><div class="resp-explanation-label">Explanation</div><div class="resp-explanation-text">${explanationText.trim()}</div></div>`;
+        }
+
+        if (insightText.trim()) {
+          html += `<div class="resp-insight"><div class="resp-insight-label">Deeper Insight</div><div class="resp-insight-text">${insightText.trim()}</div></div>`;
+        }
+
+        if (tipText.trim()) {
+          html += `<div class="resp-tip"><div class="resp-tip-icon">💡</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">${tipText.trim()}</div></div></div>`;
+        }
+
+        if (videos && videos.length > 0) {
+          const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
+          const extIcon = `<svg class="resp-video-ext" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+          const videoItems = videos.map(v => {
+            const title = (typeof v === "object") ? v.title : v;
+            const href  = (typeof v === "object") ? v.link  : "https://www.youtube.com/results?search_query=" + encodeURIComponent(v);
+            return `<a href="${href}" target="_blank" rel="noopener" class="resp-video-link">${ytIcon}<span class="resp-video-title">${title}</span>${extIcon}</a>`;
+          }).join("");
+          html += `<div class="resp-videos"><div class="resp-videos-label">🎬 Recommended Videos</div>${videoItems}</div>`;
+        }
+
+        html += `</div>`;
+        return html;
       }
-      box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div>${formatted}${videosHtml}`;
+
+      box.innerHTML = renderResponse(data.answer || data.error || "No response received.", data.videos || [], userPlan);
     } catch (err) {
       box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div><div style="white-space:pre-line;color:#dc2626;line-height:1.7;">Error getting response.</div>`;
       console.error(err);
@@ -1086,7 +1192,96 @@
       setTimeout(() => el.classList.add('visible'), 100);
     }
   });
+
+  // ======= SETTINGS MODAL =======
+  window.openSettings = function() {
+    closeDropdown();
+    const usage = getUsageData();
+    const planLabel = userPlan === 'pro_plus' ? '⭐ Premium+' : userPlan === 'pro' ? '⚡ Premium' : '🆓 Free';
+    const planColor = userPlan === 'pro_plus' ? '#7c3aed' : userPlan === 'pro' ? '#059669' : '#6b7280';
+    document.getElementById('settingsPlanBadge').innerHTML = `<span style="background:${planColor};color:white;padding:4px 12px;border-radius:8px;font-size:13px;">${planLabel}</span>`;
+
+    const isPaid = userPlan === 'pro' || userPlan === 'pro_plus';
+    document.getElementById('settingsRenewalRow').style.display = isPaid ? 'flex' : 'none';
+    document.getElementById('settingsCancelBtn').style.display = isPaid ? 'flex' : 'none';
+    document.getElementById('settingsUpgradeBtn').style.display = isPaid ? 'none' : 'flex';
+
+    if (isPaid) {
+      // Placeholder renewal date — replace with real Stripe data when integrated
+      const d = new Date(); d.setMonth(d.getMonth() + 1);
+      document.getElementById('settingsRenewalDate').textContent = d.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    }
+
+    const questionsUsed = usage.count || 0;
+    const questionsLeft = userPlan === 'pro' || userPlan === 'pro_plus' ? '∞' : Math.max(0, DAILY_LIMIT - questionsUsed);
+    document.getElementById('settingsUsage').textContent = isPaid ? 'Unlimited' : `${questionsLeft} remaining`;
+
+    document.getElementById('settingsModal').classList.add('open');
+  };
+
+  window.closeSettings = function() {
+    document.getElementById('settingsModal').classList.remove('open');
+  };
+
+  window.handleCancelSubscription = function() {
+    closeSettings();
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 flex items-center justify-center z-50';
+    modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+    modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:16px;">😢</div>
+      <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Cancel Subscription?</h3>
+      <p style="color:#4b5563;margin-bottom:24px;">Cancellation will be processed when payment integration is live. For now, please contact support.</p>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button onclick="this.closest('.fixed').remove()" class="btn" style="background:var(--green);">Keep My Plan</button>
+        <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
+      </div>
+    </div>`;
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    document.body.appendChild(modal);
+  };
 </script>
+
+<!-- ===================== SETTINGS MODAL ===================== -->
+<div class="settings-modal" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <div>
+        <div style="font-weight:800;font-size:18px;letter-spacing:-0.03em;">Account &amp; Plan</div>
+        <div style="font-size:13px;color:#4b5563;margin-top:2px;">Manage your subscription</div>
+      </div>
+      <button onclick="closeSettings()" style="background:none;border:2px solid black;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:800;font-size:16px;">✕</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-row">
+        <div>
+          <div style="font-weight:800;font-size:15px;">Current Plan</div>
+          <div class="settings-label">Your active subscription</div>
+        </div>
+        <div id="settingsPlanBadge" style="font-weight:800;font-size:14px;"></div>
+      </div>
+      <div class="settings-row" id="settingsRenewalRow" style="display:none;">
+        <div>
+          <div style="font-weight:800;font-size:15px;">Renewal Date</div>
+          <div class="settings-label">Next billing cycle</div>
+        </div>
+        <div style="font-weight:700;font-size:14px;color:#374151;" id="settingsRenewalDate">—</div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div style="font-weight:800;font-size:15px;">Questions Today</div>
+          <div class="settings-label">Resets at midnight</div>
+        </div>
+        <div id="settingsUsage" style="font-weight:700;font-size:14px;color:#374151;">—</div>
+      </div>
+      <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;">
+        <button id="settingsUpgradeBtn" onclick="closeSettings();scrollToPricing();" class="btn w-full" style="background:var(--green);justify-content:center;">⚡ Upgrade Plan</button>
+        <button id="settingsCancelBtn" onclick="handleCancelSubscription()" class="btn w-full" style="background:#fef2f2;color:#dc2626;justify-content:center;display:none;">Cancel Subscription</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
 
