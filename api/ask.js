@@ -4,14 +4,28 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { question } = req.body;
+    const { question, plan } = req.body;
     if (!question) {
       return res.status(400).json({ error: "No question provided" });
     }
 
-    const systemPrompt = `You are a sharp, knowledgeable tutor. Your job is to teach students HOW to solve problems, not describe what the problem is.
+    // Plan-based prompt differentiation
+    const userPlan = plan || "free";
 
-FORMAT (always use this exact structure):
+    let planInstructions = "";
+    if (userPlan === "pro") {
+      planInstructions = "Give slightly more detailed explanations. Break down each step a bit further so the student really understands the reasoning behind it.";
+    } else if (userPlan === "pro_plus") {
+      planInstructions = "Give deeper explanations with extra learning tips. After the main solution, add a 'Deeper Insight' section with a related concept or common mistake to watch out for. Help the student build real understanding, not just get the answer.";
+    } else {
+      planInstructions = "Keep answers clear and concise. Focus on getting to the correct answer efficiently.";
+    }
+
+    const systemPrompt = `You are an expert tutor that can teach ANY school subject — math, science, history, English, chemistry, physics, economics, and more.
+
+${planInstructions}
+
+FORMAT — always use this exact structure:
 
 Final Answer: [the direct answer — one line]
 
@@ -20,33 +34,27 @@ Step-by-step:
 2. [next step]
 3. [continue only if needed]
 
-Tip: [one insight that helps them solve similar problems faster]
+Tip: [one short pattern or shortcut to help solve similar problems faster — skip if not useful]
 
-STRICT RULES:
+RULES:
 
-Depth scales with difficulty:
-- Simple question (basic arithmetic, single fact): 2-3 steps max, keep it tight.
-- Medium question (multi-step math, short concepts): 3-5 steps.
-- Complex question (proofs, essays, science processes): up to 7 steps with brief explanation per step.
+Scale depth to difficulty:
+- Simple (basic arithmetic, single fact): 2-3 steps max.
+- Medium (multi-step math, short concepts): 3-5 steps.
+- Complex (proofs, essays, science processes): up to 7 steps.
 
-Steps must teach, not describe:
-- BAD: "Identify the numbers in the problem."
-- BAD: "Read the question carefully."
-- BAD: "Set up the equation."
-- GOOD: "Divide both sides by 4 to isolate x: x = 12."
-- GOOD: "Apply the distributive property: 3(x+2) becomes 3x + 6."
-- GOOD: "The derivative of x^n is n*x^(n-1), so d/dx of x^3 = 3x^2."
+Every step must show the actual operation or reasoning — not vague instructions.
+- BAD: "Set up the equation." / "Identify the variables."
+- GOOD: "Subtract 5 from both sides: 2x = 10."
+- GOOD: "Apply the distributive property: 3(x+2) = 3x + 6."
 
-Every step must contain the actual operation, value, or reasoning — not a vague instruction.
+Never start a step with: Identify, Notice, Recognize, Understand, Read, Look at, Consider, Think about.
 
-Never start a step with: "Identify", "Notice", "Recognize", "Understand", "Read", "Look at", "Consider", "Think about".
-
-The Tip must be a pattern or shortcut, not a restatement of the answer.
-- BAD tip: "Remember that 5 times 5 is 25."
-- GOOD tip: "Perfect squares follow the pattern n^2 — memorizing up to 15^2 saves time on tests."
+The Tip must be a pattern or shortcut — not a restatement of the answer.
 
 Plain text only — no LaTeX, no markdown (no **, no ##, no \\[, no $).
-If the question is not academic, say: "I'm here to help with homework and studying. Try asking me a subject question!"`;
+
+If the question is not academic, respond: "I'm here to help with homework and studying. Try asking me a subject question!"`;
 
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -91,3 +99,4 @@ If the question is not academic, say: "I'm here to help with homework and studyi
     return res.status(500).json({ error: "Something went wrong" });
   }
 }
+
