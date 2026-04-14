@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+<!-- deploy --><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -732,5 +733,220 @@
   }
 
   window.triggerGoogleLogin = async function(type, data) {
-    window.pendingAction = type === 'purchase' ? { type, plan: data } : { type };... (14 KB left)
-<!-- deploy -->
+    window.pendingAction = type === 'purchase' ? { type, plan: data } : { type };
+    sessionStorage.setItem('pendingAction', JSON.stringify(window.pendingAction));
+    await signInWithGoogle();
+  };
+
+  window.handleLogin = async function() {
+    await signInWithGoogle();
+  };
+
+  window.handleLogout = async function() {
+    closeDropdown();
+    await signOut(auth);
+    window.currentUser = null;
+    updateLoginUI();
+  };
+
+  window.handleSwitchAccount = async function() {
+    closeDropdown();
+    try {
+      const p = new GoogleAuthProvider();
+      p.setCustomParameters({ prompt: 'select_account' });
+      try {
+        await signInWithPopup(auth, p);
+      } catch (e) {
+        if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+          await signInWithRedirect(auth, p);
+        } else if (e.code !== 'auth/popup-closed-by-user') { console.error(e); }
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  function updateLoginUI() {
+    const loginBtn = document.getElementById('loginBtn');
+    const accountWrapper = document.getElementById('accountDropdownWrapper');
+    if (window.currentUser) {
+      loginBtn.style.display = 'none';
+      accountWrapper.style.display = 'block';
+      const { photoURL, displayName, email } = window.currentUser;
+      const name = displayName || email || 'Account';
+      document.getElementById('accountName').textContent = name.split(' ')[0];
+      document.getElementById('dropdownName').textContent = name;
+      document.getElementById('dropdownEmail').textContent = email || '';
+      document.getElementById('accountIcon').innerHTML = photoURL
+        ? `<img src="${photoURL}" class="user-avatar" alt="Profile" referrerpolicy="no-referrer">`
+        : `<div class="default-avatar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`;
+    } else {
+      loginBtn.style.display = 'inline-flex';
+      accountWrapper.style.display = 'none';
+    }
+  }
+</script>
+
+<!-- ===================== APP JS ===================== -->
+<script>
+  let billing = 'monthly';
+  const DAILY_LIMIT = 10;
+
+  document.addEventListener('click', (e) => {
+    const w = document.getElementById('accountDropdownWrapper');
+    if (w && !w.contains(e.target)) closeDropdown();
+  });
+
+  function toggleDropdown(e) { e.stopPropagation(); document.getElementById('accountDropdown').classList.toggle('open'); }
+  function closeDropdown() { const d = document.getElementById('accountDropdown'); if (d) d.classList.remove('open'); }
+  function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
+  function closeMobileNav() { document.getElementById('mobileNav').classList.remove('open'); }
+
+  function scrollToAI() { document.getElementById('ai-helper').scrollIntoView({ behavior:'smooth' }); }
+  function scrollToPricing() { document.getElementById('pricing').scrollIntoView({ behavior:'smooth' }); }
+
+  function setBilling(type) {
+    billing = type;
+    document.getElementById('monthlyBtn').style.background = type === 'monthly' ? 'var(--purple)' : 'white';
+    document.getElementById('yearlyBtn').style.background  = type === 'yearly'  ? 'var(--purple)' : 'white';
+    document.getElementById('proPrice').textContent     = type === 'monthly' ? '$9.99/mo'  : '$79.99/yr';
+    document.getElementById('proPlusPrice').textContent = type === 'monthly' ? '$14.99/mo' : '$119.99/yr';
+    document.getElementById('proSave').className     = type === 'yearly' ? 'save-badge show-save' : 'save-badge';
+    document.getElementById('proPlusSave').className = type === 'yearly' ? 'save-badge show-save' : 'save-badge';
+  }
+
+  function setQuestion(q) { document.getElementById('questionInput').value = q; }
+
+  function handlePurchase(plan) {
+    if (!window.currentUser) { window.triggerGoogleLogin('purchase', plan); return; }
+    executePurchase(plan);
+  }
+
+  function executePurchase(plan) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 flex items-center justify-center z-50';
+    modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+    modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:16px;">🎉</div>
+      <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Starting Your 3-Day Free Trial!</h3>
+      <p style="color:#4b5563;margin-bottom:24px;">You're about to start a free trial for <strong>${plan}</strong>.<br>Cancel anytime within 3 days — no charge!</p>
+      <button onclick="this.closest('.fixed').remove()" class="btn" style="background:var(--green);">Got it!</button>
+    </div>`;
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    document.body.appendChild(modal);
+  }
+
+  function handleAskQuestion() {
+    const question = document.getElementById('questionInput').value.trim();
+    if (!question) return;
+    const usage = getUsageData();
+    if (!window.currentUser) {
+      if (usage.freeUsed) { window.triggerGoogleLogin('askQuestion'); return; }
+      usage.freeUsed = true; setUsageData(usage); executeAskQuestion(); return;
+    }
+    if (usage.count >= DAILY_LIMIT) {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 flex items-center justify-center z-50';
+      modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+      modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:16px;">⏰</div>
+        <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Daily Limit Reached</h3>
+        <p style="color:#4b5563;margin-bottom:24px;">You've used all 10 free questions today.<br>Come back tomorrow or upgrade for unlimited access!</p>
+        <div style="display:flex;gap:12px;justify-content:center;">
+          <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
+          <button onclick="this.closest('.fixed').remove();scrollToPricing();" class="btn" style="background:var(--green);">View Plans</button>
+        </div>
+      </div>`;
+      modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+      document.body.appendChild(modal); return;
+    }
+    usage.count++; setUsageData(usage); executeAskQuestion();
+  }
+
+  function executeAskQuestion() {
+    const question = document.getElementById('questionInput').value.trim();
+    if (!question) return;
+    const askBtn = document.getElementById('askBtn');
+    askBtn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> AI is thinking...';
+    askBtn.disabled = true;
+    setTimeout(() => {
+      const answer = `Great question! Here's a step-by-step explanation:\n\n**Understanding the Problem:**\n${question}\n\n**Step 1:** First, let's identify the key concepts involved in this problem.\n\n**Step 2:** Now we can apply the relevant formulas or methods.\n\n**Step 3:** Working through the calculation:\n- Break down the problem into smaller parts\n- Apply each concept systematically\n- Check your work as you go\n\n**Final Answer:** The solution involves understanding the underlying principles and applying them methodically. This approach will help you solve similar problems in the future!\n\n💡 **Pro Tip:** Practice similar problems to reinforce your understanding.`;
+      const box = document.getElementById('answerBox');
+      box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div><div style="white-space:pre-line;color:#374151;line-height:1.7;">${answer}</div>`;
+      box.classList.remove('hidden');
+      askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Get Answer';
+      askBtn.disabled = false;
+    }, 2000);
+  }
+
+  function getTodayKey() { return new Date().toISOString().split('T')[0]; }
+  function getUsageData() {
+    const stored = localStorage.getItem('homeworkai_usage');
+    if (stored) {
+      const data = JSON.parse(stored);
+      if (data.date !== getTodayKey()) return { date: getTodayKey(), count: 0, freeUsed: false };
+      return data;
+    }
+    return { date: getTodayKey(), count: 0, freeUsed: false };
+  }
+  function setUsageData(data) { localStorage.setItem('homeworkai_usage', JSON.stringify(data)); }
+
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) document.getElementById('questionInput').value += `\n[Image attached: ${file.name}]`;
+  });
+
+  // ======= REVIEWS =======
+  const reviewColors = ['#7c3aed','#059669','#f59e0b','#3b82f6','#06b6d4','#8b5cf6','#ef4444','#0ea5e9'];
+  const reviews = [
+    { name:'Sarah M.',  handle:'@sarahm_22',     text:'Saved my grades. I went from a C to an A in calculus!',                                                              time:'2h', bg:'#c4b5fd' },
+    { name:'Jake T.',   handle:'@jaket_codes',    text:'I used to get stuck for hours. Now I understand everything step-by-step and can solve problems on my own.',          time:'5h', bg:'#a7f3d0' },
+    { name:'Emily R.',  handle:'@emilyreads',     text:'Best homework tool I have ever used. Period.',                                                                        time:'1d', bg:'#fde68a' },
+    { name:'Marcus L.', handle:'@marcusl',        text:'Helped me prepare for tests way better than studying notes.',                                                         time:'1d', bg:'#bae6fd' },
+    { name:'Olivia K.', handle:'@oliviak_',       text:'Makes homework actually make sense. My parents are impressed!',                                                       time:'2d', bg:'#a7f3d0' },
+    { name:'David W.',  handle:'@david_wins',     text:'Went from failing algebra to getting A grades in 2 weeks. Not even kidding.',                                         time:'3d', bg:'#fde68a' },
+    { name:'Ava P.',    handle:'@avapatel',       text:'Actually teaches instead of just answering. This is how learning should be.',                                         time:'4d', bg:'#c4b5fd' },
+    { name:'Noah C.',   handle:'@noahc_student', text:'Homework used to stress me out every night. Now I finish faster and understand everything.',                          time:'5d', bg:'#bae6fd' },
+  ];
+
+  function renderReviews() {
+    document.getElementById('reviews-grid').innerHTML = reviews.map((r, i) => {
+      const initials = r.name.split(' ').map(w => w[0]).join('');
+      const color = reviewColors[i % reviewColors.length];
+      return `<div class="review-card" style="background:${r.bg};">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="review-avatar-circle" style="background:${color};">${initials}</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-sm truncate">${r.name}</p>
+            <p style="font-size:12px;color:#6b7280;" class="truncate">${r.handle}</p>
+          </div>
+        </div>
+        <p style="font-size:14px;color:#1f2937;line-height:1.6;">${r.text}</p>
+        <div class="flex items-center justify-between mt-3 pt-3 border-t" style="border-color:rgba(0,0,0,0.1);">
+          <div style="display:flex;gap:2px;">${[1,2,3,4,5].map(()=>`<svg style="width:15px;height:15px;fill:#fbbf24;" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>`).join('')}</div>
+          <span style="font-size:12px;color:#6b7280;font-weight:600;">${r.time}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  renderReviews();
+
+  // ======= SCROLL REVEAL =======
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.05 });
+
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-pop, .section-title-underline').forEach(el => {
+    revealObserver.observe(el);
+    // Immediately trigger elements that are already in view on page load
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setTimeout(() => el.classList.add('visible'), 100);
+    }
+  });
+</script>
+</body>
+</html>
+
