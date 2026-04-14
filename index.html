@@ -1097,8 +1097,11 @@
           const extIcon = `<svg class="resp-video-ext" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
           const videoItems = videos.map(v => {
             const title = (typeof v === "object") ? v.title : v;
-            const href  = (typeof v === "object") ? v.link  : "https://www.youtube.com/results?search_query=" + encodeURIComponent(v);
-            return `<a href="${href}" target="_blank" rel="noopener" class="resp-video-link">${ytIcon}<span class="resp-video-title">${title}</span>${extIcon}</a>`;
+            // Always build a guaranteed-working YouTube search URL
+            const href = (typeof v === "object" && v.link && v.link.includes("youtube"))
+              ? v.link
+              : "https://www.youtube.com/results?search_query=" + encodeURIComponent((typeof v === "object") ? v.title : v);
+            return `<a href="${href}" target="_blank" rel="noopener" class="resp-video-link">${ytIcon}<span class="resp-video-title">${title}</span><span style="font-size:11px;font-weight:700;color:#9ca3af;margin-left:auto;white-space:nowrap;">Watch ↗</span></a>`;
           }).join("");
           html += `<div class="resp-videos"><div class="resp-videos-label">🎬 Recommended Videos</div>${videoItems}</div>`;
         }
@@ -1304,5 +1307,6 @@
 
 </body>
 </html>
+
 
 <!-- deploy -->
