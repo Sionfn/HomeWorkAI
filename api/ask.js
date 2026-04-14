@@ -1,6 +1,14 @@
 export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
   try {
     const { question } = req.body;
+
+    if (!question) {
+      return res.status(400).json({ error: "No question provided" });
+    }
 
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -10,25 +18,26 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        input: question
+        input: `You are a helpful tutor. Explain step-by-step clearly.\n\nQuestion: ${question}`
       })
     });
 
     const data = await response.json();
 
-    // safer extraction
+    console.log("OPENAI RESPONSE:", data);
+
     let answer = "No response";
 
-    if (data.output && data.output.length > 0) {
-      const content = data.output[0].content;
-      if (content && content.length > 0) {
-        answer = content[0].text;
-      }
+    try {
+      answer = data.output[0].content[0].text;
+    } catch (e) {
+      console.log("Error reading response:", data);
     }
 
-    res.status(200).json({ answer });
+    return res.status(200).json({ answer });
 
   } catch (error) {
-    res.status(500).json({ answer: "Error connecting to AI" });
+    console.error("SERVER ERROR:", error);
+    return res.status(500).json({ error: "Something went wrong" });
   }
 }
