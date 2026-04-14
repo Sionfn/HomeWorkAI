@@ -229,6 +229,19 @@
     .resp-plan-tag.tag-pro { background:#dcfce7;border-color:#16a34a;color:#15803d; }
     .resp-plan-tag.tag-pro-plus { background:#faf5ff;border-color:#9333ea;color:#7e22ce; }
 
+    /* Body paragraphs — proper spacing, no wall-of-text */
+    .resp-body-para { color:#1f2937;font-size:14.5px;line-height:1.75;margin-top:12px; }
+    .resp-para-explanation { color:#1e3a8a;background:#eff6ff;border-left:3px solid #3b82f6;padding:10px 14px;border-radius:0 8px 8px 0;margin-top:12px; }
+    .resp-bullet { color:#374151;font-size:14px;line-height:1.65;padding:4px 0 4px 8px;border-left:2px solid #c4b5fd;margin-top:6px; }
+    .resp-steps-wrap { margin-top:2px; }
+
+    /* Pro+ subtle visual upgrade */
+    .resp-pro-plus .resp-final { background:#faf5ff;border-color:#9333ea; }
+    .resp-pro-plus .resp-final-label { color:#7e22ce; }
+    .resp-pro-plus .resp-final-text { color:#4c1d95; }
+    .resp-pro-plus .resp-step-num { background:#e9d5ff;border-color:#9333ea; }
+    .resp-pro-plus .resp-steps-label { color:#7e22ce; }
+
     .resp-final { background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:14px 18px;margin-bottom:14px; }
     .resp-final-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#15803d;margin-bottom:4px; }
     .resp-final-text { font-weight:800;font-size:16px;color:#14532d;line-height:1.4; }
@@ -915,17 +928,16 @@
     if (banner) {
       if (userPlan === 'pro_plus') {
         banner.style.display = 'block';
-        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#faf5ff;border:2px solid #9333ea;border-radius:10px;padding:10px 16px;"><span style="font-weight:800;font-size:13px;color:#7e22ce;">⭐ Current Plan: Premium+</span><span style="font-size:12px;color:#9333ea;font-weight:600;">Unlimited · Best Quality · Videos</span></div>';
+        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#faf5ff;border:2px solid #9333ea;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #9333ea;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⭐</span><div><div style="font-weight:800;font-size:13px;color:#7e22ce;line-height:1.2;">Premium+ Plan</div><div style="font-size:11px;color:#9333ea;font-weight:600;margin-top:1px;">Unlimited · Best Quality · Videos</div></div></div></div>';
       } else if (userPlan === 'pro') {
         banner.style.display = 'block';
-        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#dcfce7;border:2px solid #16a34a;border-radius:10px;padding:10px 16px;"><span style="font-weight:800;font-size:13px;color:#15803d;">⚡ Current Plan: Premium</span><span style="font-size:12px;color:#15803d;font-weight:600;">Unlimited · Better Quality</span></div>';
+        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#dcfce7;border:2px solid #16a34a;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #16a34a;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚡</span><div><div style="font-weight:800;font-size:13px;color:#15803d;line-height:1.2;">Premium Plan</div><div style="font-size:11px;color:#15803d;font-weight:600;margin-top:1px;">Unlimited · Better Quality</div></div></div></div>';
       } else {
         banner.style.display = 'none';
       }
     }
     if (userPlan === 'pro' || userPlan === 'pro_plus') {
-      const planLabel = userPlan === 'pro_plus' ? 'Pro+' : 'Pro';
-      counter.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--green);border:2px solid black;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:800;">⚡ Plan: ${planLabel} — Unlimited questions</span>`;
+      counter.innerHTML = '';
       counter.style.color = '';
     } else if (!window.currentUser) {
       const used = usage.guestCount || 0;
@@ -1025,67 +1037,89 @@
 
         let finalAnswerText = "";
         let stepsHtml = "";
-        let explanationText = "";
-        let insightText = "";
+        // Collect paragraphs: each entry is {type, text}
+        let paragraphs = [];
         let tipText = "";
-        let otherLines = [];
 
         let mode = "other";
+        let currentParaLines = [];
+
+        function flushPara(type) {
+          if (currentParaLines.length > 0) {
+            paragraphs.push({ type, text: currentParaLines.join(" ").trim() });
+            currentParaLines = [];
+          }
+        }
+
         for (const line of lines) {
           if (line.startsWith("Final Answer:")) {
             finalAnswerText = line.replace("Final Answer:", "").trim();
+            mode = "other";
           } else if (line.startsWith("Step-by-step:")) {
+            flushPara(mode);
             mode = "steps";
           } else if (line.startsWith("Explanation:")) {
+            flushPara(mode);
             mode = "explanation";
             const inline = line.replace("Explanation:", "").trim();
-            if (inline) explanationText += inline + " ";
-          } else if (line.startsWith("Deeper Insight:")) {
+            if (inline) currentParaLines.push(inline);
+          } else if (line.startsWith("Deeper Insight:") || line.startsWith("Insight:")) {
+            flushPara(mode);
             mode = "insight";
-            const inline = line.replace("Deeper Insight:", "").trim();
-            if (inline) insightText += inline + " ";
+            const inline = line.replace(/^(Deeper Insight|Insight):/, "").trim();
+            if (inline) currentParaLines.push(inline);
+          } else if (line.startsWith("Key Points:") || line.startsWith("Key Point:")) {
+            flushPara(mode);
+            mode = "keypoints";
           } else if (line.startsWith("Tip:")) {
+            flushPara(mode);
             mode = "tip";
             tipText = line.replace("Tip:", "").trim();
           } else if (mode === "steps" && /^\d+\./.test(line)) {
             const num = line.match(/^(\d+)\./)[1];
             const text = line.replace(/^\d+\.\s*/, "");
             stepsHtml += `<div class="resp-step"><div class="resp-step-num">${num}</div><div class="resp-step-text">${text}</div></div>`;
-          } else if (mode === "explanation") {
-            explanationText += line + " ";
-          } else if (mode === "insight") {
-            insightText += line + " ";
+          } else if (mode === "keypoints" && /^[-•*]/.test(line)) {
+            // bullet points under Key Points
+            paragraphs.push({ type: "bullet", text: line.replace(/^[-•*]\s*/, "") });
           } else if (mode === "tip") {
             tipText += " " + line;
+          } else if (mode === "other") {
+            // Free-form conceptual text — group into paragraph
+            currentParaLines.push(line);
           } else {
-            otherLines.push(line);
+            currentParaLines.push(line);
           }
         }
+        flushPara(mode);
 
         const planTag = plan === "pro_plus" ? "⭐ Pro+" : plan === "pro" ? "⚡ Pro" : "Free";
         const planTagClass = plan === "pro_plus" ? "tag-pro-plus" : plan === "pro" ? "tag-pro" : "tag-free";
+        const isPlusPlan = plan === "pro_plus";
 
-        let html = `<div class="ai-response-box">`;
-        html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI Response</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
+        let html = `<div class="ai-response-box ${isPlusPlan ? 'resp-pro-plus' : ''}">`;
+        html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
 
         if (finalAnswerText) {
-          html += `<div class="resp-final"><div class="resp-final-label">Final Answer</div><div class="resp-final-text">${finalAnswerText}</div></div>`;
+          html += `<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">${finalAnswerText}</div></div>`;
         }
 
         if (stepsHtml) {
-          html += `<div class="resp-steps-label">Step-by-step</div><div>${stepsHtml}</div>`;
+          html += `<div class="resp-steps-label">Step-by-step</div><div class="resp-steps-wrap">${stepsHtml}</div>`;
         }
 
-        if (otherLines.length > 0) {
-          html += otherLines.map(l => `<div style="color:#374151;line-height:1.7;font-size:14px;margin:3px 0;">${l}</div>`).join("");
-        }
-
-        if (explanationText.trim()) {
-          html += `<div class="resp-explanation"><div class="resp-explanation-label">Explanation</div><div class="resp-explanation-text">${explanationText.trim()}</div></div>`;
-        }
-
-        if (insightText.trim()) {
-          html += `<div class="resp-insight"><div class="resp-insight-label">Deeper Insight</div><div class="resp-insight-text">${insightText.trim()}</div></div>`;
+        // Render collected paragraphs in order
+        for (const p of paragraphs) {
+          if (p.type === "explanation") {
+            html += `<div class="resp-body-para resp-para-explanation">${p.text}</div>`;
+          } else if (p.type === "insight") {
+            html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${p.text}</div></div>`;
+          } else if (p.type === "bullet") {
+            html += `<div class="resp-bullet">• ${p.text}</div>`;
+          } else if (p.text) {
+            // General prose paragraph — rendered with good spacing
+            html += `<div class="resp-body-para">${p.text}</div>`;
+          }
         }
 
         if (tipText.trim()) {
@@ -1094,10 +1128,8 @@
 
         if (videos && videos.length > 0) {
           const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
-          const extIcon = `<svg class="resp-video-ext" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
           const videoItems = videos.map(v => {
             const title = (typeof v === "object") ? v.title : v;
-            // Always build a guaranteed-working YouTube search URL
             const href = (typeof v === "object" && v.link && v.link.includes("youtube"))
               ? v.link
               : "https://www.youtube.com/results?search_query=" + encodeURIComponent((typeof v === "object") ? v.title : v);
