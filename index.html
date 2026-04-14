@@ -203,11 +203,6 @@
     .text-gray-400{color:#9ca3af} .text-gray-500{color:#6b7280} .text-gray-600{color:#4b5563}
     .text-gray-700{color:#374151} .text-gray-800{color:#1f2937} .text-green-500{color:#22c55e}
     .bg-white{background:white}
-    /* ======= MOBILE: SAME LAYOUT, NO HORIZONTAL SCROLL ======= */
-    html, body { overflow-x: hidden; }
-
-    /* All grids default to single column; md breakpoint restores multi-column */
-    .grid { display: grid; grid-template-columns: 1fr; width: 100%; }
     @media(min-width:640px){ .sm-grid-cols-2{grid-template-columns:repeat(2,1fr);} }
     @media(min-width:768px){
       .md-grid-cols-2{grid-template-columns:repeat(2,1fr);}
@@ -221,13 +216,6 @@
       .md-gap-12{gap:48px;}
       .md-scale-105{transform:scale(1.05);}
     }
-
-    /* Prevent textarea from triggering iOS zoom (needs 16px+) */
-    #questionInput { font-size: 16px; }
-
-    /* Clip box-shadows that extend beyond the viewport */
-    body { overflow-x: hidden; }
-    .card, .mockup-wrapper, .btn { max-width: 100%; }
   </style>
 </head>
 <body>
@@ -310,7 +298,7 @@
 
 <!-- ===================== HERO (index 3 layout, white bg, shortened mockup animation) ===================== -->
 <section id="home" style="min-height:calc(100vh - 76px);display:flex;align-items:center;">
-  <div class="max-w-6xl mx-auto" style="padding:clamp(24px,5vw,60px) clamp(16px,4vw,32px);width:100%;box-sizing:border-box;">
+  <div class="max-w-6xl mx-auto" style="padding:60px 32px;width:100%;">
     <div class="grid md-grid-cols-2 gap-12 items-center">
 
       <!-- LEFT -->
@@ -684,7 +672,7 @@
 
   const firebaseConfig = {
     apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
-    authDomain: "homeworkaiapp.com",
+    authDomain: "homeworkai-6364c.firebaseapp.com",
     projectId: "homeworkai-6364c",
     storageBucket: "homeworkai-6364c.firebasestorage.app",
     messagingSenderId: "486462619999",
