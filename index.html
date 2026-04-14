@@ -764,8 +764,9 @@
     } catch (e) { console.error(e); }
   };
 
+  const ADMIN_EMAIL = 'sion22comp@gmail.com';
+
   function updateLoginUI() {
-    updateUsageCounter();
     const loginBtn = document.getElementById('loginBtn');
     const accountWrapper = document.getElementById('accountDropdownWrapper');
     if (window.currentUser) {
@@ -779,10 +780,14 @@
       document.getElementById('accountIcon').innerHTML = photoURL
         ? `<img src="${photoURL}" class="user-avatar" alt="Profile" referrerpolicy="no-referrer">`
         : `<div class="default-avatar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`;
+      // Admin gets Pro+ and unlimited access
+      if (email === ADMIN_EMAIL) { userPlan = 'pro_plus'; }
     } else {
       loginBtn.style.display = 'inline-flex';
       accountWrapper.style.display = 'none';
+      userPlan = 'free';
     }
+    updateUsageCounter();
   }
 </script>
 
@@ -883,7 +888,7 @@
       executeAskQuestion(); return;
     }
 
-    if ((usage.count || 0) >= DAILY_LIMIT) {
+    if ((usage.count || 0) >= DAILY_LIMIT && window.currentUser?.email !== ADMIN_EMAIL) {
       const modal = document.createElement('div');
       modal.className = 'fixed inset-0 flex items-center justify-center z-50';
       modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
@@ -926,7 +931,7 @@
       });
 
       const data = await res.json();
-      const formatted = (data.answer || "No response received.")
+      const formatted = (data.answer || data.error || "No response received.")
         .split("\n")
         .map(line => {
           line = line.trim();
@@ -948,7 +953,12 @@
           return `<div style="color:#374151;line-height:1.7;font-size:14px;">${line}</div>`;
         })
         .join("");
-      box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div>${formatted}`;
+      let videosHtml = '';
+      if (data.videos && data.videos.length > 0) {
+        const videoItems = data.videos.map(v => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border:2px solid black;border-radius:8px;margin-bottom:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg><span style="font-size:13px;font-weight:600;color:#1f2937;">${v}</span></div>`).join('');
+        videosHtml = `<div style="margin-top:16px;border-top:2px solid #e5e7eb;padding-top:14px;"><div style="font-weight:800;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;margin-bottom:8px;">&#127909; Recommended Videos</div>${videoItems}</div>`;
+      }
+      box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div>${formatted}${videosHtml}`;
     } catch (err) {
       box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div><div style="white-space:pre-line;color:#dc2626;line-height:1.7;">Error getting response.</div>`;
       console.error(err);
