@@ -51,17 +51,21 @@
     .default-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid black; background: #e5e7eb; display: flex; align-items: center; justify-content: center; }
     .money-back-pill { display: inline-flex; align-items: center; gap: 10px; background: var(--yellow); border: 2px solid black; border-radius: 999px; padding: 10px 28px; font-weight: 700; font-size: 14px; color: #1f2937; line-height: 1.5; }
 
-    /* NAV — no tabs, just Pro badge */
+    /* Review cards */
+    .review-card { padding: 22px; border-radius: 18px; border: 2px solid black; box-shadow: 4px 4px 0 black; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); text-align: left; }
+    .review-card:hover { transform: translateY(-4px); box-shadow: 6px 6px 0 black; }
+    .review-avatar-circle { width: 48px; height: 48px; border-radius: 50%; border: 2px solid black; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: white; flex-shrink: 0; }
+
+    /* NAV */
     .pro-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--yellow); border: 2px solid black; border-radius: 10px;
-      padding: 7px 14px; font-size: 13px; font-weight: 800; cursor: pointer;
-      box-shadow: 2px 2px 0 black; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--yellow); border: 2px solid black; border-radius: 12px;
+      padding: 10px 20px; font-size: 15px; font-weight: 800; cursor: pointer;
+      box-shadow: 3px 3px 0 black; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
       text-decoration: none; color: #1f2937; white-space: nowrap;
     }
-    .pro-badge:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 black; }
+    .pro-badge:hover { transform: translateY(-3px); box-shadow: 5px 5px 0 black; }
 
-    /* Mobile nav — still useful for navigation if needed, hidden by default */
     .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 6px; border: 2px solid black; border-radius: 8px; background: white; }
     .hamburger span { display: block; width: 20px; height: 2px; background: black; border-radius: 2px; }
     .mobile-nav { display: none; flex-direction: column; gap: 4px; padding: 12px 16px; border-bottom: 4px solid black; background: #ede9fe; }
@@ -70,8 +74,8 @@
     .nav-tab:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 black; }
     @media (max-width: 640px) { .hamburger { display: flex; } }
 
-    /* HERO */
-    #home { background: white; }
+    /* HERO — white background as requested */
+    #home { background: #ffffff; }
 
     /* ACCOUNT DROPDOWN */
     .account-dropdown-wrapper { position: relative; }
@@ -94,6 +98,83 @@
     /* UPLOAD BTN */
     .upload-image-btn { position: absolute; bottom: 12px; right: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: white; border: 2px solid black; border-radius: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 3px 3px 0 black; }
     .upload-image-btn:hover { transform: translateY(-2px); box-shadow: 5px 5px 0 black; }
+
+    /* MOCKUP — subtle, calm lift */
+    .mockup-wrapper {
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      border: 3px solid black;
+      border-radius: 20px;
+      box-shadow: 10px 10px 0 black;
+      overflow: hidden;
+      background: white;
+    }
+    .mockup-wrapper:hover {
+      transform: translateY(-4px);
+      box-shadow: 14px 14px 0 black;
+    }
+
+    /* ======= SCROLL-REVEAL ANIMATIONS (from index 9) ======= */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes popIn {
+      0%   { opacity: 0; transform: scale(0.88); }
+      70%  { transform: scale(1.04); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 4px 4px 0 black; }
+      50%       { box-shadow: 4px 4px 0 black, 0 0 18px rgba(124,58,237,0.25); }
+    }
+
+    .reveal { opacity: 0; }
+    .reveal-left { opacity: 0; }
+    .reveal-right { opacity: 0; }
+    .reveal.visible { animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+    .reveal-left.visible  { animation: slideInLeft  0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+    .reveal-right.visible { animation: slideInRight 0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+    .reveal-pop.visible   { animation: popIn        0.5s  cubic-bezier(0.22,1,0.36,1) forwards; }
+
+    .delay-1 { animation-delay: 0.08s !important; }
+    .delay-2 { animation-delay: 0.16s !important; }
+    .delay-3 { animation-delay: 0.24s !important; }
+    .delay-4 { animation-delay: 0.32s !important; }
+
+    /* CTA button pulse on idle — only animates box-shadow, keeps btn hover working */
+    .btn-pulse { animation: pulse-glow 2.8s ease-in-out infinite; }
+    .btn-pulse:hover { animation: none; transform: translateY(-3px); box-shadow: 6px 6px 0 black; }
+    .btn-pulse:active { animation: none; transform: translateY(-1px); box-shadow: 3px 3px 0 black; }
+
+    /* Section headings underline sweep */
+    .section-title-underline { display: inline-block; position: relative; opacity: 0; }
+    .section-title-underline::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -6px;
+      width: 0; height: 4px;
+      background: #7c3aed;
+      border-radius: 2px;
+      transition: width 0.7s cubic-bezier(0.22,1,0.36,1) 0.35s;
+    }
+    .section-title-underline.visible {
+      animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    .section-title-underline.visible::after { width: 100%; }
+
+    /* Icon box — no animation on hover */
 
     /* UTILITIES */
     .hidden{display:none} .flex{display:flex} .grid{display:grid}
@@ -167,8 +248,7 @@
   </a>
 
   <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-    <!-- Pro badge next to login -->
-    <a href="#pricing" class="pro-badge" style="background:var(--yellow);">
+    <a href="#pricing" class="pro-badge">
       ⚡ Try Pro
     </a>
 
@@ -210,18 +290,19 @@
 <nav class="mobile-nav" id="mobileNav" style="position:sticky;top:72px;z-index:199;">
   <a class="nav-tab" href="#home" onclick="closeMobileNav()" style="background:var(--purple);">Home</a>
   <a class="nav-tab" href="#how-it-works" onclick="closeMobileNav()" style="background:var(--green);">How It Works</a>
+  <a class="nav-tab" href="#reviews" onclick="closeMobileNav()" style="background:var(--yellow);">Reviews</a>
   <a class="nav-tab" href="#ai-helper" onclick="closeMobileNav()" style="background:var(--blue);">Ask AI</a>
-  <a class="nav-tab" href="#pricing" onclick="closeMobileNav()" style="background:var(--yellow);">Pricing</a>
-  <a class="nav-tab" href="#faq" onclick="closeMobileNav()" style="background:var(--green);">FAQ</a>
+  <a class="nav-tab" href="#pricing" onclick="closeMobileNav()" style="background:var(--green);">Pricing</a>
+  <a class="nav-tab" href="#faq" onclick="closeMobileNav()" style="background:var(--purple);">FAQ</a>
 </nav>
 
-<!-- ===================== HERO ===================== -->
-<section id="home" style="background:white;min-height:calc(100vh - 76px);display:flex;align-items:center;">
+<!-- ===================== HERO (index 3 layout, white bg, shortened mockup animation) ===================== -->
+<section id="home" style="min-height:calc(100vh - 76px);display:flex;align-items:center;">
   <div class="max-w-6xl mx-auto" style="padding:60px 32px;width:100%;">
     <div class="grid md-grid-cols-2 gap-12 items-center">
 
       <!-- LEFT -->
-      <div>
+      <div class="reveal-left">
         <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(36px,5vw,60px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;color:#0f172a;">
           Stuck on Homework?<br>
           <span style="color:#7c3aed;background:var(--purple);padding:0 8px;border-radius:8px;">AI that explains</span><br>
@@ -240,7 +321,7 @@
         <p style="color:#22c55e;margin-top:14px;font-weight:700;font-size:14px;">✔ 10 free questions every day — no credit card needed</p>
 
         <!-- Social proof -->
-        <div style="display:flex;align-items:center;gap:14px;margin-top:28px;padding:16px 20px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:16px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-top:28px;padding:16px 20px;background:rgba(255,255,255,0.7);border:2px solid #93c5fd;border-radius:16px;">
           <div style="display:flex;">
             <div style="width:32px;height:32px;border-radius:50%;border:2px solid white;background:#7c3aed;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;margin-left:-6px;">A</div>
             <div style="width:32px;height:32px;border-radius:50%;border:2px solid white;background:#059669;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;margin-left:-6px;">J</div>
@@ -255,9 +336,9 @@
         </div>
       </div>
 
-      <!-- RIGHT: App mockup — bigger and vertically centered -->
-      <div style="display:flex;flex-direction:column;gap:16px;">
-        <div style="border:3px solid black;border-radius:20px;box-shadow:10px 10px 0 black;overflow:hidden;background:white;">
+      <!-- RIGHT: App mockup -->
+      <div>
+        <div class="mockup-wrapper">
           <!-- Browser chrome -->
           <div style="background:#f1f5f9;border-bottom:2px solid black;padding:10px 16px;display:flex;align-items:center;gap:8px;">
             <div style="width:12px;height:12px;border-radius:50%;background:#fca5a5;border:1.5px solid black;"></div>
@@ -265,7 +346,7 @@
             <div style="width:12px;height:12px;border-radius:50%;background:var(--green);border:1.5px solid black;"></div>
             <div style="flex:1;background:white;border:1.5px solid #e2e8f0;border-radius:6px;padding:4px 10px;font-size:11px;color:#94a3b8;margin-left:8px;">homeworkai.app</div>
           </div>
-          <!-- Chat UI — more padding/size -->
+          <!-- Chat UI -->
           <div style="padding:28px;background:#fafafa;">
             <!-- User msg -->
             <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
@@ -275,7 +356,29 @@
             </div>
             <!-- AI msg -->
             <div style="display:flex;gap:12px;margin-bottom:16px;">
-              <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:#7c3aed;border:2px solid black;display:flex;align-items:center;justify-content:center;font-size:18px;">🧠</div>
+              <div style="width:40px;height:40px;flex-shrink:0;border-radius:10px;border:2px solid black;overflow:hidden;background:#ede9fe;display:flex;align-items:center;justify-content:center;">
+                <svg width="32" height="32" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/>
+                  <rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/>
+                  <path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/>
+                  <line x1="37" y1="50" x2="55" y2="49" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="55" x2="55" y2="54" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="60" x2="55" y2="59" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="65" x2="55" y2="65" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/>
+                  <line x1="64" y1="49" x2="85" y2="50" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="54" x2="85" y2="55" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="59" x2="85" y2="60" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="65" x2="85" y2="65" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/>
+                  <rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/>
+                  <g transform="translate(59.5,36)">
+                    <polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/>
+                    <polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/>
+                    <circle cx="0" cy="0" r="1.5" fill="#FAC775"/>
+                  </g>
+                </svg>
+              </div>
               <div style="background:white;border:2px solid black;border-radius:4px 14px 14px 14px;padding:16px 18px;font-size:14px;line-height:1.7;box-shadow:2px 2px 0 black;flex:1;">
                 <strong style="color:#7c3aed;">Step-by-step solution:</strong><br>
                 <span style="color:#374151;">1. Subtract 5 from both sides → <strong>2x = 10</strong><br>
@@ -290,7 +393,29 @@
               </div>
             </div>
             <div style="display:flex;gap:12px;margin-bottom:16px;">
-              <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:#7c3aed;border:2px solid black;display:flex;align-items:center;justify-content:center;font-size:18px;">🧠</div>
+              <div style="width:40px;height:40px;flex-shrink:0;border-radius:10px;border:2px solid black;overflow:hidden;background:#ede9fe;display:flex;align-items:center;justify-content:center;">
+                <svg width="32" height="32" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/>
+                  <rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/>
+                  <path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/>
+                  <line x1="37" y1="50" x2="55" y2="49" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="55" x2="55" y2="54" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="60" x2="55" y2="59" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="65" x2="55" y2="65" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/>
+                  <line x1="64" y1="49" x2="85" y2="50" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="54" x2="85" y2="55" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="59" x2="85" y2="60" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="65" x2="85" y2="65" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/>
+                  <rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/>
+                  <g transform="translate(59.5,36)">
+                    <polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/>
+                    <polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/>
+                    <circle cx="0" cy="0" r="1.5" fill="#FAC775"/>
+                  </g>
+                </svg>
+              </div>
               <div style="background:white;border:2px solid black;border-radius:4px 14px 14px 14px;padding:16px 18px;font-size:14px;line-height:1.7;box-shadow:2px 2px 0 black;flex:1;">
                 <strong style="color:#059669;">Photosynthesis explained:</strong><br>
                 <span style="color:#374151;">Plants use sunlight, water &amp; CO₂ to make glucose + oxygen. It happens in the <strong>chloroplasts</strong> using chlorophyll. 🌱</span>
@@ -306,8 +431,8 @@
           </div>
         </div>
 
-        <!-- Feature chips below mockup (moved here from left col) -->
-        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <!-- Feature chips -->
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
           <div style="display:flex;align-items:center;gap:6px;background:var(--green);border:2px solid black;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;box-shadow:2px 2px 0 black;">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
             Powered by AI
@@ -326,22 +451,22 @@
 <!-- ===================== HOW IT WORKS ===================== -->
 <section id="how-it-works" class="py-16 md-py-24 px-6 text-center" style="background:white;">
   <div class="max-w-6xl mx-auto">
-    <h2 class="section-title mb-4">How It Works</h2>
+    <h2 class="section-title section-title-underline mb-4">How It Works</h2>
     <p style="color:#4b5563;margin-bottom:40px;max-width:560px;margin-left:auto;margin-right:auto;font-size:18px;line-height:1.65;">
       Get accurate answers instantly with AI that explains every step clearly and helps you actually learn.
     </p>
     <div class="grid md-grid-cols-3 gap-8 md-gap-12 mt-12">
-      <div class="p-8 card" style="background:var(--purple);">
+      <div class="p-8 card reveal delay-1" style="background:var(--purple);">
         <div class="icon-box">📸</div>
         <h3 class="mt-4 font-extrabold text-lg heading">Upload Question</h3>
         <p class="mt-2 text-gray-700 leading-relaxed">Take a picture or type your problem.</p>
       </div>
-      <div class="p-8 card" style="background:var(--green);">
+      <div class="p-8 card reveal delay-2" style="background:var(--green);">
         <div class="icon-box">🧠</div>
         <h3 class="mt-4 font-extrabold text-lg heading">AI Solves It</h3>
         <p class="mt-2 text-gray-700 leading-relaxed">Step-by-step explanations instantly.</p>
       </div>
-      <div class="p-8 card" style="background:var(--yellow);">
+      <div class="p-8 card reveal delay-3" style="background:var(--yellow);">
         <div class="icon-box">📈</div>
         <h3 class="mt-4 font-extrabold text-lg heading">Learn Faster</h3>
         <p class="mt-2 text-gray-700 leading-relaxed">Understand and improve your grades.</p>
@@ -352,11 +477,24 @@
 
 <div class="section-line"></div>
 
+<!-- ===================== REVIEWS (from index.html) ===================== -->
+<section id="reviews" class="py-20 md-py-24 px-6 text-center" style="background:white;">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="section-title section-title-underline mb-4">What Students Are Saying</h2>
+    <p style="color:#4b5563;margin-bottom:48px;max-width:560px;margin-left:auto;margin-right:auto;font-size:18px;line-height:1.65;">
+      Trusted by students worldwide to improve grades, save time, and actually understand their homework.
+    </p>
+    <div class="grid sm-grid-cols-2 md-grid-cols-4 gap-5" id="reviews-grid"></div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
 <!-- ===================== ASK AI ===================== -->
 <section id="ai-helper" class="py-16 md-py-24 px-6" style="background:white;">
   <div class="max-w-4xl mx-auto">
     <div class="text-center mb-12">
-      <h2 class="section-title mb-4">🧠 Ask HomeWorkAI</h2>
+      <h2 class="section-title section-title-underline mb-4">🧠 Ask HomeWorkAI</h2>
       <p style="color:#4b5563;font-size:18px;line-height:1.65;">Type your homework question below and get instant step-by-step explanations.</p>
     </div>
     <div class="card p-6 md-p-8" style="background:var(--purple);">
@@ -391,10 +529,10 @@
 
 <div class="section-line"></div>
 
-<!-- ===================== PRICING ===================== -->
+<!-- ===================== PRICING (index 9 animations) ===================== -->
 <section id="pricing" class="py-16 md-py-24 px-6 text-center" style="background:white;">
   <div class="max-w-6xl mx-auto">
-    <h2 class="section-title mb-2">Simple Pricing</h2>
+    <h2 class="section-title section-title-underline mb-2">Simple Pricing</h2>
     <p style="color:#4b5563;margin-bottom:16px;font-size:18px;">Choose a plan that fits your learning needs</p>
 
     <div style="display:flex;justify-content:center;margin-bottom:36px;">
@@ -411,7 +549,7 @@
 
     <div class="grid md-grid-cols-3 gap-8" style="align-items:start;">
       <!-- FREE -->
-      <div class="card pricing-card p-8" style="background:white;">
+      <div class="card pricing-card p-8 reveal delay-1" style="background:white;">
         <h3 class="text-xl font-extrabold heading">Free</h3>
         <p class="text-4xl font-extrabold mt-2">$0</p>
         <ul class="mt-6 text-left space-y-4 features-list">
@@ -426,7 +564,7 @@
       </div>
 
       <!-- PREMIUM -->
-      <div class="card pricing-card p-8 md-scale-105 relative" style="background:white;padding-top:36px;">
+      <div class="card pricing-card p-8 md-scale-105 relative reveal delay-2" style="background:white;padding-top:36px;">
         <div class="popular-badge">MOST POPULAR</div>
         <h3 class="text-xl font-extrabold heading">Premium</h3>
         <p class="text-4xl font-extrabold mt-2" id="proPrice">$9.99/mo</p>
@@ -442,12 +580,12 @@
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Priority support</li>
         </ul>
         <div class="cta-btn-wrap" style="padding-top:28px;">
-          <button onclick="handlePurchase('Premium')" class="btn w-full" style="background:var(--green);font-size:15px;">Start 3-Day Free Trial</button>
+          <button onclick="handlePurchase('Premium')" class="btn w-full btn-pulse" style="background:var(--green);font-size:15px;">Start 3-Day Free Trial</button>
         </div>
       </div>
 
       <!-- PREMIUM+ -->
-      <div class="card pricing-card p-8" style="background:white;">
+      <div class="card pricing-card p-8 reveal delay-3" style="background:white;">
         <h3 class="text-xl font-extrabold heading">Premium+</h3>
         <p class="text-4xl font-extrabold mt-2" id="proPlusPrice">$14.99/mo</p>
         <div class="trial-badge">
@@ -474,22 +612,24 @@
 <!-- ===================== FAQ ===================== -->
 <section id="faq" class="py-16 md-py-24 px-6" style="background:white;">
   <div class="max-w-4xl mx-auto">
-    <h2 class="section-title mb-4 text-center">Frequently Asked Questions</h2>
+    <div style="text-align:center;margin-bottom:16px;">
+      <h2 class="section-title section-title-underline" style="display:inline-block;">Frequently Asked Questions</h2>
+    </div>
     <p style="color:#4b5563;margin-bottom:40px;text-align:center;font-size:18px;">Everything you need to know about HomeWorkAI</p>
     <div class="space-y-4">
-      <div class="card p-6" style="background:var(--purple);">
+      <div class="card p-6 reveal delay-1" style="background:var(--blue);">
         <h3 class="font-extrabold heading text-lg">How does the 3-day free trial work?</h3>
         <p class="mt-2 text-gray-700 leading-relaxed">Start using Premium or Premium+ features immediately. If you cancel within 3 days, you won't be charged anything. No credit card required to start!</p>
       </div>
-      <div class="card p-6" style="background:var(--green);">
+      <div class="card p-6 reveal delay-2" style="background:var(--yellow);">
         <h3 class="font-extrabold heading text-lg">What subjects does HomeWorkAI cover?</h3>
         <p class="mt-2 text-gray-700 leading-relaxed">We cover all major subjects including Math, Science, History, English, Computer Science, Economics, and more. Our AI is trained to help with homework from elementary school through college level.</p>
       </div>
-      <div class="card p-6" style="background:var(--blue);">
+      <div class="card p-6 reveal delay-3" style="background:var(--purple);">
         <h3 class="font-extrabold heading text-lg">Can I upload images of my homework?</h3>
         <p class="mt-2 text-gray-700 leading-relaxed">Yes! Simply click the camera button in the question box to upload a photo of your homework problem. Our AI will analyze the image and provide step-by-step solutions.</p>
       </div>
-      <div class="card p-6" style="background:var(--yellow);">
+      <div class="card p-6 reveal delay-4" style="background:var(--green);">
         <h3 class="font-extrabold heading text-lg">Is my data safe and private?</h3>
         <p class="mt-2 text-gray-700 leading-relaxed">Absolutely. We use industry-standard encryption and never share your personal information or homework questions with third parties. Your learning journey stays private.</p>
       </div>
@@ -500,41 +640,35 @@
 <div class="section-line"></div>
 
 <!-- ===================== CTA ===================== -->
-<section class="text-center py-16 md-py-20 px-6" style="background:var(--purple);">
-  <h2 class="section-title">Ready to Ace Your Homework?</h2>
-  <p class="mt-4 text-gray-700 text-lg max-w-2xl mx-auto" style="line-height:1.7;">Join thousands of students improving grades with AI. Start free today and see the difference in your first question.</p>
+<section class="text-center py-16 px-6" style="background:var(--purple);">
+  <h2 class="section-title-underline" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-0.03em;">Ready to Ace Your Homework?</h2>
+  <p class="mt-4 text-gray-700 max-w-2xl mx-auto" style="font-size:18px;line-height:1.7;">Join thousands of students improving grades with AI. Start free today — no credit card needed.</p>
   <div class="flex flex-wrap justify-center gap-4 mt-8">
-    <button onclick="scrollToAI()" class="btn" style="background:var(--yellow);">Get Started Free</button>
-    <button onclick="scrollToPricing()" class="btn bg-white">View Premium Plans</button>
+    <button onclick="scrollToAI()" class="btn" style="background:var(--yellow);font-size:16px;padding:15px 30px;">Get Started Free</button>
+    <button onclick="scrollToPricing()" class="btn bg-white" style="font-size:16px;padding:15px 30px;">View Premium Plans</button>
   </div>
-  <div class="flex flex-wrap justify-center gap-6 mt-8">
+  <div class="flex flex-wrap justify-center gap-6 mt-6">
     <div class="flex items-center gap-2 text-sm font-semibold"><span class="text-green-500">✔</span> No credit card required</div>
     <div class="flex items-center gap-2 text-sm font-semibold"><span class="text-green-500">✔</span> 10 free questions daily</div>
     <div class="flex items-center gap-2 text-sm font-semibold"><span class="text-green-500">✔</span> Cancel anytime</div>
   </div>
 </section>
 
-<!-- ===================== FOOTER ===================== -->
-<footer class="text-center py-8" style="background:#0f172a;color:white;border-top:4px solid black;">
-  <div class="flex items-center justify-center gap-2 mb-2">
-    <svg width="28" height="28" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-      <rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/>
-      <rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/>
-      <path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/>
-      <path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/>
-      <rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/>
-      <rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/>
-      <g transform="translate(59.5,36)"><polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/><polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/><circle cx="0" cy="0" r="1.5" fill="#FAC775"/></g>
-    </svg>
-    <span style="font-weight:800;font-size:17px;letter-spacing:-0.03em;">HomeWorkAI</span>
+<!-- ===================== FOOTER (from index 4) ===================== -->
+<footer style="background:#0f172a;color:white;border-top:4px solid black;padding:24px;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <svg width="26" height="26" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/><rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/><path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/><path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/><rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/><rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/><g transform="translate(59.5,36)"><polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/><polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/><circle cx="0" cy="0" r="1.5" fill="#FAC775"/></g></svg>
+      <span style="font-weight:800;font-size:15px;letter-spacing:-0.03em;">HomeWorkAI</span>
+    </div>
+    <p style="color:#6b7280;font-size:13px;">&copy; 2026 HomeWorkAI. All rights reserved.</p>
   </div>
-  <p style="color:#9ca3af;font-size:15px;">&copy; 2026 HomeWorkAI. All rights reserved. Helping students succeed.</p>
 </footer>
 
 <!-- ===================== FIREBASE ===================== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
@@ -549,8 +683,27 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
+  provider.addScope('email');
+  provider.addScope('profile');
   window.currentUser = null;
   window.pendingAction = null;
+
+  // Handle redirect result first (for GitHub Pages where popups may be blocked)
+  getRedirectResult(auth).then((result) => {
+    if (result && result.user) {
+      window.currentUser = result.user;
+      updateLoginUI();
+      const stored = sessionStorage.getItem('pendingAction');
+      if (stored) {
+        sessionStorage.removeItem('pendingAction');
+        const action = JSON.parse(stored);
+        setTimeout(() => {
+          if (action.type === 'askQuestion') executeAskQuestion();
+          else if (action.type === 'purchase') executePurchase(action.plan);
+        }, 300);
+      }
+    }
+  }).catch((e) => { console.error('Redirect result error:', e); });
 
   onAuthStateChanged(auth, (user) => {
     window.currentUser = user;
@@ -565,163 +718,19 @@
     }
   });
 
-  window.triggerGoogleLogin = async function(type, data) {
-    window.pendingAction = type === 'purchase' ? { type, plan: data } : { type };
-    try { await signInWithPopup(auth, provider); }
-    catch (e) { window.pendingAction = null; if (e.code !== 'auth/popup-closed-by-user') console.error(e); }
-  };
-
-  window.handleLogin = async function() {
-    try { await signInWithPopup(auth, provider); }
-    catch (e) { if (e.code !== 'auth/popup-closed-by-user') console.error(e); }
-  };
-
-  window.handleLogout = async function() {
-    closeDropdown();
-    await signOut(auth);
-    window.currentUser = null;
-    updateLoginUI();
-  };
-
-  window.handleSwitchAccount = async function() {
-    closeDropdown();
+  async function signInWithGoogle() {
     try {
-      const p = new GoogleAuthProvider();
-      p.setCustomParameters({ prompt: 'select_account' });
-      await signInWithPopup(auth, p);
-    } catch (e) { if (e.code !== 'auth/popup-closed-by-user') console.error(e); }
-  };
-
-  function updateLoginUI() {
-    const loginBtn = document.getElementById('loginBtn');
-    const accountWrapper = document.getElementById('accountDropdownWrapper');
-    if (window.currentUser) {
-      loginBtn.style.display = 'none';
-      accountWrapper.style.display = 'block';
-      const { photoURL, displayName, email } = window.currentUser;
-      const name = displayName || email || 'Account';
-      document.getElementById('accountName').textContent = name.split(' ')[0];
-      document.getElementById('dropdownName').textContent = name;
-      document.getElementById('dropdownEmail').textContent = email || '';
-      document.getElementById('accountIcon').innerHTML = photoURL
-        ? `<img src="${photoURL}" class="user-avatar" alt="Profile" referrerpolicy="no-referrer">`
-        : `<div class="default-avatar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`;
-    } else {
-      loginBtn.style.display = 'inline-flex';
-      accountWrapper.style.display = 'none';
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+        // Fallback to redirect for GitHub Pages
+        await signInWithRedirect(auth, provider);
+      } else if (e.code !== 'auth/popup-closed-by-user') {
+        console.error(e);
+      }
     }
   }
-</script>
 
-<!-- ===================== APP JS ===================== -->
-<script>
-  let billing = 'monthly';
-  const DAILY_LIMIT = 10;
-
-  document.addEventListener('click', (e) => {
-    const w = document.getElementById('accountDropdownWrapper');
-    if (w && !w.contains(e.target)) closeDropdown();
-  });
-
-  function toggleDropdown(e) { e.stopPropagation(); document.getElementById('accountDropdown').classList.toggle('open'); }
-  function closeDropdown() { const d = document.getElementById('accountDropdown'); if (d) d.classList.remove('open'); }
-  function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
-  function closeMobileNav() { document.getElementById('mobileNav').classList.remove('open'); }
-
-  function scrollToAI() { document.getElementById('ai-helper').scrollIntoView({ behavior:'smooth' }); }
-  function scrollToPricing() { document.getElementById('pricing').scrollIntoView({ behavior:'smooth' }); }
-
-  function setBilling(type) {
-    billing = type;
-    document.getElementById('monthlyBtn').style.background = type === 'monthly' ? 'var(--purple)' : 'white';
-    document.getElementById('yearlyBtn').style.background  = type === 'yearly'  ? 'var(--purple)' : 'white';
-    document.getElementById('proPrice').textContent     = type === 'monthly' ? '$9.99/mo'  : '$79.99/yr';
-    document.getElementById('proPlusPrice').textContent = type === 'monthly' ? '$14.99/mo' : '$119.99/yr';
-    document.getElementById('proSave').className     = type === 'yearly' ? 'save-badge show-save' : 'save-badge';
-    document.getElementById('proPlusSave').className = type === 'yearly' ? 'save-badge show-save' : 'save-badge';
-  }
-
-  function setQuestion(q) { document.getElementById('questionInput').value = q; }
-
-  function handlePurchase(plan) {
-    if (!window.currentUser) { window.triggerGoogleLogin('purchase', plan); return; }
-    executePurchase(plan);
-  }
-
-  function executePurchase(plan) {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 flex items-center justify-center z-50';
-    modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
-    modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
-      <div style="font-size:40px;margin-bottom:16px;">🎉</div>
-      <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Starting Your 3-Day Free Trial!</h3>
-      <p style="color:#4b5563;margin-bottom:24px;">You're about to start a free trial for <strong>${plan}</strong>.<br>Cancel anytime within 3 days — no charge!</p>
-      <button onclick="this.closest('.fixed').remove()" class="btn" style="background:var(--green);">Got it!</button>
-    </div>`;
-    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
-    document.body.appendChild(modal);
-  }
-
-  function handleAskQuestion() {
-    const question = document.getElementById('questionInput').value.trim();
-    if (!question) return;
-    const usage = getUsageData();
-    if (!window.currentUser) {
-      if (usage.freeUsed) { window.triggerGoogleLogin('askQuestion'); return; }
-      usage.freeUsed = true; setUsageData(usage); executeAskQuestion(); return;
-    }
-    if (usage.count >= DAILY_LIMIT) {
-      const modal = document.createElement('div');
-      modal.className = 'fixed inset-0 flex items-center justify-center z-50';
-      modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
-      modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
-        <div style="font-size:40px;margin-bottom:16px;">⏰</div>
-        <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Daily Limit Reached</h3>
-        <p style="color:#4b5563;margin-bottom:24px;">You've used all 10 free questions today.<br>Come back tomorrow or upgrade for unlimited access!</p>
-        <div style="display:flex;gap:12px;justify-content:center;">
-          <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
-          <button onclick="this.closest('.fixed').remove();scrollToPricing();" class="btn" style="background:var(--green);">View Plans</button>
-        </div>
-      </div>`;
-      modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
-      document.body.appendChild(modal); return;
-    }
-    usage.count++; setUsageData(usage); executeAskQuestion();
-  }
-
-  function executeAskQuestion() {
-    const question = document.getElementById('questionInput').value.trim();
-    if (!question) return;
-    const askBtn = document.getElementById('askBtn');
-    askBtn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> AI is thinking...';
-    askBtn.disabled = true;
-    setTimeout(() => {
-      const answer = `Great question! Here's a step-by-step explanation:\n\n**Understanding the Problem:**\n${question}\n\n**Step 1:** First, let's identify the key concepts involved in this problem.\n\n**Step 2:** Now we can apply the relevant formulas or methods.\n\n**Step 3:** Working through the calculation:\n- Break down the problem into smaller parts\n- Apply each concept systematically\n- Check your work as you go\n\n**Final Answer:** The solution involves understanding the underlying principles and applying them methodically. This approach will help you solve similar problems in the future!\n\n💡 **Pro Tip:** Practice similar problems to reinforce your understanding.`;
-      const box = document.getElementById('answerBox');
-      box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div><div style="white-space:pre-line;color:#374151;line-height:1.7;">${answer}</div>`;
-      box.classList.remove('hidden');
-      askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Get Answer';
-      askBtn.disabled = false;
-    }, 2000);
-  }
-
-  function getTodayKey() { return new Date().toISOString().split('T')[0]; }
-  function getUsageData() {
-    const stored = localStorage.getItem('homeworkai_usage');
-    if (stored) {
-      const data = JSON.parse(stored);
-      if (data.date !== getTodayKey()) return { date: getTodayKey(), count: 0, freeUsed: false };
-      return data;
-    }
-    return { date: getTodayKey(), count: 0, freeUsed: false };
-  }
-  function setUsageData(data) { localStorage.setItem('homeworkai_usage', JSON.stringify(data)); }
-
-  document.getElementById('fileInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) document.getElementById('questionInput').value += `\n[Image attached: ${file.name}]`;
-  });
-</script>
-</body>
-</html>
+  window.triggerGoogleLogin = async function(type, data) {
+    window.pendingAction = type === 'purchase' ? { type, plan: data } : { type };... (14 KB left)
 <!-- deploy -->
