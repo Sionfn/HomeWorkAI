@@ -881,7 +881,29 @@
       });
 
       const data = await res.json();
-      box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div><div style="white-space:pre-line;color:#374151;line-height:1.7;">${data.answer}</div>`;
+      const formatted = (data.answer || "No response received.")
+        .split("\n")
+        .map(line => {
+          line = line.trim();
+          if (!line) return '<div style="height:8px;"></div>';
+          if (line.startsWith("Final Answer:")) {
+            return `<div style="background:#f0fdf4;border:2px solid #16a34a;border-radius:10px;padding:10px 14px;margin-bottom:8px;font-weight:700;font-size:15px;color:#15803d;">${line}</div>`;
+          }
+          if (line.startsWith("Step-by-step:")) {
+            return `<div style="font-weight:800;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:#6b7280;margin-top:4px;margin-bottom:4px;">${line}</div>`;
+          }
+          if (line.startsWith("Tip:")) {
+            return `<div style="background:#fefce8;border:2px solid #ca8a04;border-radius:10px;padding:10px 14px;margin-top:8px;font-size:14px;color:#92400e;">💡 ${line}</div>`;
+          }
+          if (/^\d+\./.test(line)) {
+            const num = line.match(/^(\d+)\./)[1];
+            const text = line.replace(/^\d+\.\s*/, "");
+            return `<div style="display:flex;gap:10px;align-items:flex-start;padding:6px 0;"><div style="min-width:26px;height:26px;background:#c4b5fd;border:2px solid black;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">${num}</div><div style="color:#374151;line-height:1.6;font-size:14px;padding-top:2px;">${text}</div></div>`;
+          }
+          return `<div style="color:#374151;line-height:1.7;font-size:14px;">${line}</div>`;
+        })
+        .join("");
+      box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div>${formatted}`;
     } catch (err) {
       box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div><div style="white-space:pre-line;color:#dc2626;line-height:1.7;">Error getting response.</div>`;
       console.error(err);
@@ -963,6 +985,5 @@
 </script>
 </body>
 </html>
-
 
 <!-- deploy -->
