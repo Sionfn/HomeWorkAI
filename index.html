@@ -8,1017 +8,725 @@
   <meta name="keywords" content="homework help, AI tutor, study helper, math solver, learning app">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --purple: #c4b5fd;
+      --green:  #a7f3d0;
+      --yellow: #fde68a;
+      --blue:   #bae6fd;
     }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       color: #000;
       background: #0f172a;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
-
-    .heading {
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      letter-spacing: -0.03em;
-      font-weight: 800;
-    }
-
-    .section-title {
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.2;
-    }
-
-    @media (min-width: 768px) {
-      .section-title {
-        font-size: 40px;
-      }
-    }
-
-    .section-line {
-      border-top: 4px solid black;
-    }
-
+    .heading { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; letter-spacing: -0.03em; font-weight: 800; }
+    .section-title { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 32px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; }
+    @media (min-width: 768px) { .section-title { font-size: 40px; } }
+    .section-line { border-top: 4px solid black; }
     .btn {
-      border: 2px solid black;
-      padding: 14px 24px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 15px;
-      box-shadow: 4px 4px 0 black;
-      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: white;
+      border: 2px solid black; padding: 14px 24px; border-radius: 12px;
+      font-weight: 700; font-size: 15px; box-shadow: 4px 4px 0 black;
+      transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px; background: white;
     }
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 6px 6px 0 black;
-    }
-    .btn:active {
-      transform: translateY(-1px);
-      box-shadow: 3px 3px 0 black;
-    }
-    .btn:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .btn:hover { transform: translateY(-3px); box-shadow: 6px 6px 0 black; }
+    .btn:active { transform: translateY(-1px); box-shadow: 3px 3px 0 black; }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .card { border: 2px solid black; border-radius: 16px; box-shadow: 5px 5px 0 black; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
+    .card:hover { transform: translateY(-6px); box-shadow: 8px 8px 0 black; }
+    .icon-box { width: 65px; height: 65px; border: 2px solid black; display: flex; align-items: center; justify-content: center; margin: auto; background: white; font-size: 24px; border-radius: 14px; }
+    .save-pill { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg,#34d399 0%,#10b981 100%); color: white; padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 700; border: 2px solid #059669; box-shadow: 0 2px 8px rgba(16,185,129,0.3); }
+    .popular-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--green); border: 2px solid black; padding: 5px 14px; font-size: 12px; font-weight: 800; border-radius: 20px; white-space: nowrap; letter-spacing: 0.02em; }
+    .trial-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--purple); color: #1f2937; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; border: 2px solid black; margin-top: 8px; }
+    .save-badge { opacity: 0; transform: translateY(10px) scale(0.95); transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1); height: 0; overflow: hidden; }
+    .save-badge.show-save { opacity: 1; transform: translateY(0) scale(1); height: auto; margin-top: 12px; }
+    .animate-spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid black; object-fit: cover; }
+    .default-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid black; background: #e5e7eb; display: flex; align-items: center; justify-content: center; }
+    .money-back-pill { display: inline-flex; align-items: center; gap: 10px; background: var(--yellow); border: 2px solid black; border-radius: 999px; padding: 10px 28px; font-weight: 700; font-size: 14px; color: #1f2937; line-height: 1.5; }
 
-    .card {
-      border: 2px solid black;
-      border-radius: 16px;
-      box-shadow: 5px 5px 0 black;
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-      position: relative;
+    /* Review cards */
+    .review-card { padding: 22px; border-radius: 18px; border: 2px solid black; box-shadow: 4px 4px 0 black; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); text-align: left; }
+    .review-card:hover { transform: translateY(-4px); box-shadow: 6px 6px 0 black; }
+    .review-avatar-circle { width: 48px; height: 48px; border-radius: 50%; border: 2px solid black; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: white; flex-shrink: 0; }
+
+    /* NAV */
+    .pro-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--yellow); border: 2px solid black; border-radius: 12px;
+      padding: 10px 20px; font-size: 15px; font-weight: 800; cursor: pointer;
+      box-shadow: 3px 3px 0 black; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+      text-decoration: none; color: #1f2937; white-space: nowrap;
     }
-    .card:hover {
+    .pro-badge:hover { transform: translateY(-3px); box-shadow: 5px 5px 0 black; }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 6px; border: 2px solid black; border-radius: 8px; background: white; }
+    .hamburger span { display: block; width: 20px; height: 2px; background: black; border-radius: 2px; }
+    .mobile-nav { display: none; flex-direction: column; gap: 4px; padding: 12px 16px; border-bottom: 4px solid black; background: #ede9fe; }
+    .mobile-nav.open { display: flex; }
+    .nav-tab { padding: 7px 14px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; border: 2px solid black; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); color: #1f2937; text-decoration: none; display: inline-block; white-space: nowrap; box-shadow: 2px 2px 0 black; }
+    .nav-tab:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 black; }
+    @media (max-width: 640px) { .hamburger { display: flex; } }
+
+    /* HERO — white background as requested */
+    #home { background: #ffffff; }
+
+    /* ACCOUNT DROPDOWN */
+    .account-dropdown-wrapper { position: relative; }
+    .account-dropdown { display: none; position: absolute; top: calc(100% + 10px); right: 0; background: white; border: 2px solid black; border-radius: 14px; box-shadow: 5px 5px 0 black; min-width: 210px; z-index: 300; overflow: hidden; }
+    .account-dropdown.open { display: block; }
+    .dropdown-header { padding: 14px 16px; border-bottom: 2px solid black; background: #f9fafb; }
+    .dropdown-header p { font-size: 13px; font-weight: 700; }
+    .dropdown-header span { font-size: 12px; color: #6b7280; }
+    .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.15s; border: none; background: none; width: 100%; text-align: left; }
+    .dropdown-item:hover { background: #f3f4f6; }
+    .dropdown-item.danger { color: #dc2626; }
+    .dropdown-item.danger:hover { background: #fef2f2; }
+    .dropdown-divider { border-top: 2px solid #e5e7eb; }
+
+    /* PRICING */
+    .pricing-card { display: flex; flex-direction: column; }
+    .pricing-card .features-list { margin-bottom: 24px; }
+    .pricing-card .cta-btn-wrap { margin-top: auto; padding-top: 12px; }
+
+    /* UPLOAD BTN */
+    .upload-image-btn { position: absolute; bottom: 12px; right: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: white; border: 2px solid black; border-radius: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 3px 3px 0 black; }
+    .upload-image-btn:hover { transform: translateY(-2px); box-shadow: 5px 5px 0 black; }
+
+    /* MOCKUP — identical animation to buttons/cards */
+    .mockup-wrapper {
+      transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      cursor: pointer;
+    }
+    .mockup-wrapper:hover {
       transform: translateY(-6px);
       box-shadow: 8px 8px 0 black;
     }
 
-    .hero-card {
-      border: 2px solid black;
-      border-radius: 16px;
-      box-shadow: 6px 6px 0 black;
-      transition: all 0.25s ease;
-      overflow: hidden;
+    /* ======= SCROLL-REVEAL ANIMATIONS (from index 9) ======= */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    .hero-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 10px 10px 0 black;
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
-
-    .icon-box {
-      width: 65px;
-      height: 65px;
-      border: 2px solid black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: auto;
-      background: white;
-      font-size: 24px;
-      border-radius: 14px;
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to   { opacity: 1; transform: translateX(0); }
     }
-
-    .save-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-      color: white;
-      padding: 6px 14px;
-      border-radius: 50px;
-      font-size: 13px;
-      font-weight: 700;
-      border: 2px solid #059669;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes popIn {
+      0%   { opacity: 0; transform: scale(0.88); }
+      70%  { transform: scale(1.04); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 4px 4px 0 black; }
+      50%       { box-shadow: 4px 4px 0 black, 0 0 18px rgba(124,58,237,0.25); }
     }
 
-    .popular-badge {
+    .reveal { opacity: 0; }
+    .reveal.visible { animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+    .reveal-left.visible  { animation: slideInLeft  0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+    .reveal-right.visible { animation: slideInRight 0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+    .reveal-pop.visible   { animation: popIn        0.5s  cubic-bezier(0.22,1,0.36,1) forwards; }
+
+    .delay-1 { animation-delay: 0.08s !important; }
+    .delay-2 { animation-delay: 0.16s !important; }
+    .delay-3 { animation-delay: 0.24s !important; }
+    .delay-4 { animation-delay: 0.32s !important; }
+
+    /* CTA button pulse on idle */
+    .btn-pulse { animation: pulse-glow 2.8s ease-in-out infinite; }
+
+    /* Section headings underline sweep */
+    .section-title-underline { display: inline-block; position: relative; }
+    .section-title-underline::after {
+      content: '';
       position: absolute;
-      top: -14px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #a7f3d0;
-      border: 2px solid black;
-      padding: 5px 14px;
-      font-size: 12px;
-      font-weight: 800;
-      border-radius: 20px;
-      white-space: nowrap;
-      letter-spacing: 0.02em;
+      left: 0; bottom: -6px;
+      width: 0; height: 4px;
+      background: #7c3aed;
+      border-radius: 2px;
+      transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
     }
+    .section-title-underline.visible::after { width: 100%; }
 
-    .trial-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #c4b5fd;
-      color: #1f2937;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      border: 2px solid black;
-      margin-top: 8px;
-    }
+    /* Icon box — no animation on hover */
 
-    .save-badge {
-      opacity: 0;
-      transform: translateY(10px) scale(0.95);
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      height: 0;
-      overflow: hidden;
-    }
-    .save-badge.show-save {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      height: auto;
-      margin-top: 12px;
-    }
-
-    .review-card {
-      padding: 22px;
-      border-radius: 18px;
-      border: 2px solid black;
-      box-shadow: 4px 4px 0 black;
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-      text-align: left;
-    }
-    .review-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 6px 6px 0 black;
-    }
-
-    .animate-pop {
-      animation: pop 0.4s ease;
-    }
-    @keyframes pop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.03) translateY(-4px); }
-      100% { transform: scale(1); }
-    }
-
-    .animate-spin {
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 2px solid black;
-      object-fit: cover;
-    }
-
-    .default-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 2px solid black;
-      background: #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .review-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 2px solid black;
-      object-fit: cover;
-      background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-    }
-
-    .hidden { display: none; }
-    .flex { display: flex; }
-    .grid { display: grid; }
-    .items-center { align-items: center; }
-    .justify-center { justify-content: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-2 { gap: 8px; }
-    .gap-3 { gap: 12px; }
-    .gap-4 { gap: 16px; }
-    .gap-5 { gap: 20px; }
-    .gap-6 { gap: 24px; }
-    .gap-8 { gap: 32px; }
-    .gap-12 { gap: 48px; }
-    .text-center { text-align: center; }
-    .text-left { text-align: left; }
-    .font-bold { font-weight: 700; }
-    .font-extrabold { font-weight: 800; }
-    .font-semibold { font-weight: 600; }
-    .text-sm { font-size: 14px; }
-    .text-xs { font-size: 12px; }
-    .text-lg { font-size: 18px; }
-    .text-xl { font-size: 20px; }
-    .text-2xl { font-size: 24px; }
-    .text-3xl { font-size: 30px; }
-    .text-4xl { font-size: 36px; }
-    .text-5xl { font-size: 48px; }
-    .max-w-6xl { max-width: 1152px; }
-    .max-w-4xl { max-width: 896px; }
-    .max-w-2xl { max-width: 672px; }
-    .mx-auto { margin-left: auto; margin-right: auto; }
-    .mt-2 { margin-top: 8px; }
-    .mt-3 { margin-top: 12px; }
-    .mt-4 { margin-top: 16px; }
-    .mt-6 { margin-top: 24px; }
-    .mt-8 { margin-top: 32px; }
-    .mt-10 { margin-top: 40px; }
-    .mt-12 { margin-top: 48px; }
-    .mb-2 { margin-bottom: 8px; }
-    .mb-3 { margin-bottom: 12px; }
-    .mb-4 { margin-bottom: 16px; }
-    .mb-6 { margin-bottom: 24px; }
-    .mb-10 { margin-bottom: 40px; }
-    .mb-12 { margin-bottom: 48px; }
-    .p-4 { padding: 16px; }
-    .p-5 { padding: 20px; }
-    .p-6 { padding: 24px; }
-    .p-8 { padding: 32px; }
-    .px-3 { padding-left: 12px; padding-right: 12px; }
-    .px-6 { padding-left: 24px; padding-right: 24px; }
-    .py-1 { padding-top: 4px; padding-bottom: 4px; }
-    .py-4 { padding-top: 16px; padding-bottom: 16px; }
-    .py-6 { padding-top: 24px; padding-bottom: 24px; }
-    .py-8 { padding-top: 32px; padding-bottom: 32px; }
-    .py-16 { padding-top: 64px; padding-bottom: 64px; }
-    .py-20 { padding-top: 80px; padding-bottom: 80px; }
-    .pt-3 { padding-top: 12px; }
-    .pr-14 { padding-right: 56px; }
-    .rounded-full { border-radius: 9999px; }
-    .rounded-lg { border-radius: 8px; }
-    .rounded-xl { border-radius: 12px; }
-    .rounded-2xl { border-radius: 16px; }
-    .w-full { width: 100%; }
-    .min-w-0 { min-width: 0; }
-    .flex-1 { flex: 1; }
-    .flex-col { flex-direction: column; }
-    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .leading-tight { line-height: 1.25; }
-    .leading-relaxed { line-height: 1.625; }
-    .tracking-tight { letter-spacing: -0.025em; }
-    .space-y-3 > * + * { margin-top: 12px; }
-    .space-y-4 > * + * { margin-top: 16px; }
-    .relative { position: relative; }
-    .absolute { position: absolute; }
-    .fixed { position: fixed; }
-    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-    .z-50 { z-index: 50; }
-    .overflow-hidden { overflow: hidden; }
-    .object-cover { object-fit: cover; }
-    .border-t { border-top-width: 1px; border-top-style: solid; }
-    .flex-wrap { flex-wrap: wrap; }
-    .inline-block { display: inline-block; }
-    .inline-flex { display: inline-flex; }
-    .whitespace-pre-line { white-space: pre-line; }
-
-    .text-gray-400 { color: #9ca3af; }
-    .text-gray-500 { color: #6b7280; }
-    .text-gray-600 { color: #4b5563; }
-    .text-gray-700 { color: #374151; }
-    .text-gray-800 { color: #1f2937; }
-    .text-green-500 { color: #22c55e; }
-    .text-amber-400 { color: #fbbf24; }
-    .bg-white { background: white; }
-    .bg-purple { background: #c4b5fd; }
-    .bg-green { background: #a7f3d0; }
-    .bg-yellow { background: #fde68a; }
-
-    @media (min-width: 640px) {
-      .sm-inline { display: inline; }
-      .sm-hidden { display: none; }
-      .sm-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (min-width: 768px) {
-      .md-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-      .md-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-      .md-grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-      .md-py-24 { padding-top: 96px; padding-bottom: 96px; }
-      .md-py-20 { padding-top: 80px; padding-bottom: 80px; }
-      .md-px-10 { padding-left: 40px; padding-right: 40px; }
-      .md-p-8 { padding: 32px; }
-      .md-text-4xl { font-size: 36px; }
-      .md-text-5xl { font-size: 48px; }
-      .md-scale-105 { transform: scale(1.05); }
-      .md-gap-12 { gap: 48px; }
-    }
-
-    /* iPhone-style upload button for AI chat */
-    .upload-image-btn {
-      position: absolute;
-      bottom: 12px;
-      right: 12px;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: white;
-      border: 2px solid black;
-      border-radius: 12px;
-      cursor: pointer;
-      color: #1f2937;
-      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 3px 3px 0 black;
-    }
-    .upload-image-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 5px 5px 0 black;
-    }
-    .upload-image-btn:active {
-      transform: translateY(0);
-      box-shadow: 2px 2px 0 black;
-    }
-
-    /* Pricing card enhancements */
-    .pricing-card {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .pricing-card .btn {
-      margin-top: auto;
+    /* UTILITIES */
+    .hidden{display:none} .flex{display:flex} .grid{display:grid}
+    .items-center{align-items:center} .justify-center{justify-content:center} .justify-between{justify-content:space-between}
+    .gap-2{gap:8px} .gap-3{gap:12px} .gap-4{gap:16px} .gap-5{gap:20px} .gap-6{gap:24px} .gap-8{gap:32px} .gap-12{gap:48px}
+    .text-center{text-align:center} .text-left{text-align:left}
+    .font-bold{font-weight:700} .font-extrabold{font-weight:800} .font-semibold{font-weight:600}
+    .text-sm{font-size:14px} .text-xs{font-size:12px} .text-lg{font-size:18px} .text-xl{font-size:20px} .text-4xl{font-size:36px}
+    .max-w-6xl{max-width:1152px} .max-w-4xl{max-width:896px} .max-w-2xl{max-width:672px}
+    .mx-auto{margin-left:auto;margin-right:auto}
+    .mt-2{margin-top:8px} .mt-3{margin-top:12px} .mt-4{margin-top:16px} .mt-6{margin-top:24px} .mt-8{margin-top:32px} .mt-12{margin-top:48px}
+    .mb-2{margin-bottom:8px} .mb-3{margin-bottom:12px} .mb-4{margin-bottom:16px} .mb-6{margin-bottom:24px} .mb-10{margin-bottom:40px} .mb-12{margin-bottom:48px}
+    .p-6{padding:24px} .p-8{padding:32px} .px-3{padding-left:12px;padding-right:12px} .px-6{padding-left:24px;padding-right:24px}
+    .py-1{padding-top:4px;padding-bottom:4px} .py-16{padding-top:64px;padding-bottom:64px} .py-20{padding-top:80px;padding-bottom:80px}
+    .rounded-full{border-radius:9999px} .rounded-lg{border-radius:8px} .rounded-xl{border-radius:12px} .rounded-2xl{border-radius:16px}
+    .w-full{width:100%} .min-w-0{min-width:0} .flex-1{flex:1} .flex-col{flex-direction:column}
+    .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .leading-tight{line-height:1.25} .leading-relaxed{line-height:1.625}
+    .space-y-4>*+*{margin-top:16px}
+    .relative{position:relative} .absolute{position:absolute} .fixed{position:fixed}
+    .inset-0{top:0;right:0;bottom:0;left:0} .z-50{z-index:50}
+    .overflow-hidden{overflow:hidden} .object-cover{object-fit:cover}
+    .border-t{border-top-width:1px;border-top-style:solid}
+    .flex-wrap{flex-wrap:wrap} .inline-flex{display:inline-flex}
+    .whitespace-pre-line{white-space:pre-line}
+    .text-gray-400{color:#9ca3af} .text-gray-500{color:#6b7280} .text-gray-600{color:#4b5563}
+    .text-gray-700{color:#374151} .text-gray-800{color:#1f2937} .text-green-500{color:#22c55e}
+    .bg-white{background:white}
+    @media(min-width:640px){ .sm-grid-cols-2{grid-template-columns:repeat(2,1fr);} }
+    @media(min-width:768px){
+      .md-grid-cols-2{grid-template-columns:repeat(2,1fr);}
+      .md-grid-cols-3{grid-template-columns:repeat(3,1fr);}
+      .md-grid-cols-4{grid-template-columns:repeat(4,1fr);}
+      .md-py-24{padding-top:96px;padding-bottom:96px;}
+      .md-py-20{padding-top:80px;padding-bottom:80px;}
+      .md-px-10{padding-left:40px;padding-right:40px;}
+      .md-p-8{padding:32px;}
+      .md-text-5xl{font-size:48px;}
+      .md-gap-12{gap:48px;}
+      .md-scale-105{transform:scale(1.05);}
     }
   </style>
 </head>
 <body>
-  <!-- HEADER -->
-  <header class="flex justify-between items-center px-6 md-px-10 py-4" style="background: #c4b5fd; border-bottom: 4px solid black;">
-    <div class="flex items-center gap-2">
-      <div class="logo-icon" style="width: 40px; height: 40px; background: white; border-radius: 10px; border: 2px solid black; display: flex; align-items: center; justify-content: center;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-        </svg>
+
+<!-- ===================== HEADER ===================== -->
+<header id="main-header" style="background:var(--purple);border-bottom:4px solid black;position:sticky;top:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:12px 24px;gap:16px;">
+  <a href="#home" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex-shrink:0;">
+    <svg width="38" height="38" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/>
+      <rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/>
+      <path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/>
+      <line x1="37" y1="50" x2="55" y2="49" stroke="#C4B8F0" stroke-width="1" stroke-linecap="round"/>
+      <line x1="37" y1="55" x2="55" y2="54" stroke="#C4B8F0" stroke-width="1" stroke-linecap="round"/>
+      <line x1="37" y1="60" x2="55" y2="59" stroke="#C4B8F0" stroke-width="1" stroke-linecap="round"/>
+      <line x1="37" y1="65" x2="55" y2="65" stroke="#C4B8F0" stroke-width="1" stroke-linecap="round"/>
+      <path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/>
+      <line x1="64" y1="49" x2="85" y2="50" stroke="#C4B8F0" stroke-width="1" stroke-linecap="round"/>
+      <line x1="64" y1="54" x2="85" y2="55" stroke="#C4B8F0" stroke-width="1" stroke-linecap="round"/>
+      <line x1="64" y1="59" x2="85" y2="60" stroke="#C4B8F0" stroke-width="1" stroke-linecap="round"/>
+      <line x1="64" y1="65" x2="85" y2="65" stroke="#C4B8F0" stroke-width="1" stroke-linecap="round"/>
+      <rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/>
+      <rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/>
+      <g transform="translate(59.5,36)">
+        <polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/>
+        <polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/>
+        <circle cx="0" cy="0" r="1.5" fill="#FAC775"/>
+      </g>
+    </svg>
+    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.03em;">HomeWorkAI</span>
+  </a>
+
+  <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+    <a href="#pricing" class="pro-badge">
+      ⚡ Try Pro
+    </a>
+
+    <div class="account-dropdown-wrapper" id="accountDropdownWrapper" style="display:none;">
+      <button id="accountBtn" class="btn bg-white" onclick="toggleDropdown(event)" style="padding:9px 14px;gap:8px;">
+        <span id="accountIcon"></span>
+        <span id="accountName" style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="account-dropdown" id="accountDropdown">
+        <div class="dropdown-header">
+          <p id="dropdownName"></p>
+          <span id="dropdownEmail"></span>
+        </div>
+        <button class="dropdown-item" onclick="handleSwitchAccount()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          Switch Account
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item danger" onclick="handleLogout()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
       </div>
-      <span class="font-extrabold text-lg tracking-tight heading">HomeWorkAI</span>
     </div>
-    <button id="loginBtn" class="btn bg-white flex items-center gap-2" onclick="handleLogin()">
-      <span id="loginIcon">
-        <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google">
-      </span>
-      <span id="loginText">Login with Google</span>
+
+    <button id="loginBtn" class="btn bg-white" onclick="handleLogin()" style="gap:8px;">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" height="18" alt="Google">
+      <span style="font-size:14px;">Login with Google</span>
     </button>
-  </header>
 
-  <!-- HERO -->
-  <section class="py-16 md-py-24 px-6" style="background: white;">
-    <div class="max-w-6xl mx-auto grid md-grid-cols-2 gap-12 items-center">
+    <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav" id="mobileNav" style="position:sticky;top:72px;z-index:199;">
+  <a class="nav-tab" href="#home" onclick="closeMobileNav()" style="background:var(--purple);">Home</a>
+  <a class="nav-tab" href="#how-it-works" onclick="closeMobileNav()" style="background:var(--green);">How It Works</a>
+  <a class="nav-tab" href="#reviews" onclick="closeMobileNav()" style="background:var(--yellow);">Reviews</a>
+  <a class="nav-tab" href="#ai-helper" onclick="closeMobileNav()" style="background:var(--blue);">Ask AI</a>
+  <a class="nav-tab" href="#pricing" onclick="closeMobileNav()" style="background:var(--green);">Pricing</a>
+  <a class="nav-tab" href="#faq" onclick="closeMobileNav()" style="background:var(--purple);">FAQ</a>
+</nav>
+
+<!-- ===================== HERO (index 3 layout, white bg, shortened mockup animation) ===================== -->
+<section id="home" style="min-height:calc(100vh - 76px);display:flex;align-items:center;">
+  <div class="max-w-6xl mx-auto" style="padding:60px 32px;width:100%;">
+    <div class="grid md-grid-cols-2 gap-12 items-center">
+
+      <!-- LEFT -->
       <div>
-        <h1 class="text-4xl md-text-5xl font-extrabold leading-tight heading">
-          Stuck on <span style="color: #60a5fa;">Homework?</span><br>
-          We've got your back.
+        <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(36px,5vw,60px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;color:#0f172a;">
+          Stuck on Homework?<br>
+          <span style="color:#7c3aed;background:var(--purple);padding:0 8px;border-radius:8px;">AI that explains</span><br>
+          every step clearly.
         </h1>
-        <p class="mt-6 text-gray-600 text-lg leading-relaxed">
-          Instant answers with step-by-step explanations.
-          Better than tutors and teachers.
+
+        <p style="margin-top:20px;font-size:18px;color:#475569;line-height:1.7;max-width:460px;">
+          Get instant answers with step-by-step explanations across every subject — better than tutors, faster than Google.
         </p>
-        <button class="btn mt-8" style="background: #c4b5fd;" onclick="scrollToAI()">
-          Get Started Free
-        </button>
-        <p class="text-green-500 mt-3 font-semibold">&#10004; 10 free questions daily</p>
-        <div class="mt-4 flex items-center gap-3">
-          <div class="flex" style="margin-left: -8px;">
-            <img src="https://ui-avatars.com/api/?name=A&background=7c3aed&color=fff&size=32&bold=true" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="">
-            <img src="https://ui-avatars.com/api/?name=B&background=059669&color=fff&size=32&bold=true" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="">
-            <img src="https://ui-avatars.com/api/?name=C&background=f59e0b&color=fff&size=32&bold=true" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="">
-            <img src="https://ui-avatars.com/api/?name=D&background=3b82f6&color=fff&size=32&bold=true" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="">
+
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:32px;align-items:center;">
+          <button class="btn" style="background:var(--purple);font-size:16px;padding:16px 32px;" onclick="scrollToAI()">✨ Get Started Free</button>
+          <button class="btn bg-white" style="font-size:15px;" onclick="scrollToPricing()">View Plans →</button>
+        </div>
+
+        <p style="color:#22c55e;margin-top:14px;font-weight:700;font-size:14px;">✔ 10 free questions every day — no credit card needed</p>
+
+        <!-- Social proof -->
+        <div style="display:flex;align-items:center;gap:14px;margin-top:28px;padding:16px 20px;background:rgba(255,255,255,0.7);border:2px solid #93c5fd;border-radius:16px;">
+          <div style="display:flex;">
+            <div style="width:32px;height:32px;border-radius:50%;border:2px solid white;background:#7c3aed;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;margin-left:-6px;">A</div>
+            <div style="width:32px;height:32px;border-radius:50%;border:2px solid white;background:#059669;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;margin-left:-6px;">J</div>
+            <div style="width:32px;height:32px;border-radius:50%;border:2px solid white;background:#f59e0b;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;margin-left:-6px;">E</div>
+            <div style="width:32px;height:32px;border-radius:50%;border:2px solid white;background:#3b82f6;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;margin-left:-6px;">M</div>
+            <div style="width:32px;height:32px;border-radius:50%;border:2px solid white;background:#06b6d4;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;margin-left:-6px;">S</div>
           </div>
-          <span class="text-sm text-gray-600"><strong>2,847</strong> students helped today</span>
+          <div>
+            <div style="font-weight:800;font-size:14px;color:#0f172a;">2,847 students helped today</div>
+            <div style="font-size:13px;color:#64748b;">★★★★★ &nbsp;4.9/5 average rating</div>
+          </div>
         </div>
       </div>
-      <div>
-        <div class="hero-card">
-          <img 
-            src="https://raw.githubusercontent.com/Sionfn/HomeWorkAI/refs/heads/main/KpNCqHlKPhjoLrIsecGasT6Q6TlWXUTglR8TbrzymygH2u-bPmPOtfDxYbVBZYXFRZfC3NCD3BUURscaJHB6woNIFKxnzgpsB956vPfj2m2Nk2VvXGRzrZnhQ13303yTZOp6X2nNdwQNNDRGjA-TGzQZ07E8uFeca4K0h1u8rvb1rG8y6sq_otVtBpWaXCOk.jpeg"
-            class="rounded-xl w-full object-cover"
-            alt="HomeWorkAI Preview"
-            style="display: block;"
-          >
+
+      <!-- RIGHT: App mockup — shortened animation -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="mockup-wrapper" style="border:3px solid black;border-radius:20px;box-shadow:10px 10px 0 black;overflow:hidden;background:white;">
+          <!-- Browser chrome -->
+          <div style="background:#f1f5f9;border-bottom:2px solid black;padding:10px 16px;display:flex;align-items:center;gap:8px;">
+            <div style="width:12px;height:12px;border-radius:50%;background:#fca5a5;border:1.5px solid black;"></div>
+            <div style="width:12px;height:12px;border-radius:50%;background:var(--yellow);border:1.5px solid black;"></div>
+            <div style="width:12px;height:12px;border-radius:50%;background:var(--green);border:1.5px solid black;"></div>
+            <div style="flex:1;background:white;border:1.5px solid #e2e8f0;border-radius:6px;padding:4px 10px;font-size:11px;color:#94a3b8;margin-left:8px;">homeworkai.app</div>
+          </div>
+          <!-- Chat UI -->
+          <div style="padding:28px;background:#fafafa;">
+            <!-- User msg -->
+            <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+              <div style="background:var(--purple);border:2px solid black;border-radius:14px 14px 4px 14px;padding:14px 18px;max-width:80%;font-size:15px;font-weight:600;box-shadow:2px 2px 0 black;">
+                How do I solve 2x + 5 = 15?
+              </div>
+            </div>
+            <!-- AI msg -->
+            <div style="display:flex;gap:12px;margin-bottom:16px;">
+              <div style="width:40px;height:40px;flex-shrink:0;border-radius:10px;border:2px solid black;overflow:hidden;background:#ede9fe;display:flex;align-items:center;justify-content:center;">
+                <svg width="32" height="32" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/>
+                  <rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/>
+                  <path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/>
+                  <line x1="37" y1="50" x2="55" y2="49" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="55" x2="55" y2="54" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="60" x2="55" y2="59" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="65" x2="55" y2="65" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/>
+                  <line x1="64" y1="49" x2="85" y2="50" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="54" x2="85" y2="55" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="59" x2="85" y2="60" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="65" x2="85" y2="65" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/>
+                  <rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/>
+                  <g transform="translate(59.5,36)">
+                    <polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/>
+                    <polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/>
+                    <circle cx="0" cy="0" r="1.5" fill="#FAC775"/>
+                  </g>
+                </svg>
+              </div>
+              <div style="background:white;border:2px solid black;border-radius:4px 14px 14px 14px;padding:16px 18px;font-size:14px;line-height:1.7;box-shadow:2px 2px 0 black;flex:1;">
+                <strong style="color:#7c3aed;">Step-by-step solution:</strong><br>
+                <span style="color:#374151;">1. Subtract 5 from both sides → <strong>2x = 10</strong><br>
+                2. Divide both sides by 2 → <strong>x = 5</strong><br>
+                ✅ Answer: <strong>x = 5</strong></span>
+              </div>
+            </div>
+            <!-- Second exchange -->
+            <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+              <div style="background:var(--blue);border:2px solid black;border-radius:14px 14px 4px 14px;padding:14px 18px;max-width:80%;font-size:15px;font-weight:600;box-shadow:2px 2px 0 black;">
+                Can you explain photosynthesis?
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;margin-bottom:16px;">
+              <div style="width:40px;height:40px;flex-shrink:0;border-radius:10px;border:2px solid black;overflow:hidden;background:#ede9fe;display:flex;align-items:center;justify-content:center;">
+                <svg width="32" height="32" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/>
+                  <rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/>
+                  <path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/>
+                  <line x1="37" y1="50" x2="55" y2="49" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="55" x2="55" y2="54" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="60" x2="55" y2="59" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="37" y1="65" x2="55" y2="65" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/>
+                  <line x1="64" y1="49" x2="85" y2="50" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="54" x2="85" y2="55" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="59" x2="85" y2="60" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="64" y1="65" x2="85" y2="65" stroke="#C4B8F0" stroke-width="1.5" stroke-linecap="round"/>
+                  <rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/>
+                  <rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/>
+                  <g transform="translate(59.5,36)">
+                    <polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/>
+                    <polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/>
+                    <circle cx="0" cy="0" r="1.5" fill="#FAC775"/>
+                  </g>
+                </svg>
+              </div>
+              <div style="background:white;border:2px solid black;border-radius:4px 14px 14px 14px;padding:16px 18px;font-size:14px;line-height:1.7;box-shadow:2px 2px 0 black;flex:1;">
+                <strong style="color:#059669;">Photosynthesis explained:</strong><br>
+                <span style="color:#374151;">Plants use sunlight, water &amp; CO₂ to make glucose + oxygen. It happens in the <strong>chloroplasts</strong> using chlorophyll. 🌱</span>
+              </div>
+            </div>
+            <!-- Input bar -->
+            <div style="display:flex;gap:8px;">
+              <div style="flex:1;background:white;border:2px solid black;border-radius:10px;padding:12px 14px;font-size:13px;color:#94a3b8;">Ask another question...</div>
+              <div style="background:var(--green);border:2px solid black;border-radius:10px;padding:12px 14px;box-shadow:2px 2px 0 black;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="flex flex-wrap gap-2 mt-3">
-          <div class="px-3 py-1 inline-flex items-center gap-1 text-sm rounded-lg font-semibold" style="background: #a7f3d0; border: 2px solid black;">
+
+        <!-- Feature chips below mockup -->
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <div style="display:flex;align-items:center;gap:6px;background:var(--green);border:2px solid black;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;box-shadow:2px 2px 0 black;">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-            Powered by OpenAI
+            Powered by AI
           </div>
-          <div class="px-3 py-1 inline-flex items-center gap-1 text-sm rounded-lg font-semibold" style="background: #fde68a; border: 2px solid black;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            4.9/5 Rating
-          </div>
+          <div style="display:flex;align-items:center;gap:6px;background:var(--blue);border:2px solid black;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;box-shadow:2px 2px 0 black;">📚 All Subjects</div>
+          <div style="display:flex;align-items:center;gap:6px;background:var(--yellow);border:2px solid black;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;box-shadow:2px 2px 0 black;">⚡ Instant Answers</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section id="how-it-works" class="py-16 md-py-24 px-6 text-center" style="background:white;">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="section-title section-title-underline mb-4">How It Works</h2>
+    <p style="color:#4b5563;margin-bottom:40px;max-width:560px;margin-left:auto;margin-right:auto;font-size:18px;line-height:1.65;">
+      Get accurate answers instantly with AI that explains every step clearly and helps you actually learn.
+    </p>
+    <div class="grid md-grid-cols-3 gap-8 md-gap-12 mt-12">
+      <div class="p-8 card reveal delay-1" style="background:var(--purple);">
+        <div class="icon-box">📸</div>
+        <h3 class="mt-4 font-extrabold text-lg heading">Upload Question</h3>
+        <p class="mt-2 text-gray-700 leading-relaxed">Take a picture or type your problem.</p>
+      </div>
+      <div class="p-8 card reveal delay-2" style="background:var(--green);">
+        <div class="icon-box">🧠</div>
+        <h3 class="mt-4 font-extrabold text-lg heading">AI Solves It</h3>
+        <p class="mt-2 text-gray-700 leading-relaxed">Step-by-step explanations instantly.</p>
+      </div>
+      <div class="p-8 card reveal delay-3" style="background:var(--yellow);">
+        <div class="icon-box">📈</div>
+        <h3 class="mt-4 font-extrabold text-lg heading">Learn Faster</h3>
+        <p class="mt-2 text-gray-700 leading-relaxed">Understand and improve your grades.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- ===================== REVIEWS (from index.html) ===================== -->
+<section id="reviews" class="py-20 md-py-24 px-6 text-center" style="background:white;">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="section-title section-title-underline mb-4">What Students Are Saying</h2>
+    <p style="color:#4b5563;margin-bottom:48px;max-width:560px;margin-left:auto;margin-right:auto;font-size:18px;line-height:1.65;">
+      Trusted by students worldwide to improve grades, save time, and actually understand their homework.
+    </p>
+    <div class="grid sm-grid-cols-2 md-grid-cols-4 gap-5" id="reviews-grid"></div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- ===================== ASK AI ===================== -->
+<section id="ai-helper" class="py-16 md-py-24 px-6" style="background:white;">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="section-title section-title-underline mb-4">🧠 Ask HomeWorkAI</h2>
+      <p style="color:#4b5563;font-size:18px;line-height:1.65;">Type your homework question below and get instant step-by-step explanations.</p>
+    </div>
+    <div class="card p-6 md-p-8" style="background:var(--purple);">
+      <div class="mb-6">
+        <label class="font-extrabold mb-3 heading" style="display:block;font-size:16px;">Your Question</label>
+        <div class="relative">
+          <textarea id="questionInput" placeholder="Type your homework question here... (e.g., 'How do I solve 2x + 5 = 15?')" style="width:100%;padding:16px;padding-right:56px;border:2px solid black;border-radius:10px;min-height:120px;resize:none;background:white;font-size:16px;font-family:inherit;line-height:1.5;"></textarea>
+          <input type="file" id="fileInput" accept="image/*" style="display:none;">
+          <button onclick="document.getElementById('fileInput').click()" class="upload-image-btn" title="Upload image">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <button id="askBtn" onclick="handleAskQuestion()" class="btn w-full flex items-center justify-center gap-2" style="background:var(--green);font-size:16px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        Get Answer
+      </button>
+      <div id="answerBox" class="mt-6 p-6 rounded-lg hidden" style="background:white;border:2px solid black;"></div>
+      <div class="mt-6 flex flex-wrap gap-2 items-center">
+        <span class="text-sm font-bold">Try asking:</span>
+        <button onclick="setQuestion('How do I solve quadratic equations?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background:white;border:2px solid black;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">Quadratic equations</button>
+        <button onclick="setQuestion('Explain photosynthesis step by step')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background:white;border:2px solid black;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">Photosynthesis</button>
+        <button onclick="setQuestion('What caused World War 1?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background:white;border:2px solid black;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">World War 1</button>
+      </div>
+    </div>
+    <div class="mt-8 text-center">
+      <p style="color:#4b5563;margin-bottom:16px;">Want unlimited questions with faster responses?</p>
+      <button onclick="scrollToPricing()" class="btn" style="background:var(--yellow);">View Pricing Plans</button>
+    </div>
+  </div>
+</section>
+
+<div class="section-line"></div>
+
+<!-- ===================== PRICING (index 9 animations) ===================== -->
+<section id="pricing" class="py-16 md-py-24 px-6 text-center" style="background:white;">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="section-title section-title-underline mb-2">Simple Pricing</h2>
+    <p style="color:#4b5563;margin-bottom:16px;font-size:18px;">Choose a plan that fits your learning needs</p>
+
+    <div style="display:flex;justify-content:center;margin-bottom:36px;">
+      <div class="money-back-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1f2937" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <span>30-Day Money-Back Guarantee &nbsp;—&nbsp; No questions asked. Full refund within 30 days.</span>
+      </div>
+    </div>
+
+    <div class="flex justify-center gap-4 mb-10">
+      <button id="monthlyBtn" class="btn" style="background:var(--purple);" onclick="setBilling('monthly')">Monthly</button>
+      <button id="yearlyBtn" class="btn bg-white" onclick="setBilling('yearly')">Yearly</button>
+    </div>
+
+    <div class="grid md-grid-cols-3 gap-8" style="align-items:start;">
+      <!-- FREE -->
+      <div class="card pricing-card p-8 reveal delay-1" style="background:white;">
+        <h3 class="text-xl font-extrabold heading">Free</h3>
+        <p class="text-4xl font-extrabold mt-2">$0</p>
+        <ul class="mt-6 text-left space-y-4 features-list">
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 10 questions per day</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Basic AI answers</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Standard response speed</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Access to all subjects</li>
+        </ul>
+        <div class="cta-btn-wrap">
+          <button onclick="scrollToAI()" class="btn w-full" style="background:var(--blue);">Start Now</button>
+        </div>
+      </div>
+
+      <!-- PREMIUM -->
+      <div class="card pricing-card p-8 md-scale-105 relative reveal delay-2" style="background:white;padding-top:36px;">
+        <div class="popular-badge">MOST POPULAR</div>
+        <h3 class="text-xl font-extrabold heading">Premium</h3>
+        <p class="text-4xl font-extrabold mt-2" id="proPrice">$9.99/mo</p>
+        <div class="trial-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+          3-Day Free Trial
+        </div>
+        <div class="save-badge mt-3" id="proSave"><span class="save-pill">Save $39.89/year</span></div>
+        <ul class="mt-6 text-left space-y-4 features-list">
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Unlimited questions</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Step-by-step solutions</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Faster responses</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Priority support</li>
+        </ul>
+        <div class="cta-btn-wrap" style="padding-top:28px;">
+          <button onclick="handlePurchase('Premium')" class="btn w-full btn-pulse" style="background:var(--green);font-size:15px;">Start 3-Day Free Trial</button>
+        </div>
+      </div>
+
+      <!-- PREMIUM+ -->
+      <div class="card pricing-card p-8 reveal delay-3" style="background:white;">
+        <h3 class="text-xl font-extrabold heading">Premium+</h3>
+        <p class="text-4xl font-extrabold mt-2" id="proPlusPrice">$14.99/mo</p>
+        <div class="trial-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+          3-Day Free Trial
+        </div>
+        <div class="save-badge mt-3" id="proPlusSave"><span class="save-pill">Save $59.89/year</span></div>
+        <ul class="mt-6 text-left space-y-4 features-list">
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Everything in Premium</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Video explanations</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Deep learning insights</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Fastest response speed</li>
+        </ul>
+        <div class="cta-btn-wrap">
+          <button onclick="handlePurchase('Premium+')" class="btn w-full" style="background:var(--yellow);">Start 3-Day Free Trial</button>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <div class="section-line"></div>
+<div class="section-line"></div>
 
-  <!-- HOW IT WORKS -->
-  <section class="py-16 md-py-24 px-6 text-center" style="background: white;">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="section-title mb-4">How It Works</h2>
-      <p class="text-gray-600 mb-10 max-w-2xl mx-auto text-lg leading-relaxed">
-        Get accurate answers instantly with AI that explains every step clearly and helps you actually learn.
-      </p>
-      <div class="grid md-grid-cols-3 gap-8 md-gap-12 mt-12">
-        <div class="p-8 card" style="background: #c4b5fd;">
-          <div class="icon-box">&#128247;</div>
-          <h3 class="mt-4 font-extrabold text-lg heading">Upload Question</h3>
-          <p class="mt-2 text-gray-700 leading-relaxed">Take a picture or type your problem.</p>
-        </div>
-        <div class="p-8 card" style="background: #a7f3d0;">
-          <div class="icon-box">&#129504;</div>
-          <h3 class="mt-4 font-extrabold text-lg heading">AI Solves It</h3>
-          <p class="mt-2 text-gray-700 leading-relaxed">Step-by-step explanations instantly.</p>
-        </div>
-        <div class="p-8 card" style="background: #fde68a;">
-          <div class="icon-box">&#128200;</div>
-          <h3 class="mt-4 font-extrabold text-lg heading">Learn Faster</h3>
-          <p class="mt-2 text-gray-700 leading-relaxed">Understand and improve your grades.</p>
-        </div>
+<!-- ===================== FAQ ===================== -->
+<section id="faq" class="py-16 md-py-24 px-6" style="background:white;">
+  <div class="max-w-4xl mx-auto">
+    <div style="text-align:center;margin-bottom:16px;">
+      <h2 class="section-title section-title-underline" style="display:inline-block;">Frequently Asked Questions</h2>
+    </div>
+    <p style="color:#4b5563;margin-bottom:40px;text-align:center;font-size:18px;">Everything you need to know about HomeWorkAI</p>
+    <div class="space-y-4">
+      <div class="card p-6 reveal delay-1" style="background:var(--blue);">
+        <h3 class="font-extrabold heading text-lg">How does the 3-day free trial work?</h3>
+        <p class="mt-2 text-gray-700 leading-relaxed">Start using Premium or Premium+ features immediately. If you cancel within 3 days, you won't be charged anything. No credit card required to start!</p>
+      </div>
+      <div class="card p-6 reveal delay-2" style="background:var(--yellow);">
+        <h3 class="font-extrabold heading text-lg">What subjects does HomeWorkAI cover?</h3>
+        <p class="mt-2 text-gray-700 leading-relaxed">We cover all major subjects including Math, Science, History, English, Computer Science, Economics, and more. Our AI is trained to help with homework from elementary school through college level.</p>
+      </div>
+      <div class="card p-6 reveal delay-3" style="background:var(--purple);">
+        <h3 class="font-extrabold heading text-lg">Can I upload images of my homework?</h3>
+        <p class="mt-2 text-gray-700 leading-relaxed">Yes! Simply click the camera button in the question box to upload a photo of your homework problem. Our AI will analyze the image and provide step-by-step solutions.</p>
+      </div>
+      <div class="card p-6 reveal delay-4" style="background:var(--green);">
+        <h3 class="font-extrabold heading text-lg">Is my data safe and private?</h3>
+        <p class="mt-2 text-gray-700 leading-relaxed">Absolutely. We use industry-standard encryption and never share your personal information or homework questions with third parties. Your learning journey stays private.</p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <div class="section-line"></div>
+<div class="section-line"></div>
 
-  <!-- REVIEWS -->
-  <section class="py-20 md-py-24 px-6 text-center" style="background: white;">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="section-title mb-4">What Students Are Saying</h2>
-      <p class="text-gray-600 mb-12 max-w-2xl mx-auto text-lg leading-relaxed">
-        Trusted by students worldwide to improve grades, save time, and actually understand their homework.
-      </p>
-      <div class="grid sm-grid-cols-2 md-grid-cols-4 gap-5" id="reviews">
-      </div>
+<!-- ===================== CTA ===================== -->
+<section class="text-center py-16 px-6" style="background:var(--purple);">
+  <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-0.03em;">Ready to Ace Your Homework?</h2>
+  <p class="mt-4 text-gray-700 max-w-2xl mx-auto" style="font-size:18px;line-height:1.7;">Join thousands of students improving grades with AI. Start free today — no credit card needed.</p>
+  <div class="flex flex-wrap justify-center gap-4 mt-8">
+    <button onclick="scrollToAI()" class="btn" style="background:var(--yellow);font-size:16px;padding:15px 30px;">Get Started Free</button>
+    <button onclick="scrollToPricing()" class="btn bg-white" style="font-size:16px;padding:15px 30px;">View Premium Plans</button>
+  </div>
+  <div class="flex flex-wrap justify-center gap-6 mt-6">
+    <div class="flex items-center gap-2 text-sm font-semibold"><span class="text-green-500">✔</span> No credit card required</div>
+    <div class="flex items-center gap-2 text-sm font-semibold"><span class="text-green-500">✔</span> 10 free questions daily</div>
+    <div class="flex items-center gap-2 text-sm font-semibold"><span class="text-green-500">✔</span> Cancel anytime</div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER (from index 4) ===================== -->
+<footer style="background:#0f172a;color:white;border-top:4px solid black;padding:24px;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <svg width="26" height="26" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/><rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/><path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/><path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/><rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/><rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/><g transform="translate(59.5,36)"><polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/><polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/><circle cx="0" cy="0" r="1.5" fill="#FAC775"/></g></svg>
+      <span style="font-weight:800;font-size:15px;letter-spacing:-0.03em;">HomeWorkAI</span>
     </div>
-  </section>
+    <p style="color:#6b7280;font-size:13px;">&copy; 2026 HomeWorkAI. All rights reserved.</p>
+  </div>
+</footer>
 
-  <div class="section-line"></div>
+<!-- ===================== FIREBASE ===================== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-  <!-- AI SECTION -->
-  <section id="ai-helper" class="py-16 md-py-24 px-6" style="background: white;">
-    <div class="max-w-4xl mx-auto">
-      <div class="text-center mb-12">
-        <h2 class="section-title mb-4">&#129504; Ask HomeWorkAI</h2>
-        <p class="text-gray-600 text-lg leading-relaxed">
-          Type your homework question below and get instant step-by-step explanations.
-        </p>
-      </div>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
+    authDomain: "homeworkai-6364c.firebaseapp.com",
+    projectId: "homeworkai-6364c",
+    storageBucket: "homeworkai-6364c.firebasestorage.app",
+    messagingSenderId: "486462619999",
+    appId: "1:486462619999:web:885753530368f657d3f6ea",
+    measurementId: "G-9Q99SL0FBX"
+  };
 
-      <div class="card p-6 md-p-8" style="background: #c4b5fd;">
-        <div class="mb-6">
-          <label class="font-extrabold mb-3 heading" style="display: block; font-size: 16px;">Your Question</label>
-          <div class="relative">
-            <textarea
-              id="questionInput"
-              placeholder="Type your homework question here... (e.g., 'How do I solve 2x + 5 = 15?')"
-              style="width: 100%; padding: 16px; padding-right: 56px; border: 2px solid black; border-radius: 10px; min-height: 120px; resize: none; background: white; font-size: 16px; font-family: inherit; line-height: 1.5;"
-            ></textarea>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;">
-            <button 
-              onclick="document.getElementById('fileInput').click()"
-              class="upload-image-btn"
-              title="Upload image of your question"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
-                <circle cx="12" cy="13" r="3"/>
-              </svg>
-            </button>
-          </div>
-        </div>
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  window.currentUser = null;
+  window.pendingAction = null;
 
-        <button 
-          id="askBtn"
-          onclick="handleAskQuestion()"
-          class="btn w-full flex items-center justify-center gap-2"
-          style="background: #a7f3d0; font-size: 16px;"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m22 2-7 20-4-9-9-4Z"/>
-            <path d="M22 2 11 13"/>
-          </svg>
-          Get Answer
-        </button>
-
-        <div id="answerBox" class="mt-6 p-6 rounded-lg hidden" style="background: white; border: 2px solid black;"></div>
-
-        <div class="mt-6 flex flex-wrap gap-2 items-center">
-          <span class="text-sm font-bold">Try asking:</span>
-          <button onclick="setQuestion('How do I solve quadratic equations?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background: white; border: 2px solid black; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">Quadratic equations</button>
-          <button onclick="setQuestion('Explain photosynthesis step by step')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background: white; border: 2px solid black; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">Photosynthesis</button>
-          <button onclick="setQuestion('What caused World War 1?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background: white; border: 2px solid black; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">World War 1</button>
-        </div>
-      </div>
-
-      <div class="mt-8 text-center">
-        <p class="text-gray-600 mb-4">Want unlimited questions with faster responses?</p>
-        <button onclick="scrollToPricing()" class="btn" style="background: #fde68a;">
-          View Pricing Plans
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <div class="section-line"></div>
-
-  <!-- PRICING -->
-  <section id="pricing" class="py-16 md-py-24 px-6 text-center" style="background: white;">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="section-title mb-2">Simple Pricing</h2>
-      <p class="text-gray-600 mb-4 text-lg">Choose a plan that fits your learning needs</p>
-      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-10" style="background: #fde68a; border: 2px solid black;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1f2937" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-        <span class="font-bold text-sm" style="color: #1f2937;">30-Day Money-Back Guarantee</span>
-      </div>
-
-      <div class="flex justify-center gap-4 mb-10">
-        <button id="monthlyBtn" class="btn" style="background: #c4b5fd;" onclick="setBilling('monthly')">Monthly</button>
-        <button id="yearlyBtn" class="btn bg-white" onclick="setBilling('yearly')">Yearly</button>
-      </div>
-
-      <div class="grid md-grid-cols-3 gap-8">
-        <!-- FREE -->
-        <div class="card pricing-card p-8" style="background: white;">
-          <h3 class="text-xl font-extrabold heading">Free</h3>
-          <p class="text-4xl font-extrabold mt-2">$0</p>
-          <ul class="mt-6 text-left space-y-4">
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> 10 questions per day</li>
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Basic AI answers</li>
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Standard response speed</li>
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Access to all subjects</li>
-          </ul>
-          <button onclick="scrollToAI()" class="btn mt-6 w-full" style="background: #93c5fd;">Start Now</button>
-        </div>
-
-        <!-- PRO -->
-        <div class="card pricing-card p-8 md-scale-105 relative" style="background: white;">
-          <div class="popular-badge">MOST POPULAR</div>
-          <h3 class="text-xl font-extrabold heading">Premium</h3>
-          <p class="text-4xl font-extrabold mt-2" id="proPrice">$9.99/mo</p>
-          <div class="trial-badge">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 8v4l3 3"/>
-              <circle cx="12" cy="12" r="10"/>
-            </svg>
-            3-Day Free Trial
-          </div>
-          <div class="save-badge mt-3" id="proSave">
-            <span class="save-pill">Save $39.89/year</span>
-          </div>
-          <ul class="mt-6 text-left space-y-4">
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Unlimited questions</li>
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Step-by-step solutions</li>
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Faster responses</li>
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Priority support</li>
-          </ul>
-          <button onclick="handlePurchase('Premium')" class="btn mt-6 w-full" style="background: #a7f3d0;">Start 3-Day Free Trial</button>
-        </div>
-
-        <!-- PRO+ -->
-        <div class="card pricing-card p-8" style="background: white;">
-          <h3 class="text-xl font-extrabold heading">Premium+</h3>
-          <p class="text-4xl font-extrabold mt-2" id="proPlusPrice">$14.99/mo</p>
-          <div class="trial-badge">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 8v4l3 3"/>
-              <circle cx="12" cy="12" r="10"/>
-            </svg>
-            3-Day Free Trial
-          </div>
-          <div class="save-badge mt-3" id="proPlusSave">
-            <span class="save-pill">Save $59.89/year</span>
-          </div>
-          <ul class="mt-6 text-left space-y-4">
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Everything in Premium</li>
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Video explanations</li>
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Deep learning insights</li>
-            <li class="flex items-center gap-2"><span class="text-green-500 font-bold">&#10004;</span> Fastest response speed</li>
-          </ul>
-          <button onclick="handlePurchase('Premium+')" class="btn mt-6 w-full" style="background: #fde68a;">Start 3-Day Free Trial</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="section-line"></div>
-
-  <!-- FAQ -->
-  <section class="py-16 md-py-24 px-6" style="background: white;">
-    <div class="max-w-4xl mx-auto">
-      <h2 class="section-title mb-4 text-center">Frequently Asked Questions</h2>
-      <p class="text-gray-600 mb-10 text-center text-lg">Everything you need to know about HomeWorkAI</p>
-      
-      <div class="space-y-4">
-        <div class="card p-6" style="background: #c4b5fd;">
-          <h3 class="font-extrabold heading text-lg">How does the 3-day free trial work?</h3>
-          <p class="mt-2 text-gray-700 leading-relaxed">Start using Premium or Premium+ features immediately. If you cancel within 3 days, you won't be charged anything. No credit card required to start!</p>
-        </div>
-        <div class="card p-6" style="background: #a7f3d0;">
-          <h3 class="font-extrabold heading text-lg">What subjects does HomeWorkAI cover?</h3>
-          <p class="mt-2 text-gray-700 leading-relaxed">We cover all major subjects including Math, Science, History, English, Computer Science, Economics, and more. Our AI is trained to help with homework from elementary school through college level.</p>
-        </div>
-        <div class="card p-6" style="background: #fde68a;">
-          <h3 class="font-extrabold heading text-lg">Can I upload images of my homework?</h3>
-          <p class="mt-2 text-gray-700 leading-relaxed">Yes! Simply click the camera button in the question box to upload a photo of your homework problem. Our AI will analyze the image and provide step-by-step solutions.</p>
-        </div>
-        <div class="card p-6" style="background: #c4b5fd;">
-          <h3 class="font-extrabold heading text-lg">Is my data safe and private?</h3>
-          <p class="mt-2 text-gray-700 leading-relaxed">Absolutely. We use industry-standard encryption and never share your personal information or homework questions with third parties. Your learning journey stays private.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="section-line"></div>
-
-  <!-- CTA -->
-  <section class="text-center py-16 md-py-20 px-6" style="background: #c4b5fd;">
-    <h2 class="section-title">Ready to Ace Your Homework?</h2>
-    <p class="mt-4 text-gray-700 text-lg max-w-2xl mx-auto">Join thousands of students improving grades with AI. Start free today and see the difference in your first question.</p>
-    <div class="flex flex-wrap justify-center gap-4 mt-8">
-      <button onclick="scrollToAI()" class="btn" style="background: #fde68a;">Get Started Free</button>
-      <button onclick="scrollToPricing()" class="btn bg-white">View Premium Plans</button>
-    </div>
-    <div class="flex flex-wrap justify-center gap-6 mt-8">
-      <div class="flex items-center gap-2 text-sm font-semibold">
-        <span class="text-green-500">&#10004;</span> No credit card required
-      </div>
-      <div class="flex items-center gap-2 text-sm font-semibold">
-        <span class="text-green-500">&#10004;</span> 10 free questions daily
-      </div>
-      <div class="flex items-center gap-2 text-sm font-semibold">
-        <span class="text-green-500">&#10004;</span> Cancel anytime
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="text-center py-8" style="background: #0f172a; color: white; border-top: 4px solid black;">
-    <div class="flex items-center justify-center gap-2 mb-2">
-      <div style="width: 32px; height: 32px; background: white; border-radius: 8px; border: 2px solid black; display: flex; align-items: center; justify-content: center;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-        </svg>
-      </div>
-      <span class="font-extrabold text-lg tracking-tight heading">HomeWorkAI</span>
-    </div>
-    <p class="text-gray-400 text-sm">&copy; 2026 HomeWorkAI. Helping students succeed.</p>
-  </footer>
-
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
-      authDomain: "homeworkai-6364c.firebaseapp.com",
-      projectId: "homeworkai-6364c",
-      storageBucket: "homeworkai-6364c.firebasestorage.app",
-      messagingSenderId: "486462619999",
-      appId: "1:486462619999:web:885753530368f657d3f6ea",
-      measurementId: "G-9Q99SL0FBX"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    window.currentUser = null;
-    window.pendingAction = null;
-
-    onAuthStateChanged(auth, (user) => {
-      window.currentUser = user;
-      updateLoginButton();
-      
-      if (user && window.pendingAction) {
-        if (window.pendingAction.type === 'askQuestion') {
-          setTimeout(() => {
-            executeAskQuestion();
-          }, 300);
-        } else if (window.pendingAction.type === 'purchase') {
-          setTimeout(() => {
-            executePurchase(window.pendingAction.plan);
-          }, 300);
-        }
-        window.pendingAction = null;
-      }
-    });
-
-    window.triggerGoogleLogin = async function(pendingActionType, pendingActionData) {
-      if (pendingActionType === 'askQuestion') {
-        window.pendingAction = { type: 'askQuestion' };
-      } else if (pendingActionType === 'purchase') {
-        window.pendingAction = { type: 'purchase', plan: pendingActionData };
-      }
-      
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (error) {
-        window.pendingAction = null;
-        if (error.code !== 'auth/popup-closed-by-user') {
-          console.error('Login error:', error);
-        }
-      }
-    };
-
-    window.handleLogin = async function() {
-      if (window.currentUser) {
-        await signOut(auth);
-        window.currentUser = null;
-        updateLoginButton();
-      } else {
-        try {
-          await signInWithPopup(auth, provider);
-        } catch (error) {
-          if (error.code !== 'auth/popup-closed-by-user') {
-            console.error('Login error:', error);
-          }
-        }
-      }
-    };
-
-    function updateLoginButton() {
-      const loginText = document.getElementById('loginText');
-      const loginIcon = document.getElementById('loginIcon');
-      
-      if (window.currentUser) {
-        const photoURL = window.currentUser.photoURL;
-        const displayName = window.currentUser.displayName || window.currentUser.email || 'Account';
-        
-        if (photoURL) {
-          loginIcon.innerHTML = `<img src="${photoURL}" class="user-avatar" alt="Profile" referrerpolicy="no-referrer">`;
-        } else {
-          loginIcon.innerHTML = `
-            <div class="default-avatar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </div>
-          `;
-        }
-        loginText.textContent = displayName;
-      } else {
-        loginIcon.innerHTML = `<img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google">`;
-        loginText.textContent = 'Login with Google';
-      }
-    }
-  </script>
-
-  <script>
-    let billing = 'monthly';
-    const DAILY_LIMIT = 10;
-
-    function getTodayKey() {
-      return new Date().toISOString().split('T')[0];
-    }
-
-    function getUsageData() {
-      const stored = localStorage.getItem('homeworkai_usage');
-      if (stored) {
-        const data = JSON.parse(stored);
-        if (data.date !== getTodayKey()) {
-          return { date: getTodayKey(), count: 0, freeUsed: data.freeUsed || false };
-        }
-        return data;
-      }
-      return { date: getTodayKey(), count: 0, freeUsed: false };
-    }
-
-    function setUsageData(data) {
-      localStorage.setItem('homeworkai_usage', JSON.stringify(data));
-    }
-
-    const avatarColors = [
-      '7c3aed', '059669', 'f59e0b', '3b82f6', 'ec4899', '06b6d4', 'ef4444', '8b5cf6',
-    ];
-
-    const reviews = [
-      { id: 1, name: 'Sarah M.', handle: '@sarahm_22', text: 'Saved my grades. I went from a C to an A in calculus!', time: '2h', bg: '#c4b5fd' },
-      { id: 2, name: 'Jake T.', handle: '@jaket_codes', text: 'I used to get stuck for hours. Now I understand everything step-by-step and can solve problems on my own.', time: '5h', bg: '#a7f3d0' },
-      { id: 3, name: 'Emily R.', handle: '@emilyreads', text: 'Best homework tool I have ever used. Period.', time: '1d', bg: '#fde68a' },
-      { id: 4, name: 'Marcus L.', handle: '@marcusl', text: 'Helped me prepare for tests way better than studying notes.', time: '1d', bg: '#c4b5fd' },
-      { id: 5, name: 'Olivia K.', handle: '@oliviak_', text: 'Makes homework actually make sense. My parents are impressed!', time: '2d', bg: '#a7f3d0' },
-      { id: 6, name: 'David W.', handle: '@david_wins', text: 'Went from failing algebra to getting A grades in 2 weeks. Not even kidding.', time: '3d', bg: '#fde68a' },
-      { id: 7, name: 'Ava P.', handle: '@avapatel', text: 'Actually teaches instead of just answering. This is how learning should be.', time: '4d', bg: '#c4b5fd' },
-      { id: 8, name: 'Noah C.', handle: '@noahc_student', text: 'Homework used to stress me out every night. Now I finish faster and understand everything.', time: '5d', bg: '#a7f3d0' },
-    ];
-
-    function getAvatarUrl(name, index) {
-      const color = avatarColors[index % avatarColors.length];
-      const encodedName = encodeURIComponent(name);
-      return `https://ui-avatars.com/api/?name=${encodedName}&background=${color}&color=fff&size=96&font-size=0.4&bold=true`;
-    }
-
-    function renderReviews() {
-      const container = document.getElementById('reviews');
-      container.innerHTML = reviews.map((review, index) => `
-        <div class="review-card" style="background: ${review.bg};">
-          <div class="flex items-center gap-3 mb-3">
-            <img src="${getAvatarUrl(review.name, index)}" class="review-avatar" alt="${review.name}">
-            <div class="flex-1 min-w-0">
-              <p class="font-bold text-sm truncate">${review.name}</p>
-              <p class="text-xs text-gray-600 truncate">${review.handle}</p>
-            </div>
-          </div>
-          <p class="text-sm text-gray-800 leading-relaxed">${review.text}</p>
-          <div class="flex items-center justify-between mt-3 pt-3 border-t" style="border-color: rgba(0,0,0,0.1);">
-            <div class="flex" style="gap: 2px;">
-              ${[1,2,3,4,5].map(() => `<svg class="text-amber-400" style="width: 16px; height: 16px; fill: #fbbf24;" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>`).join('')}
-            </div>
-            <span class="text-xs text-gray-500 font-semibold">${review.time}</span>
-          </div>
-        </div>
-      `).join('');
-    }
-    renderReviews();
-
-    function scrollToAI() {
-      document.getElementById('ai-helper').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function scrollToPricing() {
-      document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function setBilling(type) {
-      billing = type;
-      document.getElementById('monthlyBtn').style.background = type === 'monthly' ? '#c4b5fd' : 'white';
-      document.getElementById('yearlyBtn').style.background = type === 'yearly' ? '#c4b5fd' : 'white';
-      
-      document.getElementById('proPrice').textContent = type === 'monthly' ? '$9.99/mo' : '$79.99/yr';
-      document.getElementById('proPlusPrice').textContent = type === 'monthly' ? '$14.99/mo' : '$119.99/yr';
-      
-      document.getElementById('proSave').className = type === 'yearly' ? 'save-badge show-save' : 'save-badge';
-      document.getElementById('proPlusSave').className = type === 'yearly' ? 'save-badge show-save' : 'save-badge';
-    }
-
-    function setQuestion(q) {
-      document.getElementById('questionInput').value = q;
-    }
-
-    function handlePurchase(plan) {
-      if (!window.currentUser) {
-        window.triggerGoogleLogin('purchase', plan);
-        return;
-      }
-      executePurchase(plan);
-    }
-
-    function executePurchase(plan) {
-      const modal = document.createElement('div');
-      modal.className = 'fixed inset-0 flex items-center justify-center z-50 p-4';
-      modal.style.cssText = 'background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);';
-      modal.innerHTML = `
-        <div class="rounded-2xl p-8 relative text-center" style="background: white; max-width: 24rem; width: 100%; border: 4px solid black; box-shadow: 8px 8px 0 black;">
-          <div class="text-4xl mb-4">&#127881;</div>
-          <h3 class="text-xl font-extrabold heading mb-2">Starting Your 3-Day Free Trial!</h3>
-          <p class="text-gray-600 mb-6">You're about to start a free trial for <strong>${plan}</strong>.<br>Cancel anytime within 3 days - no charge!</p>
-          <button onclick="this.closest('.fixed').remove()" class="btn" style="background: #a7f3d0;">Got it!</button>
-        </div>
-      `;
-      modal.onclick = function(e) {
-        if (e.target === modal) modal.remove();
-      };
-      document.body.appendChild(modal);
-    }
-
-    function handleAskQuestion() {
-      const question = document.getElementById('questionInput').value.trim();
-      if (!question) return;
-
-      const usage = getUsageData();
-
-      if (!window.currentUser) {
-        if (usage.freeUsed) {
-          window.triggerGoogleLogin('askQuestion');
-          return;
-        }
-        usage.freeUsed = true;
-        setUsageData(usage);
-        executeAskQuestion();
-        return;
-      }
-
-      if (usage.count >= DAILY_LIMIT) {
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 flex items-center justify-center z-50 p-4';
-        modal.style.cssText = 'background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);';
-        modal.innerHTML = `
-          <div class="rounded-2xl p-8 relative text-center" style="background: white; max-width: 24rem; width: 100%; border: 4px solid black; box-shadow: 8px 8px 0 black;">
-            <div class="text-4xl mb-4">&#9200;</div>
-            <h3 class="text-xl font-extrabold heading mb-2">Daily Limit Reached</h3>
-            <p class="text-gray-600 mb-6">You've used all 10 free questions today.<br>Come back tomorrow or upgrade for unlimited access!</p>
-            <div class="flex gap-3 justify-center">
-              <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
-              <button onclick="this.closest('.fixed').remove(); scrollToPricing();" class="btn" style="background: #a7f3d0;">View Plans</button>
-            </div>
-          </div>
-        `;
-        modal.onclick = function(e) {
-          if (e.target === modal) modal.remove();
-        };
-        document.body.appendChild(modal);
-        return;
-      }
-
-      usage.count++;
-      setUsageData(usage);
-      executeAskQuestion();
-    }
-
-    function executeAskQuestion() {
-      const question = document.getElementById('questionInput').value.trim();
-      if (!question) return;
-
-      const askBtn = document.getElementById('askBtn');
-      askBtn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> AI is thinking...';
-      askBtn.disabled = true;
-
+  onAuthStateChanged(auth, (user) => {
+    window.currentUser = user;
+    updateLoginUI();
+    if (user && window.pendingAction) {
+      const action = window.pendingAction;
+      window.pendingAction = null;
       setTimeout(() => {
-        const answer = `Great question! Here's a step-by-step explanation:
-
-**Understanding the Problem:**
-${question}
-
-**Step 1:** First, let's identify the key concepts involved in this problem.
-
-**Step 2:** Now we can apply the relevant formulas or methods.
-
-**Step 3:** Working through the calculation:
-- Break down the problem into smaller parts
-- Apply each concept systematically
-- Check your work as you go
-
-**Final Answer:** The solution involves understanding the underlying principles and applying them methodically. This approach will help you solve similar problems in the future!
-
-&#128161; **Pro Tip:** Practice similar problems to reinforce your understanding.`;
-
-        const answerBox = document.getElementById('answerBox');
-        answerBox.innerHTML = `
-          <div class="flex items-center gap-2 mb-4">
-            <div class="icon-box" style="width: 40px; height: 40px; font-size: 16px;">&#129504;</div>
-            <span class="font-extrabold heading">HomeWorkAI Response</span>
-          </div>
-          <div class="whitespace-pre-line text-gray-700 leading-relaxed">${answer}</div>
-        `;
-        answerBox.classList.remove('hidden');
-
-        askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Get Answer';
-        askBtn.disabled = false;
-      }, 2000);
+        if (action.type === 'askQuestion') executeAskQuestion();
+        else if (action.type === 'purchase') executePurchase(action.plan);
+      }, 300);
     }
+  });
 
-    document.getElementById('fileInput').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        document.getElementById('questionInput').value += `\n[Image attached: ${file.name}]`;
-      }
-    });
-  </script>
-</body>
-</html>
+  window.triggerGoogleLogin = async function(type, data) {
+    window.pendingAction = type === 'purchase' ? { type, plan: data } : { type };
+    try { await signInWithPopup(auth, provider); }
+    catch (e) { window.pendingAction = null; if (e.code !== 'auth/popup-closed-by-user') console.error(e); }
+  };
+
+  window.handleLogin = async function() {
+    try { await signInWithPopup(auth, provider); }
+    catch (e) { if (e.code !== 'auth/popup-closed-by-user') console.error(e); }
+  };
+
+  window.handleLogout = async function() {
+    closeDropdown();
+    await signOut(auth);
+    window.currentUser = null;
+    updateLoginUI();
+  };
+
+  window.handleSwitchAccount = async function() {
+    closeDropdown();
+    try {
+      const p = new GoogleAuthProvider();
+      p.setCustomParameters({ prompt: 'select_account' });
+      await signInWithPopup(auth, p);
+    } catch (e) { if (e.code !== 'auth/popup-closed-by-user') console.error(e); }
+  };
+
+  function updateLoginUI() {
+    const loginBtn = document.getElementById('loginBtn');
+    const accountWrapper = document.getElementById('accountDropdownWrapper');
+    if (window.currentUser) {
+      loginBtn.style.display = 'none';
+      accountWrapper.style.display = 'block';
+      const { photoURL, displayName, email } = window.currentUser;
+      const name = displayName || email || 'Account';
+      document.getElementById('accountName').textContent = name.split(' ')[0];
+      document.getElementById('dropdownName').textContent = name;
+      document.getElementById('dropdownEmail').textContent = email || '';
+      document.getElementById('accountIcon').innerHTML = photoURL
+        ? `<img src="${photoURL}" class="user-avatar" alt="Profile" referrerpolicy="no-referrer">`
+        : `<div class="default-av... (12 KB left)
 <!-- deploy -->
