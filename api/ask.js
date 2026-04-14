@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { question, plan } = req.body;
+    const { question, plan, imageBase64, imageType } = req.body;
     if (!question) {
       return res.status(400).json({ error: "No question provided" });
     }
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
     // YouTube instruction — only for pro_plus
     const youtubeInstruction = userPlan === "pro_plus"
-      ? `\nVideos: [suggest 1-2 short YouTube search titles (not URLs) relevant to this exact topic, on their own line after the Tip/Deeper Insight, formatted as:\nVideos:\n- [title 1]\n- [title 2]]`
+      ? `\nVideos: [Find 1-2 highly relevant YouTube videos for this EXACT topic. Format each as:\nTitle: [exact video title]\nLink: https://www.youtube.com/results?search_query=[url-encoded search terms]\nPlace these after the Tip/Deeper Insight on their own lines.]`
       : "";
 
     const systemPrompt = `You are an expert tutor for ALL school subjects — math, science (biology, chemistry, physics), history, English, economics, and more. You help students from K-12 through college level.
@@ -67,6 +67,23 @@ Plain text only — no LaTeX, no markdown (no **, no ##, no \\[, no $).
 
 If the question is not academic, respond only: "I'm here to help with homework and studying. Try asking me a subject question!"`;
 
+    // Build input — support text + optional image
+    let inputContent;
+    if (imageBase64 && imageType) {
+      inputContent = [
+        {
+          type: "input_image",
+          image_url: `data:${imageType};base64,${imageBase64}`
+        },
+        {
+          type: "input_text",
+          text: question ? `Question: ${question}` : "Please read this image and answer the homework question shown."
+        }
+      ];
+    } else {
+      inputContent = `Question: ${question}`;
+    }
+
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
@@ -76,7 +93,7 @@ If the question is not academic, respond only: "I'm here to help with homework a
       body: JSON.stringify({
         model: "gpt-4o-mini",
         instructions: systemPrompt,
-        input: `Question: ${question}`
+        input: inputContent
       })
     });
 
@@ -106,17 +123,22 @@ If the question is not academic, respond only: "I'm here to help with homework a
       .replace(/\n{3,}/g, "\n\n")
       .trim();
 
-    // Extract video suggestions (Pro+ only) — parse them out and send as separate array
+    // Extract video suggestions (Pro+ only)
     let videos = [];
     if (userPlan === "pro_plus") {
-      const videoMatch = answer.match(/Videos:\n([\s\S]*?)(?:\n\n|$)/);
-      if (videoMatch) {
-        videos = videoMatch[1]
-          .split("\n")
-          .map(l => l.replace(/^-\s*/, "").trim())
-          .filter(Boolean);
-        // Remove the Videos block from the main answer text
-        answer = answer.replace(/Videos:\n[\s\S]*?(?:\n\n|$)/, "").trim();
+      // Match "Title: X\nLink: Y" pairs
+      const videoBlockMatch = answer.match(/Videos:([\s\S]*?)(?:\n\n|$)/);
+      if (videoBlockMatch) {
+        const block = videoBlockMatch[1];
+        const pairs = block.matchAll(/Title:\s*(.+?)\s*\nLink:\s*(https?:\/\/\S+)/gi);
+        for (const m of pairs) {
+          videos.push(`Title: ${m[1].trim()} Link: ${m[2].trim()}`);
+        }
+        // Fallback: simple dash list
+        if (videos.length === 0) {
+          videos = block.split("\n").map(l => l.replace(/^-\s*/, "").trim()).filter(Boolean);
+        }
+        answer = answer.replace(/Videos:[\s\S]*?(?:\n\n|$)/, "").trim();
       }
     }
 
@@ -127,3 +149,4 @@ If the question is not academic, respond only: "I'm here to help with homework a
     return res.status(500).json({ error: "Something went wrong" });
   }
 }
+
