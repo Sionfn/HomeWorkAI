@@ -116,6 +116,16 @@ STRICT RULES:
     }
 
     // ── Call OpenAI ───────────────────────────────────────────────────────
+    // ── Model selection by plan ───────────────────────────────────────────
+    let model;
+    if (userPlan === "pro_plus") {
+      model = "gpt-4.1";
+    } else if (userPlan === "pro") {
+      model = "gpt-4.1-mini";
+    } else {
+      model = "gpt-4o-mini";
+    }
+
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
@@ -123,7 +133,7 @@ STRICT RULES:
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: model,
         instructions: systemPrompt,
         input: inputContent
       })
