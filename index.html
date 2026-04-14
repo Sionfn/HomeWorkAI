@@ -508,6 +508,7 @@
           </button>
         </div>
       </div>
+      <div id="usageCounter" style="margin-bottom:10px;font-size:13px;font-weight:700;color:#4b5563;text-align:right;min-height:20px;"></div>
       <button id="askBtn" onclick="handleAskQuestion()" class="btn w-full flex items-center justify-center gap-2" style="background:var(--green);font-size:16px;">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
         Get Answer
@@ -764,6 +765,7 @@
   };
 
   function updateLoginUI() {
+    if (typeof updateUsageCounter === "function") updateUsageCounter();
     const loginBtn = document.getElementById('loginBtn');
     const accountWrapper = document.getElementById('accountDropdownWrapper');
     if (window.currentUser) {
@@ -787,7 +789,7 @@
 <!-- ===================== APP JS ===================== -->
 <script>
   let billing = 'monthly';
-  const DAILY_LIMIT = 10;
+  // DAILY_LIMIT defined in usage limits section below
 
   document.addEventListener('click', (e) => {
     const w = document.getElementById('accountDropdownWrapper');
@@ -833,31 +835,107 @@
     document.body.appendChild(modal);
   }
 
-  function handleAskQuestion() {
-    const question = document.getElementById('questionInput').value.trim();
-    if (!question) return;
+  // ======= USAGE LIMITS =======
+  const GUEST_LIMIT = 3;       // total questions for non-logged-in users
+  const DAILY_LIMIT = 10;      // questions per day for logged-in users
+
+  function getTodayKey() { return new Date().toISOString().split('T')[0]; }
+
+  function getUsageData() {
+    try {
+      const stored = localStorage.getItem('homeworkai_usage');
+      if (stored) {
+        const data = JSON.parse(stored);
+        // Reset daily count if it's a new day
+        if (data.date !== getTodayKey()) {
+          return { date: getTodayKey(), count: 0, guestCount: data.guestCount || 0 };
+        }
+        return data;
+      }
+    } catch(e) {}
+    return { date: getTodayKey(), count: 0, guestCount: 0 };
+  }
+
+  function setUsageData(data) {
+    localStorage.setItem('homeworkai_usage', JSON.stringify(data));
+  }
+
+  function updateUsageCounter() {
+    const counter = document.getElementById('usageCounter');
+    if (!counter) return;
     const usage = getUsageData();
     if (!window.currentUser) {
-      if (usage.freeUsed) { window.triggerGoogleLogin('askQuestion'); return; }
-      usage.freeUsed = true; setUsageData(usage); executeAskQuestion(); return;
+      const remaining = Math.max(0, GUEST_LIMIT - (usage.guestCount || 0));
+      if (remaining === 0) {
+        counter.innerHTML = '<span style="color:#dc2626;">No free questions left — <a href="#" onclick="window.triggerGoogleLogin('askQuestion');return false;" style="color:#7c3aed;text-decoration:underline;">Login to continue</a></span>';
+      } else {
+        counter.textContent = `Free questions left: ${remaining}`;
+        counter.style.color = remaining === 1 ? '#f59e0b' : '#4b5563';
+      }
+    } else {
+      const remaining = Math.max(0, DAILY_LIMIT - usage.count);
+      if (remaining === 0) {
+        counter.innerHTML = '<span style="color:#dc2626;">Daily limit reached — resets tomorrow</span>';
+      } else {
+        counter.textContent = `Daily questions left: ${remaining}`;
+        counter.style.color = remaining <= 2 ? '#f59e0b' : '#4b5563';
+      }
     }
-    if (usage.count >= DAILY_LIMIT) {
-      const modal = document.createElement('div');
-      modal.className = 'fixed inset-0 flex items-center justify-center z-50';
-      modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+  }
+
+  function showLimitModal(isGuest) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 flex items-center justify-center z-50';
+    modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+    if (isGuest) {
+      modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:16px;">🔒</div>
+        <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">You've used your free questions</h3>
+        <p style="color:#4b5563;margin-bottom:24px;">Login to continue using HomeWorkAI and get 10 free questions every day.</p>
+        <div style="display:flex;gap:12px;justify-content:center;">
+          <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
+          <button onclick="this.closest('.fixed').remove();window.triggerGoogleLogin('askQuestion');" class="btn" style="background:var(--purple);">Login to Continue</button>
+        </div>
+      </div>`;
+    } else {
       modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
         <div style="font-size:40px;margin-bottom:16px;">⏰</div>
         <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Daily Limit Reached</h3>
-        <p style="color:#4b5563;margin-bottom:24px;">You've used all 10 free questions today.<br>Come back tomorrow or upgrade for unlimited access!</p>
+        <p style="color:#4b5563;margin-bottom:24px;">You've used all ${DAILY_LIMIT} free questions today.<br>Come back tomorrow or upgrade for unlimited access!</p>
         <div style="display:flex;gap:12px;justify-content:center;">
           <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
           <button onclick="this.closest('.fixed').remove();scrollToPricing();" class="btn" style="background:var(--green);">View Plans</button>
         </div>
       </div>`;
-      modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
-      document.body.appendChild(modal); return;
     }
-    usage.count++; setUsageData(usage); executeAskQuestion();
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    document.body.appendChild(modal);
+  }
+
+  function handleAskQuestion() {
+    const question = document.getElementById('questionInput').value.trim();
+    if (!question) return;
+    const usage = getUsageData();
+
+    if (!window.currentUser) {
+      // Guest: allow up to GUEST_LIMIT total questions
+      if ((usage.guestCount || 0) >= GUEST_LIMIT) {
+        showLimitModal(true); return;
+      }
+      usage.guestCount = (usage.guestCount || 0) + 1;
+      setUsageData(usage);
+      updateUsageCounter();
+      executeAskQuestion(); return;
+    }
+
+    // Logged-in: allow up to DAILY_LIMIT per day
+    if (usage.count >= DAILY_LIMIT) {
+      showLimitModal(false); return;
+    }
+    usage.count++;
+    setUsageData(usage);
+    updateUsageCounter();
+    executeAskQuestion();
   }
 
   async function executeAskQuestion() {
@@ -913,17 +991,7 @@
     }
   }
 
-  function getTodayKey() { return new Date().toISOString().split('T')[0]; }
-  function getUsageData() {
-    const stored = localStorage.getItem('homeworkai_usage');
-    if (stored) {
-      const data = JSON.parse(stored);
-      if (data.date !== getTodayKey()) return { date: getTodayKey(), count: 0, freeUsed: false };
-      return data;
-    }
-    return { date: getTodayKey(), count: 0, freeUsed: false };
-  }
-  function setUsageData(data) { localStorage.setItem('homeworkai_usage', JSON.stringify(data)); }
+  // (usage helpers defined above)
 
   document.getElementById('fileInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
