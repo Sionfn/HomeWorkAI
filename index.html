@@ -626,10 +626,10 @@
         <h3 class="text-xl font-extrabold heading">Free</h3>
         <p class="text-4xl font-extrabold mt-2">$0</p>
         <ul class="mt-6 text-left space-y-4 features-list">
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 5 questions per day (logged in)</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 1 guest question (no login)</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 1 question without login</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 5 questions/day (logged in)</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Basic AI answers</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Standard response speed</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Short explanations</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Access to all subjects</li>
         </ul>
         <div class="cta-btn-wrap">
@@ -648,10 +648,11 @@
         </div>
         <div class="save-badge mt-3" id="proSave"><span class="save-pill">Save $39.89/year</span></div>
         <ul class="mt-6 text-left space-y-4 features-list">
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Unlimited questions</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Step-by-step solutions</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Faster responses</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Priority support</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> <strong>Unlimited</strong> questions</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Better AI model (gpt-4.1-mini)</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Clear step-by-step explanations</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> <strong>Bold</strong> formatting for key ideas</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Feels like a strong tutor</li>
         </ul>
         <div class="cta-btn-wrap" style="padding-top:28px;">
           <button onclick="handlePurchase('Pro')" class="btn w-full btn-pulse" style="background:var(--green);font-size:15px;">Start 3-Day Free Trial</button>
@@ -669,9 +670,10 @@
         <div class="save-badge mt-3" id="proPlusSave"><span class="save-pill">Save $59.89/year</span></div>
         <ul class="mt-6 text-left space-y-4 features-list">
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Everything in Pro</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Video explanations</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Deep learning insights</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Fastest response speed</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Best AI model (gpt-4.1)</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Deepest explanations &amp; insights</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> <strong>Bold</strong> + <u>underline</u> formatting</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 🎬 Video suggestions (when relevant)</li>
         </ul>
         <div class="cta-btn-wrap">
           <button onclick="handlePurchase('Pro+')" class="btn w-full" style="background:var(--yellow);">Start 3-Day Free Trial</button>
@@ -1033,6 +1035,20 @@
 
       // ── Rich response renderer ──────────────────────────────────────────
       function renderResponse(answer, videos, plan) {
+        // ── Format inline text: bold (**) for Pro+Pro+, underline (__) for Pro+ only ──
+        function formatInline(text, planTier) {
+          let out = text;
+          if (planTier === "pro" || planTier === "pro_plus") {
+            // Bold: **word** → <strong>word</strong>
+            out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+          }
+          if (planTier === "pro_plus") {
+            // Underline: __phrase__ → <u>phrase</u>
+            out = out.replace(/__(.+?)__/g, "<u>$1</u>");
+          }
+          return out;
+        }
+
         const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
 
         let finalAnswerText = "";
@@ -1077,7 +1093,7 @@
             tipText = line.replace("Tip:", "").trim();
           } else if (mode === "steps" && /^\d+\./.test(line)) {
             const num = line.match(/^(\d+)\./)[1];
-            const text = line.replace(/^\d+\.\s*/, "");
+            const text = formatInline(line.replace(/^\d+\.\s*/, ""), plan);
             stepsHtml += `<div class="resp-step"><div class="resp-step-num">${num}</div><div class="resp-step-text">${text}</div></div>`;
           } else if (mode === "keypoints" && /^[-•*]/.test(line)) {
             // bullet points under Key Points
@@ -1101,7 +1117,7 @@
         html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
 
         if (finalAnswerText) {
-          html += `<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">${finalAnswerText}</div></div>`;
+          html += `<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">${formatInline(finalAnswerText, plan)}</div></div>`;
         }
 
         if (stepsHtml) {
@@ -1111,19 +1127,19 @@
         // Render collected paragraphs in order
         for (const p of paragraphs) {
           if (p.type === "explanation") {
-            html += `<div class="resp-body-para resp-para-explanation">${p.text}</div>`;
+            html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
           } else if (p.type === "insight") {
-            html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${p.text}</div></div>`;
+            html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${formatInline(p.text, plan)}</div></div>`;
           } else if (p.type === "bullet") {
-            html += `<div class="resp-bullet">• ${p.text}</div>`;
+            html += `<div class="resp-bullet">• ${formatInline(p.text, plan)}</div>`;
           } else if (p.text) {
             // General prose paragraph — rendered with good spacing
-            html += `<div class="resp-body-para">${p.text}</div>`;
+            html += `<div class="resp-body-para">${formatInline(p.text, plan)}</div>`;
           }
         }
 
         if (tipText.trim()) {
-          html += `<div class="resp-tip"><div class="resp-tip-icon">💡</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">${tipText.trim()}</div></div></div>`;
+          html += `<div class="resp-tip"><div class="resp-tip-icon">💡</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">${formatInline(tipText.trim(), plan)}</div></div></div>`;
         }
 
         if (videos && videos.length > 0) {
