@@ -12,44 +12,65 @@ export default async function handler(req, res) {
     const userPlan = plan || "free";
 
     // ── Plan-based quality tier ───────────────────────────────────────────
+    // FREE  → gpt-4o-mini  | basic, short, minimal formatting
+    // PRO   → gpt-4.1-mini | clear tutor, better explanations, bold formatting
+    // PRO+  → gpt-4.1      | expert professor, deepest explanations, bold + underline, videos
     let planInstructions = "";
 
     if (userPlan === "pro") {
-      planInstructions = `QUALITY LEVEL: Pro (clear tutor)
+      planInstructions = `QUALITY LEVEL: Pro (strong tutor)
+You are a clear, confident tutor helping a student genuinely understand the material.
+
+FORMATTING — Pro plan supports bold text. Use it selectively:
+- Wrap important terms or key values in **double asterisks** to bold them (e.g., **photosynthesis**, **x = 5**).
+- Bold only what truly matters — 2-4 highlights per response. Never over-bold.
+
 After the Final Answer, write an Explanation section. Rules:
 - 2-3 short paragraphs. Each paragraph is one clear idea. 2-3 sentences each.
 - Explain the WHY — not just what happened, but why it works or why it matters.
 - Teach clearly, like you're explaining to a smart student who wants to understand.
-- For math: after the steps, explain the logic behind the method.
+- For math: after the steps, explain the logic behind the method and bold key results.
 - For concepts: explain causes, mechanisms, real-world meaning.
 - Add a Tip only if it is genuinely useful. Skip it if not.
 - Keep paragraphs short. Never write a wall of text.`;
 
     } else if (userPlan === "pro_plus") {
-      planInstructions = `QUALITY LEVEL: Pro+ (expert professor level)
+      planInstructions = `QUALITY LEVEL: Pro+ (expert professor)
+You are a top-tier professor delivering the clearest, deepest, most useful explanation possible.
+
+FORMATTING — Pro+ plan supports bold AND underline. Use both purposefully:
+- Wrap important terms in **double asterisks** to bold them (e.g., **Newton's Second Law**).
+- Wrap key concepts that the student must remember in __double underscores__ to underline them (e.g., __the derivative measures rate of change__).
+- Bold 3-5 highlights and underline 1-2 must-remember concepts per response. Never over-format.
+
 After the Final Answer, write an Explanation section. Rules:
 - 2-4 short paragraphs. Each paragraph is one focused idea. 2-3 sentences each.
 - Go deeper than surface facts. Explain underlying principles, real-world implications, or important connections.
-- For math: explain the full reasoning, then add why the method works at a conceptual level.
-- For concepts: break down causes, mechanisms, and significance with specific detail.
+- For math: explain the full reasoning, then add why the method works at a conceptual level. Bold key numbers and underline the core method name.
+- For concepts: break down causes, mechanisms, and significance with specific detail. Underline the single most important idea.
 - After Explanation, add "Insight:" ONLY if there is something genuinely valuable — a key nuance, a common mistake, or a deeper connection students miss. One short paragraph. Skip for simple questions.
 - Add a Tip only if it is a high-value shortcut or mental model. Skip if nothing valuable to add.
 - Keep each paragraph short and sharp. Never write walls of text. Quality over quantity.`;
 
     } else {
+      // FREE tier — basic, concise, no special formatting
       planInstructions = `QUALITY LEVEL: Free (basic helper)
 After the Final Answer:
 - Write 1-2 short sentences that explain the core idea simply.
 - For math: show the key steps only.
 - For concepts: one simple explanation sentence, then optionally one example.
 - Do NOT add Tip, Insight, Key Points, or extra sections.
+- Do NOT use bold (**) or underline (__) formatting.
 - Be helpful but concise.`;
     }
 
-    // ── YouTube titles (Pro+ only) ────────────────────────────────────────
+    // ── YouTube titles (Pro+ ONLY) ────────────────────────────────────────
+    // Videos are an exclusive Pro+ feature. Only suggest videos when the topic
+    // genuinely benefits from visual/video learning (e.g. complex math, science
+    // experiments, historical events). Skip for simple or one-line questions.
     const youtubeInstruction = userPlan === "pro_plus"
-      ? `\n\nIf the topic genuinely warrants it, add a "Videos:" section at the very end with 1-2 relevant YouTube video titles. Format:\nTitle: [descriptive title]\nTitles only — no URLs. Skip entirely for simple questions.`
-      : "";
+      ? `\n\nPro+ exclusive: If the topic genuinely warrants a video (complex concept, visual process, or deep subject), add a "Videos:" section at the very end with 1-2 relevant YouTube video titles. Format:\nTitle: [descriptive title]\nTitles only — no URLs. Skip entirely for simple or short questions. Quality over quantity.`
+      : "";  // Free and Pro plans do NOT get videos
 
     // ── Core system prompt ────────────────────────────────────────────────
     const systemPrompt = `You are HomeWorkAI — an expert academic tutor for ALL subjects from K-12 through college.
@@ -95,7 +116,7 @@ STRICT RULES:
    - English: name the technique and explain its effect with textual evidence
    - Economics: connect the concept to real human incentives and behavior
    - Law/Psychology: state the principle then give a concrete real-world example
-7. Plain text ONLY — no LaTeX, no markdown symbols (no **, no ##, no $ for math)
+7. FORMATTING: Free tier — plain text ONLY, no bold, no underline. Pro tier — bold (**word**) allowed for key terms. Pro+ tier — bold (**word**) AND underline (__phrase__) allowed for key terms. No LaTeX, no markdown symbols like ##, no $ for math.
 8. Non-academic question: reply only "I'm here to help with homework and studying. Try asking me a subject question!"
 9. Write like a confident, intelligent tutor — not a chatbot, not an essay.${youtubeInstruction}`;
 
@@ -115,8 +136,10 @@ STRICT RULES:
       inputContent = `Question: ${question}`;
     }
 
-    // ── Call OpenAI ───────────────────────────────────────────────────────
     // ── Model selection by plan ───────────────────────────────────────────
+    // FREE    → gpt-4o-mini  (basic, fast)
+    // PRO     → gpt-4.1-mini (better quality, clear tutor)
+    // PRO+    → gpt-4.1      (best quality, expert professor)
     let model;
     if (userPlan === "pro_plus") {
       model = "gpt-4.1";
@@ -152,16 +175,28 @@ STRICT RULES:
     } catch (e) { console.log("Parse error:", data); }
 
     // ── Strip LaTeX / markdown ────────────────────────────────────────────
+    // Always strip LaTeX and heading markers.
+    // For Pro/Pro+, preserve ** (bold) and __ (underline) — the frontend renders them.
+    // For Free, strip all formatting markers.
     let answer = rawAnswer
       .replace(/\\\[[\s\S]*?\\\]/g, "")
       .replace(/\\\([\s\S]*?\\\)/g, "")
       .replace(/\$\$[\s\S]*?\$\$/g, "")
       .replace(/\$([^$]+)\$/g, "$1")
-      .replace(/\*\*(.*?)\*\*/g, "$1")
-      .replace(/\*(.*?)\*/g, "$1")
       .replace(/^#{1,6}\s/gm, "")
       .replace(/\n{3,}/g, "\n\n")
       .trim();
+
+    // For Free users only: strip bold and italic markers too
+    if (userPlan === "free") {
+      answer = answer
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .replace(/\*(.*?)\*/g, "$1")
+        .replace(/__(.*?)__/g, "$1");
+    } else {
+      // For Pro/Pro+: only strip lone single asterisks (italic), keep ** and __
+      answer = answer.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "$1");
+    }
 
     // ── Extract videos (Pro+ only) — always YouTube search URLs ──────────
     let videos = [];
