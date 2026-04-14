@@ -47,6 +47,8 @@
     .save-badge.show-save { opacity: 1; transform: translateY(0) scale(1); height: auto; margin-top: 12px; }
     .animate-spin { animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes thinking-dots { 0%,20%{content:'.'} 40%{content:'..'} 60%,100%{content:'...'} }
+    .thinking-dots::after { content:'...'; animation: thinking-dots 1.2s steps(1) infinite; }
     .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid black; object-fit: cover; }
     .default-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid black; background: #e5e7eb; display: flex; align-items: center; justify-content: center; }
     .money-back-pill { display: inline-flex; align-items: center; gap: 10px; background: var(--yellow); border: 2px solid black; border-radius: 999px; padding: 10px 28px; font-weight: 700; font-size: 14px; color: #1f2937; line-height: 1.5; }
@@ -222,7 +224,10 @@
     .resp-header { display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e5e7eb; }
     .resp-brain { width:40px;height:40px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
     .resp-title { font-weight:800;font-size:16px;letter-spacing:-0.02em; }
-    .resp-plan-tag { font-size:11px;font-weight:700;background:#f3f4f6;border:1.5px solid #d1d5db;border-radius:6px;padding:2px 8px;color:#6b7280;margin-left:auto; }
+    .resp-plan-tag { font-size:11px;font-weight:700;border-radius:6px;padding:3px 10px;margin-left:auto;border:1.5px solid transparent; }
+    .resp-plan-tag.tag-free { background:#f3f4f6;border-color:#d1d5db;color:#6b7280; }
+    .resp-plan-tag.tag-pro { background:#dcfce7;border-color:#16a34a;color:#15803d; }
+    .resp-plan-tag.tag-pro-plus { background:#faf5ff;border-color:#9333ea;color:#7e22ce; }
 
     .resp-final { background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:14px 18px;margin-bottom:14px; }
     .resp-final-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#15803d;margin-bottom:4px; }
@@ -561,6 +566,7 @@
           </button>
         </div>
       </div>
+      <div id="planBanner" style="display:none;margin-bottom:12px;"></div>
       <button id="askBtn" onclick="handleAskQuestion()" class="btn w-full flex items-center justify-center gap-2" style="background:var(--green);font-size:16px;">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
         Get Answer
@@ -904,6 +910,19 @@
     const counter = document.getElementById('usageCounter');
     if (!counter) return;
     const usage = getUsageData();
+    // Update plan banner
+    const banner = document.getElementById('planBanner');
+    if (banner) {
+      if (userPlan === 'pro_plus') {
+        banner.style.display = 'block';
+        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#faf5ff;border:2px solid #9333ea;border-radius:10px;padding:10px 16px;"><span style="font-weight:800;font-size:13px;color:#7e22ce;">⭐ Current Plan: Premium+</span><span style="font-size:12px;color:#9333ea;font-weight:600;">Unlimited · Best Quality · Videos</span></div>';
+      } else if (userPlan === 'pro') {
+        banner.style.display = 'block';
+        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#dcfce7;border:2px solid #16a34a;border-radius:10px;padding:10px 16px;"><span style="font-weight:800;font-size:13px;color:#15803d;">⚡ Current Plan: Premium</span><span style="font-size:12px;color:#15803d;font-weight:600;">Unlimited · Better Quality</span></div>';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
     if (userPlan === 'pro' || userPlan === 'pro_plus') {
       const planLabel = userPlan === 'pro_plus' ? 'Pro+' : 'Pro';
       counter.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--green);border:2px solid black;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:800;">⚡ Plan: ${planLabel} — Unlimited questions</span>`;
@@ -924,7 +943,7 @@
 
   function handleAskQuestion() {
     const question = document.getElementById('questionInput').value.trim();
-    if (!question) return;
+    if (!question && !pendingImageBase64) return;
     const usage = getUsageData();
 
     // Pro/Pro+ users skip ALL limits
@@ -980,13 +999,13 @@
 
   async function executeAskQuestion() {
     const question = document.getElementById('questionInput').value.trim();
-    if (!question) return;
+    if (!question && !pendingImageBase64) return;
     const askBtn = document.getElementById('askBtn');
     const box = document.getElementById('answerBox');
 
     askBtn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> AI is thinking...';
     askBtn.disabled = true;
-    box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div><div style="white-space:pre-line;color:#374151;line-height:1.7;">Thinking...</div>`;
+    box.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:20px;"><div style="width:40px;height:40px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🧠</div><div><div style="font-weight:800;font-size:15px;letter-spacing:-0.01em;">HomeWorkAI</div><div style="font-size:13px;color:#6b7280;margin-top:2px;">Thinking<span class="thinking-dots"></span></div></div></div>`;
     box.classList.remove('hidden');
 
     try {
@@ -1043,10 +1062,11 @@
           }
         }
 
-        const planTag = plan === "pro_plus" ? "Pro+" : plan === "pro" ? "Pro" : "Free";
+        const planTag = plan === "pro_plus" ? "⭐ Pro+" : plan === "pro" ? "⚡ Pro" : "Free";
+        const planTagClass = plan === "pro_plus" ? "tag-pro-plus" : plan === "pro" ? "tag-pro" : "tag-free";
 
         let html = `<div class="ai-response-box">`;
-        html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI Response</div><div class="resp-plan-tag">${planTag}</div></div>`;
+        html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI Response</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
 
         if (finalAnswerText) {
           html += `<div class="resp-final"><div class="resp-final-label">Final Answer</div><div class="resp-final-text">${finalAnswerText}</div></div>`;
@@ -1077,8 +1097,11 @@
           const extIcon = `<svg class="resp-video-ext" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
           const videoItems = videos.map(v => {
             const title = (typeof v === "object") ? v.title : v;
-            const href  = (typeof v === "object") ? v.link  : "https://www.youtube.com/results?search_query=" + encodeURIComponent(v);
-            return `<a href="${href}" target="_blank" rel="noopener" class="resp-video-link">${ytIcon}<span class="resp-video-title">${title}</span>${extIcon}</a>`;
+            // Always build a guaranteed-working YouTube search URL
+            const href = (typeof v === "object" && v.link && v.link.includes("youtube"))
+              ? v.link
+              : "https://www.youtube.com/results?search_query=" + encodeURIComponent((typeof v === "object") ? v.title : v);
+            return `<a href="${href}" target="_blank" rel="noopener" class="resp-video-link">${ytIcon}<span class="resp-video-title">${title}</span><span style="font-size:11px;font-weight:700;color:#9ca3af;margin-left:auto;white-space:nowrap;">Watch ↗</span></a>`;
           }).join("");
           html += `<div class="resp-videos"><div class="resp-videos-label">🎬 Recommended Videos</div>${videoItems}</div>`;
         }
@@ -1089,7 +1112,7 @@
 
       box.innerHTML = renderResponse(data.answer || data.error || "No response received.", data.videos || [], userPlan);
     } catch (err) {
-      box.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><div style="width:36px;height:36px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;">🧠</div><span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">HomeWorkAI Response</span></div><div style="white-space:pre-line;color:#dc2626;line-height:1.7;">Error getting response.</div>`;
+      box.innerHTML = `<div class="ai-response-box"><div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI Response</div></div><div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px 18px;color:#dc2626;font-size:14px;line-height:1.6;">Something went wrong. Please try again.</div></div>`;
       console.error(err);
     } finally {
       askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Get Answer';
