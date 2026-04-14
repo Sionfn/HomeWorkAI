@@ -640,7 +640,7 @@
       <!-- PREMIUM -->
       <div class="card pricing-card p-8 md-scale-105 relative reveal delay-2" style="background:white;padding-top:36px;">
         <div class="popular-badge">MOST POPULAR</div>
-        <h3 class="text-xl font-extrabold heading">Premium</h3>
+        <h3 class="text-xl font-extrabold heading">Pro</h3>
         <p class="text-4xl font-extrabold mt-2" id="proPrice">$9.99/mo</p>
         <div class="trial-badge">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
@@ -654,13 +654,13 @@
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Priority support</li>
         </ul>
         <div class="cta-btn-wrap" style="padding-top:28px;">
-          <button onclick="handlePurchase('Premium')" class="btn w-full btn-pulse" style="background:var(--green);font-size:15px;">Start 3-Day Free Trial</button>
+          <button onclick="handlePurchase('Pro')" class="btn w-full btn-pulse" style="background:var(--green);font-size:15px;">Start 3-Day Free Trial</button>
         </div>
       </div>
 
       <!-- PREMIUM+ -->
       <div class="card pricing-card p-8 reveal delay-3" style="background:white;">
-        <h3 class="text-xl font-extrabold heading">Premium+</h3>
+        <h3 class="text-xl font-extrabold heading">Pro+</h3>
         <p class="text-4xl font-extrabold mt-2" id="proPlusPrice">$14.99/mo</p>
         <div class="trial-badge">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
@@ -668,13 +668,13 @@
         </div>
         <div class="save-badge mt-3" id="proPlusSave"><span class="save-pill">Save $59.89/year</span></div>
         <ul class="mt-6 text-left space-y-4 features-list">
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Everything in Premium</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Everything in Pro</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Video explanations</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Deep learning insights</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Fastest response speed</li>
         </ul>
         <div class="cta-btn-wrap">
-          <button onclick="handlePurchase('Premium+')" class="btn w-full" style="background:var(--yellow);">Start 3-Day Free Trial</button>
+          <button onclick="handlePurchase('Pro+')" class="btn w-full" style="background:var(--yellow);">Start 3-Day Free Trial</button>
         </div>
       </div>
     </div>
@@ -693,7 +693,7 @@
     <div class="space-y-4">
       <div class="card p-6 reveal delay-1" style="background:var(--blue);">
         <h3 class="font-extrabold heading text-lg">How does the 3-day free trial work?</h3>
-        <p class="mt-2 text-gray-700 leading-relaxed">Start using Premium or Premium+ features immediately. If you cancel within 3 days, you won't be charged anything. No credit card required to start!</p>
+        <p class="mt-2 text-gray-700 leading-relaxed">Start using Pro or Pro+ features immediately. If you cancel within 3 days, you won't be charged anything. No credit card required to start!</p>
       </div>
       <div class="card p-6 reveal delay-2" style="background:var(--yellow);">
         <h3 class="font-extrabold heading text-lg">What subjects does HomeWorkAI cover?</h3>
@@ -719,7 +719,7 @@
   <p class="mt-4 text-gray-700 max-w-2xl mx-auto" style="font-size:18px;line-height:1.7;">Join thousands of students improving grades with AI. Start free today — no credit card needed.</p>
   <div class="flex flex-wrap justify-center gap-4 mt-8">
     <button onclick="scrollToAI()" class="btn" style="background:var(--yellow);font-size:16px;padding:15px 30px;">Get Started Free</button>
-    <button onclick="scrollToPricing()" class="btn bg-white" style="font-size:16px;padding:15px 30px;">View Premium Plans</button>
+    <button onclick="scrollToPricing()" class="btn bg-white" style="font-size:16px;padding:15px 30px;">View Pro Plans</button>
   </div>
   <div class="flex flex-wrap justify-center gap-6 mt-6">
     <div class="flex items-center gap-2 text-sm font-semibold"><span class="text-green-500">✔</span> No credit card required</div>
@@ -928,10 +928,10 @@
     if (banner) {
       if (userPlan === 'pro_plus') {
         banner.style.display = 'block';
-        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#faf5ff;border:2px solid #9333ea;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #9333ea;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⭐</span><div><div style="font-weight:800;font-size:13px;color:#7e22ce;line-height:1.2;">Premium+ Plan</div><div style="font-size:11px;color:#9333ea;font-weight:600;margin-top:1px;">Unlimited · Best Quality · Videos</div></div></div></div>';
+        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#faf5ff;border:2px solid #9333ea;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #9333ea;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⭐</span><div><div style="font-weight:800;font-size:13px;color:#7e22ce;line-height:1.2;">Pro+ Plan</div><div style="font-size:11px;color:#9333ea;font-weight:600;margin-top:1px;">Unlimited · Best Quality · Videos</div></div></div></div>';
       } else if (userPlan === 'pro') {
         banner.style.display = 'block';
-        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#dcfce7;border:2px solid #16a34a;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #16a34a;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚡</span><div><div style="font-weight:800;font-size:13px;color:#15803d;line-height:1.2;">Premium Plan</div><div style="font-size:11px;color:#15803d;font-weight:600;margin-top:1px;">Unlimited · Better Quality</div></div></div></div>';
+        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#dcfce7;border:2px solid #16a34a;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #16a34a;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚡</span><div><div style="font-weight:800;font-size:13px;color:#15803d;line-height:1.2;">Pro Plan</div><div style="font-size:11px;color:#15803d;font-weight:600;margin-top:1px;">Unlimited · Better Quality</div></div></div></div>';
       } else {
         banner.style.display = 'none';
       }
@@ -1252,7 +1252,7 @@
   window.openSettings = function() {
     closeDropdown();
     const usage = getUsageData();
-    const planLabel = userPlan === 'pro_plus' ? '⭐ Premium+' : userPlan === 'pro' ? '⚡ Premium' : '🆓 Free';
+    const planLabel = userPlan === 'pro_plus' ? '⭐ Pro+' : userPlan === 'pro' ? '⚡ Pro' : '🆓 Free';
     const planColor = userPlan === 'pro_plus' ? '#7c3aed' : userPlan === 'pro' ? '#059669' : '#6b7280';
     document.getElementById('settingsPlanBadge').innerHTML = `<span style="background:${planColor};color:white;padding:4px 12px;border-radius:8px;font-size:13px;">${planLabel}</span>`;
 
