@@ -227,7 +227,7 @@ STRICT RULES:
 
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.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);
 
 // ------------------------------------------------------------------
 // PRICE IDs — after creating products in Stripe Dashboard, copy each
