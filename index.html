@@ -615,25 +615,29 @@
       </div>
     </div>
 
-    <div class="flex justify-center gap-4 mb-10">
-      <button id="monthlyBtn" class="btn" style="background:var(--purple);" onclick="setBilling('monthly')">Monthly</button>
-      <button id="yearlyBtn" class="btn bg-white" onclick="setBilling('yearly')">Yearly</button>
+    <div class="flex justify-center gap-4 mb-10" style="flex-direction:column;align-items:center;">
+      <div style="display:flex;gap:16px;">
+        <button id="monthlyBtn" class="btn" style="background:var(--purple);" onclick="setBilling('monthly')">Monthly</button>
+        <button id="yearlyBtn" class="btn bg-white" onclick="setBilling('yearly')">Yearly</button>
+      </div>
+      <p style="font-size:13px;font-weight:700;color:#059669;">💰 Save 20% with a yearly plan</p>
     </div>
 
     <div class="grid md-grid-cols-3 gap-8" style="align-items:start;">
       <!-- FREE -->
       <div class="card pricing-card p-8 reveal delay-1" style="background:white;">
         <h3 class="text-xl font-extrabold heading">Free</h3>
+        <p style="font-size:13px;color:#6b7280;font-weight:600;margin-top:4px;">Good for quick answers</p>
         <p class="text-4xl font-extrabold mt-2">$0</p>
         <ul class="mt-6 text-left space-y-4 features-list">
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 1 question without login</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 5 questions/day (logged in)</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Basic AI answers</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Short explanations</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Access to all subjects</li>
+          <li class="flex items-center gap-2"><span style="color:#9ca3af;font-weight:bold;">—</span> 1 question without login</li>
+          <li class="flex items-center gap-2"><span style="color:#9ca3af;font-weight:bold;">—</span> Only 5 questions/day</li>
+          <li class="flex items-center gap-2"><span style="color:#9ca3af;font-weight:bold;">—</span> Basic AI answers (limited depth)</li>
+          <li class="flex items-center gap-2"><span style="color:#9ca3af;font-weight:bold;">—</span> Short explanations only</li>
+          <li class="flex items-center gap-2"><span style="color:#9ca3af;font-weight:bold;">—</span> No step-by-step breakdowns</li>
         </ul>
         <div class="cta-btn-wrap">
-          <button onclick="scrollToAI()" class="btn w-full" style="background:var(--blue);">Start Now</button>
+          <button onclick="scrollToAI()" class="btn w-full" style="background:#f3f4f6;color:#6b7280;">Try for Free</button>
         </div>
       </div>
 
@@ -641,6 +645,7 @@
       <div class="card pricing-card p-8 md-scale-105 relative reveal delay-2" style="background:white;padding-top:36px;">
         <div class="popular-badge">MOST POPULAR</div>
         <h3 class="text-xl font-extrabold heading">Pro</h3>
+        <p style="font-size:13px;color:#059669;font-weight:600;margin-top:4px;">Best for daily homework help</p>
         <p class="text-4xl font-extrabold mt-2" id="proPrice">$9.99/mo</p>
         <div class="trial-badge">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
@@ -649,19 +654,20 @@
         <div class="save-badge mt-3" id="proSave"><span class="save-pill">Save $39.89/year</span></div>
         <ul class="mt-6 text-left space-y-4 features-list">
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> <strong>Unlimited</strong> questions</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Better AI model (gpt-4.1-mini)</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Smarter AI (gpt-4.1-mini)</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Clear step-by-step explanations</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> <strong>Bold</strong> formatting for key ideas</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Feels like a strong tutor</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Feels like a real tutor</li>
         </ul>
         <div class="cta-btn-wrap" style="padding-top:28px;">
-          <button onclick="handlePurchase('Pro')" class="btn w-full btn-pulse" style="background:var(--green);font-size:15px;">Start 3-Day Free Trial</button>
+          <button onclick="handlePurchase('Pro')" class="btn w-full btn-pulse" style="background:var(--green);font-size:15px;">Start Free Trial</button>
         </div>
       </div>
 
       <!-- PREMIUM+ -->
       <div class="card pricing-card p-8 reveal delay-3" style="background:white;">
         <h3 class="text-xl font-extrabold heading">Pro+</h3>
+        <p style="font-size:13px;color:#7c3aed;font-weight:600;margin-top:4px;">Best for deep learning &amp; top grades</p>
         <p class="text-4xl font-extrabold mt-2" id="proPlusPrice">$14.99/mo</p>
         <div class="trial-badge">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
@@ -670,13 +676,13 @@
         <div class="save-badge mt-3" id="proPlusSave"><span class="save-pill">Save $59.89/year</span></div>
         <ul class="mt-6 text-left space-y-4 features-list">
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Everything in Pro</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Best AI model (gpt-4.1)</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Deepest explanations &amp; insights</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> <strong>Bold</strong> + <u>underline</u> formatting</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 🎬 Video suggestions (when relevant)</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Best-in-class AI (gpt-4.1)</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Deepest explanations for real understanding</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> <strong>Bold</strong> + <u>underline</u> — college-level formatting</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 🎬 Curated video suggestions</li>
         </ul>
         <div class="cta-btn-wrap">
-          <button onclick="handlePurchase('Pro+')" class="btn w-full" style="background:var(--yellow);">Start 3-Day Free Trial</button>
+          <button onclick="handlePurchase('Pro+')" class="btn w-full" style="background:var(--yellow);">Unlock Pro+</button>
         </div>
       </div>
     </div>
