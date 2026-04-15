@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     :root {
       --purple: #c4b5fd;
@@ -1023,23 +1024,62 @@
   }
 
   async function executeAskQuestion() {
-    const question = document.getElementById('questionInput').value.trim();
-    if (!question && !pendingImageBase64) return;
+    const typedQuestion = document.getElementById('questionInput').value.trim();
+    if (!typedQuestion && !pendingImageBase64) return;
+
     const askBtn = document.getElementById('askBtn');
     const box = document.getElementById('answerBox');
+    const spinnerSVG = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+    const thinkingBox = (label) => `<div style="display:flex;align-items:center;gap:12px;padding:20px;"><div style="width:40px;height:40px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🧠</div><div><div style="font-weight:800;font-size:15px;letter-spacing:-0.01em;">HomeWorkAI</div><div style="font-size:13px;color:#6b7280;margin-top:2px;">${label}<span class="thinking-dots"></span></div></div></div>`;
+    const errorBox = (msg) => `<div class="ai-response-box"><div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div></div><div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px 18px;color:#dc2626;font-size:14px;line-height:1.6;">${msg}</div></div>`;
+    const resetBtn = () => {
+      askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Get Answer';
+      askBtn.disabled = false;
+    };
 
-    askBtn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> AI is thinking...';
     askBtn.disabled = true;
-    box.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:20px;"><div style="width:40px;height:40px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🧠</div><div><div style="font-weight:800;font-size:15px;letter-spacing:-0.01em;">HomeWorkAI</div><div style="font-size:13px;color:#6b7280;margin-top:2px;">Thinking<span class="thinking-dots"></span></div></div></div>`;
     box.classList.remove('hidden');
+
+    // ── STEP 1: If image attached, OCR it to extract text ─────────────────
+    let finalQuestion = typedQuestion;
+
+    if (pendingImageBase64) {
+      askBtn.innerHTML = `${spinnerSVG} Reading image...`;
+      box.innerHTML = thinkingBox('Reading image');
+
+      try {
+        const dataUrl = 'data:' + pendingImageType + ';base64,' + pendingImageBase64;
+        const result = await Tesseract.recognize(dataUrl, 'eng', { logger: () => {} });
+        const extracted = result.data.text.trim();
+
+        if (!extracted || extracted.length < 3) {
+          box.innerHTML = errorBox('Could not read the image clearly. Please try again.');
+          resetBtn();
+          return;
+        }
+
+        // If user also typed a note, prepend it so the AI has full context
+        finalQuestion = typedQuestion
+          ? `${typedQuestion}\n\n[Question from image]:\n${extracted}`
+          : extracted;
+
+      } catch (ocrErr) {
+        console.error('OCR error:', ocrErr);
+        box.innerHTML = errorBox('Could not read the image clearly. Please try again.');
+        resetBtn();
+        return;
+      }
+    }
+
+    // ── STEP 2: Send extracted text to /api/ask exactly like a normal question ──
+    askBtn.innerHTML = `${spinnerSVG} AI is thinking...`;
+    box.innerHTML = thinkingBox('Thinking');
 
     try {
       const res = await fetch("/api/ask", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question, plan: userPlan, imageBase64: pendingImageBase64 || null, imageType: pendingImageType || null }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: finalQuestion, plan: userPlan }),
       });
 
       const data = await res.json();
