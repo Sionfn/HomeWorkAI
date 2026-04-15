@@ -606,8 +606,8 @@
 <!-- ===================== PRICING (index 9 animations) ===================== -->
 <section id="pricing" class="py-16 md-py-24 px-6 text-center" style="background:white;">
   <div class="max-w-6xl mx-auto">
-    <h2 class="section-title section-title-underline mb-2">Simple Pricing</h2>
-    <p style="color:#4b5563;margin-bottom:36px;font-size:18px;">Choose a plan that fits your learning needs</p>
+    <h2 class="section-title section-title-underline mb-4">Simple Pricing</h2>
+    <p style="color:#4b5563;margin-bottom:40px;max-width:560px;margin-left:auto;margin-right:auto;font-size:18px;line-height:1.65;">Choose a plan that fits your learning needs</p>
 
     <div style="display:flex;justify-content:center;margin-bottom:36px;">
       <div class="money-back-pill">
@@ -1048,71 +1048,7 @@
 
       try {
         const dataUrl = 'data:' + pendingImageType + ';base64,' + pendingImageBase64;
-
-        // ── Preprocess image for better OCR accuracy ──────────────────────
-        // Load image → draw to canvas → grayscale + contrast + threshold + sharpen
-        const processedDataUrl = await new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement('canvas');
-            canvas.width  = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-
-            // 1. Draw original
-            ctx.drawImage(img, 0, 0);
-
-            // 2. Grayscale + contrast boost via CSS filter trick
-            const offscreen = document.createElement('canvas');
-            offscreen.width  = img.width;
-            offscreen.height = img.height;
-            const octx = offscreen.getContext('2d');
-            octx.filter = 'grayscale(1) contrast(1.8)';
-            octx.drawImage(img, 0, 0);
-
-            // 3. Get pixel data and apply threshold (black & white)
-            const imageData = octx.getImageData(0, 0, offscreen.width, offscreen.height);
-            const data = imageData.data;
-            for (let i = 0; i < data.length; i += 4) {
-              // Already grayscale so R=G=B; threshold at 128
-              const val = data[i] < 128 ? 0 : 255;
-              data[i] = data[i+1] = data[i+2] = val;
-            }
-            octx.putImageData(imageData, 0, 0);
-
-            // 4. Sharpen via convolution kernel on the thresholded image
-            const sharpData = octx.getImageData(0, 0, offscreen.width, offscreen.height);
-            const src = sharpData.data;
-            const w = offscreen.width, h = offscreen.height;
-            const out = new Uint8ClampedArray(src);
-            // Sharpening kernel: [0,-1,0,-1,5,-1,0,-1,0]
-            const kernel = [0,-1,0,-1,5,-1,0,-1,0];
-            for (let y = 1; y < h - 1; y++) {
-              for (let x = 1; x < w - 1; x++) {
-                let r = 0;
-                for (let ky = -1; ky <= 1; ky++) {
-                  for (let kx = -1; kx <= 1; kx++) {
-                    const idx = ((y + ky) * w + (x + kx)) * 4;
-                    r += src[idx] * kernel[(ky+1)*3 + (kx+1)];
-                  }
-                }
-                const outIdx = (y * w + x) * 4;
-                const clamped = Math.min(255, Math.max(0, r));
-                out[outIdx] = out[outIdx+1] = out[outIdx+2] = clamped;
-                out[outIdx+3] = 255;
-              }
-            }
-            sharpData.data.set(out);
-            octx.putImageData(sharpData, 0, 0);
-
-            resolve(offscreen.toDataURL('image/png'));
-          };
-          img.onerror = reject;
-          img.src = dataUrl;
-        });
-        // ─────────────────────────────────────────────────────────────────
-
-        const result = await Tesseract.recognize(processedDataUrl, 'eng', { logger: () => {} });
+        const result = await Tesseract.recognize(dataUrl, 'eng', { logger: () => {} });
         const extracted = result.data.text.trim();
 
         if (!extracted || extracted.length < 3) {
@@ -1472,6 +1408,5 @@
 
 </body>
 </html>
-
 
 <!-- deploy -->
