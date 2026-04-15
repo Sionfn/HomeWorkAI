@@ -218,3 +218,427 @@ STRICT RULES:
   }
 }
 
+// /api/create-checkout-session.js
+// Creates a Stripe Checkout Session with 3-day free trial.
+// Called from the frontend when a user clicks "Start Free Trial" or "Unlock Pro+".
+//
+// Required env vars:
+//   STRIPE_SECRET_KEY
+//   STRIPE_PRICE_PRO_MONTHLY  STRIPE_PRICE_PRO_YEARLY
+//   STRIPE_PRICE_PRO_PLUS_MONTHLY  STRIPE_PRICE_PRO_PLUS_YEARLY
+//   FIREBASE_PROJECT_ID  FIREBASE_CLIENT_EMAIL  FIREBASE_PRIVATE_KEY
+
+import Stripe from "stripe";
+import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
+
+// ── Firebase Admin (singleton) ───────────────────────────────────────────────
+function getAdminApp() {
+  if (getApps().length > 0) return getApps()[0];
+  return initializeApp({
+    credential: cert({
+      projectId:   process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      // Vercel / Railway store the key as a single-line string with literal \n
+      privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    }),
+  });
+}
+
+// ── Price map ────────────────────────────────────────────────────────────────
+const PRICES = {
+  pro: {
+    monthly: process.env.STRIPE_PRICE_PRO_MONTHLY,
+    yearly:  process.env.STRIPE_PRICE_PRO_YEARLY,
+  },
+  pro_plus: {
+    monthly: process.env.STRIPE_PRICE_PRO_PLUS_MONTHLY,
+    yearly:  process.env.STRIPE_PRICE_PRO_PLUS_YEARLY,
+  },
+};
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  // ── 1. Parse body ──────────────────────────────────────────────────────────
+  const { plan, billing = "monthly" } = req.body;
+  if (!plan || !["pro", "pro_plus"].includes(plan)) {
+    return res.status(400).json({ error: "Invalid plan. Must be 'pro' or 'pro_plus'." });
+  }
+  if (!["monthly", "yearly"].includes(billing)) {
+    return res.status(400).json({ error: "Invalid billing. Must be 'monthly' or 'yearly'." });
+  }
+
+  // ── 2. Verify Firebase ID token ─────────────────────────────────────────
+  const authHeader = req.headers.authorization || "";
+  const idToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!idToken) {
+    return res.status(401).json({ error: "Missing Firebase ID token." });
+  }
+
+  let decodedToken;
+  try {
+    const adminApp = getAdminApp();
+    decodedToken = await getAuth(adminApp).verifyIdToken(idToken);
+  } catch (e) {
+    console.error("Token verification failed:", e.message);
+    return res.status(401).json({ error: "Invalid or expired token." });
+  }
+
+  const { uid, email, name } = decodedToken;
+
+  // ── 3. Look up or create Stripe customer ────────────────────────────────
+  const adminApp = getAdminApp();
+  const db = getFirestore(adminApp);
+  const userRef = db.collection("users").doc(uid);
+  const userSnap = await userRef.get();
+  const userData = userSnap.exists ? userSnap.data() : {};
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-11-20.acacia" });
+
+  let stripeCustomerId = userData.stripeCustomerId;
+  if (!stripeCustomerId) {
+    // Create a new customer in Stripe
+    const customer = await stripe.customers.create({
+      email,
+      name:     name || undefined,
+      metadata: { firebaseUid: uid },
+    });
+    stripeCustomerId = customer.id;
+    // Persist it immediately so we can reference it in the webhook
+    await userRef.set({ stripeCustomerId }, { merge: true });
+  }
+
+  // ── 4. Resolve price ID ──────────────────────────────────────────────────
+  const priceId = PRICES[plan][billing];
+  if (!priceId) {
+    return res.status(500).json({
+      error: `No price ID configured for ${plan} / ${billing}. ` +
+             `Check STRIPE_PRICE_${plan.toUpperCase()}_${billing.toUpperCase()} in your .env file.`,
+    });
+  }
+
+  // ── 5. Create Checkout Session ───────────────────────────────────────────
+  const baseUrl = req.headers.origin || `https://${req.headers.host}`;
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    customer: stripeCustomerId,
+    line_items: [{ price: priceId, quantity: 1 }],
+
+    // 3-day free trial — card is required but not charged during trial
+    subscription_data: {
+      trial_period_days: 3,
+      metadata: {
+        firebaseUid: uid,
+        plan,
+        billing,
+      },
+    },
+
+    // Pre-fill email
+    customer_email: stripeCustomerId ? undefined : email,
+
+    // Redirect URLs — success passes the session ID back so you can verify
+    success_url: `${baseUrl}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url:  `${baseUrl}?payment=cancelled`,
+
+    // Metadata on the session itself (for webhook)
+    metadata: {
+      firebaseUid: uid,
+      plan,
+      billing,
+    },
+
+    // Allow promotion codes if you ever create them in Stripe
+    allow_promotion_codes: true,
+  });
+
+  return res.status(200).json({ url: session.url });
+}
+
+// /api/webhook.js
+// Receives Stripe webhook events and keeps Firestore user plans in sync.
+//
+// IMPORTANT: In Next.js you must disable body parsing for this route
+// so Stripe can verify the raw request body signature.
+//
+// Required env vars:
+//   STRIPE_SECRET_KEY
+//   STRIPE_WEBHOOK_SECRET  (get this from Stripe Dashboard → Webhooks → your endpoint → Signing secret)
+//   FIREBASE_PROJECT_ID  FIREBASE_CLIENT_EMAIL  FIREBASE_PRIVATE_KEY
+//
+// Stripe events you must enable in the dashboard for this endpoint:
+//   checkout.session.completed
+//   customer.subscription.updated
+//   customer.subscription.deleted
+//   invoice.payment_failed
+
+import Stripe from "stripe";
+import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { getFirestore }                  from "firebase-admin/firestore";
+
+// ── Disable Next.js body parser — Stripe needs the raw body ─────────────────
+export const config = { api: { bodyParser: false } };
+
+// ── Firebase Admin (singleton) ───────────────────────────────────────────────
+function getAdminApp() {
+  if (getApps().length > 0) return getApps()[0];
+  return initializeApp({
+    credential: cert({
+      projectId:   process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    }),
+  });
+}
+
+// ── Helper: read raw body as buffer ─────────────────────────────────────────
+function getRawBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on("data", (chunk) => chunks.push(chunk));
+    req.on("end",  () => resolve(Buffer.concat(chunks)));
+    req.on("error", reject);
+  });
+}
+
+// ── Plan mapper: Stripe price ID → internal plan key ────────────────────────
+// We store the plan name in subscription metadata so we don't need to reverse-
+// look up price IDs — which is cleaner and avoids env-var coupling in the webhook.
+function planFromMetadata(metadata = {}) {
+  const raw = (metadata.plan || "").toLowerCase();
+  if (raw === "pro_plus" || raw === "pro+") return "pro_plus";
+  if (raw === "pro")                         return "pro";
+  return null;
+}
+
+// ── Main handler ─────────────────────────────────────────────────────────────
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).send("Method not allowed");
+  }
+
+  // 1. Read raw body and verify Stripe signature
+  const rawBody = await getRawBody(req);
+  const sig     = req.headers["stripe-signature"];
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-11-20.acacia" });
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  const db = getFirestore(getAdminApp());
+  console.log(`Stripe event received: ${event.type}`);
+
+  // ── 2. Handle events ─────────────────────────────────────────────────────
+  try {
+    switch (event.type) {
+
+      // ── Checkout completed (trial or paid) ────────────────────────────────
+      case "checkout.session.completed": {
+        const session    = event.data.object;
+        const firebaseUid = session.metadata?.firebaseUid;
+        const plan        = planFromMetadata(session.metadata);
+        const customerId  = session.customer;
+
+        if (!firebaseUid || !plan) {
+          console.warn("checkout.session.completed: missing firebaseUid or plan in metadata", session.id);
+          break;
+        }
+
+        await db.collection("users").doc(firebaseUid).set({
+          plan,
+          stripeCustomerId:  customerId,
+          subscriptionId:    session.subscription,
+          subscriptionStatus: "active",   // in trial or active after checkout
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
+
+        console.log(`✅ Plan set to '${plan}' for uid ${firebaseUid}`);
+        break;
+      }
+
+      // ── Subscription updated (renewal, cancel-at-period-end, trial end) ───
+      case "customer.subscription.updated": {
+        const sub        = event.data.object;
+        const customerId = sub.customer;
+
+        // Resolve firebaseUid from Firestore via stripeCustomerId
+        const userSnap = await db.collection("users")
+          .where("stripeCustomerId", "==", customerId)
+          .limit(1)
+          .get();
+
+        if (userSnap.empty) {
+          console.warn("subscription.updated: no user found for customer", customerId);
+          break;
+        }
+
+        const userDoc  = userSnap.docs[0];
+        const uid      = userDoc.id;
+        const metadata = sub.metadata || {};
+        const plan     = planFromMetadata(metadata);
+        const status   = sub.status; // active, trialing, past_due, canceled, unpaid
+
+        const isActive = ["active", "trialing"].includes(status);
+        const newPlan  = isActive && plan ? plan : "free";
+
+        await db.collection("users").doc(uid).set({
+          plan:               newPlan,
+          subscriptionId:     sub.id,
+          subscriptionStatus: status,
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
+
+        console.log(`🔄 uid ${uid} → plan '${newPlan}' (status: ${status})`);
+        break;
+      }
+
+      // ── Subscription deleted (cancelled immediately or at period end) ─────
+      case "customer.subscription.deleted": {
+        const sub        = event.data.object;
+        const customerId = sub.customer;
+
+        const userSnap = await db.collection("users")
+          .where("stripeCustomerId", "==", customerId)
+          .limit(1)
+          .get();
+
+        if (userSnap.empty) {
+          console.warn("subscription.deleted: no user found for customer", customerId);
+          break;
+        }
+
+        const uid = userSnap.docs[0].id;
+        await db.collection("users").doc(uid).set({
+          plan:               "free",
+          subscriptionId:     null,
+          subscriptionStatus: "canceled",
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
+
+        console.log(`❌ Subscription cancelled for uid ${uid} — downgraded to free`);
+        break;
+      }
+
+      // ── Payment failed (trial ended, card declined) ───────────────────────
+      case "invoice.payment_failed": {
+        const invoice    = event.data.object;
+        const customerId = invoice.customer;
+
+        const userSnap = await db.collection("users")
+          .where("stripeCustomerId", "==", customerId)
+          .limit(1)
+          .get();
+
+        if (!userSnap.empty) {
+          const uid = userSnap.docs[0].id;
+          await db.collection("users").doc(uid).set({
+            subscriptionStatus: "past_due",
+            updatedAt: new Date().toISOString(),
+          }, { merge: true });
+          console.log(`⚠️  Payment failed for uid ${uid}`);
+        }
+        break;
+      }
+
+      default:
+        // Silently ignore unhandled event types
+        break;
+    }
+  } catch (err) {
+    console.error("Error processing webhook event:", err);
+    // Still return 200 so Stripe doesn't keep retrying for server-side bugs
+    return res.status(200).json({ received: true, error: err.message });
+  }
+
+  return res.status(200).json({ received: true });
+}
+
+// /api/customer-portal.js
+// Creates a Stripe Billing Portal session so users can manage/cancel their subscription.
+//
+// Required env vars:
+//   STRIPE_SECRET_KEY
+//   FIREBASE_PROJECT_ID  FIREBASE_CLIENT_EMAIL  FIREBASE_PRIVATE_KEY
+//
+// One-time Stripe setup:
+//   → Dashboard → Billing → Customer portal → Activate
+//     (Enable "Cancel subscriptions" and "Update payment method" at minimum)
+
+import Stripe from "stripe";
+import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { getAuth }      from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
+
+// ── Firebase Admin (singleton) ───────────────────────────────────────────────
+function getAdminApp() {
+  if (getApps().length > 0) return getApps()[0];
+  return initializeApp({
+    credential: cert({
+      projectId:   process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    }),
+  });
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  // ── 1. Verify Firebase ID token ──────────────────────────────────────────
+  const authHeader = req.headers.authorization || "";
+  const idToken    = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!idToken) {
+    return res.status(401).json({ error: "Missing Firebase ID token." });
+  }
+
+  let decodedToken;
+  try {
+    const adminApp = getAdminApp();
+    decodedToken   = await getAuth(adminApp).verifyIdToken(idToken);
+  } catch (e) {
+    console.error("Token verification failed:", e.message);
+    return res.status(401).json({ error: "Invalid or expired token." });
+  }
+
+  const { uid } = decodedToken;
+
+  // ── 2. Look up stripeCustomerId from Firestore ───────────────────────────
+  const adminApp = getAdminApp();
+  const db       = getFirestore(adminApp);
+  const userSnap = await db.collection("users").doc(uid).get();
+
+  if (!userSnap.exists) {
+    return res.status(404).json({ error: "User not found in database." });
+  }
+
+  const { stripeCustomerId } = userSnap.data();
+  if (!stripeCustomerId) {
+    return res.status(400).json({
+      error: "No Stripe customer ID on file. " +
+             "You may not have completed a checkout session yet.",
+    });
+  }
+
+  // ── 3. Create Stripe Billing Portal session ──────────────────────────────
+  const stripe   = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-11-20.acacia" });
+  const baseUrl  = req.headers.origin || `https://${req.headers.host}`;
+
+  const portalSession = await stripe.billingPortal.sessions.create({
+    customer:   stripeCustomerId,
+    return_url: `${baseUrl}?portal=returned`,
+  });
+
+  return res.status(200).json({ url: portalSession.url });
+}
