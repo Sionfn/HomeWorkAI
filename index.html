@@ -756,6 +756,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
   import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
@@ -767,40 +768,77 @@
     measurementId: "G-9Q99SL0FBX"
   };
 
-  const app = initializeApp(firebaseConfig);
+  const app  = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db   = getFirestore(app);
   const provider = new GoogleAuthProvider();
   provider.addScope('email');
   provider.addScope('profile');
   window.currentUser = null;
   window.pendingAction = null;
 
-  // Handle redirect result first (for GitHub Pages where popups may be blocked)
-  getRedirectResult(auth).then((result) => {
-    if (result && result.user) {
+  // ── fetchUserPlan ───────────────────────────────────────────────────────
+  // Reads the user's plan from Firestore and updates the global userPlan
+  // variable, then re-draws the UI. Also saves their email to Firestore so
+  // the webhook has a fallback lookup path.
+  async function fetchUserPlan(uid) {
+    try {
+      const userRef = doc(db, "users", uid);
+      const snap    = await getDoc(userRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        window.userRenewalDate = data.renewalDate?.toDate?.() || null;
+        if (data.plan && data.plan !== "free") {
+          userPlan = data.plan;   // "pro" or "pro_plus"
+        }
+      }
+      // Persist email + uid so the webhook can do a fallback email lookup
+      const email = window.currentUser?.email;
+      if (email) await setDoc(userRef, { email, uid }, { merge: true });
+    } catch (e) {
+      console.error("[fetchUserPlan]", e);
+    }
+    updateLoginUI();
+  }
+
+  // Handle redirect result (GitHub Pages / browsers that block popups)
+  getRedirectResult(auth).then(async (result) => {
+    if (result?.user) {
       window.currentUser = result.user;
-      updateLoginUI();
-      const stored = sessionStorage.getItem('pendingAction');
+      if (result.user.email === ADMIN_EMAIL) { userPlan = "pro_plus"; updateLoginUI(); }
+      else { await fetchUserPlan(result.user.uid); }
+      const stored = sessionStorage.getItem("pendingAction");
       if (stored) {
-        sessionStorage.removeItem('pendingAction');
+        sessionStorage.removeItem("pendingAction");
         const action = JSON.parse(stored);
         setTimeout(() => {
-          if (action.type === 'askQuestion') executeAskQuestion();
-          else if (action.type === 'purchase') executePurchase(action.plan);
+          if (action.type === "askQuestion") executeAskQuestion();
+          else if (action.type === "purchase") executePurchase(action.plan);
         }, 300);
       }
     }
-  }).catch((e) => { console.error('Redirect result error:', e); });
+  }).catch((e) => console.error("Redirect result error:", e));
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     window.currentUser = user;
-    updateLoginUI();
+    if (user) {
+      if (user.email === ADMIN_EMAIL) {
+        userPlan = "pro_plus";
+        updateLoginUI();
+      } else {
+        await fetchUserPlan(user.uid);
+      }
+    } else {
+      userPlan = "free";
+      window.userRenewalDate = null;
+      updateLoginUI();
+    }
     if (user && window.pendingAction) {
       const action = window.pendingAction;
       window.pendingAction = null;
       setTimeout(() => {
-        if (action.type === 'askQuestion') executeAskQuestion();
-        else if (action.type === 'purchase') executePurchase(action.plan);
+        if (action.type === "askQuestion") executeAskQuestion();
+        else if (action.type === "purchase") executePurchase(action.plan);
       }, 300);
     }
   });
@@ -915,19 +953,82 @@
     executePurchase(plan);
   }
 
-  function executePurchase(plan) {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 flex items-center justify-center z-50';
-    modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
-    modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
-      <div style="font-size:40px;margin-bottom:16px;">🎉</div>
-      <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Starting Your 3-Day Free Trial!</h3>
-      <p style="color:#4b5563;margin-bottom:24px;">You're about to start a free trial for <strong>${plan}</strong>.<br>Cancel anytime within 3 days — no charge!</p>
-      <button onclick="this.closest('.fixed').remove()" class="btn" style="background:var(--green);">Got it!</button>
+  // ── executePurchase ─────────────────────────────────────────────────────
+  // Calls the backend to create a Stripe Checkout session, then redirects
+  // the user to Stripe's hosted checkout page.
+  async function executePurchase(plan) {
+    if (!window.currentUser) { window.triggerGoogleLogin("purchase", plan); return; }
+
+    // Show a loading overlay while we wait for the API
+    const overlay = document.createElement("div");
+    overlay.className = "fixed inset-0 flex items-center justify-center z-50";
+    overlay.style.cssText = "background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;";
+    overlay.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:16px;">💳</div>
+      <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Taking you to checkout…</h3>
+      <p style="color:#4b5563;margin-bottom:20px;">Your 3-day free trial starts today.<br>Cancel any time before it ends — no charge.</p>
+      <div style="display:flex;justify-content:center;"><div style="width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite;"></div></div>
     </div>`;
-    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
-    document.body.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    try {
+      const res  = await fetch("/api/create-checkout-session", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan,
+          userId:  window.currentUser.uid,
+          email:   window.currentUser.email,
+          billing: billing,   // global: "monthly" | "yearly"
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;    // → Stripe hosted checkout
+      } else {
+        throw new Error(data.error || "No checkout URL returned");
+      }
+    } catch (err) {
+      console.error("[checkout]", err);
+      overlay.remove();
+      const errModal = document.createElement("div");
+      errModal.className = "fixed inset-0 flex items-center justify-center z-50";
+      errModal.style.cssText = "background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;";
+      errModal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:16px;">⚠️</div>
+        <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Something went wrong</h3>
+        <p style="color:#4b5563;margin-bottom:24px;">Could not open checkout. Please try again.</p>
+        <button onclick="this.closest('.fixed').remove()" class="btn" style="background:var(--green);">OK</button>
+      </div>`;
+      errModal.onclick = (e) => { if (e.target === errModal) errModal.remove(); };
+      document.body.appendChild(errModal);
+    }
   }
+
+  // ── Handle ?session=success / ?session=canceled on return from Stripe ───
+  (function handleStripeReturn() {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("session");
+    if (!status) return;
+    // Clean the URL immediately so refresh doesn't re-trigger the modal
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    if (status === "success") {
+      const modal = document.createElement("div");
+      modal.className = "fixed inset-0 flex items-center justify-center z-50";
+      modal.style.cssText = "background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;";
+      modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:16px;">🎉</div>
+        <h3 style="font-size:22px;font-weight:800;margin-bottom:8px;">You're all set!</h3>
+        <p style="color:#4b5563;margin-bottom:8px;">Your 3-day free trial has started. Your plan is updating now.</p>
+        <p style="color:#9ca3af;font-size:13px;margin-bottom:24px;">If your plan badge doesn't appear, click the button below.</p>
+        <button onclick="this.closest('.fixed').remove();location.reload();" class="btn" style="background:var(--green);">Start Learning ⚡</button>
+      </div>`;
+      modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+      document.body.appendChild(modal);
+    }
+    // canceled → URL already cleaned, nothing else needed
+  })();
 
   // Plan variable — set to 'pro' or 'pro_plus' when Stripe is integrated
   let userPlan = 'free';
@@ -1331,9 +1432,10 @@
     document.getElementById('settingsUpgradeBtn').style.display = isPaid ? 'none' : 'flex';
 
     if (isPaid) {
-      // Placeholder renewal date — replace with real Stripe data when integrated
-      const d = new Date(); d.setMonth(d.getMonth() + 1);
-      document.getElementById('settingsRenewalDate').textContent = d.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+      const el = document.getElementById('settingsRenewalDate');
+      el.textContent = window.userRenewalDate
+        ? window.userRenewalDate.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })
+        : '—';
     }
 
     const questionsUsed = usage.count || 0;
@@ -1347,22 +1449,39 @@
     document.getElementById('settingsModal').classList.remove('open');
   };
 
-  window.handleCancelSubscription = function() {
+  window.handleCancelSubscription = async function() {
     closeSettings();
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 flex items-center justify-center z-50';
-    modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
-    modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
-      <div style="font-size:40px;margin-bottom:16px;">😢</div>
-      <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Cancel Subscription?</h3>
-      <p style="color:#4b5563;margin-bottom:24px;">Cancellation will be processed when payment integration is live. For now, please contact support.</p>
-      <div style="display:flex;gap:12px;justify-content:center;">
-        <button onclick="this.closest('.fixed').remove()" class="btn" style="background:var(--green);">Keep My Plan</button>
-        <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
-      </div>
+    if (!window.currentUser) return;
+
+    // Loading overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 flex items-center justify-center z-50';
+    overlay.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+    overlay.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:16px;">⚙️</div>
+      <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Opening billing portal…</h3>
+      <p style="color:#4b5563;margin-bottom:20px;">Manage your subscription, update your card, or cancel.</p>
+      <div style="display:flex;justify-content:center;"><div style="width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite;"></div></div>
     </div>`;
-    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
-    document.body.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    try {
+      const res  = await fetch('/api/customer-portal', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: window.currentUser.uid }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;   // → Stripe billing portal
+      } else {
+        throw new Error(data.error || 'No portal URL returned');
+      }
+    } catch (err) {
+      console.error('[portal]', err);
+      overlay.remove();
+      alert('Could not open billing portal. Please try again.');
+    }
   };
 </script>
 
