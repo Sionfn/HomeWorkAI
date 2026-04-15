@@ -117,20 +117,8 @@ STRICT RULES:
 9. Write like a confident, intelligent tutor — not a chatbot, not an essay.${youtubeInstruction}`;
 
     // ── Build input ───────────────────────────────────────────────────────
-    let inputContent;
-    if (imageBase64 && imageType) {
-      inputContent = [
-        { type: "input_image", image_url: `data:${imageType};base64,${imageBase64}` },
-        {
-          type: "input_text",
-          text: question
-            ? `The student uploaded a homework image. Their note: "${question}". Read the image carefully, identify the full question, and solve it completely.`
-            : "The student uploaded a homework image. Read it carefully, identify the full question, and solve it completely."
-        }
-      ];
-    } else {
-      inputContent = `Question: ${question}`;
-    }
+    // Images are OCR'd on the frontend before this point — input is always text
+    const inputContent = `Question: ${question}`;
 
     // ── Model selection by plan ───────────────────────────────────────────
     // FREE    → gpt-4o-mini  (basic, fast)
