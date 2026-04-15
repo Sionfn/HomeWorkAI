@@ -1,0 +1,5 @@
+"dependencies": {
+  "next": "...",
+  "react": "...",
+  "stripe": "^17.0.0"
+}
