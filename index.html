@@ -621,7 +621,7 @@
         <button id="monthlyBtn" class="btn" style="background:var(--purple);" onclick="setBilling('monthly')">Monthly</button>
         <button id="yearlyBtn" class="btn bg-white" onclick="setBilling('yearly')">Yearly</button>
       </div>
-      <p style="font-size:13px;font-weight:700;color:#059669;">💰 Save 20% with a yearly plan</p>
+      <p style="font-size:13px;font-weight:700;color:#059669;">💰 Pro: save $39.89 · Pro+: save $59.89 — billed yearly</p>
     </div>
 
     <div class="grid md-grid-cols-3 gap-8" style="align-items:start;">
@@ -655,10 +655,10 @@
         </div>
         <div class="save-badge mt-3" id="proSave"><span class="save-pill">Save $39.89/year</span></div>
         <ul class="mt-6 text-left space-y-4 features-list">
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> <strong>Unlimited</strong> questions</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Smarter AI (gpt-4.1-mini)</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Clear step-by-step explanations</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> <strong>Bold</strong> formatting for key ideas</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Unlimited questions</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Smarter AI model</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Step-by-step explanations</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Bold formatting for key terms</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Feels like a real tutor</li>
         </ul>
         <div class="cta-btn-wrap" style="padding-top:28px;">
@@ -678,23 +678,23 @@
         </div>
         <div class="save-badge mt-3" id="proPlusSave"><span class="save-pill">Save $59.89/year</span></div>
         <ul class="mt-6 text-left space-y-4 features-list">
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Best-in-class AI (gpt-4.1)</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Deepest explanations for real understanding</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> <strong>Bold</strong> + <u>underline</u> formatting</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Best-in-class AI model</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Deepest explanations available</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Bold + underline formatting</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Feels like a college-level tutor</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 🎬 Curated video suggestions</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Curated video suggestions</li>
         </ul>
         <div class="cta-btn-wrap">
-          <button onclick="handlePurchase('Pro+')" class="btn w-full" style="background:#7c3aed;color:white;border-color:#5b21b6;box-shadow:4px 4px 0 #3b0764;font-size:15px;font-weight:800;">Unlock Pro+</button>
+          <button onclick="handlePurchase('Pro+')" class="btn w-full" style="background:var(--blue);">Unlock Pro+</button>
         </div>
       </div>
     </div>
+    <p style="margin-top:28px;font-size:13px;color:#9ca3af;font-weight:600;">All plans include access to every subject · No hidden fees · Cancel anytime</p>
   </div>
 </section>
 
 <div class="section-line"></div>
 
-<!-- ===================== FAQ ===================== -->
 <section id="faq" class="py-16 md-py-24 px-6" style="background:white;">
   <div class="max-w-4xl mx-auto">
     <div style="text-align:center;margin-bottom:16px;">
@@ -740,11 +740,17 @@
 </section>
 
 <!-- ===================== FOOTER (from index 4) ===================== -->
-<footer style="background:#0f172a;color:white;border-top:4px solid black;padding:24px;">
-  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+<footer style="background:#0f172a;color:white;border-top:4px solid black;padding:32px 24px;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
     <div style="display:flex;align-items:center;gap:8px;">
       <svg width="26" height="26" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/><rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/><path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/><path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/><rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/><rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/><g transform="translate(59.5,36)"><polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/><polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/><circle cx="0" cy="0" r="1.5" fill="#FAC775"/></g></svg>
       <span style="font-weight:800;font-size:15px;letter-spacing:-0.03em;">HomeWorkAI</span>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;">
+      <a href="#" style="color:#9ca3af;font-size:13px;font-weight:600;text-decoration:none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">Privacy Policy</a>
+      <a href="#" style="color:#9ca3af;font-size:13px;font-weight:600;text-decoration:none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">Terms of Service</a>
+      <a href="#" style="color:#9ca3af;font-size:13px;font-weight:600;text-decoration:none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">Contact</a>
+      <a href="#pricing" style="color:#9ca3af;font-size:13px;font-weight:600;text-decoration:none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">Pricing</a>
     </div>
     <p style="color:#6b7280;font-size:13px;">&copy; 2026 HomeWorkAI. All rights reserved.</p>
   </div>
@@ -1364,5 +1370,6 @@
 
 </body>
 </html>
+
 
 <!-- deploy -->
