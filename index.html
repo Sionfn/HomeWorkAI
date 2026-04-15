@@ -756,6 +756,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
   import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
@@ -769,6 +770,7 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
   provider.addScope('email');
   provider.addScope('profile');
@@ -792,8 +794,32 @@
     }
   }).catch((e) => { console.error('Redirect result error:', e); });
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     window.currentUser = user;
+    if (user) {
+      // ── Fetch plan from Firestore (set by Stripe webhook) ────────────────
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          const plan = data.plan || 'free';
+          const status = data.subscriptionStatus || '';
+          const isActive = ['active', 'trialing'].includes(status);
+          // Only honour stored plan if subscription is active/trialing
+          if (isActive && plan === 'pro_plus') userPlan = 'pro_plus';
+          else if (isActive && plan === 'pro')  userPlan = 'pro';
+          else if (plan === 'pro_plus' || plan === 'pro') userPlan = plan; // fallback if status missing
+          else userPlan = 'free';
+        } else {
+          userPlan = 'free';
+        }
+      } catch (e) {
+        console.warn('Could not fetch user plan from Firestore:', e.message);
+        userPlan = 'free';
+      }
+    } else {
+      userPlan = 'free';
+    }
     updateLoginUI();
     if (user && window.pendingAction) {
       const action = window.pendingAction;
@@ -866,7 +892,7 @@
       document.getElementById('accountIcon').innerHTML = photoURL
         ? `<img src="${photoURL}" class="user-avatar" alt="Profile" referrerpolicy="no-referrer">`
         : `<div class="default-avatar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`;
-      // Admin gets Pro+ and unlimited access
+      // Admin always gets Pro+ (overrides anything)
       if (email === ADMIN_EMAIL) { userPlan = 'pro_plus'; }
       // Show plan in dropdown
       const planLabel = userPlan === 'pro_plus' ? '⭐ Pro+' : userPlan === 'pro' ? '⚡ Pro' : '🆓 Free';
@@ -884,6 +910,57 @@
 <script>
   let billing = 'monthly';
   const DAILY_LIMIT = 5;
+
+  // ── Stripe redirect param handler ────────────────────────────────────────
+  // After Stripe redirects back, show a success or cancel toast, then clean the URL.
+  (function handleStripeReturn() {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get('payment');
+    const portal  = params.get('portal');
+
+    if (payment || portal) {
+      // Clean the URL immediately (no reload)
+      window.history.replaceState({}, '', window.location.pathname);
+
+      if (payment === 'success') {
+        setTimeout(() => showPaymentToast('success'), 600);
+      } else if (payment === 'cancelled') {
+        setTimeout(() => showPaymentToast('cancelled'), 400);
+      }
+      // portal=returned: just clean URL, no toast needed
+    }
+  })();
+
+  function showPaymentToast(type) {
+    const toast = document.createElement('div');
+    toast.style.cssText = [
+      'position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;',
+      'background:white;border:3px solid black;border-radius:16px;',
+      'padding:20px 28px;box-shadow:6px 6px 0 black;text-align:center;',
+      'max-width:90vw;width:360px;',
+      'animation:fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) forwards;',
+    ].join('');
+
+    if (type === 'success') {
+      toast.innerHTML = `
+        <div style="font-size:36px;margin-bottom:10px;">🎉</div>
+        <div style="font-weight:800;font-size:17px;margin-bottom:6px;letter-spacing:-0.02em;">You're all set!</div>
+        <div style="color:#4b5563;font-size:14px;line-height:1.5;">Your 3-day free trial has started.<br>Enjoy unlimited questions!</div>`;
+    } else {
+      toast.innerHTML = `
+        <div style="font-size:36px;margin-bottom:10px;">😕</div>
+        <div style="font-weight:800;font-size:17px;margin-bottom:6px;letter-spacing:-0.02em;">Checkout cancelled</div>
+        <div style="color:#4b5563;font-size:14px;line-height:1.5;">No worries — your free plan is still active.<br>Upgrade anytime from Pricing.</div>`;
+    }
+
+    document.body.appendChild(toast);
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+      toast.style.transition = 'opacity 0.4s ease';
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 420);
+    }, 5000);
+  }
 
   document.addEventListener('click', (e) => {
     const w = document.getElementById('accountDropdownWrapper');
@@ -915,19 +992,76 @@
     executePurchase(plan);
   }
 
-  function executePurchase(plan) {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 flex items-center justify-center z-50';
-    modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
-    modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
-      <div style="font-size:40px;margin-bottom:16px;">🎉</div>
-      <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Starting Your 3-Day Free Trial!</h3>
-      <p style="color:#4b5563;margin-bottom:24px;">You're about to start a free trial for <strong>${plan}</strong>.<br>Cancel anytime within 3 days — no charge!</p>
-      <button onclick="this.closest('.fixed').remove()" class="btn" style="background:var(--green);">Got it!</button>
-    </div>`;
-    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
-    document.body.appendChild(modal);
+  // ── Real Stripe Checkout ─────────────────────────────────────────────────
+  // executePurchase is called from handlePurchase (after login gate) OR from
+  // the redirect result handler. It POSTs to /api/create-checkout-session and
+  // redirects the user to Stripe's hosted checkout page.
+  async function executePurchase(plan) {
+    const planKey = (plan === 'Pro+' || plan === 'pro_plus') ? 'pro_plus' : 'pro';
+
+    // Show loading state on all pricing CTA buttons
+    const allBtns = document.querySelectorAll('.pricing-card .cta-btn-wrap button');
+    allBtns.forEach(b => { b.disabled = true; });
+
+    // Find the clicked button and show spinner
+    const clickedLabel = planKey === 'pro_plus' ? 'Unlock Pro+' : 'Start Free Trial';
+    allBtns.forEach(b => {
+      if (b.textContent.includes(clickedLabel.replace('⚡ ', '').replace('🚀 ', ''))) {
+        b.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Redirecting...';
+      }
+    });
+
+    try {
+      const token = await window.currentUser.getIdToken();
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ plan: planKey, billing })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'No checkout URL returned from server.');
+      }
+    } catch (e) {
+      console.error('Stripe checkout error:', e);
+      allBtns.forEach(b => { b.disabled = false; });
+      document.querySelectorAll('.btn-pulse').forEach(b => {
+        b.innerHTML = 'Start Free Trial';
+      });
+      document.querySelectorAll('[onclick*="Pro+"]').forEach(b => {
+        if (b.tagName === 'BUTTON') b.innerHTML = 'Unlock Pro+';
+      });
+      alert('Could not open checkout. Please try again or contact support.');
+    }
   }
+
+  // ── Customer Portal (cancel / update payment) ────────────────────────────
+  window.openCustomerPortal = async function() {
+    try {
+      const token = await window.currentUser.getIdToken();
+      const res = await fetch('/api/customer-portal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'No portal URL returned.');
+      }
+    } catch (e) {
+      console.error('Portal error:', e);
+      alert('Could not open the billing portal. Please try again.');
+    }
+  };
 
   // Plan variable — set to 'pro' or 'pro_plus' when Stripe is integrated
   let userPlan = 'free';
@@ -1353,12 +1487,12 @@
     modal.className = 'fixed inset-0 flex items-center justify-center z-50';
     modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
     modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
-      <div style="font-size:40px;margin-bottom:16px;">😢</div>
-      <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Cancel Subscription?</h3>
-      <p style="color:#4b5563;margin-bottom:24px;">Cancellation will be processed when payment integration is live. For now, please contact support.</p>
+      <div style="font-size:40px;margin-bottom:16px;">⚙️</div>
+      <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Manage Subscription</h3>
+      <p style="color:#4b5563;margin-bottom:24px;">You'll be taken to the Stripe billing portal where you can cancel, update your payment method, or view your billing history.</p>
       <div style="display:flex;gap:12px;justify-content:center;">
         <button onclick="this.closest('.fixed').remove()" class="btn" style="background:var(--green);">Keep My Plan</button>
-        <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
+        <button onclick="this.closest('.fixed').remove();window.openCustomerPortal();" class="btn bg-white">Go to Portal →</button>
       </div>
     </div>`;
     modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
