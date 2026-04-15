@@ -572,7 +572,7 @@
       <div class="mb-6">
         <label class="font-extrabold mb-3 heading" style="display:block;font-size:16px;">Your Question</label>
         <div class="relative">
-          <textarea id="questionInput" placeholder="Type your homework question here... (e.g., 'How do I solve 2x + 5 = 15?')" style="width:100%;padding:16px;padding-right:56px;border:2px solid black;border-radius:10px;min-height:120px;resize:none;background:white;font-size:16px;font-family:inherit;line-height:1.5;"></textarea>
+          <textarea id="questionInput" placeholder="Type your homework question here... (or upload an image below — you can add a note too)" style="width:100%;padding:16px;padding-right:56px;border:2px solid black;border-radius:10px;min-height:120px;resize:none;background:white;font-size:16px;font-family:inherit;line-height:1.5;"></textarea>
           <input type="file" id="fileInput" accept="image/*" style="display:none;">
           <button onclick="document.getElementById('fileInput').click()" class="upload-image-btn" title="Upload image">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
@@ -1207,16 +1207,19 @@
       if (existing) existing.remove();
       const pill = document.createElement('div');
       pill.id = 'imagePill';
-      pill.style.cssText = 'display:inline-flex;align-items:center;gap:6px;background:var(--blue);border:2px solid black;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;margin-top:8px;';
-      pill.innerHTML = '📎 ' + file.name + ' <button onclick="clearImage()" style="background:none;border:none;cursor:pointer;font-weight:900;font-size:14px;line-height:1;">×</button>';
-      document.getElementById('questionInput').insertAdjacentElement('afterend', pill);
+      pill.style.cssText = 'display:inline-flex;align-items:center;gap:8px;background:var(--blue);border:2px solid black;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;margin-top:8px;max-width:100%;';
+      pill.innerHTML = '<img src="' + ev.target.result + '" style="width:32px;height:32px;object-fit:cover;border-radius:4px;border:1px solid black;flex-shrink:0;"> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📎 ' + file.name + '</span> <button onclick="clearImage()" style="background:none;border:none;cursor:pointer;font-weight:900;font-size:14px;line-height:1;flex-shrink:0;">×</button>';
+      // Insert after the div.relative wrapper (parent of textarea), not the textarea itself
+      const relativeWrapper = document.getElementById('questionInput').closest('.relative');
+      relativeWrapper.insertAdjacentElement('afterend', pill);
     };
     reader.readAsDataURL(file);
   });
 
   window.clearImage = function() {
     pendingImageBase64 = null; pendingImageType = null;
-    document.getElementById('fileInput').value = '';
+    const fi = document.getElementById('fileInput');
+    try { fi.value = ''; } catch(e) { fi.type='text'; fi.type='file'; }
     const pill = document.getElementById('imagePill');
     if (pill) pill.remove();
   };
@@ -1366,7 +1369,6 @@
 
 </body>
 </html>
-
 
 
 <!-- deploy -->
