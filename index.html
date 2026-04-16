@@ -6,19 +6,6 @@
   <title>HomeWorkAI - AI Homework Helper</title>
   <meta name="description" content="Instant answers with step-by-step explanations. Better than tutors and teachers.">
   <meta name="keywords" content="homework help, AI tutor, study helper, math solver, learning app">
-  <!-- Open Graph / Social sharing -->
-  <meta property="og:title" content="HomeWorkAI - AI Homework Helper">
-  <meta property="og:description" content="Get instant answers with step-by-step explanations across every subject. Better than tutors, faster than Google.">
-  <meta property="og:image" content="https://homeworkaiapp.com/og-image.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://homeworkaiapp.com">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="HomeWorkAI">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="HomeWorkAI - AI Homework Helper">
-  <meta name="twitter:description" content="Get instant answers with step-by-step explanations across every subject. Better than tutors, faster than Google.">
-  <meta name="twitter:image" content="https://homeworkaiapp.com/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -300,6 +287,27 @@
     .settings-row:last-child { border-bottom:none; }
     .settings-label { font-size:13px;color:#6b7280;font-weight:600;margin-top:2px; }
 
+    /* ── Login Modal ─────────────────────────────────────────────── */
+    .login-modal { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:600;align-items:center;justify-content:center;padding:16px; }
+    .login-modal.open { display:flex; }
+    .login-panel { background:white;max-width:26rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:20px;overflow:hidden; }
+    .login-header { background:var(--purple);border-bottom:3px solid black;padding:20px 24px;display:flex;align-items:center;justify-content:space-between; }
+    .login-body { padding:24px; }
+    .login-input { width:100%;padding:13px 16px;border:2px solid black;border-radius:10px;font-size:15px;font-family:inherit;outline:none;transition:box-shadow 0.2s; }
+    .login-input:focus { box-shadow:3px 3px 0 black; }
+    .login-divider { display:flex;align-items:center;gap:12px;margin:18px 0; }
+    .login-divider span { color:#9ca3af;font-size:13px;font-weight:600;white-space:nowrap; }
+    .login-divider::before,.login-divider::after { content:'';flex:1;border-top:2px solid #e5e7eb; }
+    .login-social-btn { width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border:2px solid black;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;background:white;box-shadow:3px 3px 0 black;transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);margin-bottom:10px; }
+    .login-social-btn:hover { transform:translateY(-2px);box-shadow:5px 5px 0 black; }
+    .login-error { background:#fef2f2;border:2px solid #dc2626;border-radius:8px;padding:10px 14px;color:#dc2626;font-size:13px;font-weight:600;margin-bottom:14px;display:none; }
+    .login-error.show { display:block; }
+    .login-success { background:#f0fdf4;border:2px solid #16a34a;border-radius:8px;padding:10px 14px;color:#15803d;font-size:13px;font-weight:600;margin-bottom:14px;display:none; }
+    .login-success.show { display:block; }
+    .login-tab { display:inline-flex;align-items:center;padding:8px 18px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;border:2px solid transparent;transition:all 0.2s; }
+    .login-tab.active { background:white;border-color:black;box-shadow:2px 2px 0 black; }
+    .login-tab:not(.active) { color:#6b7280; }
+
   </style>
 </head>
 <body>
@@ -364,9 +372,9 @@
       </div>
     </div>
 
-    <button id="loginBtn" class="btn bg-white" onclick="handleLogin()" style="gap:8px;">
-      <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" height="18" alt="Google">
-      <span class="login-text" style="font-size:14px;">Login with Google</span>
+    <button id="loginBtn" class="btn bg-white" onclick="openLoginModal()" style="gap:8px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="login-text" style="font-size:14px;">Login</span>
     </button>
 
   </div>
@@ -780,10 +788,75 @@
   </div>
 </footer>
 
+<!-- ===================== LOGIN MODAL ===================== -->
+<div class="login-modal" id="loginModal" onclick="if(event.target===this)closeLoginModal()">
+  <div class="login-panel">
+    <div class="login-header">
+      <div>
+        <div style="font-weight:800;font-size:18px;letter-spacing:-0.03em;">Welcome to HomeWorkAI</div>
+        <div style="font-size:13px;color:#4b5563;margin-top:2px;">Sign in or create an account</div>
+      </div>
+      <button onclick="closeLoginModal()" style="background:none;border:2px solid black;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:800;font-size:16px;">✕</button>
+    </div>
+    <div class="login-body">
+
+      <!-- Tab switcher -->
+      <div style="display:flex;gap:6px;background:#f3f4f6;border-radius:10px;padding:4px;margin-bottom:20px;">
+        <button class="login-tab active" id="tabSignIn" onclick="switchLoginTab('signin')" style="flex:1;justify-content:center;">Sign In</button>
+        <button class="login-tab" id="tabSignUp" onclick="switchLoginTab('signup')" style="flex:1;justify-content:center;">Create Account</button>
+      </div>
+
+      <!-- Error / Success messages -->
+      <div class="login-error" id="loginError"></div>
+      <div class="login-success" id="loginSuccess"></div>
+
+      <!-- Google button -->
+      <button class="login-social-btn" onclick="handleGoogleLogin()">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google">
+        Continue with Google
+      </button>
+
+      <div class="login-divider"><span>or</span></div>
+
+      <!-- SIGN IN FORM -->
+      <div id="signinForm">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <input class="login-input" id="signinEmail" type="email" placeholder="Email address" autocomplete="email">
+          <input class="login-input" id="signinPassword" type="password" placeholder="Password" autocomplete="current-password">
+          <button class="btn w-full" style="background:var(--purple);justify-content:center;font-size:15px;" onclick="handleEmailSignIn()">Sign In</button>
+        </div>
+        <button onclick="switchLoginTab('forgot')" style="background:none;border:none;cursor:pointer;color:#7c3aed;font-size:13px;font-weight:600;margin-top:12px;padding:0;width:100%;text-align:center;">Forgot password?</button>
+      </div>
+
+      <!-- SIGN UP FORM -->
+      <div id="signupForm" style="display:none;">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <input class="login-input" id="signupName" type="text" placeholder="Full name" autocomplete="name">
+          <input class="login-input" id="signupEmail" type="email" placeholder="Email address" autocomplete="email">
+          <input class="login-input" id="signupPassword" type="password" placeholder="Password (min 6 characters)" autocomplete="new-password">
+          <button class="btn w-full" style="background:var(--green);justify-content:center;font-size:15px;" onclick="handleEmailSignUp()">Create Account</button>
+        </div>
+        <p style="font-size:12px;color:#9ca3af;text-align:center;margin-top:12px;">By creating an account you agree to our <a href="/terms.html" style="color:#7c3aed;">Terms of Service</a></p>
+      </div>
+
+      <!-- FORGOT PASSWORD FORM -->
+      <div id="forgotForm" style="display:none;">
+        <p style="font-size:14px;color:#4b5563;margin-bottom:14px;">Enter your email and we'll send you a reset link.</p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <input class="login-input" id="forgotEmail" type="email" placeholder="Email address">
+          <button class="btn w-full" style="background:var(--blue);justify-content:center;font-size:15px;" onclick="handleForgotPassword()">Send Reset Email</button>
+        </div>
+        <button onclick="switchLoginTab('signin')" style="background:none;border:none;cursor:pointer;color:#7c3aed;font-size:13px;font-weight:600;margin-top:12px;padding:0;width:100%;text-align:center;">← Back to Sign In</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- ===================== FIREBASE ===================== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
@@ -856,7 +929,6 @@
       await signInWithPopup(auth, provider);
     } catch (e) {
       if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
-        // Fallback to redirect for GitHub Pages
         await signInWithRedirect(auth, provider);
       } else if (e.code !== 'auth/popup-closed-by-user') {
         console.error(e);
@@ -867,11 +939,116 @@
   window.triggerGoogleLogin = async function(type, data) {
     window.pendingAction = type === 'purchase' ? { type, plan: data } : { type };
     sessionStorage.setItem('pendingAction', JSON.stringify(window.pendingAction));
-    await signInWithGoogle();
+    openLoginModal();
   };
 
   window.handleLogin = async function() {
-    await signInWithGoogle();
+    openLoginModal();
+  };
+
+  // ── Login modal controls ────────────────────────────────────────────────
+  window.openLoginModal = function() {
+    document.getElementById('loginModal').classList.add('open');
+    clearLoginMessages();
+  };
+  window.closeLoginModal = function() {
+    document.getElementById('loginModal').classList.remove('open');
+    clearLoginMessages();
+  };
+  window.switchLoginTab = function(tab) {
+    document.getElementById('signinForm').style.display  = tab === 'signin'  ? 'block' : 'none';
+    document.getElementById('signupForm').style.display  = tab === 'signup'  ? 'block' : 'none';
+    document.getElementById('forgotForm').style.display  = tab === 'forgot'  ? 'block' : 'none';
+    document.getElementById('tabSignIn').className  = 'login-tab' + (tab === 'signin' ? ' active' : '');
+    document.getElementById('tabSignUp').className  = 'login-tab' + (tab === 'signup' ? ' active' : '');
+    clearLoginMessages();
+  };
+
+  function showLoginError(msg) {
+    const el = document.getElementById('loginError');
+    el.textContent = msg; el.classList.add('show');
+    document.getElementById('loginSuccess').classList.remove('show');
+  }
+  function showLoginSuccess(msg) {
+    const el = document.getElementById('loginSuccess');
+    el.textContent = msg; el.classList.add('show');
+    document.getElementById('loginError').classList.remove('show');
+  }
+  function clearLoginMessages() {
+    document.getElementById('loginError').classList.remove('show');
+    document.getElementById('loginSuccess').classList.remove('show');
+  }
+
+  // ── Google ───────────────────────────────────────────────────────────────
+  window.handleGoogleLogin = async function() {
+    try {
+      await signInWithPopup(auth, provider);
+      closeLoginModal();
+    } catch (e) {
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+        await signInWithRedirect(auth, provider);
+      } else if (e.code !== 'auth/popup-closed-by-user') {
+        showLoginError('Google sign-in failed. Please try again.');
+      }
+    }
+  };
+
+  // ── Email sign in ─────────────────────────────────────────────────────────
+  window.handleEmailSignIn = async function() {
+    const email    = document.getElementById('signinEmail').value.trim();
+    const password = document.getElementById('signinPassword').value;
+    if (!email || !password) { showLoginError('Please enter your email and password.'); return; }
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      closeLoginModal();
+    } catch (e) {
+      const msgs = {
+        'auth/user-not-found':   'No account found with that email.',
+        'auth/wrong-password':   'Incorrect password. Please try again.',
+        'auth/invalid-email':    'Please enter a valid email address.',
+        'auth/invalid-credential': 'Incorrect email or password.',
+        'auth/too-many-requests': 'Too many attempts. Please wait a moment.',
+      };
+      showLoginError(msgs[e.code] || 'Sign in failed. Please try again.');
+    }
+  };
+
+  // ── Email sign up ─────────────────────────────────────────────────────────
+  window.handleEmailSignUp = async function() {
+    const name     = document.getElementById('signupName').value.trim();
+    const email    = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    if (!name)               { showLoginError('Please enter your name.'); return; }
+    if (!email)              { showLoginError('Please enter your email.'); return; }
+    if (password.length < 6) { showLoginError('Password must be at least 6 characters.'); return; }
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      closeLoginModal();
+    } catch (e) {
+      const msgs = {
+        'auth/email-already-in-use': 'An account with this email already exists. Try signing in.',
+        'auth/invalid-email':        'Please enter a valid email address.',
+        'auth/weak-password':        'Password is too weak. Use at least 6 characters.',
+      };
+      showLoginError(msgs[e.code] || 'Account creation failed. Please try again.');
+    }
+  };
+
+  // ── Forgot password ───────────────────────────────────────────────────────
+  window.handleForgotPassword = async function() {
+    const email = document.getElementById('forgotEmail').value.trim();
+    if (!email) { showLoginError('Please enter your email address.'); return; }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showLoginSuccess('Reset email sent! Check your inbox.');
+    } catch (e) {
+      const msgs = {
+        'auth/user-not-found': 'No account found with that email.',
+        'auth/invalid-email':  'Please enter a valid email address.',
+      };
+      showLoginError(msgs[e.code] || 'Failed to send reset email.');
+    }
   };
 
   window.handleLogout = async function() {
@@ -928,6 +1105,15 @@
     }
     updateUsageCounter();
   }
+
+  // ── Enter key support for login forms ────────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    if (!document.getElementById('loginModal').classList.contains('open')) return;
+    if (document.getElementById('signinForm').style.display !== 'none') handleEmailSignIn();
+    else if (document.getElementById('signupForm').style.display !== 'none') handleEmailSignUp();
+    else if (document.getElementById('forgotForm').style.display !== 'none') handleForgotPassword();
+  });
 </script>
 
 <!-- ===================== APP JS ===================== -->
@@ -1205,7 +1391,7 @@
           <p style="color:#4b5563;margin-bottom:24px;">Login to continue using HomeWorkAI and get 5 free questions every day!</p>
           <div style="display:flex;gap:12px;justify-content:center;">
             <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
-            <button onclick="this.closest('.fixed').remove();window.triggerGoogleLogin('askQuestion');" class="btn" style="background:var(--purple);">Login with Google</button>
+            <button onclick="this.closest('.fixed').remove();openLoginModal();" class="btn" style="background:var(--purple);">Login</button>
           </div>
         </div>`;
         modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
