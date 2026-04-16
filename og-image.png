@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!-- saved from url=(0050)file:///Users/sion/Downloads/og-image-preview.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1200px; height: 630px; overflow: hidden; }
+  .card {
+    width: 1200px; height: 630px;
+    background: linear-gradient(135deg, #ede9fe 0%, #c4b5fd 50%, #a78bfa 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    position: relative; overflow: hidden;
+  }
+  .bg-circle-1 {
+    position: absolute; width: 500px; height: 500px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); top: -100px; right: -100px;
+  }
+  .bg-circle-2 {
+    position: absolute; width: 300px; height: 300px; border-radius: 50%;
+    background: rgba(255,255,255,0.1); bottom: -80px; left: -60px;
+  }
+  .content {
+    display: flex; align-items: center; gap: 60px;
+    padding: 60px; position: relative; z-index: 1;
+  }
+  .logo-wrap {
+    flex-shrink: 0;
+    background: white; border: 4px solid black;
+    border-radius: 32px; padding: 20px;
+    box-shadow: 8px 8px 0 black;
+  }
+  .text-side { flex: 1; }
+  .brand {
+    font-size: 52px; font-weight: 800; color: #1f2937;
+    letter-spacing: -0.03em; line-height: 1.1;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.08);
+  }
+  .tagline {
+    font-size: 26px; font-weight: 600; color: #4c1d95;
+    margin-top: 16px; line-height: 1.4; max-width: 560px;
+  }
+  .badges {
+    display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap;
+  }
+  .badge {
+    background: white; border: 2px solid black; border-radius: 50px;
+    padding: 8px 20px; font-size: 16px; font-weight: 700; color: #1f2937;
+    box-shadow: 3px 3px 0 black;
+  }
+  .badge.green { background: #a7f3d0; }
+  .badge.yellow { background: #fde68a; }
+  .badge.blue { background: #bae6fd; }
+  .url {
+    position: absolute; bottom: 28px; right: 40px;
+    font-size: 18px; font-weight: 700; color: #6d28d9;
+    letter-spacing: -0.01em; z-index: 1;
+  }
+</style>
+<link href="./og-image.png_files/css2" rel="stylesheet">
+</head>
+<body>
+<div class="card">
+  <div class="bg-circle-1"></div>
+  <div class="bg-circle-2"></div>
+  <div class="content">
+    <div class="logo-wrap">
+      <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"></rect>
+        <rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"></rect>
+        <path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"></path>
+        <line x1="37" y1="50" x2="55" y2="49" stroke="#C4B8F0" stroke-width="2" stroke-linecap="round"></line>
+        <line x1="37" y1="55" x2="55" y2="54" stroke="#C4B8F0" stroke-width="2" stroke-linecap="round"></line>
+        <line x1="37" y1="60" x2="55" y2="59" stroke="#C4B8F0" stroke-width="2" stroke-linecap="round"></line>
+        <line x1="37" y1="65" x2="55" y2="65" stroke="#C4B8F0" stroke-width="2" stroke-linecap="round"></line>
+        <path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"></path>
+        <line x1="64" y1="49" x2="85" y2="50" stroke="#C4B8F0" stroke-width="2" stroke-linecap="round"></line>
+        <line x1="64" y1="54" x2="85" y2="55" stroke="#C4B8F0" stroke-width="2" stroke-linecap="round"></line>
+        <line x1="64" y1="59" x2="85" y2="60" stroke="#C4B8F0" stroke-width="2" stroke-linecap="round"></line>
+        <line x1="64" y1="65" x2="85" y2="65" stroke="#C4B8F0" stroke-width="2" stroke-linecap="round"></line>
+        <rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"></rect>
+        <rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"></rect>
+        <g transform="translate(59.5,36)">
+          <polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"></polygon>
+          <polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"></polygon>
+          <circle cx="0" cy="0" r="1.5" fill="#FAC775"></circle>
+        </g>
+      </svg>
+    </div>
+    <div class="text-side">
+      <div class="brand">HomeWorkAI</div>
+      <div class="tagline">AI that explains every step clearly.<br>Better than tutors, faster than Google.</div>
+      <div class="badges">
+        <div class="badge green">✔ All Subjects</div>
+        <div class="badge yellow">⚡ Instant Answers</div>
+        <div class="badge blue">🆓 Free to Start</div>
+      </div>
+    </div>
+  </div>
+  <div class="url">homeworkaiapp.com</div>
+</div>
+
+
+</body></html>
