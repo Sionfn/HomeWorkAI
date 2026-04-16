@@ -64,15 +64,14 @@ export default async function handler(req, res) {
       line_items: [{ price: priceId, quantity: 1 }],
 
       // 3-day free trial — card is required but NOT charged during trial
-      subscription_data: {
-        trial_period_days: 3,
-        metadata: {
-          firebaseUid: uid || "",
-          plan,
-          billing,
-        },
-      },
-
+     subscription_data: {
+  trial_period_days: (plan === 'pro' && billing === 'monthly') ? 3 : undefined,
+  metadata: {
+    firebaseUid: uid || "",
+    plan,
+    billing,
+  },
+},
       // Redirect after checkout
       success_url: `${baseUrl}?payment=success`,
       cancel_url:  `${baseUrl}?payment=cancelled`,
