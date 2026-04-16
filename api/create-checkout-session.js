@@ -3,11 +3,11 @@ import Stripe from "stripe";
 const PRICES = {
   pro: {
     monthly: process.env.STRIPE_PRICE_PRO_MONTHLY,
-    yearly:  process.env.STRIPE_PRICE_PRO_YEARLY,
+    yearly: process.env.STRIPE_PRICE_PRO_YEARLY,
   },
   pro_plus: {
     monthly: process.env.STRIPE_PRICE_PRO_PLUS_MONTHLY,
-    yearly:  process.env.STRIPE_PRICE_PRO_PLUS_YEARLY,
+    yearly: process.env.STRIPE_PRICE_PRO_PLUS_YEARLY,
   },
 };
 
@@ -40,19 +40,14 @@ export default async function handler(req, res) {
 
     const baseUrl = req.headers.origin || `https://${req.headers.host}`;
 
-    const subscriptionData = {
-      metadata: { plan, billing, firebaseUid: uid || "" },
-    };
-
-    if (plan === "pro" && billing === "monthly") {
-      subscriptionData.trial_period_days = 3;
-    }
-
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customer.id,
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: subscriptionData,
+      subscription_data: {
+        trial_period_days: (plan === "pro" && billing === "monthly") ? 3 : undefined,
+        metadata: { plan, billing },
+      },
       success_url: `${baseUrl}?payment=success`,
       cancel_url: `${baseUrl}?payment=cancelled`,
       allow_promotion_codes: true,
