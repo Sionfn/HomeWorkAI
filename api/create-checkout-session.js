@@ -1,7 +1,3 @@
-// /api/create-checkout-session.js
-// Creates a Stripe Checkout session with a 3-day free trial.
-// No Firebase Admin SDK needed — only your Stripe keys are required.
-
 import Stripe from "stripe";
 
 const PRICES = {
@@ -22,20 +18,16 @@ export default async function handler(req, res) {
 
   const { plan, billing = "monthly", email, uid } = req.body;
 
-  // Basic validation
   if (!email) {
     return res.status(400).json({ error: "Email is required." });
   }
   if (!plan || !["pro", "pro_plus"].includes(plan)) {
-    return res.status(400).json({ error: "Invalid plan. Must be 'pro' or 'pro_plus'." });
+    return res.status(400).json({ error: "Invalid plan." });
   }
 
   const priceId = PRICES[plan]?.[billing];
   if (!priceId) {
-    return res.status(500).json({
-      error: `Price ID not configured for ${plan}/${billing}. ` +
-             `Add STRIPE_PRICE_${plan.toUpperCase()}_${billing.toUpperCase()} to your Vercel environment variables.`,
-    });
+    return res.status(500).json({ error: `Price ID not configured for ${plan}/${billing}.` });
   }
 
   try {
@@ -43,7 +35,6 @@ export default async function handler(req, res) {
       apiVersion: "2024-11-20.acacia",
     });
 
-    // Find existing customer by email, or create a new one
     const existingList = await stripe.customers.list({ email, limit: 1 });
     let customer;
     if (existingList.data.length > 0) {
@@ -57,28 +48,31 @@ export default async function handler(req, res) {
 
     const baseUrl = req.headers.origin || `https://${req.headers.host}`;
 
-    const session = await stripe.checkout.sessions.create({
+    // Only Pro Monthly gets the 3-day free trial
+    const isTrialEligible = (plan === "pro" && billing === "monthly");
+
+    const sessionData = {
       mode: "subscription",
       customer: customer.id,
-
       line_items: [{ price: priceId, quantity: 1 }],
-
-      // 3-day free trial — card is required but NOT charged during trial
-     subscription_data: {
-  trial_period_days: (plan === 'pro' && billing === 'monthly') ? 3 : undefined,
-  metadata: {
-    firebaseUid: uid || "",
-    plan,
-    billing,
-  },
-},
-      // Redirect after checkout
+      subscription_data: {
+        metadata: {
+          firebaseUid: uid || "",
+          plan,
+          billing,
+        },
+      },
       success_url: `${baseUrl}?payment=success`,
       cancel_url:  `${baseUrl}?payment=cancelled`,
-
-      // Allow promo codes if you create them in Stripe later
       allow_promotion_codes: true,
-    });
+    };
+
+    // Add trial only for Pro Monthly
+    if (isTrialEligible) {
+      sessionData.subscription_data.trial_period_days = 3;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionData);
 
     return res.status(200).json({ url: session.url });
 
