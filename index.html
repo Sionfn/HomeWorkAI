@@ -812,6 +812,7 @@
       userPlan = 'free';
     }
     updateLoginUI();
+    updatePricingButtons();
     if (user && window.pendingAction) {
       const action = window.pendingAction;
       window.pendingAction = null;
@@ -950,6 +951,10 @@
     if (trialBtn)  trialBtn.innerHTML  = '⏳ Opening Stripe...';
     if (proPlsBtn) proPlsBtn.innerHTML = '⏳ Opening Stripe...';
 
+    // Track what was purchased so the toast shows the right message
+    window._lastPurchasedPlan    = planKey;
+    window._lastPurchasedBilling = billing;
+
     try {
       const res  = await fetch('/api/create-checkout-session', {
         method:  'POST',
@@ -965,7 +970,6 @@
       const data = await res.json();
 
       if (data.url) {
-        // Redirect to Stripe Checkout
         window.location.href = data.url;
       } else {
         throw new Error(data.error || 'No checkout URL returned.');
@@ -973,7 +977,6 @@
 
     } catch (err) {
       console.error('Checkout failed:', err);
-      // Re-enable buttons
       allBtns.forEach(b => b.disabled = false);
       if (trialBtn)  trialBtn.innerHTML  = 'Start Free Trial';
       if (proPlsBtn) proPlsBtn.innerHTML = 'Unlock Pro+';
@@ -1031,22 +1034,28 @@
       'max-width:90vw;width:360px;',
     ].join('');
 
-    if (type === 'success') {
-      toast.innerHTML = [
-        '<div style="font-size:36px;margin-bottom:10px;">🎉</div>',
-        '<div style="font-weight:800;font-size:17px;margin-bottom:6px;">You\'re all set!</div>',
-        '<div style="color:#4b5563;font-size:14px;line-height:1.5;">',
-        'Your 3-day free trial has started.<br>',
-        'Enjoy unlimited questions — no charge until the trial ends!',
-        '</div>',
-      ].join('');
-    } else {
+    if (type === 'cancelled') {
       toast.innerHTML = [
         '<div style="font-size:36px;margin-bottom:10px;">😕</div>',
         '<div style="font-weight:800;font-size:17px;margin-bottom:6px;">Checkout cancelled</div>',
         '<div style="color:#4b5563;font-size:14px;line-height:1.5;">',
         'No worries — your free plan is still active.<br>',
         'Come back whenever you\'re ready to upgrade.',
+        '</div>',
+      ].join('');
+    } else {
+      // Only show trial message for Pro Monthly
+      const isProMonthlyTrial = (
+        window._lastPurchasedPlan === 'pro' &&
+        window._lastPurchasedBilling === 'monthly'
+      );
+      toast.innerHTML = [
+        '<div style="font-size:36px;margin-bottom:10px;">🎉</div>',
+        '<div style="font-weight:800;font-size:17px;margin-bottom:6px;">You\'re all set!</div>',
+        '<div style="color:#4b5563;font-size:14px;line-height:1.5;">',
+        isProMonthlyTrial
+          ? 'Your 3-day free trial has started.<br>No charge until the trial ends!'
+          : 'Your subscription is now active.<br>Enjoy unlimited questions!',
         '</div>',
       ].join('');
     }
@@ -1057,6 +1066,52 @@
       toast.style.opacity    = '0';
       setTimeout(() => toast.remove(), 420);
     }, 5500);
+  }
+
+  // ── Update pricing buttons based on current plan ─────────────────────────
+  function updatePricingButtons() {
+    const pricingCards = document.querySelectorAll('.pricing-card');
+    pricingCards.forEach(card => {
+      const title = card.querySelector('h3')?.textContent.trim();
+      const btn   = card.querySelector('.cta-btn-wrap button');
+      if (!btn || !title) return;
+
+      // Reset first
+      btn.disabled = false;
+      btn.style.boxShadow = '';
+      btn.style.opacity   = '';
+
+      if (userPlan === 'pro') {
+        if (title === 'Pro') {
+          btn.textContent = '✓ Current Plan';
+          btn.disabled    = true;
+          btn.style.background  = '#e5e7eb';
+          btn.style.color       = '#6b7280';
+          btn.style.boxShadow   = 'none';
+          btn.style.opacity     = '0.7';
+        }
+        // Pro+ buttons stay active so Pro users can upgrade
+      }
+
+      if (userPlan === 'pro_plus') {
+        if (title === 'Pro+') {
+          btn.textContent = '✓ Current Plan';
+          btn.disabled    = true;
+          btn.style.background  = '#e5e7eb';
+          btn.style.color       = '#6b7280';
+          btn.style.boxShadow   = 'none';
+          btn.style.opacity     = '0.7';
+        }
+        if (title === 'Pro') {
+          btn.textContent = '↓ Downgrade';
+          btn.disabled    = true;
+          btn.style.background  = '#e5e7eb';
+          btn.style.color       = '#6b7280';
+          btn.style.boxShadow   = 'none';
+          btn.style.opacity     = '0.7';
+        }
+      }
+    });
   }
 
   // Plan variable — set to 'pro' or 'pro_plus' after Stripe check on login
