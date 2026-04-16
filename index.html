@@ -816,6 +816,12 @@
         Continue with Google
       </button>
 
+      <!-- Microsoft button -->
+      <button class="login-social-btn" onclick="handleMicrosoftLogin()" style="border-color:#2563eb;">
+        <svg width="20" height="20" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+        Continue with Microsoft
+      </button>
+
       <div class="login-divider"><span>or</span></div>
 
       <!-- SIGN IN FORM -->
@@ -856,7 +862,7 @@
 <!-- ===================== FIREBASE ===================== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, OAuthProvider, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
@@ -993,7 +999,24 @@
     }
   };
 
-  // ── Email sign in ─────────────────────────────────────────────────────────
+  // ── Microsoft ─────────────────────────────────────────────────────────────
+  window.handleMicrosoftLogin = async function() {
+    try {
+      const msProvider = new OAuthProvider('microsoft.com');
+      msProvider.addScope('email');
+      msProvider.addScope('profile');
+      await signInWithPopup(auth, msProvider);
+      closeLoginModal();
+    } catch (e) {
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+        const msProvider = new OAuthProvider('microsoft.com');
+        await signInWithRedirect(auth, msProvider);
+      } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+        showLoginError('Microsoft sign-in failed. Please try again.');
+        console.error(e);
+      }
+    }
+  };
   window.handleEmailSignIn = async function() {
     const email    = document.getElementById('signinEmail').value.trim();
     const password = document.getElementById('signinPassword').value;
@@ -1811,6 +1834,5 @@
 
 </body>
 </html>
-
 
 <!-- deploy -->
