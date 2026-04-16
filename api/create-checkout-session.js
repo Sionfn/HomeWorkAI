@@ -40,14 +40,17 @@ export default async function handler(req, res) {
 
     const baseUrl = req.headers.origin || `https://${req.headers.host}`;
 
+    // Build subscription_data without trial for non-Pro-Monthly plans
+    let subscriptionData = { metadata: { plan, billing } };
+    if (plan === "pro" && billing === "monthly") {
+      subscriptionData.trial_period_days = 3;
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customer.id,
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: {
-        trial_period_days: (plan === "pro" && billing === "monthly") ? 3 : undefined,
-        metadata: { plan, billing },
-      },
+      subscription_data: subscriptionData,
       success_url: `${baseUrl}?payment=success`,
       cancel_url: `${baseUrl}?payment=cancelled`,
       allow_promotion_codes: true,
