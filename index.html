@@ -71,20 +71,13 @@
     }
     .pro-badge:hover { transform: translateY(-3px); box-shadow: 5px 5px 0 black; }
 
-    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 6px; border: 2px solid black; border-radius: 8px; background: white; }
-    .hamburger span { display: block; width: 20px; height: 2px; background: black; border-radius: 2px; }
-    .mobile-nav { display: none; flex-direction: column; gap: 4px; padding: 12px 16px; border-bottom: 4px solid black; background: #ede9fe; }
-    .mobile-nav.open { display: flex; }
-    .nav-tab { padding: 7px 14px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; border: 2px solid black; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); color: #1f2937; text-decoration: none; display: inline-block; white-space: nowrap; box-shadow: 2px 2px 0 black; }
-    .nav-tab:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 black; }
-    @media (max-width: 640px) { .hamburger { display: flex; } }
-
     /* Mobile header — hide text labels to prevent overflow */
     @media (max-width: 640px) {
       .logo-text { display: none; }
       .login-text { display: none; }
-      .pro-badge { padding: 10px 12px; font-size: 13px; }
-      #loginBtn { padding: 9px 10px; }
+      .pro-badge { padding: 11px 14px; font-size: 14px; }
+      #loginBtn { padding: 10px 12px; }
+      #accountBtn { padding: 10px 12px; }
     }
 
     /* HERO — white background as requested */
@@ -298,7 +291,7 @@
 <body>
 
 <!-- ===================== HEADER ===================== -->
-<header id="main-header" style="background:var(--purple);border-bottom:4px solid black;position:sticky;top:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:12px 24px;gap:16px;">
+<header id="main-header" style="background:var(--purple);border-bottom:4px solid black;position:sticky;top:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;gap:12px;">
   <a href="#home" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex-shrink:0;">
     <svg width="38" height="38" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
       <rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/>
@@ -362,21 +355,8 @@
       <span class="login-text" style="font-size:14px;">Login with Google</span>
     </button>
 
-    <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
   </div>
 </header>
-
-<!-- MOBILE NAV -->
-<nav class="mobile-nav" id="mobileNav" style="position:sticky;top:72px;z-index:199;">
-  <a class="nav-tab" href="#home" onclick="closeMobileNav()" style="background:var(--purple);">Home</a>
-  <a class="nav-tab" href="#how-it-works" onclick="closeMobileNav()" style="background:var(--green);">How It Works</a>
-  <a class="nav-tab" href="#reviews" onclick="closeMobileNav()" style="background:var(--yellow);">Reviews</a>
-  <a class="nav-tab" href="#ai-helper" onclick="closeMobileNav()" style="background:var(--blue);">Ask AI</a>
-  <a class="nav-tab" href="#pricing" onclick="closeMobileNav()" style="background:var(--green);">Pricing</a>
-  <a class="nav-tab" href="#faq" onclick="closeMobileNav()" style="background:var(--purple);">FAQ</a>
-</nav>
 
 <!-- ===================== HERO (index 3 layout, white bg, shortened mockup animation) ===================== -->
 <section id="home" style="min-height:calc(100vh - 76px);display:flex;align-items:center;">
