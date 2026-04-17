@@ -42,6 +42,7 @@ FORMATTING — Pro+ plan supports bold AND underline. Use both purposefully:
 After the Final Answer, write an Explanation section. Rules:
 - 2-4 short paragraphs. Each paragraph is one focused idea. 2-3 sentences each.
 - Go deeper than surface facts. Explain underlying principles, real-world implications, or important connections.
+- Connect the topic to its broader curriculum context — mention which course level, exam (SAT/ACT/AP), or real-world field this applies to when relevant.
 - For math: explain the full reasoning, then add why the method works at a conceptual level. Bold key numbers and underline the core method name.
 - For concepts: break down causes, mechanisms, and significance with specific detail. Underline the single most important idea.
 - After Explanation, add "Insight:" ONLY if there is something genuinely valuable — a key nuance, a common mistake, or a deeper connection students miss. One short paragraph. Skip for simple questions.
@@ -62,6 +63,11 @@ After the Final Answer:
     const youtubeInstruction = userPlan === "pro_plus"
       ? `\n\nPro+ exclusive: If the topic genuinely warrants a video (complex concept, visual process, or deep subject), add a "Videos:" section at the very end with 1-2 relevant YouTube video titles. Format:\nTitle: [descriptive title]\nTitles only — no URLs. Skip entirely for simple or short questions. Quality over quantity.`
       : "";
+
+    const resourcesInstruction = userPlan === "pro_plus"
+      ? `\n\nPro+ exclusive study resources: Decide if the topic would genuinely benefit from extra study resources (Khan Academy, Quizlet, or Brainly). Use your judgment — only include resources if they would meaningfully help the student learn more. For conceptual topics, history, science, or math theory: include relevant ones. For simple one-step calculations or trivial questions: skip entirely.\n\nIf useful, add a "Resources:" section at the very end (after Videos if present). Only include the ones that actually make sense for the topic:\n- Khan Academy: [short search topic] — good for lessons and explanations\n- Quizlet: [short search topic] — good for memorization and flashcards\n- Brainly: [short search topic] — good for homework help and discussion\n\nInclude 1-3 of these only when genuinely useful. Skip any that wouldn't help. Skip the whole section if none would help.`
+      : "";
+
 
     const systemPrompt = `You are HomeWorkAI — an expert academic tutor for ALL subjects from K-12 through college.
 Subjects: Math (arithmetic → calculus, stats) | Science (biology, chemistry, physics) | History | English & writing | Economics | Law | Psychology | Computer science | Any academic topic
@@ -95,7 +101,7 @@ STRICT RULES:
 5. Scale length to complexity — simple = shorter, complex = more thorough. Never pad.
 6. FORMATTING: Free tier — plain text ONLY, no bold, no underline. Pro tier — bold (**word**) allowed for key terms. Pro+ tier — bold (**word**) AND underline (__phrase__) allowed for key terms. No LaTeX, no markdown symbols like ##, no $ for math.
 7. Non-academic question: reply only "I'm here to help with homework and studying. Try asking me a subject question!"
-8. Write like a confident, intelligent tutor — not a chatbot, not an essay.${youtubeInstruction}`;
+8. Write like a confident, intelligent tutor — not a chatbot, not an essay.${youtubeInstruction}${resourcesInstruction}`;
 
     const inputContent = `Question: ${question}`;
 
@@ -151,17 +157,14 @@ STRICT RULES:
 
     let videos = [];
     if (userPlan === "pro_plus") {
-      const videoBlockMatch = answer.match(/Videos:([\s\S]*?)(?=\n\n|$)/);
+      const videoBlockMatch = answer.match(/Videos:([\s\S]*?)(?=\n\nResources:|Resources:|$)/);
       if (videoBlockMatch) {
         const block = videoBlockMatch[1];
         const titleMatches = [...block.matchAll(/Title:\s*(.+)/gi)];
         for (const m of titleMatches) {
           const title = m[1].trim();
           if (title.length > 3) {
-            videos.push({
-              title,
-              link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(title)
-            });
+            videos.push({ title, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(title) });
           }
         }
         if (videos.length === 0) {
@@ -172,15 +175,32 @@ STRICT RULES:
             videos.push({ title: l, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(l) });
           }
         }
-        answer = answer.replace(/Videos:[\s\S]*?(?=\n\n|$)/, "").trim();
+        answer = answer.replace(/Videos:[\s\S]*?(?=\n\nResources:|Resources:|$)/, "").trim();
       }
     }
 
-    return res.status(200).json({ answer, videos });
+    // ── Parse Study Resources (Pro+ only) ────────────────────────────────
+    let resources = [];
+    if (userPlan === "pro_plus") {
+      const resBlockMatch = answer.match(/Resources:([\s\S]*?)(?=\n\n|$)/);
+      if (resBlockMatch) {
+        const block = resBlockMatch[1];
+        const kaMatch = block.match(/Khan Academy:\s*(.+)/i);
+        const quizMatch = block.match(/Quizlet:\s*(.+)/i);
+        const brainlyMatch = block.match(/Brainly:\s*(.+)/i);
+        if (kaMatch) resources.push({ site: "Khan Academy", query: kaMatch[1].trim(), url: "https://www.khanacademy.org/search?page_search_query=" + encodeURIComponent(kaMatch[1].trim()), color: "#14bf96", icon: "🎓" });
+        if (quizMatch) resources.push({ site: "Quizlet", query: quizMatch[1].trim(), url: "https://quizlet.com/search?query=" + encodeURIComponent(quizMatch[1].trim()) + "&type=sets", color: "#4257b2", icon: "📇" });
+        if (brainlyMatch) resources.push({ site: "Brainly", query: brainlyMatch[1].trim(), url: "https://brainly.com/search?entry=" + encodeURIComponent(brainlyMatch[1].trim()), color: "#b45309", icon: "💬" });
+        answer = answer.replace(/Resources:[\s\S]*?(?=\n\n|$)/, "").trim();
+      }
+    }
+
+    return res.status(200).json({ answer, videos, resources });
 
   } catch (error) {
     console.error("SERVER ERROR:", error);
     return res.status(500).json({ error: "Something went wrong" });
   }
 }
+
 
