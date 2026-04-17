@@ -46,7 +46,16 @@ After the Final Answer, write an Explanation section. Rules:
 - For concepts: break down causes, mechanisms, and significance with specific detail. Underline the single most important idea.
 - After Explanation, add "Insight:" ONLY if there is something genuinely valuable — a key nuance, a common mistake, or a deeper connection students miss. One short paragraph. Skip for simple questions.
 - Add a Tip only if it is a high-value shortcut or mental model. Skip if nothing valuable to add.
-- Keep each paragraph short and sharp. Never write walls of text. Quality over quantity.`;
+- Keep each paragraph short and sharp. Never write walls of text. Quality over quantity.
+
+PRACTICE PROBLEM (Pro+ exclusive):
+After your main answer, add a "Practice Problem:" section with ONE practice question closely related to what the student just asked. The practice question should test the same concept at a similar difficulty level. Format:
+Practice Problem: [One clear practice question]
+Practice Answer: [The answer with brief explanation]
+
+EXAM TIP (Pro+ exclusive):
+After the practice problem, add "Exam Tip:" with ONE short, genuinely useful tip about how this topic commonly appears on exams (SAT, ACT, AP, or general exams). Only add this if there is something genuinely useful to say. Format:
+Exam Tip: [One sentence exam tip]`;
 
     } else {
       planInstructions = `QUALITY LEVEL: Free (basic helper)
@@ -63,10 +72,21 @@ After the Final Answer:
       ? `\n\nPro+ exclusive: If the topic genuinely warrants a video (complex concept, visual process, or deep subject), add a "Videos:" section at the very end with 1-2 relevant YouTube video titles. Format:\nTitle: [descriptive title]\nTitles only — no URLs. Skip entirely for simple or short questions. Quality over quantity.`
       : "";
 
+    // Pro+ RAG: enrich system prompt with curriculum context hints
+    const ragContext = userPlan === "pro_plus"
+      ? `\n\nCURRICULUM AWARENESS (Pro+ only):
+- Connect answers to standard curriculum frameworks (Common Core, AP, IB, SAT/ACT) when relevant.
+- For math problems, mention the broader mathematical domain (e.g., "This is a core algebra concept tested heavily on the SAT").
+- For science, reference the specific branch and real-world application.
+- For history/social studies, connect to broader themes and time periods.
+- For English, reference literary devices, rhetorical strategies, or writing standards.
+- This context makes answers more valuable for exam prep and deeper understanding.`
+      : "";
+
     const systemPrompt = `You are HomeWorkAI — an expert academic tutor for ALL subjects from K-12 through college.
 Subjects: Math (arithmetic → calculus, stats) | Science (biology, chemistry, physics) | History | English & writing | Economics | Law | Psychology | Computer science | Any academic topic
 
-${planInstructions}
+${planInstructions}${ragContext}
 
 RESPONSE FORMAT — adapt naturally to the question. Do NOT force sections. Only include a section if it genuinely helps.
 
@@ -149,6 +169,7 @@ STRICT RULES:
       answer = answer.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "$1");
     }
 
+    // ── Parse Videos (Pro+ only) ──────────────────────────────────────────
     let videos = [];
     if (userPlan === "pro_plus") {
       const videoBlockMatch = answer.match(/Videos:([\s\S]*?)(?=\n\n|$)/);
@@ -158,10 +179,7 @@ STRICT RULES:
         for (const m of titleMatches) {
           const title = m[1].trim();
           if (title.length > 3) {
-            videos.push({
-              title,
-              link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(title)
-            });
+            videos.push({ title, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(title) });
           }
         }
         if (videos.length === 0) {
@@ -176,10 +194,36 @@ STRICT RULES:
       }
     }
 
-    return res.status(200).json({ answer, videos });
+    // ── Parse Practice Problem (Pro+ only) ───────────────────────────────
+    let practiceProblem = null;
+    let practiceAnswer = null;
+    if (userPlan === "pro_plus") {
+      const ppMatch = answer.match(/Practice Problem:\s*(.+?)(?:\n|$)/i);
+      const paMatch = answer.match(/Practice Answer:\s*([\s\S]+?)(?=\n\n|Exam Tip:|$)/i);
+      if (ppMatch) {
+        practiceProblem = ppMatch[1].trim();
+        answer = answer.replace(/Practice Problem:[\s\S]*?(?=\n\n|Exam Tip:|$)/i, "").trim();
+      }
+      if (paMatch) {
+        practiceAnswer = paMatch[1].trim();
+      }
+    }
+
+    // ── Parse Exam Tip (Pro+ only) ────────────────────────────────────────
+    let examTip = null;
+    if (userPlan === "pro_plus") {
+      const etMatch = answer.match(/Exam Tip:\s*(.+?)(?:\n|$)/i);
+      if (etMatch) {
+        examTip = etMatch[1].trim();
+        answer = answer.replace(/Exam Tip:.*?(?:\n|$)/i, "").trim();
+      }
+    }
+
+    return res.status(200).json({ answer, videos, practiceProblem, practiceAnswer, examTip });
 
   } catch (error) {
     console.error("SERVER ERROR:", error);
     return res.status(500).json({ error: "Something went wrong" });
   }
 }
+
