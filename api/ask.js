@@ -4,101 +4,103 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { question, plan, imageBase64, imageType } = req.body;
-    if (!question && !imageBase64) {
+    const { question, plan } = req.body;
+    if (!question) {
       return res.status(400).json({ error: "No question provided" });
     }
 
     const userPlan = plan || "free";
 
+    // ─────────────────────────────────────────────
+    // PLAN INSTRUCTIONS
+    // Hard rules per plan. No probability logic.
+    // ─────────────────────────────────────────────
+
     let planInstructions = "";
 
-    if (userPlan === "pro") {
-      planInstructions = `QUALITY LEVEL: Pro (strong tutor)
-You are a clear, confident tutor helping a student genuinely understand the material.
+    if (userPlan === "free") {
+      planInstructions = `PLAN: Free
 
-FORMATTING — Pro plan supports bold text. Use it selectively:
-- Wrap important terms or key values in **double asterisks** to bold them (e.g., **photosynthesis**, **x = 5**).
-- Bold only what truly matters — 2-4 highlights per response. Never over-bold.
+ALLOWED SECTIONS — only these two, nothing else:
+1. Final Answer (always)
+2. One short explanation: 1–2 sentences max. Explain the core idea simply.
 
-After the Final Answer, write an Explanation section. Rules:
-- 2-3 short paragraphs. Each paragraph is one clear idea. 2-3 sentences each.
-- Explain the WHY — not just what happened, but why it works or why it matters.
-- Teach clearly, like you're explaining to a smart student who wants to understand.
-- For math: after the steps, explain the logic behind the method and bold key results.
-- For concepts: explain causes, mechanisms, real-world meaning.
-- Add a Tip only if it is genuinely useful. Skip it if not.
-- Keep paragraphs short. Never write a wall of text.`;
+STRICTLY FORBIDDEN — never include any of these on the Free plan:
+- Step-by-step
+- Tip
+- Insight
+- Common Mistake
+- Key Points
+- Resources
+- Any extra section or label
+
+FORMATTING: Plain text only. No bold (**), no underline (__).
+
+Keep it short and correct. That is all.`;
+
+    } else if (userPlan === "pro") {
+      planInstructions = `PLAN: Pro
+
+ALLOWED SECTIONS — include only when they genuinely help:
+1. Final Answer (always)
+2. Explanation — explain the WHY in 2–3 short paragraphs. One idea per paragraph, 2–3 sentences max.
+3. Step-by-step — ONLY for math, calculations, or multi-step processes. Show real operations with actual numbers. Never vague.
+4. Tip — ONLY if there is a genuinely useful shortcut or memory trick. Skip if nothing valuable to add.
+
+STRICTLY FORBIDDEN — never include any of these on the Pro plan:
+- Insight
+- Common Mistake
+- Resources
+
+FORMATTING: Bold (**word**) allowed for key terms — use selectively, 2–4 highlights max. No underline (__).
+
+Write like a clear, confident tutor. Match depth to the question.`;
 
     } else if (userPlan === "pro_plus") {
-      planInstructions = `QUALITY LEVEL: Pro+ (expert professor)
-You are a top-tier professor delivering the clearest, deepest, most useful explanation possible.
+      planInstructions = `PLAN: Pro+
 
-FORMATTING — Pro+ plan supports bold AND underline. Use both purposefully:
-- Wrap important terms in **double asterisks** to bold them (e.g., **Newton's Second Law**).
-- Wrap key concepts that the student must remember in __double underscores__ to underline them (e.g., __the derivative measures rate of change__).
-- Bold 3-5 highlights and underline 1-2 must-remember concepts per response. Never over-format.
+ALLOWED SECTIONS — include only when they genuinely help the student:
+1. Final Answer (always)
+2. Explanation — 2–4 short paragraphs. Explain underlying principles and real-world meaning. One idea per paragraph, 2–3 sentences max.
+3. Step-by-step — ONLY for math, calculations, or multi-step processes. Show real operations with actual numbers.
+4. Tip — ONLY if there is a high-value shortcut or mental model. Skip if nothing genuinely useful.
+5. Insight — ONLY for complex topics where there is a deeper nuance or connection students often miss. One short paragraph. Skip for simple questions.
+6. Common Mistake — ONLY when there is one specific, common error students make on this exact topic. One sentence. Skip if not clearly applicable.
+7. Resources — ONLY for topics that genuinely benefit from further study. Skip for simple questions or pure calculations. See format below.
 
-After the Final Answer, write an Explanation section. Rules:
-- 2-4 short paragraphs. Each paragraph is one focused idea. 2-3 sentences each.
-- Go deeper than surface facts. Explain underlying principles, real-world implications, or important connections.
-- For math: explain the full reasoning, then add why the method works at a conceptual level. Bold key numbers and underline the core method name.
-- For concepts: break down causes, mechanisms, and significance with specific detail. Underline the single most important idea.
-- After Explanation, add "Insight:" ONLY if there is something genuinely valuable — a key nuance, a common mistake, or a deeper connection students miss. One short paragraph. Skip for simple questions.
-- Add a Tip only if it is a high-value shortcut or mental model. Skip if nothing valuable to add.
-- Keep each paragraph short and sharp. Never write walls of text. Quality over quantity.`;
+Do NOT force all sections into every response. Only include sections that add real value.
 
-    } else {
-      planInstructions = `QUALITY LEVEL: Free (basic helper)
-After the Final Answer:
-- Write 1-2 short sentences that explain the core idea simply.
-- For math: show the key steps only.
-- For concepts: one simple explanation sentence, then optionally one example.
-- Do NOT add Tip, Insight, Key Points, or extra sections.
-- Do NOT use bold (**) or underline (__) formatting.
-- Be helpful but concise.`;
+FORMATTING: Bold (**word**) for key terms. Underline (__phrase__) for the single most important concept. Use both selectively.
+
+RESOURCES FORMAT (only add at the very end when genuinely useful):
+Resources:
+- YouTube: [Specific descriptive video title matching the exact topic]
+- Quizlet: [Relevant study set name matching the topic]
+
+Rules:
+- YouTube title must be specific enough to find the right video (e.g. "Mitosis vs Meiosis step by step" not just "cell division")
+- Quizlet name should match a real study topic (e.g. "AP Biology Chapter 12 Cell Division Flashcards")
+- Include 1 YouTube and 1 Quizlet when both are relevant. Include just one if only one fits.
+- Skip Resources entirely for math calculations, simple factual questions, or anything that doesn't benefit from video or flashcard study.
+
+Write like a top-tier professor. Teach deeply but concisely.`;
     }
 
-    const youtubeInstruction = userPlan === "pro_plus"
-      ? `\n\nPro+ exclusive: If the topic genuinely warrants a video (complex concept, visual process, or deep subject), add a "Videos:" section at the very end with 1-2 relevant YouTube video titles. Format:\nTitle: [descriptive title]\nTitles only — no URLs. Skip entirely for simple or short questions. Quality over quantity.`
-      : "";
-
     const systemPrompt = `You are HomeWorkAI — an expert academic tutor for ALL subjects from K-12 through college.
-Subjects: Math (arithmetic → calculus, stats) | Science (biology, chemistry, physics) | History | English & writing | Economics | Law | Psychology | Computer science | Any academic topic
+Subjects: Math (arithmetic through calculus, statistics) | Science (biology, chemistry, physics) | History | English & writing | Economics | Law | Psychology | Computer science | Any academic topic
 
 ${planInstructions}
 
-RESPONSE FORMAT — adapt naturally to the question. Do NOT force sections. Only include a section if it genuinely helps.
-
-ALWAYS start with:
-Final Answer: [One direct sentence. The answer only — no explanation here.]
-
-THEN, choose only what the question actually needs:
-- Simple/short question → Final Answer only, or Final Answer + 1-2 sentences. No extra sections.
-- Math or multi-step problem → Final Answer + Step-by-step (only as many steps as genuinely needed). Add a brief Explanation only if the method needs clarifying.
-- Conceptual question → Final Answer + Explanation (short paragraphs, one idea each, teach the WHY).
-- Complex or multi-part question → Final Answer + whatever combination of steps, explanation, or key points best serves it.
-- Summary or list request → Final Answer + bullet Key Points if that's the clearest format.
-
-OPTIONAL SECTIONS — only add when they add real value:
-Step-by-step: (math/calculations only — show real operations with actual numbers)
-Explanation: (short paragraphs — one idea each, 2-3 sentences max)
-Key Points: (3-5 bullets max — one specific fact per line)
-Tip: (one sentence — a real shortcut or memory trick. Skip if nothing genuinely useful.)
-Insight: (one short paragraph — a deeper nuance. Pro+ only, skip for simple questions.)
-
-STRICT RULES:
-1. NEVER force Explanation, Step-by-step, or Key Points into every response. Match the format to the question.
-2. NEVER write one long paragraph. Every paragraph = one idea, 2-3 sentences max.
+UNIVERSAL RULES (apply to all plans):
+1. ALWAYS start with: Final Answer: [one direct sentence — the answer only, no explanation here]
+2. Never write one long wall of text. Every paragraph = one idea, 2–3 sentences max.
 3. Steps must show REAL work — never vague.
-4. NEVER start a step with: Identify, Notice, Consider, Think, Remember, Set up, Look at, Understand
-5. Scale length to complexity — simple = shorter, complex = more thorough. Never pad.
-6. FORMATTING: Free tier — plain text ONLY, no bold, no underline. Pro tier — bold (**word**) allowed for key terms. Pro+ tier — bold (**word**) AND underline (__phrase__) allowed for key terms. No LaTeX, no markdown symbols like ##, no $ for math.
-7. Non-academic question: reply only "I'm here to help with homework and studying. Try asking me a subject question!"
-8. Write like a confident, intelligent tutor — not a chatbot, not an essay.${youtubeInstruction}`;
+4. NEVER start a step with: Identify, Notice, Consider, Think, Remember, Set up, Look at, Understand.
+5. Scale length to complexity — simple questions get short answers.
+6. No LaTeX, no markdown headers (##), no dollar signs for math.
+7. If the question is not academic: reply only "I'm here to help with homework and studying. Try asking me a subject question!"`;
 
-    const inputContent = `Question: ${question}`;
-
+    // Model per plan
     let model;
     if (userPlan === "pro_plus") {
       model = "gpt-4.1";
@@ -115,9 +117,9 @@ STRICT RULES:
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: model,
+        model,
         instructions: systemPrompt,
-        input: inputContent
+        input: `Question: ${question}`
       })
     });
 
@@ -131,6 +133,7 @@ STRICT RULES:
       }
     } catch (e) { console.log("Parse error:", data); }
 
+    // Strip LaTeX and markdown artifacts
     let answer = rawAnswer
       .replace(/\\\[[\s\S]*?\\\]/g, "")
       .replace(/\\\([\s\S]*?\\\)/g, "")
@@ -140,43 +143,62 @@ STRICT RULES:
       .replace(/\n{3,}/g, "\n\n")
       .trim();
 
+    // Strip formatting for Free plan (hard enforcement)
     if (userPlan === "free") {
       answer = answer
         .replace(/\*\*(.*?)\*\*/g, "$1")
         .replace(/\*(.*?)\*/g, "$1")
-        .replace(/__(.*?)__/g, "$1");
+        .replace(/__(.*?)__/g, "$1")
+        // Strip any section headers the AI might try to sneak in
+        .replace(/^(Step-by-step:|Tip:|Insight:|Common Mistake:|Key Points:|Resources:).*$/gim, "")
+        .replace(/^\d+\.\s.+$/gm, "") // strip numbered steps
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
     } else {
+      // Strip single asterisks (italic) but keep double (bold)
       answer = answer.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "$1");
     }
 
-    let videos = [];
+    // ─────────────────────────────────────────────
+    // PARSE RESOURCES SECTION (Pro+ only)
+    // Returns structured { type, title, link } objects.
+    // ─────────────────────────────────────────────
+    let resources = [];
+
     if (userPlan === "pro_plus") {
-      const videoBlockMatch = answer.match(/Videos:([\s\S]*?)(?=\n\n|$)/);
-      if (videoBlockMatch) {
-        const block = videoBlockMatch[1];
-        const titleMatches = [...block.matchAll(/Title:\s*(.+)/gi)];
-        for (const m of titleMatches) {
-          const title = m[1].trim();
-          if (title.length > 3) {
-            videos.push({
+      const resourcesMatch = answer.match(/Resources:\n([\s\S]*?)(?=\n\n|$)/);
+      if (resourcesMatch) {
+        const block = resourcesMatch[1];
+        const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+
+        for (const line of lines) {
+          const ytMatch = line.match(/^[-*]?\s*YouTube:\s*(.+)/i);
+          const qlMatch = line.match(/^[-*]?\s*Quizlet:\s*(.+)/i);
+
+          if (ytMatch) {
+            const title = ytMatch[1].trim();
+            resources.push({
+              type: "youtube",
               title,
               link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(title)
             });
+          } else if (qlMatch) {
+            const title = qlMatch[1].trim();
+            resources.push({
+              type: "quizlet",
+              title,
+              link: "https://quizlet.com/search?query=" + encodeURIComponent(title) + "&type=sets"
+            });
           }
         }
-        if (videos.length === 0) {
-          const lines = block.split("\n")
-            .map(l => l.replace(/^[-*]\s*/, "").replace(/^Title:\s*/i, "").trim())
-            .filter(l => l.length > 3 && !l.startsWith("Link:") && !l.startsWith("http"));
-          for (const l of lines) {
-            videos.push({ title: l, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(l) });
-          }
-        }
-        answer = answer.replace(/Videos:[\s\S]*?(?=\n\n|$)/, "").trim();
+
+        // Remove the Resources block from the main answer
+        answer = answer.replace(/Resources:\n[\s\S]*?(?=\n\n|$)/, "").trim();
       }
     }
 
-    return res.status(200).json({ answer, videos });
+    // Legacy: send empty videos array so old frontend code doesn't break
+    return res.status(200).json({ answer, resources, videos: [] });
 
   } catch (error) {
     console.error("SERVER ERROR:", error);
