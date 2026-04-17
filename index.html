@@ -277,12 +277,19 @@
     .resp-tip-text { color:#92400e;font-size:14px;line-height:1.65; }
     .resp-tip-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#b45309;margin-bottom:3px; }
 
-    .resp-videos { margin-top:18px;border-top:2px solid #e5e7eb;padding-top:16px; }
-    .resp-videos-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#6b7280;margin-bottom:10px; }
-    .resp-video-link { display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:2px solid black;border-radius:10px;margin-bottom:8px;text-decoration:none;transition:all 0.15s;box-shadow:2px 2px 0 black; }
-    .resp-video-link:hover { transform:translateY(-2px);box-shadow:4px 4px 0 black;background:#fff5f5; }
-    .resp-video-title { font-size:13px;font-weight:700;color:#1f2937;flex:1; }
-    .resp-video-ext { margin-left:auto;flex-shrink:0; }
+    .resp-resources { margin-top:18px;border-top:2px solid #e5e7eb;padding-top:16px; }
+    .resp-resources-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#6b7280;margin-bottom:10px; }
+    .resp-resource-link { display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid black;border-radius:10px;margin-bottom:8px;text-decoration:none;transition:all 0.15s;box-shadow:2px 2px 0 black; }
+    .resp-resource-link:hover { transform:translateY(-2px);box-shadow:4px 4px 0 black; }
+    .resp-resource-link.yt { background:#fff5f5; }
+    .resp-resource-link.yt:hover { background:#fee2e2; }
+    .resp-resource-link.ql { background:#f0f9ff; }
+    .resp-resource-link.ql:hover { background:#e0f2fe; }
+    .resp-resource-title { font-size:13px;font-weight:700;color:#1f2937;flex:1; }
+    .resp-common-mistake { background:#fff7ed;border:2px solid #f97316;border-radius:12px;padding:14px 18px;margin-top:10px;display:flex;gap:10px;align-items:flex-start; }
+    .resp-common-mistake-icon { font-size:18px;flex-shrink:0;margin-top:1px; }
+    .resp-common-mistake-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#c2410c;margin-bottom:3px; }
+    .resp-common-mistake-text { color:#7c2d12;font-size:14px;line-height:1.65; }
 
     /* Settings modal */
     .settings-modal { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;padding:16px; }
@@ -697,7 +704,7 @@
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Deepest explanations available</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Bold + underline formatting</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Feels like a college-level tutor</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Helpful video explanations</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Resources: YouTube + Quizlet links</li>
         </ul>
         <div class="cta-btn-wrap">
           <button onclick="handlePurchase('Pro+')" class="btn w-full" style="background:var(--blue);">Unlock Pro+</button>
@@ -1374,7 +1381,7 @@
     if (banner) {
       if (userPlan === 'pro_plus') {
         banner.style.display = 'block';
-        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#faf5ff;border:2px solid #9333ea;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #9333ea;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⭐</span><div><div style="font-weight:800;font-size:13px;color:#7e22ce;line-height:1.2;">Pro+ Plan</div><div style="font-size:11px;color:#9333ea;font-weight:600;margin-top:1px;">Unlimited · Best Quality · Videos</div></div></div></div>';
+        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#faf5ff;border:2px solid #9333ea;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #9333ea;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⭐</span><div><div style="font-weight:800;font-size:13px;color:#7e22ce;line-height:1.2;">Pro+ Plan</div><div style="font-size:11px;color:#9333ea;font-weight:600;margin-top:1px;">Unlimited · Best Quality · Resources</div></div></div></div>';
       } else if (userPlan === 'pro') {
         banner.style.display = 'block';
         banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#dcfce7;border:2px solid #16a34a;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #16a34a;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚡</span><div><div style="font-weight:800;font-size:13px;color:#15803d;line-height:1.2;">Pro Plan</div><div style="font-size:11px;color:#15803d;font-weight:600;margin-top:1px;">Unlimited · Better Quality</div></div></div></div>';
@@ -1517,16 +1524,14 @@
       const data = await res.json();
 
       // ── Rich response renderer ──────────────────────────────────────────
-      function renderResponse(answer, videos, plan) {
-        // ── Format inline text: bold (**) for Pro+Pro+, underline (__) for Pro+ only ──
+      function renderResponse(answer, resources, plan) {
+        // ── Format inline text: bold (**) for Pro/Pro+, underline (__) for Pro+ only ──
         function formatInline(text, planTier) {
           let out = text;
           if (planTier === "pro" || planTier === "pro_plus") {
-            // Bold: **word** → <strong>word</strong>
             out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
           }
           if (planTier === "pro_plus") {
-            // Underline: __phrase__ → <u>phrase</u>
             out = out.replace(/__(.+?)__/g, "<u>$1</u>");
           }
           return out;
@@ -1536,9 +1541,10 @@
 
         let finalAnswerText = "";
         let stepsHtml = "";
-        // Collect paragraphs: each entry is {type, text}
         let paragraphs = [];
         let tipText = "";
+        let insightText = "";
+        let commonMistakeText = "";
 
         let mode = "other";
         let currentParaLines = [];
@@ -1566,7 +1572,12 @@
             flushPara(mode);
             mode = "insight";
             const inline = line.replace(/^(Deeper Insight|Insight):/, "").trim();
-            if (inline) currentParaLines.push(inline);
+            if (inline) insightText = inline;
+          } else if (line.startsWith("Common Mistake:")) {
+            flushPara(mode);
+            mode = "common_mistake";
+            const inline = line.replace("Common Mistake:", "").trim();
+            if (inline) commonMistakeText = inline;
           } else if (line.startsWith("Key Points:") || line.startsWith("Key Point:")) {
             flushPara(mode);
             mode = "keypoints";
@@ -1579,12 +1590,14 @@
             const text = formatInline(line.replace(/^\d+\.\s*/, ""), plan);
             stepsHtml += `<div class="resp-step"><div class="resp-step-num">${num}</div><div class="resp-step-text">${text}</div></div>`;
           } else if (mode === "keypoints" && /^[-•*]/.test(line)) {
-            // bullet points under Key Points
             paragraphs.push({ type: "bullet", text: line.replace(/^[-•*]\s*/, "") });
           } else if (mode === "tip") {
             tipText += " " + line;
+          } else if (mode === "insight") {
+            insightText += " " + line;
+          } else if (mode === "common_mistake") {
+            commonMistakeText += " " + line;
           } else if (mode === "other") {
-            // Free-form conceptual text — group into paragraph
             currentParaLines.push(line);
           } else {
             currentParaLines.push(line);
@@ -1607,41 +1620,48 @@
           html += `<div class="resp-steps-label">Step-by-step</div><div class="resp-steps-wrap">${stepsHtml}</div>`;
         }
 
-        // Render collected paragraphs in order
         for (const p of paragraphs) {
           if (p.type === "explanation") {
             html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
-          } else if (p.type === "insight") {
-            html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${formatInline(p.text, plan)}</div></div>`;
           } else if (p.type === "bullet") {
             html += `<div class="resp-bullet">• ${formatInline(p.text, plan)}</div>`;
           } else if (p.text) {
-            // General prose paragraph — rendered with good spacing
             html += `<div class="resp-body-para">${formatInline(p.text, plan)}</div>`;
           }
+        }
+
+        if (insightText.trim()) {
+          html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${formatInline(insightText.trim(), plan)}</div></div>`;
         }
 
         if (tipText.trim()) {
           html += `<div class="resp-tip"><div class="resp-tip-icon">💡</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">${formatInline(tipText.trim(), plan)}</div></div></div>`;
         }
 
-        if (videos && videos.length > 0) {
-          const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
-          const videoItems = videos.map(v => {
-            const title = (typeof v === "object") ? v.title : v;
-            const href = (typeof v === "object" && v.link && v.link.includes("youtube"))
-              ? v.link
-              : "https://www.youtube.com/results?search_query=" + encodeURIComponent((typeof v === "object") ? v.title : v);
-            return `<a href="${href}" target="_blank" rel="noopener" class="resp-video-link">${ytIcon}<span class="resp-video-title">${title}</span><span style="font-size:11px;font-weight:700;color:#9ca3af;margin-left:auto;white-space:nowrap;">Watch ↗</span></a>`;
+        if (commonMistakeText.trim()) {
+          html += `<div class="resp-common-mistake"><div class="resp-common-mistake-icon">⚠️</div><div><div class="resp-common-mistake-label">Common Mistake</div><div class="resp-common-mistake-text">${formatInline(commonMistakeText.trim(), plan)}</div></div></div>`;
+        }
+
+        // Resources section — Pro+ only, replaces old Videos section
+        if (resources && resources.length > 0) {
+          const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
+          const qlIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg>`;
+          const resourceItems = resources.map(r => {
+            const isYT = r.type === "youtube";
+            const icon = isYT ? ytIcon : qlIcon;
+            const badge = isYT
+              ? `<span style="font-size:11px;font-weight:700;color:#ef4444;white-space:nowrap;">YouTube ↗</span>`
+              : `<span style="font-size:11px;font-weight:700;color:#3b82f6;white-space:nowrap;">Quizlet ↗</span>`;
+            return `<a href="${r.link}" target="_blank" rel="noopener" class="resp-resource-link ${isYT ? 'yt' : 'ql'}">${icon}<span class="resp-resource-title">${r.title}</span>${badge}</a>`;
           }).join("");
-          html += `<div class="resp-videos"><div class="resp-videos-label">🎬 Recommended Videos</div>${videoItems}</div>`;
+          html += `<div class="resp-resources"><div class="resp-resources-label">📚 Resources</div>${resourceItems}</div>`;
         }
 
         html += `</div>`;
         return html;
       }
 
-      box.innerHTML = renderResponse(data.answer || data.error || "No response received.", data.videos || [], userPlan);
+      box.innerHTML = renderResponse(data.answer || data.error || "No response received.", data.resources || [], userPlan);
     } catch (err) {
       box.innerHTML = `<div class="ai-response-box"><div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI Response</div></div><div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px 18px;color:#dc2626;font-size:14px;line-height:1.6;">Something went wrong. Please try again.</div></div>`;
       console.error(err);
@@ -1841,7 +1861,6 @@
 
 </body>
 </html>
-
 
 
 <!-- deploy -->
