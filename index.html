@@ -299,29 +299,29 @@
     .calc-btn-trigger:hover { transform: translateY(-2px); box-shadow: 5px 5px 0 black; }
     .calc-modal { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:700;align-items:center;justify-content:center;padding:16px; }
     .calc-modal.open { display:flex; }
-    .calc-panel { background:white;max-width:340px;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:20px;overflow:hidden; }
-    .calc-header { background:#0f172a;padding:16px 20px;display:flex;align-items:center;justify-content:space-between; }
-    .calc-display { background:#0f172a;padding:0 20px 16px;text-align:right; }
-    .calc-expr { color:#6b7280;font-size:13px;min-height:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-    .calc-result { color:white;font-size:32px;font-weight:800;letter-spacing:-0.02em;min-height:40px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-    .calc-mode { display:flex;gap:6px;padding:0 16px 12px;background:#0f172a; }
-    .calc-mode-btn { flex:1;padding:5px;border:1.5px solid #334155;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:#94a3b8;transition:all 0.15s; }
-    .calc-mode-btn.active { background:#c4b5fd;border-color:#7c3aed;color:#1f2937; }
-    .calc-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e5e7eb;border-top:2px solid black; }
-    .calc-key { padding:16px 8px;font-size:15px;font-weight:700;cursor:pointer;background:white;border:none;transition:all 0.1s;text-align:center; }
-    .calc-key:hover { background:#f3f4f6; }
-    .calc-key:active { background:#e5e7eb;transform:scale(0.96); }
-    .calc-key.fn { background:#f8fafc;font-size:13px;color:#7c3aed; }
-    .calc-key.fn:hover { background:#ede9fe; }
-    .calc-key.op { background:#fef3c7;color:#92400e; }
-    .calc-key.op:hover { background:#fde68a; }
-    .calc-key.eq { background:#a7f3d0;color:#065f46;grid-column:span 2; }
-    .calc-key.eq:hover { background:#6ee7b7; }
-    .calc-key.clr { background:#fef2f2;color:#dc2626; }
-    .calc-key.clr:hover { background:#fecaca; }
-    .calc-history { max-height:120px;overflow-y:auto;padding:10px 16px;border-top:2px solid #e5e7eb;background:#f8fafc; }
-    .calc-history-item { font-size:12px;color:#6b7280;padding:3px 0;border-bottom:1px solid #f3f4f6;cursor:pointer; }
-    .calc-history-item:hover { color:#7c3aed; }
+    .calc-panel { background:white;max-width:360px;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:20px;overflow:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
+    .calc-header-bar { background:var(--purple);border-bottom:3px solid black;padding:14px 20px;display:flex;align-items:center;justify-content:space-between; }
+    .calc-display { background:#0f172a;padding:16px 20px; }
+    .calc-expr-line { color:#64748b;font-size:13px;min-height:18px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600; }
+    .calc-main-line { color:white;font-size:36px;font-weight:800;letter-spacing:-0.03em;text-align:right;min-height:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .calc-mode-bar { display:flex;gap:0;border-bottom:3px solid black; }
+    .calc-mode-btn { flex:1;padding:10px 6px;font-size:13px;font-weight:800;cursor:pointer;background:white;border:none;border-right:2px solid black;color:#6b7280;transition:background 0.15s;font-family:inherit; }
+    .calc-mode-btn:last-child { border-right:none; }
+    .calc-mode-btn.active { background:var(--purple);color:#1f2937; }
+    .calc-mode-btn:hover:not(.active) { background:#f3f4f6; }
+    .calc-history-panel { max-height:100px;overflow-y:auto;border-bottom:2px solid #e5e7eb;background:#f8fafc;display:none; }
+    .calc-history-item { padding:6px 16px;font-size:12px;color:#4b5563;font-weight:600;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background 0.1s; }
+    .calc-history-item:hover { background:#ede9fe;color:#7c3aed; }
+    .calc-grid { display:grid;grid-template-columns:repeat(4,1fr); }
+    .ck { padding:18px 8px;font-size:15px;font-weight:800;cursor:pointer;background:white;border:none;border-right:2px solid black;border-bottom:2px solid black;transition:all 0.1s;text-align:center;font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
+    .ck:last-child { border-right:none; }
+    .ck:hover { filter:brightness(0.94); }
+    .ck:active { transform:scale(0.94); }
+    .ck.fn { background:var(--purple);font-size:13px;color:#1f2937; }
+    .ck.op { background:var(--yellow);color:#1f2937; }
+    .ck.eq { background:var(--green);color:#065f46;font-size:18px; }
+    .ck.clr { background:#fef2f2;color:#dc2626; }
+    .ck.span2 { grid-column:span 2; }
 
     /* ── Study Resources ─────────────────────────────────────────── */
     .resp-resources { margin-top:16px;border-top:2px solid #e5e7eb;padding-top:14px; }
@@ -330,37 +330,25 @@
     .resp-resource-link { display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:2px solid black;border-radius:10px;font-size:12px;font-weight:700;text-decoration:none;box-shadow:2px 2px 0 black;transition:all 0.15s;color:#1f2937; }
     .resp-resource-link:hover { transform:translateY(-2px);box-shadow:4px 4px 0 black; }
 
-    /* ── Practice Problem ────────────────────────────────────────── */
-    .resp-practice { background:#fff7ed;border:2px solid #f97316;border-radius:12px;padding:14px 18px;margin-top:14px; }
-    .resp-practice-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#c2410c;margin-bottom:6px; }
-    .resp-practice-q { color:#1f2937;font-size:14px;font-weight:600;line-height:1.6;margin-bottom:10px; }
-    .resp-practice-toggle { background:#fed7aa;border:2px solid black;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:2px 2px 0 black;transition:all 0.15s; }
-    .resp-practice-toggle:hover { transform:translateY(-1px); }
-    .resp-practice-ans { display:none;margin-top:10px;padding-top:10px;border-top:1.5px dashed #f97316;color:#374151;font-size:13px;line-height:1.6; }
-    .resp-practice-ans.show { display:block; }
-
-    /* ── Exam Tip ────────────────────────────────────────────────── */
-    .resp-exam-tip { background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:12px 16px;margin-top:10px;display:flex;gap:10px;align-items:flex-start; }
-    .resp-exam-tip-icon { font-size:16px;flex-shrink:0; }
-    .resp-exam-tip-text { color:#14532d;font-size:13px;font-weight:600;line-height:1.55; }
-    .resp-exam-tip-label { font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#15803d;margin-bottom:2px; }
-
     /* ── Save Answer ─────────────────────────────────────────────── */
-    .resp-save-btn { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:2px solid black;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:2px 2px 0 black;transition:all 0.2s;margin-top:14px; }
+    .resp-save-btn { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:2px solid black;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:2px 2px 0 black;transition:all 0.2s;margin-top:14px;font-family:inherit; }
     .resp-save-btn:hover { transform:translateY(-2px);box-shadow:4px 4px 0 black;background:#faf5ff; }
-    .resp-save-btn.saved { background:#a7f3d0;border-color:#059669;color:#065f46; }
+    .resp-save-btn.saved { background:var(--green);border-color:#059669;color:#065f46; }
 
     /* ── Saved History Panel ─────────────────────────────────────── */
     .history-modal { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:700;align-items:center;justify-content:center;padding:16px; }
     .history-modal.open { display:flex; }
-    .history-panel { background:white;max-width:32rem;width:100%;max-height:80vh;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:20px;overflow:hidden;display:flex;flex-direction:column; }
+    .history-panel { background:white;max-width:32rem;width:100%;max-height:82vh;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:20px;overflow:hidden;display:flex;flex-direction:column; }
     .history-header { background:var(--purple);border-bottom:3px solid black;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0; }
     .history-body { padding:16px;overflow-y:auto;flex:1; }
     .history-item { border:2px solid black;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:3px 3px 0 black;background:white; }
-    .history-item-q { font-size:13px;font-weight:800;color:#1f2937;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-    .history-item-a { font-size:12px;color:#4b5563;line-height:1.5;max-height:60px;overflow:hidden; }
-    .history-item-date { font-size:11px;color:#9ca3af;margin-top:6px;font-weight:600; }
-    .history-item-del { float:right;background:none;border:none;cursor:pointer;color:#dc2626;font-size:16px;font-weight:900;padding:0;line-height:1; }
+    .history-item-q { font-size:13px;font-weight:800;color:#1f2937;margin-bottom:6px;line-height:1.4; }
+    .history-item-a { font-size:12px;color:#4b5563;line-height:1.5;max-height:55px;overflow:hidden; }
+    .history-item-footer { display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1.5px solid #f3f4f6; }
+    .history-item-date { font-size:11px;color:#9ca3af;font-weight:600; }
+    .history-reask-btn { display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:var(--purple);border:2px solid black;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;box-shadow:2px 2px 0 black;transition:all 0.15s;font-family:inherit; }
+    .history-reask-btn:hover { transform:translateY(-1px);box-shadow:3px 3px 0 black; }
+    .history-item-del { background:none;border:none;cursor:pointer;color:#dc2626;font-size:16px;font-weight:900;padding:0;line-height:1;font-family:inherit; }
 
     /* ── Login Modal ─────────────────────────────────────────────── */
     .login-modal { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:600;align-items:center;justify-content:center;padding:16px; }
@@ -666,7 +654,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
           </button>
           <button onclick="openCalculator()" class="calc-btn-trigger" title="Calculator">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/><line x1="16" y1="18" x2="16" y2="18"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="11" r="0.5" fill="currentColor"/><circle cx="12" cy="11" r="0.5" fill="currentColor"/><circle cx="16" cy="11" r="0.5" fill="currentColor"/><circle cx="8" cy="15" r="0.5" fill="currentColor"/><circle cx="12" cy="15" r="0.5" fill="currentColor"/><circle cx="16" cy="15" r="0.5" fill="currentColor"/><circle cx="8" cy="19" r="0.5" fill="currentColor"/><line x1="12" y1="19" x2="16" y2="19"/></svg>
           </button>
         </div>
       </div>
@@ -767,10 +755,9 @@
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Best-in-class AI model (gpt-4.1)</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Deepest explanations available</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Bold + underline formatting</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Practice problems after every answer</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Exam tips (SAT, ACT, AP)</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Study resources (Quizlet, Khan Academy)</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Save answers for later review</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Save answers &amp; review later</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Advanced calculator built-in</li>
           <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Helpful video explanations</li>
         </ul>
         <div class="cta-btn-wrap">
@@ -872,60 +859,60 @@
 <!-- ===================== CALCULATOR MODAL ===================== -->
 <div class="calc-modal" id="calcModal" onclick="if(event.target===this)closeCalculator()">
   <div class="calc-panel">
-    <div class="calc-header">
-      <div style="font-weight:800;font-size:16px;color:white;letter-spacing:-0.02em;">🧮 Calculator</div>
-      <button onclick="closeCalculator()" style="background:none;border:2px solid #475569;border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:800;font-size:14px;color:#94a3b8;">✕</button>
+    <div class="calc-header-bar">
+      <span style="font-weight:800;font-size:16px;letter-spacing:-0.02em;">🧮 Calculator</span>
+      <button onclick="closeCalculator()" style="background:none;border:2px solid black;border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:800;font-size:14px;color:#1f2937;">✕</button>
     </div>
     <div class="calc-display">
-      <div class="calc-expr" id="calcExpr"></div>
-      <div class="calc-result" id="calcResult">0</div>
+      <div class="calc-expr-line" id="calcExpr"></div>
+      <div class="calc-main-line" id="calcResult">0</div>
     </div>
-    <div class="calc-mode">
+    <div class="calc-mode-bar">
       <button class="calc-mode-btn active" id="calcDeg" onclick="setCalcMode('DEG')">DEG</button>
       <button class="calc-mode-btn" id="calcRad" onclick="setCalcMode('RAD')">RAD</button>
-      <button class="calc-mode-btn" onclick="toggleCalcHistory()" style="flex:2;">History</button>
+      <button class="calc-mode-btn" onclick="toggleCalcHistory()">📋 History</button>
     </div>
-    <div id="calcHistory" class="calc-history" style="display:none;"></div>
+    <div id="calcHistoryPanel" class="calc-history-panel"></div>
     <div class="calc-grid">
-      <button class="calc-key fn" onclick="calcInput('sin(')">sin</button>
-      <button class="calc-key fn" onclick="calcInput('cos(')">cos</button>
-      <button class="calc-key fn" onclick="calcInput('tan(')">tan</button>
-      <button class="calc-key clr" onclick="calcClear()">C</button>
+      <button class="ck fn" onclick="ck('sin(')">sin</button>
+      <button class="ck fn" onclick="ck('cos(')">cos</button>
+      <button class="ck fn" onclick="ck('tan(')">tan</button>
+      <button class="ck clr" onclick="calcClear()">C</button>
 
-      <button class="calc-key fn" onclick="calcInput('log(')">log</button>
-      <button class="calc-key fn" onclick="calcInput('ln(')">ln</button>
-      <button class="calc-key fn" onclick="calcInput('√(')">√</button>
-      <button class="calc-key clr" onclick="calcBackspace()">⌫</button>
+      <button class="ck fn" onclick="ck('log(')">log</button>
+      <button class="ck fn" onclick="ck('ln(')">ln</button>
+      <button class="ck fn" onclick="ck('√(')">√</button>
+      <button class="ck clr" onclick="calcBackspace()">⌫</button>
 
-      <button class="calc-key fn" onclick="calcInput('^')">xʸ</button>
-      <button class="calc-key fn" onclick="calcSquare()">x²</button>
-      <button class="calc-key fn" onclick="calcInput('π')">π</button>
-      <button class="calc-key fn" onclick="calcInput('e')">e</button>
+      <button class="ck fn" onclick="calcSquare()">x²</button>
+      <button class="ck fn" onclick="ck('^')">xʸ</button>
+      <button class="ck fn" onclick="ck('π')">π</button>
+      <button class="ck fn" onclick="ck('e')">e</button>
 
-      <button class="calc-key fn" onclick="calcInput('(')">(</button>
-      <button class="calc-key fn" onclick="calcInput(')')">)</button>
-      <button class="calc-key fn" onclick="calcInput('%')">%</button>
-      <button class="calc-key op" onclick="calcInput('÷')">÷</button>
+      <button class="ck fn" onclick="ck('(')"> ( </button>
+      <button class="ck fn" onclick="ck(')')"> ) </button>
+      <button class="ck fn" onclick="ck('%')">%</button>
+      <button class="ck op" onclick="ck('÷')">÷</button>
 
-      <button class="calc-key" onclick="calcInput('7')">7</button>
-      <button class="calc-key" onclick="calcInput('8')">8</button>
-      <button class="calc-key" onclick="calcInput('9')">9</button>
-      <button class="calc-key op" onclick="calcInput('×')">×</button>
+      <button class="ck" onclick="ck('7')">7</button>
+      <button class="ck" onclick="ck('8')">8</button>
+      <button class="ck" onclick="ck('9')">9</button>
+      <button class="ck op" onclick="ck('×')">×</button>
 
-      <button class="calc-key" onclick="calcInput('4')">4</button>
-      <button class="calc-key" onclick="calcInput('5')">5</button>
-      <button class="calc-key" onclick="calcInput('6')">6</button>
-      <button class="calc-key op" onclick="calcInput('-')">−</button>
+      <button class="ck" onclick="ck('4')">4</button>
+      <button class="ck" onclick="ck('5')">5</button>
+      <button class="ck" onclick="ck('6')">6</button>
+      <button class="ck op" onclick="ck('-')">−</button>
 
-      <button class="calc-key" onclick="calcInput('1')">1</button>
-      <button class="calc-key" onclick="calcInput('2')">2</button>
-      <button class="calc-key" onclick="calcInput('3')">3</button>
-      <button class="calc-key op" onclick="calcInput('+')">+</button>
+      <button class="ck" onclick="ck('1')">1</button>
+      <button class="ck" onclick="ck('2')">2</button>
+      <button class="ck" onclick="ck('3')">3</button>
+      <button class="ck op" onclick="ck('+')">+</button>
 
-      <button class="calc-key" onclick="calcToggleSign()">±</button>
-      <button class="calc-key" onclick="calcInput('0')">0</button>
-      <button class="calc-key" onclick="calcInput('.')">.</button>
-      <button class="calc-key eq" onclick="calcEquals()">=</button>
+      <button class="ck" onclick="calcToggleSign()">±</button>
+      <button class="ck" onclick="ck('0')">0</button>
+      <button class="ck" onclick="ck('.')">.</button>
+      <button class="ck eq" onclick="calcEquals()">=</button>
     </div>
   </div>
 </div>
@@ -934,7 +921,7 @@
 <div class="history-modal" id="historyModal" onclick="if(event.target===this)closeHistory()">
   <div class="history-panel">
     <div class="history-header">
-      <div style="font-weight:800;font-size:17px;letter-spacing:-0.03em;">💾 Saved Answers</div>
+      <span style="font-weight:800;font-size:17px;letter-spacing:-0.03em;">💾 Saved Answers</span>
       <button onclick="closeHistory()" style="background:none;border:2px solid black;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:800;font-size:16px;">✕</button>
     </div>
     <div class="history-body" id="historyBody">
@@ -1522,7 +1509,7 @@
     if (banner) {
       if (userPlan === 'pro_plus') {
         banner.style.display = 'block';
-        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#faf5ff;border:2px solid #9333ea;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #9333ea;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⭐</span><div><div style="font-weight:800;font-size:13px;color:#7e22ce;line-height:1.2;">Pro+ Plan</div><div style="font-size:11px;color:#9333ea;font-weight:600;margin-top:1px;">Unlimited · Practice Problems · Study Resources · Save Answers</div></div></div><button onclick="openHistory()" style="background:white;border:2px solid #9333ea;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;color:#7e22ce;">📚 Saved</button></div>';
+        banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#faf5ff;border:2px solid #9333ea;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #9333ea;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⭐</span><div><div style="font-weight:800;font-size:13px;color:#7e22ce;line-height:1.2;">Pro+ Plan</div><div style="font-size:11px;color:#9333ea;font-weight:600;margin-top:1px;">Unlimited · Best Quality · Study Resources</div></div></div><button onclick="openHistory()" style="background:white;border:2px solid #9333ea;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;color:#7e22ce;box-shadow:2px 2px 0 #9333ea;">💾 Saved</button></div>';
       } else if (userPlan === 'pro') {
         banner.style.display = 'block';
         banner.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;background:#dcfce7;border:2px solid #16a34a;border-radius:10px;padding:11px 16px;box-shadow:3px 3px 0 #16a34a;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚡</span><div><div style="font-weight:800;font-size:13px;color:#15803d;line-height:1.2;">Pro Plan</div><div style="font-size:11px;color:#15803d;font-weight:600;margin-top:1px;">Unlimited · Better Quality</div></div></div></div>';
@@ -1665,7 +1652,7 @@
       const data = await res.json();
 
       // ── Rich response renderer ──────────────────────────────────────────
-      function renderResponse(answer, videos, plan, practiceProblem, practiceAnswer, examTip, originalQuestion) {
+      function renderResponse(answer, videos, plan, resourceKeyword, originalQuestion) {
         // ── Format inline text: bold (**) for Pro+Pro+, underline (__) for Pro+ only ──
         function formatInline(text, planTier) {
           let out = text;
@@ -1785,9 +1772,9 @@
           html += `<div class="resp-videos"><div class="resp-videos-label">🎬 Recommended Videos</div>${videoItems}</div>`;
         }
 
-        // ── Study Resources (Pro+ only) ──────────────────────────────────
-        if (plan === "pro_plus" && originalQuestion) {
-          const q = encodeURIComponent(originalQuestion.slice(0, 80));
+        // ── Study Resources (Pro+ only, only when AI says useful) ────────
+        if (plan === "pro_plus" && resourceKeyword) {
+          const q = encodeURIComponent(resourceKeyword);
           const resources = [
             { name: 'Quizlet', bg: '#4257b2', color: 'white', url: `https://quizlet.com/search?query=${q}&type=sets`, icon: '📇' },
             { name: 'Khan Academy', bg: '#14bf96', color: 'white', url: `https://www.khanacademy.org/search?page_search_query=${q}`, icon: '🎓' },
@@ -1795,38 +1782,24 @@
             { name: 'Britannica', bg: '#cc0000', color: 'white', url: `https://www.britannica.com/search?query=${q}`, icon: '🌐' },
           ];
           const resourceLinks = resources.map(r =>
-            `<a href="${r.url}" target="_blank" rel="noopener" class="resp-resource-link" style="background:${r.bg};color:${r.color};border-color:${r.bg === '#f8f9fa' ? 'black' : r.bg};">${r.icon} ${r.name}</a>`
+            `<a href="${r.url}" target="_blank" rel="noopener" class="resp-resource-link" style="background:${r.bg};color:${r.color};">${r.icon} ${r.name} ↗</a>`
           ).join("");
           html += `<div class="resp-resources"><div class="resp-resources-label">📚 Study Resources</div><div class="resp-resource-grid">${resourceLinks}</div></div>`;
         }
 
-        // ── Practice Problem (Pro+ only) ─────────────────────────────────
-        if (plan === "pro_plus" && practiceProblem) {
-          const practiceId = 'pp_' + Date.now();
-          html += `<div class="resp-practice">
-            <div class="resp-practice-label">✏️ Practice Problem</div>
-            <div class="resp-practice-q">${practiceProblem}</div>
-            <button class="resp-practice-toggle" onclick="this.nextElementSibling.classList.toggle('show');this.textContent=this.nextElementSibling.classList.contains('show')?'Hide Answer':'Show Answer'">Show Answer</button>
-            <div class="resp-practice-ans">${practiceAnswer || 'See if you can solve it first!'}</div>
-          </div>`;
-        }
-
-        // ── Exam Tip (Pro+ only) ─────────────────────────────────────────
-        if (plan === "pro_plus" && examTip) {
-          html += `<div class="resp-exam-tip"><div class="resp-exam-tip-icon">🎯</div><div><div class="resp-exam-tip-label">Exam Tip</div><div class="resp-exam-tip-text">${examTip}</div></div></div>`;
-        }
-
         // ── Save Answer Button (Pro+ only) ───────────────────────────────
-        if (plan === "pro_plus") {
+        if (plan === "pro_plus" && originalQuestion) {
           const saveId = 'save_' + Date.now();
-          html += `<button class="resp-save-btn" id="${saveId}" onclick="saveAnswer('${saveId}', \`${(originalQuestion||'').replace(/`/g,"'").replace(/\n/g,' ').slice(0,120)}\`, \`${answer.replace(/`/g,"'").replace(/\n/g,' ').slice(0,300)}\`)">💾 Save Answer</button>`;
+          const safeQ = (originalQuestion||'').replace(/'/g,"\\'").replace(/\n/g,' ').slice(0,150);
+          const safeA = answer.replace(/'/g,"\\'").replace(/\n/g,' ').slice(0,400);
+          html += `<button class="resp-save-btn" id="${saveId}" onclick="saveAnswer('${saveId}','${safeQ}','${safeA}')">💾 Save Answer</button>`;
         }
 
         html += `</div>`;
         return html;
       }
 
-      box.innerHTML = renderResponse(data.answer || data.error || "No response received.", data.videos || [], userPlan, data.practiceProblem, data.practiceAnswer, data.examTip, finalQuestion);
+      box.innerHTML = renderResponse(data.answer || data.error || "No response received.", data.videos || [], userPlan, data.resourceKeyword, finalQuestion);
     } catch (err) {
       box.innerHTML = `<div class="ai-response-box"><div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI Response</div></div><div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px 18px;color:#dc2626;font-size:14px;line-height:1.6;">Something went wrong. Please try again.</div></div>`;
       console.error(err);
@@ -1985,9 +1958,8 @@
 
   // ======= CALCULATOR =======
   let calcExpr = '';
-  let calcLastResult = '';
   let calcMode = 'DEG';
-  let calcHistoryArr = [];
+  let calcHistArr = [];
 
   window.openCalculator = function() { document.getElementById('calcModal').classList.add('open'); };
   window.closeCalculator = function() { document.getElementById('calcModal').classList.remove('open'); };
@@ -1997,129 +1969,81 @@
     document.getElementById('calcRad').classList.toggle('active', m === 'RAD');
   };
   window.toggleCalcHistory = function() {
-    const h = document.getElementById('calcHistory');
-    h.style.display = h.style.display === 'none' ? 'block' : 'none';
-    renderCalcHistory();
+    const p = document.getElementById('calcHistoryPanel');
+    const show = p.style.display === 'none' || !p.style.display;
+    p.style.display = show ? 'block' : 'none';
+    if (show) renderCalcHist();
   };
-
-  function renderCalcHistory() {
-    const h = document.getElementById('calcHistory');
-    if (!calcHistoryArr.length) { h.innerHTML = '<div style="color:#9ca3af;font-size:12px;text-align:center;padding:8px;">No history yet</div>'; return; }
-    h.innerHTML = calcHistoryArr.slice().reverse().map((item, i) =>
-      `<div class="calc-history-item" onclick="calcUseHistory('${item.result}')">${item.expr} = <strong>${item.result}</strong></div>`
+  function renderCalcHist() {
+    const p = document.getElementById('calcHistoryPanel');
+    if (!calcHistArr.length) { p.innerHTML = '<div style="padding:10px 16px;font-size:12px;color:#9ca3af;font-weight:600;">No history yet</div>'; return; }
+    p.innerHTML = calcHistArr.slice().reverse().map(h =>
+      `<div class="calc-history-item" onclick="calcUseVal('${h.result}')">${h.expr} = <strong>${h.result}</strong></div>`
     ).join('');
   }
-
-  window.calcUseHistory = function(val) { calcExpr = String(val); updateCalcDisplay(); };
-
-  window.calcInput = function(val) {
-    calcExpr += val;
-    updateCalcDisplay();
-  };
-
-  window.calcClear = function() { calcExpr = ''; calcLastResult = ''; updateCalcDisplay(true); };
-  window.calcBackspace = function() { calcExpr = calcExpr.slice(0, -1); updateCalcDisplay(); };
+  window.calcUseVal = function(v) { calcExpr = String(v); updateCalcDisplay(); };
+  window.ck = function(v) { calcExpr += v; updateCalcDisplay(); };
+  window.calcClear = function() { calcExpr = ''; document.getElementById('calcExpr').textContent = ''; document.getElementById('calcResult').textContent = '0'; };
+  window.calcBackspace = function() { calcExpr = calcExpr.slice(0,-1); updateCalcDisplay(); };
   window.calcSquare = function() { calcExpr += '^2'; updateCalcDisplay(); };
   window.calcToggleSign = function() {
-    if (calcExpr && !isNaN(calcExpr)) calcExpr = String(-parseFloat(calcExpr));
-    else if (calcExpr.startsWith('-')) calcExpr = calcExpr.slice(1);
-    else calcExpr = '-' + calcExpr;
+    if (!calcExpr) return;
+    calcExpr = calcExpr.startsWith('-') ? calcExpr.slice(1) : '-' + calcExpr;
     updateCalcDisplay();
   };
-
   window.calcEquals = function() {
     if (!calcExpr) return;
     try {
-      const result = evalCalcExpr(calcExpr);
+      const result = evalCalc(calcExpr);
       const rounded = parseFloat(result.toFixed(10));
-      calcHistoryArr.push({ expr: calcExpr, result: rounded });
-      if (calcHistoryArr.length > 20) calcHistoryArr.shift();
+      calcHistArr.push({ expr: calcExpr, result: rounded });
+      if (calcHistArr.length > 30) calcHistArr.shift();
       document.getElementById('calcExpr').textContent = calcExpr + ' =';
       document.getElementById('calcResult').textContent = rounded;
-      calcLastResult = String(rounded);
       calcExpr = String(rounded);
     } catch(e) {
       document.getElementById('calcResult').textContent = 'Error';
       calcExpr = '';
     }
   };
-
-  function updateCalcDisplay(clear) {
-    document.getElementById('calcExpr').textContent = clear ? '' : (calcExpr || '');
-    document.getElementById('calcResult').textContent = clear ? '0' : (calcExpr || '0');
+  function updateCalcDisplay() {
+    document.getElementById('calcExpr').textContent = '';
+    document.getElementById('calcResult').textContent = calcExpr || '0';
   }
-
-  function evalCalcExpr(expr) {
-    let e = expr
-      .replace(/×/g, '*')
-      .replace(/÷/g, '/')
-      .replace(/π/g, String(Math.PI))
-      .replace(/\^/g, '**');
-
-    // Replace trig functions with degree/radian aware versions
-    if (calcMode === 'DEG') {
-      const d2r = Math.PI / 180;
-      e = e
-        .replace(/sin\(/g, `__s__(`)
-        .replace(/cos\(/g, `__c__(`)
-        .replace(/tan\(/g, `__t__(`);
-      const __s__ = x => Math.sin(x * d2r);
-      const __c__ = x => Math.cos(x * d2r);
-      const __t__ = x => Math.tan(x * d2r);
-      e = e
-        .replace(/log\(/g, '__log__(')
-        .replace(/ln\(/g, '__ln__(')
-        .replace(/√\(/g, '__sqrt__(')
-        .replace(/%/g, '/100');
-      const __log__ = x => Math.log10(x);
-      const __ln__ = x => Math.log(x);
-      const __sqrt__ = x => Math.sqrt(x);
-      return Function('__s__','__c__','__t__','__log__','__ln__','__sqrt__',
-        '"use strict"; return (' + e + ')')(__s__,__c__,__t__,__log__,__ln__,__sqrt__);
-    } else {
-      e = e
-        .replace(/sin\(/g, 'Math.sin(')
-        .replace(/cos\(/g, 'Math.cos(')
-        .replace(/tan\(/g, 'Math.tan(')
-        .replace(/log\(/g, '__log__(')
-        .replace(/ln\(/g, '__ln__(')
-        .replace(/√\(/g, '__sqrt__(')
-        .replace(/%/g, '/100');
-      const __log__ = x => Math.log10(x);
-      const __ln__ = x => Math.log(x);
-      const __sqrt__ = x => Math.sqrt(x);
-      return Function('__log__','__ln__','__sqrt__',
-        '"use strict"; return (' + e + ')')(__log__,__ln__,__sqrt__);
-    }
+  function evalCalc(expr) {
+    let e = expr.replace(/×/g,'*').replace(/÷/g,'/').replace(/π/g,String(Math.PI)).replace(/\^/g,'**');
+    const d2r = Math.PI/180;
+    const _sin = calcMode==='DEG' ? x=>Math.sin(x*d2r) : Math.sin;
+    const _cos = calcMode==='DEG' ? x=>Math.cos(x*d2r) : Math.cos;
+    const _tan = calcMode==='DEG' ? x=>Math.tan(x*d2r) : Math.tan;
+    const _log = x=>Math.log10(x), _ln = x=>Math.log(x), _sqrt = x=>Math.sqrt(x);
+    e = e.replace(/sin\(/g,'_sin(').replace(/cos\(/g,'_cos(').replace(/tan\(/g,'_tan(')
+         .replace(/log\(/g,'_log(').replace(/ln\(/g,'_ln(').replace(/√\(/g,'_sqrt(')
+         .replace(/%/g,'/100');
+    return Function('_sin','_cos','_tan','_log','_ln','_sqrt','"use strict";return('+e+')')(_sin,_cos,_tan,_log,_ln,_sqrt);
   }
-
   // Keyboard support for calculator
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', e => {
     if (!document.getElementById('calcModal').classList.contains('open')) return;
-    if (e.key >= '0' && e.key <= '9') calcInput(e.key);
-    else if (e.key === '+') calcInput('+');
-    else if (e.key === '-') calcInput('-');
-    else if (e.key === '*') calcInput('×');
-    else if (e.key === '/') { e.preventDefault(); calcInput('÷'); }
-    else if (e.key === '.') calcInput('.');
-    else if (e.key === '(') calcInput('(');
-    else if (e.key === ')') calcInput(')');
-    else if (e.key === 'Enter' || e.key === '=') calcEquals();
-    else if (e.key === 'Backspace') calcBackspace();
-    else if (e.key === 'Escape') closeCalculator();
+    if ('0123456789'.includes(e.key)) ck(e.key);
+    else if (e.key==='+') ck('+');
+    else if (e.key==='-') ck('-');
+    else if (e.key==='*') ck('×');
+    else if (e.key==='/') { e.preventDefault(); ck('÷'); }
+    else if (e.key==='.') ck('.');
+    else if (e.key==='(') ck('(');
+    else if (e.key===')') ck(')');
+    else if (e.key==='Enter'||e.key==='=') calcEquals();
+    else if (e.key==='Backspace') calcBackspace();
+    else if (e.key==='Escape') closeCalculator();
   });
 
   // ======= SAVE ANSWERS =======
   window.saveAnswer = function(btnId, question, answer) {
     const btn = document.getElementById(btnId);
-    if (!btn) return;
-    const saved = JSON.parse(localStorage.getItem('homeworkai_saved') || '[]');
-    saved.unshift({
-      id: Date.now(),
-      question: question,
-      answer: answer,
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    });
+    if (!btn || btn.disabled) return;
+    const saved = JSON.parse(localStorage.getItem('homeworkai_saved')||'[]');
+    saved.unshift({ id: Date.now(), question, answer, date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) });
     if (saved.length > 50) saved.pop();
     localStorage.setItem('homeworkai_saved', JSON.stringify(saved));
     btn.textContent = '✓ Saved!';
@@ -2127,32 +2051,42 @@
     btn.disabled = true;
   };
 
-  window.openHistory = function() {
-    renderHistoryPanel();
-    document.getElementById('historyModal').classList.add('open');
-  };
+  window.openHistory = function() { renderHistoryPanel(); document.getElementById('historyModal').classList.add('open'); };
   window.closeHistory = function() { document.getElementById('historyModal').classList.remove('open'); };
 
   function renderHistoryPanel() {
-    const saved = JSON.parse(localStorage.getItem('homeworkai_saved') || '[]');
+    const saved = JSON.parse(localStorage.getItem('homeworkai_saved')||'[]');
     const body = document.getElementById('historyBody');
     if (!saved.length) {
-      body.innerHTML = '<p style="color:#9ca3af;text-align:center;padding:24px;font-size:14px;font-weight:600;">No saved answers yet. Answer a question as Pro+ and click 💾 Save Answer.</p>';
+      body.innerHTML = '<p style="color:#9ca3af;text-align:center;padding:28px 16px;font-size:14px;font-weight:600;">No saved answers yet.<br><span style="font-size:12px;">Answer a question as Pro+ and click 💾 Save Answer.</span></p>';
       return;
     }
     body.innerHTML = saved.map(item => `
       <div class="history-item">
-        <button class="history-item-del" onclick="deleteHistoryItem(${item.id})">×</button>
         <div class="history-item-q">❓ ${item.question}</div>
         <div class="history-item-a">${item.answer}</div>
-        <div class="history-item-date">${item.date}</div>
+        <div class="history-item-footer">
+          <span class="history-item-date">${item.date}</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="history-reask-btn" onclick="reAskQuestion(${JSON.stringify(item.question).replace(/'/g,"\\'")} )">🔄 Re-ask</button>
+            <button class="history-item-del" onclick="deleteHistoryItem(${item.id})">×</button>
+          </div>
+        </div>
       </div>
     `).join('');
   }
 
+  window.reAskQuestion = function(question) {
+    closeHistory();
+    const input = document.getElementById('questionInput');
+    input.value = question;
+    document.getElementById('ai-helper').scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => { input.focus(); }, 400);
+  };
+
   window.deleteHistoryItem = function(id) {
-    let saved = JSON.parse(localStorage.getItem('homeworkai_saved') || '[]');
-    saved = saved.filter(item => item.id !== id);
+    let saved = JSON.parse(localStorage.getItem('homeworkai_saved')||'[]');
+    saved = saved.filter(i => i.id !== id);
     localStorage.setItem('homeworkai_saved', JSON.stringify(saved));
     renderHistoryPanel();
   };
