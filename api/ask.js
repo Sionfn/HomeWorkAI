@@ -30,7 +30,7 @@ STRICTLY FORBIDDEN — never include any of these on the Free plan:
 - Tip
 - Insight
 - Common Mistake
-- Key Points
+- Key Points (premium feature — not available on Free)
 - Resources
 - Any extra section or label
 
@@ -50,6 +50,7 @@ ALLOWED SECTIONS — include only when they genuinely help:
 STRICTLY FORBIDDEN — never include any of these on the Pro plan:
 - Insight
 - Common Mistake
+- Key Points (premium feature — not available on Pro)
 - Resources
 
 FORMATTING: Bold (**word**) allowed for key terms — use selectively, 2–4 highlights max. No underline (__).
@@ -66,7 +67,8 @@ ALLOWED SECTIONS — include only when they genuinely help the student:
 4. Tip — ONLY if there is a high-value shortcut or mental model. Skip if nothing genuinely useful.
 5. Insight — ONLY for complex topics where there is a deeper nuance or connection students often miss. One short paragraph. Skip for simple questions.
 6. Common Mistake — ONLY when there is one specific, common error students make on this exact topic. One sentence. Skip if not clearly applicable.
-7. Resources — ONLY for topics that genuinely benefit from further study. Skip for simple questions or pure calculations. See format below.
+7. Key Points — ONLY for summary questions, list-based topics, or study/review situations where a quick-reference list helps the student memorize or review. Use 3–6 bullet points. Skip for math calculations, single-fact questions, or anything that does not benefit from a bullet summary.
+8. Resources — ONLY for topics that genuinely benefit from further study. Skip for simple questions or pure calculations. See format below.
 
 Do NOT force all sections into every response. Only include sections that add real value.
 
