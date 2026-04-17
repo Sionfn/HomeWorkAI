@@ -10,6 +10,7 @@ export default async function handler(req, res) {
     }
 
     const userPlan = plan || "free";
+
     let planInstructions = "";
 
     if (userPlan === "pro") {
@@ -58,30 +59,14 @@ After the Final Answer:
 - Be helpful but concise.`;
     }
 
-    // YouTube videos for Pro+
     const youtubeInstruction = userPlan === "pro_plus"
       ? `\n\nPro+ exclusive: If the topic genuinely warrants a video (complex concept, visual process, or deep subject), add a "Videos:" section at the very end with 1-2 relevant YouTube video titles. Format:\nTitle: [descriptive title]\nTitles only — no URLs. Skip entirely for simple or short questions. Quality over quantity.`
-      : "";
-
-    // Study resources for Pro+ — only when genuinely useful
-    const resourcesInstruction = userPlan === "pro_plus"
-      ? `\n\nPro+ exclusive study resources: If the topic genuinely benefits from further study (concepts, historical events, scientific topics, literature, math theory — NOT simple one-step calculations), add a "Resources:" line at the very end with a short 2-4 word search keyword. Example: "Resources: photosynthesis biology" or "Resources: World War 1 causes". Skip entirely for simple arithmetic, basic definitions, or questions that don't benefit from further reading.`
-      : "";
-
-    // RAG: curriculum context for Pro+
-    const ragContext = userPlan === "pro_plus"
-      ? `\n\nCURRICULUM AWARENESS (Pro+ only):
-- Connect answers to standard curriculum frameworks when relevant.
-- For math problems, mention the broader mathematical domain where helpful.
-- For science, reference the specific branch and real-world application.
-- For history/social studies, connect to broader themes and time periods.
-- This context makes answers more valuable for deeper understanding.`
       : "";
 
     const systemPrompt = `You are HomeWorkAI — an expert academic tutor for ALL subjects from K-12 through college.
 Subjects: Math (arithmetic → calculus, stats) | Science (biology, chemistry, physics) | History | English & writing | Economics | Law | Psychology | Computer science | Any academic topic
 
-${planInstructions}${ragContext}
+${planInstructions}
 
 RESPONSE FORMAT — adapt naturally to the question. Do NOT force sections. Only include a section if it genuinely helps.
 
@@ -110,14 +95,18 @@ STRICT RULES:
 5. Scale length to complexity — simple = shorter, complex = more thorough. Never pad.
 6. FORMATTING: Free tier — plain text ONLY, no bold, no underline. Pro tier — bold (**word**) allowed for key terms. Pro+ tier — bold (**word**) AND underline (__phrase__) allowed for key terms. No LaTeX, no markdown symbols like ##, no $ for math.
 7. Non-academic question: reply only "I'm here to help with homework and studying. Try asking me a subject question!"
-8. Write like a confident, intelligent tutor — not a chatbot, not an essay.${youtubeInstruction}${resourcesInstruction}`;
+8. Write like a confident, intelligent tutor — not a chatbot, not an essay.${youtubeInstruction}`;
 
     const inputContent = `Question: ${question}`;
 
     let model;
-    if (userPlan === "pro_plus") model = "gpt-4.1";
-    else if (userPlan === "pro") model = "gpt-4.1-mini";
-    else model = "gpt-4o-mini";
+    if (userPlan === "pro_plus") {
+      model = "gpt-4.1";
+    } else if (userPlan === "pro") {
+      model = "gpt-4.1-mini";
+    } else {
+      model = "gpt-4o-mini";
+    }
 
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -126,7 +115,7 @@ STRICT RULES:
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model,
+        model: model,
         instructions: systemPrompt,
         input: inputContent
       })
@@ -160,38 +149,34 @@ STRICT RULES:
       answer = answer.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "$1");
     }
 
-    // ── Parse Videos (Pro+ only) ──────────────────────────────────────────
     let videos = [];
     if (userPlan === "pro_plus") {
-      const videoBlockMatch = answer.match(/Videos:([\s\S]*?)(?=\n\n|Resources:|$)/);
+      const videoBlockMatch = answer.match(/Videos:([\s\S]*?)(?=\n\n|$)/);
       if (videoBlockMatch) {
         const block = videoBlockMatch[1];
         const titleMatches = [...block.matchAll(/Title:\s*(.+)/gi)];
         for (const m of titleMatches) {
           const title = m[1].trim();
-          if (title.length > 3) videos.push({ title, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(title) });
+          if (title.length > 3) {
+            videos.push({
+              title,
+              link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(title)
+            });
+          }
         }
         if (videos.length === 0) {
           const lines = block.split("\n")
             .map(l => l.replace(/^[-*]\s*/, "").replace(/^Title:\s*/i, "").trim())
             .filter(l => l.length > 3 && !l.startsWith("Link:") && !l.startsWith("http"));
-          for (const l of lines) videos.push({ title: l, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(l) });
+          for (const l of lines) {
+            videos.push({ title: l, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(l) });
+          }
         }
-        answer = answer.replace(/Videos:[\s\S]*?(?=\n\n|Resources:|$)/, "").trim();
+        answer = answer.replace(/Videos:[\s\S]*?(?=\n\n|$)/, "").trim();
       }
     }
 
-    // ── Parse Resources (Pro+ only) ───────────────────────────────────────
-    let resourceKeyword = null;
-    if (userPlan === "pro_plus") {
-      const resMatch = answer.match(/Resources:\s*(.+?)(?:\n|$)/i);
-      if (resMatch) {
-        resourceKeyword = resMatch[1].trim();
-        answer = answer.replace(/Resources:.*?(?:\n|$)/i, "").trim();
-      }
-    }
-
-    return res.status(200).json({ answer, videos, resourceKeyword });
+    return res.status(200).json({ answer, videos });
 
   } catch (error) {
     console.error("SERVER ERROR:", error);
