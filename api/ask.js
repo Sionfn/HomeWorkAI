@@ -10,7 +10,6 @@ export default async function handler(req, res) {
     }
 
     const userPlan = plan || "free";
-
     let planInstructions = "";
 
     if (userPlan === "pro") {
@@ -46,16 +45,7 @@ After the Final Answer, write an Explanation section. Rules:
 - For concepts: break down causes, mechanisms, and significance with specific detail. Underline the single most important idea.
 - After Explanation, add "Insight:" ONLY if there is something genuinely valuable — a key nuance, a common mistake, or a deeper connection students miss. One short paragraph. Skip for simple questions.
 - Add a Tip only if it is a high-value shortcut or mental model. Skip if nothing valuable to add.
-- Keep each paragraph short and sharp. Never write walls of text. Quality over quantity.
-
-PRACTICE PROBLEM (Pro+ exclusive):
-After your main answer, add a "Practice Problem:" section with ONE practice question closely related to what the student just asked. The practice question should test the same concept at a similar difficulty level. Format:
-Practice Problem: [One clear practice question]
-Practice Answer: [The answer with brief explanation]
-
-EXAM TIP (Pro+ exclusive):
-After the practice problem, add "Exam Tip:" with ONE short, genuinely useful tip about how this topic commonly appears on exams (SAT, ACT, AP, or general exams). Only add this if there is something genuinely useful to say. Format:
-Exam Tip: [One sentence exam tip]`;
+- Keep each paragraph short and sharp. Never write walls of text. Quality over quantity.`;
 
     } else {
       planInstructions = `QUALITY LEVEL: Free (basic helper)
@@ -68,19 +58,24 @@ After the Final Answer:
 - Be helpful but concise.`;
     }
 
+    // YouTube videos for Pro+
     const youtubeInstruction = userPlan === "pro_plus"
       ? `\n\nPro+ exclusive: If the topic genuinely warrants a video (complex concept, visual process, or deep subject), add a "Videos:" section at the very end with 1-2 relevant YouTube video titles. Format:\nTitle: [descriptive title]\nTitles only — no URLs. Skip entirely for simple or short questions. Quality over quantity.`
       : "";
 
-    // Pro+ RAG: enrich system prompt with curriculum context hints
+    // Study resources for Pro+ — only when genuinely useful
+    const resourcesInstruction = userPlan === "pro_plus"
+      ? `\n\nPro+ exclusive study resources: If the topic genuinely benefits from further study (concepts, historical events, scientific topics, literature, math theory — NOT simple one-step calculations), add a "Resources:" line at the very end with a short 2-4 word search keyword. Example: "Resources: photosynthesis biology" or "Resources: World War 1 causes". Skip entirely for simple arithmetic, basic definitions, or questions that don't benefit from further reading.`
+      : "";
+
+    // RAG: curriculum context for Pro+
     const ragContext = userPlan === "pro_plus"
       ? `\n\nCURRICULUM AWARENESS (Pro+ only):
-- Connect answers to standard curriculum frameworks (Common Core, AP, IB, SAT/ACT) when relevant.
-- For math problems, mention the broader mathematical domain (e.g., "This is a core algebra concept tested heavily on the SAT").
+- Connect answers to standard curriculum frameworks when relevant.
+- For math problems, mention the broader mathematical domain where helpful.
 - For science, reference the specific branch and real-world application.
 - For history/social studies, connect to broader themes and time periods.
-- For English, reference literary devices, rhetorical strategies, or writing standards.
-- This context makes answers more valuable for exam prep and deeper understanding.`
+- This context makes answers more valuable for deeper understanding.`
       : "";
 
     const systemPrompt = `You are HomeWorkAI — an expert academic tutor for ALL subjects from K-12 through college.
@@ -115,18 +110,14 @@ STRICT RULES:
 5. Scale length to complexity — simple = shorter, complex = more thorough. Never pad.
 6. FORMATTING: Free tier — plain text ONLY, no bold, no underline. Pro tier — bold (**word**) allowed for key terms. Pro+ tier — bold (**word**) AND underline (__phrase__) allowed for key terms. No LaTeX, no markdown symbols like ##, no $ for math.
 7. Non-academic question: reply only "I'm here to help with homework and studying. Try asking me a subject question!"
-8. Write like a confident, intelligent tutor — not a chatbot, not an essay.${youtubeInstruction}`;
+8. Write like a confident, intelligent tutor — not a chatbot, not an essay.${youtubeInstruction}${resourcesInstruction}`;
 
     const inputContent = `Question: ${question}`;
 
     let model;
-    if (userPlan === "pro_plus") {
-      model = "gpt-4.1";
-    } else if (userPlan === "pro") {
-      model = "gpt-4.1-mini";
-    } else {
-      model = "gpt-4o-mini";
-    }
+    if (userPlan === "pro_plus") model = "gpt-4.1";
+    else if (userPlan === "pro") model = "gpt-4.1-mini";
+    else model = "gpt-4o-mini";
 
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -135,7 +126,7 @@ STRICT RULES:
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: model,
+        model,
         instructions: systemPrompt,
         input: inputContent
       })
@@ -172,54 +163,35 @@ STRICT RULES:
     // ── Parse Videos (Pro+ only) ──────────────────────────────────────────
     let videos = [];
     if (userPlan === "pro_plus") {
-      const videoBlockMatch = answer.match(/Videos:([\s\S]*?)(?=\n\n|$)/);
+      const videoBlockMatch = answer.match(/Videos:([\s\S]*?)(?=\n\n|Resources:|$)/);
       if (videoBlockMatch) {
         const block = videoBlockMatch[1];
         const titleMatches = [...block.matchAll(/Title:\s*(.+)/gi)];
         for (const m of titleMatches) {
           const title = m[1].trim();
-          if (title.length > 3) {
-            videos.push({ title, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(title) });
-          }
+          if (title.length > 3) videos.push({ title, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(title) });
         }
         if (videos.length === 0) {
           const lines = block.split("\n")
             .map(l => l.replace(/^[-*]\s*/, "").replace(/^Title:\s*/i, "").trim())
             .filter(l => l.length > 3 && !l.startsWith("Link:") && !l.startsWith("http"));
-          for (const l of lines) {
-            videos.push({ title: l, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(l) });
-          }
+          for (const l of lines) videos.push({ title: l, link: "https://www.youtube.com/results?search_query=" + encodeURIComponent(l) });
         }
-        answer = answer.replace(/Videos:[\s\S]*?(?=\n\n|$)/, "").trim();
+        answer = answer.replace(/Videos:[\s\S]*?(?=\n\n|Resources:|$)/, "").trim();
       }
     }
 
-    // ── Parse Practice Problem (Pro+ only) ───────────────────────────────
-    let practiceProblem = null;
-    let practiceAnswer = null;
+    // ── Parse Resources (Pro+ only) ───────────────────────────────────────
+    let resourceKeyword = null;
     if (userPlan === "pro_plus") {
-      const ppMatch = answer.match(/Practice Problem:\s*(.+?)(?:\n|$)/i);
-      const paMatch = answer.match(/Practice Answer:\s*([\s\S]+?)(?=\n\n|Exam Tip:|$)/i);
-      if (ppMatch) {
-        practiceProblem = ppMatch[1].trim();
-        answer = answer.replace(/Practice Problem:[\s\S]*?(?=\n\n|Exam Tip:|$)/i, "").trim();
-      }
-      if (paMatch) {
-        practiceAnswer = paMatch[1].trim();
+      const resMatch = answer.match(/Resources:\s*(.+?)(?:\n|$)/i);
+      if (resMatch) {
+        resourceKeyword = resMatch[1].trim();
+        answer = answer.replace(/Resources:.*?(?:\n|$)/i, "").trim();
       }
     }
 
-    // ── Parse Exam Tip (Pro+ only) ────────────────────────────────────────
-    let examTip = null;
-    if (userPlan === "pro_plus") {
-      const etMatch = answer.match(/Exam Tip:\s*(.+?)(?:\n|$)/i);
-      if (etMatch) {
-        examTip = etMatch[1].trim();
-        answer = answer.replace(/Exam Tip:.*?(?:\n|$)/i, "").trim();
-      }
-    }
-
-    return res.status(200).json({ answer, videos, practiceProblem, practiceAnswer, examTip });
+    return res.status(200).json({ answer, videos, resourceKeyword });
 
   } catch (error) {
     console.error("SERVER ERROR:", error);
