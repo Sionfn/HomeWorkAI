@@ -36,6 +36,15 @@ STRICTLY FORBIDDEN — never include any of these on the Free plan:
 
 FORMATTING: Plain text only. No bold (**), no underline (__).
 
+QUESTION HANDLING RULE — applies even when the user explicitly asks for more:
+If the user asks for step-by-step, a detailed breakdown, a full explanation, or any advanced format:
+- Still answer the question correctly
+- Still provide a short explanation (1–2 sentences)
+- Do NOT provide steps, numbered lists, or detailed breakdowns
+- Do NOT simulate steps by describing them in paragraph form
+- Do NOT extend the explanation beyond 1–2 sentences to compensate
+Give a simplified, correct answer. Never reject or skip the question — just keep it short and basic.
+
 Keep it short and correct. That is all.`;
 
     } else if (userPlan === "pro") {
