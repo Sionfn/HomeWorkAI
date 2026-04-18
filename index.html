@@ -112,6 +112,52 @@
     /* UPLOAD BTN */
     .upload-image-btn { position: absolute; bottom: 12px; right: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: white; border: 2px solid black; border-radius: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 3px 3px 0 black; }
     .upload-image-btn:hover { transform: translateY(-2px); box-shadow: 5px 5px 0 black; }
+    .calc-open-btn { position: absolute; bottom: 12px; right: 64px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: white; border: 2px solid black; border-radius: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 3px 3px 0 black; }
+    .calc-open-btn:hover { transform: translateY(-2px); box-shadow: 5px 5px 0 black; }
+
+    /* CALCULATOR MODAL */
+    .calc-modal { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;padding:16px; }
+    .calc-modal.open { display:flex; }
+    .calc-panel { background:white;max-width:320px;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:20px;overflow:hidden; }
+    .calc-header { background:var(--purple);border-bottom:3px solid black;padding:16px 20px;display:flex;align-items:center;justify-content:space-between; }
+    .calc-display { background:#0f172a;color:#a7f3d0;font-size:24px;font-weight:800;font-family:'Plus Jakarta Sans',monospace;padding:16px 18px;text-align:right;min-height:62px;letter-spacing:0.02em;border-bottom:3px solid black;word-break:break-all; }
+    .calc-expr { font-size:12px;color:#64748b;text-align:right;padding:6px 18px 0;min-height:20px; }
+    .calc-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:0; }
+    .calc-btn { border:none;border-right:2px solid black;border-bottom:2px solid black;padding:18px 8px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;transition:background 0.12s;background:white; }
+    .calc-btn:last-child { border-right:none; }
+    .calc-btn:hover { background:#f3f4f6; }
+    .calc-btn:active { background:#e5e7eb; }
+    .calc-btn.op { background:var(--blue); }
+    .calc-btn.op:hover { background:#93c5fd; }
+    .calc-btn.eq { background:var(--green); }
+    .calc-btn.eq:hover { background:#6ee7b7; }
+    .calc-btn.clear { background:var(--yellow); }
+    .calc-btn.clear:hover { background:#fcd34d; }
+    .calc-btn.del { background:#fca5a5; }
+    .calc-btn.del:hover { background:#f87171; }
+    .calc-insert-btn { width:100%;padding:14px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;background:#0f172a;color:white;border:none;border-top:3px solid black;transition:background 0.15s; }
+    .calc-insert-btn:hover { background:#1e293b; }
+
+    /* HISTORY MODAL */
+    .history-modal { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;padding:16px; }
+    .history-modal.open { display:flex; }
+    .history-panel { background:white;max-width:520px;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:20px;overflow:hidden;max-height:85vh;display:flex;flex-direction:column; }
+    .history-header { background:var(--yellow);border-bottom:3px solid black;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0; }
+    .history-body { padding:16px;overflow-y:auto;flex:1; }
+    .history-item { border:2px solid black;border-radius:12px;padding:14px 16px;margin-bottom:10px;background:#fafafa;box-shadow:3px 3px 0 black;transition:all 0.2s; }
+    .history-item:hover { transform:translateY(-2px);box-shadow:5px 5px 0 black; }
+    .history-q { font-weight:700;font-size:14px;color:#1f2937;margin-bottom:8px;line-height:1.4; }
+    .history-meta { font-size:11px;color:#9ca3af;font-weight:600;margin-bottom:10px; }
+    .history-actions { display:flex;gap:8px; }
+    .history-view-btn { flex:1;padding:8px 12px;font-size:13px;font-weight:700;font-family:inherit;background:var(--purple);border:2px solid black;border-radius:8px;cursor:pointer;box-shadow:2px 2px 0 black;transition:all 0.15s; }
+    .history-view-btn:hover { transform:translateY(-1px);box-shadow:3px 3px 0 black; }
+    .history-del-btn { padding:8px 12px;font-size:13px;font-weight:700;font-family:inherit;background:#fef2f2;color:#dc2626;border:2px solid #dc2626;border-radius:8px;cursor:pointer;box-shadow:2px 2px 0 #dc2626;transition:all 0.15s; }
+    .history-del-btn:hover { background:#fee2e2; }
+
+    /* SAVE ANSWER BTN */
+    .save-answer-btn { display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:10px 18px;font-size:13px;font-weight:800;font-family:inherit;background:var(--green);border:2px solid black;border-radius:10px;cursor:pointer;box-shadow:3px 3px 0 black;transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+    .save-answer-btn:hover { transform:translateY(-2px);box-shadow:5px 5px 0 black; }
+    .save-answer-btn.saved { background:#e5e7eb;color:#6b7280;box-shadow:none;cursor:default;transform:none; }
 
     /* MOCKUP — subtle, calm lift */
     .mockup-wrapper {
@@ -599,8 +645,11 @@
       <div class="mb-6">
         <label class="font-extrabold mb-3 heading" style="display:block;font-size:16px;">Your Question</label>
         <div class="relative">
-          <textarea id="questionInput" placeholder="Type your homework question here... (or upload an image below — you can add a note too)" style="width:100%;padding:16px;padding-right:56px;border:2px solid black;border-radius:10px;min-height:120px;resize:none;background:white;font-size:16px;font-family:inherit;line-height:1.5;"></textarea>
+          <textarea id="questionInput" placeholder="Type your homework question here... (or upload an image below — you can add a note too)" style="width:100%;padding:16px;padding-right:116px;border:2px solid black;border-radius:10px;min-height:120px;resize:none;background:white;font-size:16px;font-family:inherit;line-height:1.5;"></textarea>
           <input type="file" id="fileInput" accept="image/*" style="display:none;">
+          <button onclick="openCalc()" class="calc-open-btn" title="Open calculator">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>
+          </button>
           <button onclick="document.getElementById('fileInput').click()" class="upload-image-btn" title="Upload image">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
           </button>
@@ -612,6 +661,10 @@
         Get Answer
       </button>
       <div id="usageCounter" style="margin-top:10px;text-align:right;font-size:13px;font-weight:700;color:#4b5563;"></div>
+      <button onclick="openHistory()" style="margin-top:10px;display:inline-flex;align-items:center;gap:7px;background:white;border:2px solid black;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:3px 3px 0 black;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='5px 5px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='3px 3px 0 black';">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Question History
+      </button>
       <div id="answerBox" class="mt-6 p-6 rounded-lg hidden" style="background:white;border:2px solid black;"></div>
       <div class="mt-6 flex flex-wrap gap-2 items-center">
         <span class="text-sm font-bold">Try asking:</span>
@@ -1111,6 +1164,7 @@
   };
 
   const ADMIN_EMAIL = 'sion22comp@gmail.com';
+  const VIP_PRO_EMAILS = ['brandenwhitevlogs@gmail.com'];
 
   function updateLoginUI() {
     const loginBtn = document.getElementById('loginBtn');
@@ -1129,6 +1183,8 @@
         : `<div class="default-avatar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`;
       // Admin gets Pro+ and unlimited access
       if (email === ADMIN_EMAIL) { userPlan = 'pro_plus'; }
+      // VIP users get Pro plan permanently
+      if (VIP_PRO_EMAILS.includes(email) && userPlan === 'free') { userPlan = 'pro'; }
       // Show plan in dropdown
       const planLabel = userPlan === 'pro_plus' ? '⭐ Pro+' : userPlan === 'pro' ? '⚡ Pro' : '🆓 Free';
       document.getElementById('dropdownPlan').textContent = planLabel;
@@ -1440,7 +1496,7 @@
       executeAskQuestion(); return;
     }
 
-    if ((usage.count || 0) >= DAILY_LIMIT && window.currentUser?.email !== ADMIN_EMAIL) {
+    if ((usage.count || 0) >= DAILY_LIMIT && window.currentUser?.email !== ADMIN_EMAIL && !VIP_PRO_EMAILS.includes(window.currentUser?.email)) {
       const modal = document.createElement('div');
       modal.className = 'fixed inset-0 flex items-center justify-center z-50';
       modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
@@ -1662,6 +1718,17 @@
       }
 
       box.innerHTML = renderResponse(data.answer || data.error || "No response received.", data.resources || [], userPlan);
+
+      // Add Save Answer button below the response
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'save-answer-btn';
+      saveBtn.innerHTML = '💾 Save Answer';
+      saveBtn.onclick = function() {
+        saveToHistory(finalQuestion, data.answer || '', userPlan);
+        saveBtn.className = 'save-answer-btn saved';
+        saveBtn.innerHTML = '✓ Saved';
+      };
+      box.appendChild(saveBtn);
     } catch (err) {
       box.innerHTML = `<div class="ai-response-box"><div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI Response</div></div><div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px 18px;color:#dc2626;font-size:14px;line-height:1.6;">Something went wrong. Please try again.</div></div>`;
       console.error(err);
@@ -1672,6 +1739,156 @@
       if (window.clearImage) window.clearImage();
     }
   }
+
+  // ── CALCULATOR ────────────────────────────────────────────────────────────
+  let calcExpr = '';
+
+  window.openCalc = function() {
+    calcExpr = '';
+    document.getElementById('calcDisplay').textContent = '0';
+    document.getElementById('calcExpr').textContent = '';
+    document.getElementById('calcModal').classList.add('open');
+  };
+  window.closeCalc = function() {
+    document.getElementById('calcModal').classList.remove('open');
+  };
+  window.calcInput = function(val) {
+    if (calcExpr === 'Error') calcExpr = '';
+    calcExpr += val;
+    document.getElementById('calcDisplay').textContent = calcExpr || '0';
+  };
+  window.calcClear = function() {
+    calcExpr = '';
+    document.getElementById('calcDisplay').textContent = '0';
+    document.getElementById('calcExpr').textContent = '';
+  };
+  window.calcDel = function() {
+    calcExpr = calcExpr.slice(0, -1);
+    document.getElementById('calcDisplay').textContent = calcExpr || '0';
+  };
+  window.calcEquals = function() {
+    try {
+      const expr = calcExpr.replace(/×/g,'*').replace(/÷/g,'/');
+      const result = Function('"use strict"; return (' + expr + ')')();
+      document.getElementById('calcExpr').textContent = calcExpr + ' =';
+      calcExpr = String(parseFloat(result.toFixed(10)));
+      document.getElementById('calcDisplay').textContent = calcExpr;
+    } catch(e) {
+      calcExpr = 'Error';
+      document.getElementById('calcDisplay').textContent = 'Error';
+    }
+  };
+  window.calcInsert = function() {
+    if (!calcExpr || calcExpr === 'Error') return;
+    const ta = document.getElementById('questionInput');
+    ta.value = ta.value ? ta.value + ' ' + calcExpr : calcExpr;
+    closeCalc();
+    ta.focus();
+  };
+
+  // ── HISTORY ───────────────────────────────────────────────────────────────
+  const HISTORY_KEY = 'homeworkai_history';
+
+  function saveToHistory(question, answer, plan) {
+    let history = getHistory();
+    history.unshift({ question: question.substring(0, 300), answer, plan, time: new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) });
+    history = history.slice(0, 10);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  }
+
+  function getHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+    catch(e) { return []; }
+  }
+
+  window.openHistory = function() {
+    renderHistoryList();
+    document.getElementById('historyModal').classList.add('open');
+  };
+  window.closeHistory = function() {
+    document.getElementById('historyModal').classList.remove('open');
+  };
+
+  function renderHistoryList() {
+    const history = getHistory();
+    const body = document.getElementById('historyBody');
+    if (history.length === 0) {
+      body.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#9ca3af;font-weight:700;font-size:14px;">No saved questions yet.<br><span style=\'font-weight:500;font-size:13px;\'>Ask a question and hit \uD83D\uDCBE Save Answer!</span></div>';
+      return;
+    }
+    body.innerHTML = history.map((item, i) => {
+      const planLabel = item.plan === 'pro_plus' ? '\u2B50 Pro+' : item.plan === 'pro' ? '\u26A1 Pro' : '\uD83C\uDD13 Free';
+      const shortQ = item.question.length > 120 ? item.question.substring(0, 120) + '\u2026' : item.question;
+      return '<div class="history-item" id="hist-item-' + i + '">' +
+        '<div class="history-q">' + shortQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
+        '<div class="history-meta">' + item.time + ' &nbsp;&middot;&nbsp; ' + planLabel + '</div>' +
+        '<div class="history-actions">' +
+          '<button class="history-view-btn" onclick="viewHistoryItem(' + i + ')">\uD83D\uDC41 View Answer</button>' +
+          '<button class="history-del-btn" onclick="deleteHistoryItem(' + i + ')">\u2715 Remove</button>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  window.viewHistoryItem = function(index) {
+    const history = getHistory();
+    const item = history[index];
+    if (!item) return;
+    closeHistory();
+    document.getElementById('questionInput').value = item.question;
+    const box = document.getElementById('answerBox');
+    box.classList.remove('hidden');
+    function fi(text, p) {
+      let out = text;
+      if (p === "pro" || p === "pro_plus") out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
+      return out;
+    }
+    const lines = item.answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+    let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
+    let mode = "other", cpl = [];
+    function fp(type) { if (cpl.length > 0) { paragraphs.push({ type, text: cpl.join(" ").trim() }); cpl = []; } }
+    for (const line of lines) {
+      if (line.startsWith("Final Answer:")) { finalAnswerText = line.replace("Final Answer:", "").trim(); mode = "other"; }
+      else if (line.startsWith("Step-by-step:")) { fp(mode); mode = "steps"; }
+      else if (line.startsWith("Explanation:")) { fp(mode); mode = "explanation"; const inl = line.replace("Explanation:", "").trim(); if (inl) cpl.push(inl); }
+      else if (line.startsWith("Insight:") || line.startsWith("Deeper Insight:")) { fp(mode); mode = "insight"; insightText = line.replace(/^(Deeper Insight|Insight):/, "").trim(); }
+      else if (line.startsWith("Common Mistake:")) { fp(mode); mode = "common_mistake"; commonMistakeText = line.replace("Common Mistake:", "").trim(); }
+      else if (line.startsWith("Key Points:") || line.startsWith("Key Point:")) { fp(mode); mode = "keypoints"; }
+      else if (line.startsWith("Tip:")) { fp(mode); mode = "tip"; tipText = line.replace("Tip:", "").trim(); }
+      else if (mode === "steps" && /^\d+\./.test(line)) { const num = line.match(/^(\d+)\./)[1]; stepsHtml += '<div class="resp-step"><div class="resp-step-num">' + num + '</div><div class="resp-step-text">' + fi(line.replace(/^\d+\.\s*/,""), item.plan) + '</div></div>'; }
+      else if (mode === "keypoints" && /^[-\u2022*]/.test(line)) { paragraphs.push({ type:"bullet", text: line.replace(/^[-\u2022*]\s*/,"") }); }
+      else if (mode === "tip") { tipText += " " + line; }
+      else if (mode === "insight") { insightText += " " + line; }
+      else if (mode === "common_mistake") { commonMistakeText += " " + line; }
+      else { cpl.push(line); }
+    }
+    fp(mode);
+    const planTag = item.plan === "pro_plus" ? "\u2B50 Pro+" : item.plan === "pro" ? "\u26A1 Pro" : "Free";
+    const planTagClass = item.plan === "pro_plus" ? "tag-pro-plus" : item.plan === "pro" ? "tag-pro" : "tag-free";
+    let html = '<div class="ai-response-box ' + (item.plan === "pro_plus" ? "resp-pro-plus" : "") + '">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 12px;background:#f3f4f6;border-radius:8px;font-size:12px;font-weight:700;color:#6b7280;">\uD83D\uDD50 From history &nbsp;&middot;&nbsp; ' + item.time + '</div>';
+    html += '<div class="resp-header"><div class="resp-brain">\uD83E\uDDE0</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ' + planTagClass + '">' + planTag + '</div></div>';
+    if (finalAnswerText) html += '<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">' + fi(finalAnswerText, item.plan) + '</div></div>';
+    if (stepsHtml) html += '<div class="resp-steps-label">Step-by-step</div><div class="resp-steps-wrap">' + stepsHtml + '</div>';
+    for (const p of paragraphs) {
+      if (p.type === "explanation") html += '<div class="resp-body-para resp-para-explanation">' + fi(p.text, item.plan) + '</div>';
+      else if (p.type === "bullet") html += '<div class="resp-bullet">\u2022 ' + fi(p.text, item.plan) + '</div>';
+      else if (p.text) html += '<div class="resp-body-para">' + fi(p.text, item.plan) + '</div>';
+    }
+    if (insightText.trim()) html += '<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">' + fi(insightText.trim(), item.plan) + '</div></div>';
+    if (tipText.trim()) html += '<div class="resp-tip"><div class="resp-tip-icon">\uD83D\uDCA1</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">' + fi(tipText.trim(), item.plan) + '</div></div></div>';
+    if (commonMistakeText.trim()) html += '<div class="resp-common-mistake"><div class="resp-common-mistake-icon">\u26A0\uFE0F</div><div><div class="resp-common-mistake-label">Common Mistake</div><div class="resp-common-mistake-text">' + fi(commonMistakeText.trim(), item.plan) + '</div></div></div>';
+    html += '</div>';
+    box.innerHTML = html;
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  window.deleteHistoryItem = function(index) {
+    let history = getHistory();
+    history.splice(index, 1);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    renderHistoryList();
+  };
 
   function getTodayKey() { return new Date().toISOString().split('T')[0]; }
   function getUsageData() {
@@ -1859,8 +2076,62 @@
   </div>
 </div>
 
+<!-- ===================== CALCULATOR MODAL ===================== -->
+<div class="calc-modal" id="calcModal" onclick="if(event.target===this)closeCalc()">
+  <div class="calc-panel">
+    <div class="calc-header">
+      <div style="font-weight:800;font-size:16px;letter-spacing:-0.03em;">🧮 Calculator</div>
+      <button onclick="closeCalc()" style="background:none;border:2px solid black;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:800;font-size:16px;">✕</button>
+    </div>
+    <div class="calc-expr" id="calcExpr"></div>
+    <div class="calc-display" id="calcDisplay">0</div>
+    <div class="calc-grid">
+      <button class="calc-btn clear" onclick="calcClear()">C</button>
+      <button class="calc-btn op" onclick="calcInput('(')">(</button>
+      <button class="calc-btn op" onclick="calcInput(')')">)</button>
+      <button class="calc-btn del" onclick="calcDel()">⌫</button>
+
+      <button class="calc-btn" onclick="calcInput('7')">7</button>
+      <button class="calc-btn" onclick="calcInput('8')">8</button>
+      <button class="calc-btn" onclick="calcInput('9')">9</button>
+      <button class="calc-btn op" onclick="calcInput('/')">÷</button>
+
+      <button class="calc-btn" onclick="calcInput('4')">4</button>
+      <button class="calc-btn" onclick="calcInput('5')">5</button>
+      <button class="calc-btn" onclick="calcInput('6')">6</button>
+      <button class="calc-btn op" onclick="calcInput('*')">×</button>
+
+      <button class="calc-btn" onclick="calcInput('1')">1</button>
+      <button class="calc-btn" onclick="calcInput('2')">2</button>
+      <button class="calc-btn" onclick="calcInput('3')">3</button>
+      <button class="calc-btn op" onclick="calcInput('-')">−</button>
+
+      <button class="calc-btn" onclick="calcInput('0')">0</button>
+      <button class="calc-btn" onclick="calcInput('.')">.</button>
+      <button class="calc-btn eq" onclick="calcEquals()" style="border-right:none;">=</button>
+      <button class="calc-btn op" onclick="calcInput('+')">+</button>
+    </div>
+    <button class="calc-insert-btn" onclick="calcInsert()">➤ Insert result into question</button>
+  </div>
+</div>
+
+<!-- ===================== HISTORY MODAL ===================== -->
+<div class="history-modal" id="historyModal" onclick="if(event.target===this)closeHistory()">
+  <div class="history-panel">
+    <div class="history-header">
+      <div>
+        <div style="font-weight:800;font-size:18px;letter-spacing:-0.03em;">🕐 Question History</div>
+        <div style="font-size:13px;color:#4b5563;margin-top:2px;">Your last 10 saved answers</div>
+      </div>
+      <button onclick="closeHistory()" style="background:none;border:2px solid black;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:800;font-size:16px;">✕</button>
+    </div>
+    <div class="history-body" id="historyBody"></div>
+  </div>
+</div>
+
 </body>
 </html>
+
 
 
 <!-- deploy -->
