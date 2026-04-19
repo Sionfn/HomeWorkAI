@@ -264,7 +264,9 @@ export default async function handler(req, res) {
 
   // 5. Detect learning style and preference-only (Pro+ only)
   const learningStyle = userPlan === "pro_plus" ? detectLearningStyle(safeHistory, trimmedQuestion) : null;
-  const prefOnly      = userPlan === "pro_plus" && !hasImage && isPreferenceOnly(trimmedQuestion);
+  // Only show acknowledgment if there's NO conversation history — if they've already asked something, re-answer it with the new style
+  const hasHistory    = safeHistory.length > 0;
+  const prefOnly      = userPlan === "pro_plus" && !hasImage && !hasHistory && isPreferenceOnly(trimmedQuestion);
 
   // 6. Build system prompt
   let learningStyleInstructions = "";
@@ -273,15 +275,16 @@ export default async function handler(req, res) {
 
     if (prefOnly) {
       learningStyleInstructions = `
-PREFERENCE STATEMENT DETECTED: The user is expressing a learning preference, not asking a subject question.
+PREFERENCE STATEMENT DETECTED: The user is expressing a learning preference with no prior conversation.
 - Respond with ONLY a warm, friendly 1-2 sentence acknowledgment. Do NOT use Final Answer: format.
-- Example: "Perfect! I'll include visual content and clear visual analogies in all my explanations for you."`;
+- Example: "Perfect! I'll include visual explanations, diagrams, and clear visual analogies in all my explanations to help you learn best."`;
     } else if (learningStyle === "visual" || asksForVisual) {
       learningStyleInstructions = `
 LEARNING STYLE — VISUAL LEARNER:
 - Keep text concise and structured. Use vivid visual analogies ("imagine this as...", "picture this like...").
 - Think in terms of diagrams, timelines, and spatial relationships.
 - Describe what diagrams or charts would look like in text form if you can (e.g. "Picture a timeline where...").
+- If the user just told you they are a visual learner and there is prior conversation context, re-explain the previous topic using this visual style — do NOT just acknowledge.
 - The system will automatically show relevant diagrams and videos alongside your response.`;
     } else if (learningStyle === "verbal") {
       learningStyleInstructions = `
