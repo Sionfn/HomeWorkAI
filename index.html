@@ -53,8 +53,12 @@
     .save-pill { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg,#34d399 0%,#10b981 100%); color: white; padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 700; border: 2px solid #059669; box-shadow: 0 2px 8px rgba(16,185,129,0.3); }
     .popular-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--green); border: 2px solid black; padding: 5px 14px; font-size: 12px; font-weight: 800; border-radius: 20px; white-space: nowrap; letter-spacing: 0.02em; }
     .trial-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--purple); color: #1f2937; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; border: 2px solid black; margin-top: 8px; }
-    .save-badge { opacity: 0; transform: translateY(10px) scale(0.95); transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1); height: 0; overflow: hidden; }
-    .save-badge.show-save { opacity: 1; transform: translateY(0) scale(1); height: auto; margin-top: 12px; }
+    /* Pricing save badge animation */
+    .price-period { font-size:13px;color:#9ca3af;font-weight:600;transition:all 0.3s; }
+    .yearly-note { display:none;font-size:12px;font-weight:800;color:#059669;background:#dcfce7;border:1.5px solid #16a34a;border-radius:6px;padding:3px 8px;margin-top:4px;animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    .show-yearly .yearly-note { display:inline-block; }
+    .show-yearly .price-period { color:#059669; }
+    @media (max-width: 767px) { .pricing-grid { grid-template-columns: 1fr !important; } }
     .animate-spin { animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes thinking-dots { 0%,20%{content:'.'} 40%{content:'..'} 60%,100%{content:'...'} }
@@ -78,63 +82,41 @@
     }
     .pro-badge:hover { transform: translateY(-3px); box-shadow: 5px 5px 0 black; }
 
-    /* Mobile header — hide text labels to prevent overflow */
+    /* Mobile header */
     @media (max-width: 640px) {
-      .logo-text { display: none; }
-      .logo-icon { width: 32px; height: 32px; }
+      .logo-icon { width: 36px; height: 36px; }
+      .logo-text { font-size: 16px !important; }
       .login-text { display: none; }
       .pro-badge { padding: 9px 12px; font-size: 13px; gap: 4px; }
       #loginBtn { padding: 9px 12px; }
       #accountBtn { padding: 8px 10px; gap: 4px; }
-      /* Hide account name on mobile — show only avatar icon */
       #accountName { display: none; }
-      #accountBtn svg { display: none; }
-      /* Dropdown full width on mobile */
+      #accountBtn > svg { display: none; }
       .account-dropdown { right: -8px; min-width: 200px; }
 
-      /* Modals full-width on mobile */
-      .login-panel { border-radius: 16px 16px 0 0; max-height: 92vh; }
-      .settings-panel { border-radius: 16px 16px 0 0; }
-      .history-panel { border-radius: 16px 16px 0 0; }
+      /* Modals slide up from bottom */
+      .login-panel, .settings-panel, .history-panel { border-radius: 16px 16px 0 0; max-height: 92vh; overflow-y: auto; }
       .login-modal, .settings-modal, .history-modal { align-items: flex-end; padding: 0; }
-
-      /* Calculator fits on mobile */
       .calc-panel { border-radius: 16px 16px 0 0; max-height: 92vh; overflow-y: auto; }
       .calc-modal { align-items: flex-end; padding: 0; }
       .calc-btn { padding: 10px 2px; font-size: 11px; }
 
-      /* AI response box */
       .ai-response-box { font-size: 14px; }
       .resp-final { padding: 14px; }
       .resp-final-text { font-size: 15px; }
       .resp-step { gap: 8px; }
       .resp-step-num { min-width: 24px; height: 24px; font-size: 12px; }
       .resp-resource-link { padding: 10px 12px; }
-
-      /* Money back pill wraps on mobile */
       .money-back-pill { font-size: 12px; padding: 8px 16px; text-align: center; }
-
-      /* Pricing cards full width */
       .md-scale-105 { transform: none; }
-
-      /* Upload/calc buttons don't overlap on small screens */
       .upload-image-btn { width: 40px; height: 40px; }
       .calc-open-btn { width: 40px; height: 40px; right: 58px; }
-
-      /* Subject cards — 2 col on mobile */
-      .sm-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-
-      /* Plan banner text size */
       .resp-plan-tag { font-size: 10px; padding: 2px 8px; }
-
-      /* Footer columns stack */
-      footer > div > div:first-child { width: 100%; }
     }
 
-    /* Extra small screens */
     @media (max-width: 380px) {
       .pro-badge { display: none; }
-      .logo-text { display: none; }
+      .logo-text { display: none !important; }
     }
 
     /* HERO — white background as requested */
@@ -286,6 +268,13 @@
     .btn-pulse { animation: pulse-glow 2.8s ease-in-out infinite; }
     .btn-pulse:hover { animation: none; transform: translateY(-3px); box-shadow: 6px 6px 0 black; }
     .btn-pulse:active { animation: none; transform: translateY(-1px); box-shadow: 3px 3px 0 black; }
+    .btn-pulse-purple { animation: pulse-glow-purple 2.8s ease-in-out infinite; }
+    .btn-pulse-purple:hover { animation: none; transform: translateY(-3px); box-shadow: 6px 6px 0 black; }
+    .btn-pulse-purple:active { animation: none; transform: translateY(-1px); box-shadow: 3px 3px 0 black; }
+    @keyframes pulse-glow-purple {
+      0%, 100% { box-shadow: 4px 4px 0 black; }
+      50%       { box-shadow: 4px 4px 0 black, 0 0 18px rgba(124,58,237,0.45); }
+    }
 
     /* Section headings underline sweep */
     .section-title-underline { display: inline-block; position: relative; opacity: 0; }
@@ -456,7 +445,7 @@
 <!-- ===================== HEADER ===================== -->
 <header id="main-header" style="background:var(--purple);border-bottom:4px solid black;position:sticky;top:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;gap:12px;">
   <a href="#home" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex-shrink:0;">
-    <svg class="logo-icon" width="38" height="38" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <svg class="logo-icon" width="44" height="44" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
       <rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/>
       <rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/>
       <path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/>
@@ -807,89 +796,119 @@
 
 <div class="section-line"></div>
 
-<!-- ===================== PRICING (index 9 animations) ===================== -->
+<!-- ===================== PRICING ===================== -->
 <section id="pricing" class="py-16 md-py-24 px-6 text-center" style="background:white;">
   <div class="max-w-6xl mx-auto">
     <h2 class="section-title section-title-underline mb-4">Simple Pricing</h2>
-    <p style="color:#4b5563;margin-bottom:40px;max-width:560px;margin-left:auto;margin-right:auto;font-size:18px;line-height:1.65;">Choose a plan that fits your learning needs</p>
+    <p style="color:#4b5563;margin-bottom:32px;max-width:560px;margin-left:auto;margin-right:auto;font-size:18px;line-height:1.65;">Choose a plan that fits your learning needs</p>
 
-    <div style="display:flex;justify-content:center;margin-bottom:36px;">
+    <div style="display:flex;justify-content:center;margin-bottom:28px;">
       <div class="money-back-pill">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1f2937" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-        <span>30-Day Money-Back Guarantee &nbsp;—&nbsp; No questions asked. Full refund within 30 days.</span>
+        <span>30-Day Money-Back Guarantee &nbsp;—&nbsp; No questions asked.</span>
       </div>
     </div>
 
-    <div class="flex justify-center gap-4 mb-10" style="flex-direction:column;align-items:center;">
-      <div style="display:flex;gap:16px;">
-        <button id="monthlyBtn" class="btn" style="background:var(--purple);" onclick="setBilling('monthly')">Monthly</button>
-        <button id="yearlyBtn" class="btn bg-white" onclick="setBilling('yearly')">Yearly</button>
+    <!-- Billing toggle -->
+    <div style="display:flex;justify-content:center;margin-bottom:36px;">
+      <div style="display:inline-flex;background:#f3f4f6;border:2px solid black;border-radius:14px;padding:4px;box-shadow:3px 3px 0 black;gap:4px;">
+        <button id="monthlyBtn" onclick="setBilling('monthly')" style="padding:10px 24px;border-radius:10px;font-weight:800;font-size:14px;font-family:inherit;border:2px solid black;cursor:pointer;background:var(--purple);box-shadow:2px 2px 0 black;transition:all 0.2s;">Monthly</button>
+        <button id="yearlyBtn" onclick="setBilling('yearly')" style="padding:10px 24px;border-radius:10px;font-weight:800;font-size:14px;font-family:inherit;border:2px solid transparent;cursor:pointer;background:transparent;transition:all 0.2s;color:#6b7280;">
+          Yearly
+          <span style="margin-left:6px;font-size:11px;font-weight:800;background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;border-radius:6px;padding:2px 6px;">Save 33%</span>
+        </button>
       </div>
-      
     </div>
 
-    <div class="grid md-grid-cols-3 gap-8" style="align-items:start;">
-      <!-- FREE -->
-      <div class="card pricing-card p-8 reveal delay-1" style="background:white;">
-        <h3 class="text-xl font-extrabold heading">Free</h3>
-        <p style="font-size:13px;color:#6b7280;font-weight:600;margin-top:4px;">Good for quick answers</p>
-        <p class="text-4xl font-extrabold mt-2">$0</p>
-        <ul class="mt-6 text-left space-y-4 features-list">
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Free account — sign up in seconds</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> 5 questions/day</li>
-          <li class="flex items-center gap-2"><span style="color:#9ca3af;font-weight:bold;">—</span> Basic AI answers (limited depth)</li>
-          <li class="flex items-center gap-2"><span style="color:#9ca3af;font-weight:bold;">—</span> Short explanations only</li>
-          <li class="flex items-center gap-2"><span style="color:#9ca3af;font-weight:bold;">—</span> No step-by-step breakdowns</li>
-          <li class="flex items-center gap-2"><span style="color:#9ca3af;font-weight:bold;">—</span> No YouTube &amp; Quizlet resources</li>
-        </ul>
-        <div class="cta-btn-wrap">
-          <button onclick="scrollToAI()" class="btn w-full" style="background:#f3f4f6;color:#6b7280;">Try for Free</button>
+    <!-- Cards — 3 col on desktop, stacked on mobile -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;" class="pricing-grid">
+
+      <!-- ── FREE ── -->
+      <div class="pricing-card card reveal delay-1" style="background:white;padding:28px;text-align:left;">
+        <div style="display:inline-flex;align-items:center;gap:6px;background:var(--blue);border:2px solid black;border-radius:8px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.05em;margin-bottom:16px;">FREE</div>
+        <div style="font-size:40px;font-weight:800;letter-spacing:-0.04em;color:#0f172a;line-height:1;">$0</div>
+        <div class="price-period">forever free</div>
+        <p style="font-size:13px;color:#6b7280;font-weight:600;margin-top:8px;margin-bottom:20px;">Good for quick answers</p>
+
+        <div style="border-top:2px solid #f3f4f6;padding-top:16px;display:flex;flex-direction:column;gap:9px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:var(--green);border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>Free account</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:var(--green);border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>5 questions/day</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:var(--green);border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>Basic AI answers</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:var(--green);border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>All subjects</div>
+          <div style="height:1px;background:#f3f4f6;margin:4px 0;"></div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#d1d5db;"><span style="width:20px;height:20px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🔒</span>Unlimited questions</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#d1d5db;"><span style="width:20px;height:20px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🔒</span>Step-by-step cards</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#d1d5db;"><span style="width:20px;height:20px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🔒</span>Tips & Insights</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#d1d5db;"><span style="width:20px;height:20px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🔒</span>YouTube & Quizlet</div>
         </div>
+
+        <button onclick="scrollToAI()" class="btn w-full" style="background:#f3f4f6;color:#6b7280;justify-content:center;">Try for Free</button>
       </div>
 
-      <!-- PREMIUM -->
-      <div class="card pricing-card p-8 md-scale-105 relative reveal delay-2" style="background:white;padding-top:36px;">
+      <!-- ── PRO ── -->
+      <div class="pricing-card card reveal delay-2 relative" style="background:white;padding:28px;text-align:left;padding-top:42px;border-width:3px;box-shadow:7px 7px 0 black;">
         <div class="popular-badge">MOST POPULAR</div>
-        <h3 class="text-xl font-extrabold heading">Pro</h3>
-        <p style="font-size:13px;color:#059669;font-weight:600;margin-top:4px;">Best for daily homework help</p>
-        <p class="text-4xl font-extrabold mt-2" id="proPrice">$9.99/mo</p>
-        <div class="trial-badge" id="proTrialBadge">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+        <div style="position:absolute;top:0;right:0;width:100px;height:100px;background:var(--green);border-radius:0 16px 0 80%;opacity:0.3;pointer-events:none;"></div>
+
+        <div style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;border:2px solid #16a34a;border-radius:8px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.05em;color:#15803d;margin-bottom:16px;">⚡ PRO</div>
+        <div id="proPrice" style="font-size:44px;font-weight:800;letter-spacing:-0.04em;color:#0f172a;line-height:1;">$9.99</div>
+        <div class="price-period" id="proPeriod">/month</div>
+        <div class="yearly-note" id="proYearlyNote">billed as $79.99/yr · save $39.89</div>
+        <div class="trial-badge" id="proTrialBadge" style="margin-top:8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
           3-Day Free Trial
         </div>
-        <div class="save-badge mt-3" id="proSave"><span class="save-pill">Save $39.89/year</span></div>
-        <ul class="mt-6 text-left space-y-4 features-list">
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Unlimited questions</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Advanced AI — faster &amp; smarter</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Step-by-step explanations</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Bold formatting for key terms</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Feels like a real tutor</li>
-        </ul>
-        <div class="cta-btn-wrap" style="padding-top:28px;">
-          <button onclick="handlePurchase('Pro')" class="btn w-full btn-pulse" style="background:var(--green);font-size:15px;">Start Free Trial</button>
+        <p style="font-size:13px;color:#059669;font-weight:600;margin-top:8px;margin-bottom:20px;">Best for daily homework help</p>
+
+        <div style="border-top:2px solid #f3f4f6;padding-top:16px;display:flex;flex-direction:column;gap:9px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:var(--green);border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>Unlimited questions</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:var(--green);border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>Advanced AI model</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:var(--green);border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>Step-by-step cards</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:var(--green);border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>Tip sections</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:var(--green);border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>Image upload</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:var(--green);border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>Conversation memory</div>
+          <div style="height:1px;background:#f3f4f6;margin:4px 0;"></div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#d1d5db;"><span style="width:20px;height:20px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🔒</span>Insight & Analysis</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#d1d5db;"><span style="width:20px;height:20px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🔒</span>YouTube & Quizlet</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#d1d5db;"><span style="width:20px;height:20px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🔒</span>Key Points & Insights</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#d1d5db;"><span style="width:20px;height:20px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🔒</span>College-level AI</div>
         </div>
+
+        <button onclick="handlePurchase('Pro')" class="btn w-full btn-pulse" style="background:var(--green);justify-content:center;font-size:15px;" id="proCTABtn">Start Free Trial</button>
       </div>
 
-      <!-- PREMIUM+ -->
-      <div class="card pricing-card p-8 reveal delay-3" style="background:white;">
-        <h3 class="text-xl font-extrabold heading">Pro+</h3>
-        <p style="font-size:13px;color:#7c3aed;font-weight:600;margin-top:4px;">Best for deep learning &amp; top grades</p>
-        <p class="text-4xl font-extrabold mt-2" id="proPlusPrice">$14.99/mo</p>
-        <div class="save-badge mt-3" id="proPlusSave"><span class="save-pill">Save $59.89/year</span></div>
-        <ul class="mt-6 text-left space-y-4 features-list">
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Everything in Pro</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Best-in-class AI — deepest answers</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> College-level explanations</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Bold + underline key concepts</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> Feels like a college-level tutor</li>
-          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✔</span> YouTube &amp; Quizlet resource links</li>
-        </ul>
-        <div class="cta-btn-wrap">
-          <button onclick="handlePurchase('Pro+')" class="btn w-full" style="background:var(--blue);">Unlock Pro+</button>
+      <!-- ── PRO+ ── -->
+      <div class="pricing-card card reveal delay-3" style="background:var(--purple);padding:28px;text-align:left;border-width:3px;box-shadow:7px 7px 0 black;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;right:0;width:100px;height:100px;background:#7c3aed;border-radius:0 16px 0 80%;opacity:0.15;pointer-events:none;"></div>
+
+        <div style="display:inline-flex;align-items:center;gap:6px;background:#ede9fe;border:2px solid #7c3aed;border-radius:8px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:0.05em;color:#6d28d9;margin-bottom:16px;">⭐ PRO+</div>
+        <div id="proPlusPrice" style="font-size:44px;font-weight:800;letter-spacing:-0.04em;color:#0f172a;line-height:1;">$14.99</div>
+        <div class="price-period" id="proPlusPeriod">/month</div>
+        <div class="yearly-note" id="proPlusYearlyNote">billed as $119.99/yr · save $59.89</div>
+        <p style="font-size:13px;color:#6d28d9;font-weight:700;margin-top:8px;margin-bottom:20px;">Best for deep learning &amp; top grades</p>
+
+        <div style="background:var(--yellow);border:2px solid black;border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;box-shadow:2px 2px 0 black;">
+          <span style="font-size:18px;flex-shrink:0;">🎓</span>
+          <p style="font-size:12px;color:#1f2937;font-weight:700;line-height:1.4;">Like having a personal college tutor on demand.</p>
         </div>
+
+        <div style="border-top:2px solid rgba(0,0,0,0.1);padding-top:16px;display:flex;flex-direction:column;gap:9px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:white;border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#7c3aed;">✔</span>Everything in Pro</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:white;border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#7c3aed;">✔</span>Best-in-class AI</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:white;border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#7c3aed;">✔</span>Insight & Analysis</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:white;border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#7c3aed;">✔</span>Key Points summary</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:white;border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#7c3aed;">✔</span>Common Mistake alerts</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:white;border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#7c3aed;">✔</span>YouTube & Quizlet</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:white;border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#7c3aed;">✔</span>College-level depth</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#1f2937;"><span style="width:20px;height:20px;background:white;border:1.5px solid black;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#7c3aed;">✔</span>Learning style AI</div>
+        </div>
+
+        <button onclick="handlePurchase('Pro+')" class="btn w-full btn-pulse-purple" style="background:#7c3aed;color:white;justify-content:center;font-size:15px;">Unlock Pro+</button>
       </div>
+
     </div>
-    <p style="margin-top:28px;font-size:13px;color:#9ca3af;font-weight:600;">All plans include access to every subject · No hidden fees · Cancel anytime</p>
+
+    <p style="margin-top:24px;font-size:13px;color:#9ca3af;font-weight:600;">All plans include access to every subject · No hidden fees · Cancel anytime</p>
   </div>
 </section>
 
@@ -1421,15 +1440,37 @@
 
   function setBilling(type) {
     billing = type;
-    document.getElementById('monthlyBtn').style.background = type === 'monthly' ? 'var(--purple)' : 'white';
-    document.getElementById('yearlyBtn').style.background  = type === 'yearly'  ? 'var(--purple)' : 'white';
-    document.getElementById('proPrice').textContent     = type === 'monthly' ? '$9.99/mo'  : '$79.99/yr';
-    document.getElementById('proPlusPrice').textContent = type === 'monthly' ? '$14.99/mo' : '$119.99/yr';
-    document.getElementById('proSave').className     = type === 'yearly' ? 'save-badge show-save' : 'save-badge';
-    document.getElementById('proPlusSave').className = type === 'yearly' ? 'save-badge show-save' : 'save-badge';
-    // Trial badge only shows on monthly Pro
+    // Toggle button styles
+    const mBtn = document.getElementById('monthlyBtn');
+    const yBtn = document.getElementById('yearlyBtn');
+    if (type === 'monthly') {
+      mBtn.style.background = 'var(--purple)'; mBtn.style.color = '#1f2937'; mBtn.style.borderColor = 'black'; mBtn.style.boxShadow = '2px 2px 0 black';
+      yBtn.style.background = 'transparent'; yBtn.style.color = '#6b7280'; yBtn.style.borderColor = 'transparent'; yBtn.style.boxShadow = 'none';
+    } else {
+      yBtn.style.background = 'var(--purple)'; yBtn.style.color = '#1f2937'; yBtn.style.borderColor = 'black'; yBtn.style.boxShadow = '2px 2px 0 black';
+      mBtn.style.background = 'transparent'; mBtn.style.color = '#6b7280'; mBtn.style.borderColor = 'transparent'; mBtn.style.boxShadow = 'none';
+    }
+    // Update prices
+    document.getElementById('proPrice').textContent     = type === 'monthly' ? '$9.99'  : '$79.99';
+    document.getElementById('proPlusPrice').textContent = type === 'monthly' ? '$14.99' : '$119.99';
+    // Yearly note animation — pop in under the price
+    const proWrap     = document.getElementById('proPrice').parentElement;
+    const proPlusWrap = document.getElementById('proPlusPrice').parentElement;
+    if (type === 'yearly') {
+      proWrap.classList.add('show-yearly');
+      proPlusWrap.classList.add('show-yearly');
+      // Re-trigger animation by cloning nodes
+      ['proYearlyNote','proPlusYearlyNote'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.animation = 'none'; el.offsetHeight; el.style.animation = ''; }
+      });
+    } else {
+      proWrap.classList.remove('show-yearly');
+      proPlusWrap.classList.remove('show-yearly');
+    }
+    // Trial badge
     const trialBadge = document.getElementById('proTrialBadge');
-    const proBtn = document.querySelector('.btn-pulse');
+    const proBtn = document.getElementById('proCTABtn');
     if (trialBadge) trialBadge.style.display = type === 'monthly' ? '' : 'none';
     if (proBtn) proBtn.textContent = type === 'monthly' ? 'Start Free Trial' : 'Get Pro Yearly';
   }
@@ -2848,6 +2889,7 @@
 
 </body>
 </html>
+
 
 
 
