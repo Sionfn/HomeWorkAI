@@ -1726,6 +1726,8 @@
     answer = normalizeSections(answer);
 
     const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+    let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
+    let mode = "other", currentParaLines = [];
 
     function flushPara(type) {
       if (currentParaLines.length > 0) { paragraphs.push({ type, text: currentParaLines.join(" ").trim() }); currentParaLines = []; }
@@ -2552,6 +2554,7 @@
 
 </body>
 </html>
+
 
 
 
