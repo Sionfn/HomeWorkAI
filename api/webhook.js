@@ -44,11 +44,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-04-
 // Go to: Stripe Dashboard → Products → click your product → copy Price ID
 const PRICE_TO_PLAN = {
   // Monthly prices
-  "price_REPLACE_PRO_MONTHLY":      "pro",
-  "price_REPLACE_PRO_PLUS_MONTHLY": "pro_plus",
+  "price_1TMd55CqlxC7aoKRdJVB44hS":      "pro",
+  "price_1TMd9QCqlxC7aoKRL4PKWP54": "pro_plus",
   // Yearly prices
-  "price_REPLACE_PRO_YEARLY":       "pro",
-  "price_REPLACE_PRO_PLUS_YEARLY":  "pro_plus",
+  "price_1TMd8KCqlxC7aoKRKmfTr4GC":       "pro",
+  "price_1TMdANCqlxC7aoKRFIMt5n55":  "pro_plus",
 };
 
 // ── Disable Vercel's default body parser (Stripe needs raw body) ──────────
