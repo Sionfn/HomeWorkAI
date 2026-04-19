@@ -40,6 +40,19 @@ const ADMIN_EMAIL      = process.env.ADMIN_EMAIL || "";
 const VIP_PRO_EMAILS   = (process.env.VIP_PRO_EMAILS || "")
   .split(",").map(e => e.trim()).filter(Boolean);
 
+// ── Extract clean search topic from AI's Final Answer (much more accurate than raw question) ──
+function extractSearchTopic(rawAnswer) {
+  const match = rawAnswer.match(/Final Answer:\s*(.+?)(?:\n|$)/i);
+  if (!match) return null;
+  const stop = new Set(['the','and','for','are','this','that','with','from','they','have','been','which','when','where','what','into','also','some','more','than','then','there','their','these','those','would','could','should','about','after','before','during','between','through','because','however','therefore','although','whereas','both','each','only','just','even','very','most','much','many','such','like','will','can','may','might','must','shall','does','did','has','had','was','were','not','but','how','why','its','all','by','of','to','in','is','a','an']);
+  const words = match[1].trim()
+    .replace(/[^a-zA-Z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 3 && !stop.has(w.toLowerCase()))
+    .slice(0, 5);
+  return words.length > 0 ? words.join(' ') : null;
+}
+
 // ── YouTube search — returns actual video data if YOUTUBE_API_KEY is set ──
 async function searchYouTubeVideo(query) {
   const apiKey = process.env.YOUTUBE_API_KEY;
@@ -320,19 +333,33 @@ UNIVERSAL RULES:
     if (contentArray?.length > 0) rawAnswer = contentArray.map(c => c.text || "").join("");
 
     const processed = processAnswer(rawAnswer, userPlan);
-    const { answer, resources } = userPlan === "pro_plus"
+    let { answer, resources } = userPlan === "pro_plus"
       ? parseResources(processed)
       : { answer: processed, resources: [] };
 
-    // 10. For visual learners (Pro+), search for actual YouTube video
+    // 10. For Pro+: upgrade YouTube resource links to actual videos + visual learner embed
     let embeddedVideo    = null;
     let imageSearchQuery = null;
-    if (userPlan === "pro_plus" && learningStyle === "visual" && !prefOnly) {
-      const searchQuery = trimmedQuestion
-        .replace(/\b(i'?m? a? ?visual learner|as a visual learner|visual learner|show me)\b/gi, "")
-        .trim() || trimmedQuestion;
-      embeddedVideo    = await searchYouTubeVideo(searchQuery);
-      imageSearchQuery = searchQuery;
+
+    // Extract the clean topic from the AI's Final Answer — much more accurate than the raw question
+    const searchTopic = extractSearchTopic(rawAnswer) || trimmedQuestion;
+
+    if (userPlan === "pro_plus") {
+      // Upgrade any YouTube resource links that are still search URLs to real video links
+      if (resources.length > 0) {
+        for (let i = 0; i < resources.length; i++) {
+          if (resources[i].type === "youtube" && resources[i].link.includes("youtube.com/results")) {
+            const video = await searchYouTubeVideo(resources[i].title);
+            if (video) resources[i].link = video.url;
+          }
+        }
+      }
+
+      // Embed a relevant video + image search for visual learners
+      if (learningStyle === "visual" && !prefOnly) {
+        embeddedVideo    = await searchYouTubeVideo(searchTopic + " explained");
+        imageSearchQuery = searchTopic;
+      }
     }
 
     return res.status(200).json({
