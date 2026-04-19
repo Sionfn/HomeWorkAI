@@ -47,14 +47,15 @@ export default async function handler(req, res) {
     }
 
     const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer: customer.id,
-      line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: subscriptionData,
-      success_url: `${baseUrl}?payment=success`,
-      cancel_url: `${baseUrl}?payment=cancelled`,
-      allow_promotion_codes: true,
-    });
+  mode: "subscription",
+  customer: customer.id,
+  line_items: [{ price: priceId, quantity: 1 }],
+  subscription_data: subscriptionData,
+  success_url: `${baseUrl}?payment=success`,
+  cancel_url: `${baseUrl}?payment=cancelled`,
+  allow_promotion_codes: true,
+  metadata: { uid, email },  // ← add this line
+});
 
     return res.status(200).json({ url: session.url });
 
