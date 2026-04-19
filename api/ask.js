@@ -259,14 +259,28 @@ export default async function handler(req, res) {
   const hasImage = !!(imageBase64 && imageType);
   if (!question && !hasImage) return res.status(400).json({ error: "No question provided." });
 
-  const trimmedQuestion = (question || "").trim().slice(0, 4000);
-  const safeHistory     = Array.isArray(history) ? history.slice(-6) : [];
+  let trimmedQuestion = (question || "").trim().slice(0, 4000);
+  const safeHistory   = Array.isArray(history) ? history.slice(-6) : [];
+  const hasHistory    = safeHistory.length > 0;
+
+  // If the user is just stating a learning preference AND there's prior history,
+  // automatically re-ask the last question so the AI re-answers it with that context
+  const isJustPreference = isPreferenceOnly(trimmedQuestion);
+  if (isJustPreference && hasHistory && !hasImage) {
+    // Find the last user question from history
+    const lastUserMsg = [...safeHistory].reverse().find(m => m.role === "user");
+    const lastQuestion = typeof lastUserMsg?.content === "string"
+      ? lastUserMsg.content.replace(/^Question:\s*/i, "").trim()
+      : null;
+    if (lastQuestion) {
+      trimmedQuestion = `${trimmedQuestion}. Please re-explain your last answer about: ${lastQuestion}`;
+    }
+  }
 
   // 5. Detect learning style and preference-only (Pro+ only)
   const learningStyle = userPlan === "pro_plus" ? detectLearningStyle(safeHistory, trimmedQuestion) : null;
-  // Only show acknowledgment if there's NO conversation history — if they've already asked something, re-answer it with the new style
-  const hasHistory    = safeHistory.length > 0;
-  const prefOnly      = userPlan === "pro_plus" && !hasImage && !hasHistory && isPreferenceOnly(trimmedQuestion);
+  // Only show acknowledgment if there's NO conversation history
+  const prefOnly = userPlan === "pro_plus" && !hasImage && !hasHistory && isJustPreference;
 
   // 6. Build system prompt
   let learningStyleInstructions = "";
@@ -487,5 +501,4 @@ UNIVERSAL RULES (apply to ALL plans):
     return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 }
-
 
