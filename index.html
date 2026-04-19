@@ -1379,14 +1379,18 @@
     window._lastPurchasedBilling = billing;
 
     try {
+      // Get Firebase token — server verifies this and pulls uid/email from it
+      const idToken = await user.getIdToken(true);
+
       const res  = await fetch('/api/create-checkout-session', {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
         body:    JSON.stringify({
-          plan:   planKey,
+          plan:    planKey,
           billing,
-          email:  user.email,
-          uid:    user.uid,
         }),
       });
 
@@ -1413,10 +1417,16 @@
     if (!user || !user.email) { alert('Please log in first.'); return; }
 
     try {
+      // Get Firebase token — server verifies this to confirm identity
+      const idToken = await user.getIdToken(true);
+
       const res  = await fetch('/api/customer-portal', {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email: user.email }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body:    JSON.stringify({}),
       });
       const data = await res.json();
       if (data.url) {
@@ -2661,6 +2671,7 @@
 
 </body>
 </html>
+
 
 
 
