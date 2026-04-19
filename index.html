@@ -1707,9 +1707,25 @@
     // Pre-pass: ensure Resources: is always on its own line (fixes Resources-in-Tip bug)
     answer = answer.replace(/([^\n])(Resources:)/g, '$1\n\nResources:');
 
+    // ── Normalise: force section headers and numbered steps onto their own lines ──
+    // The AI sometimes writes everything inline. This ensures the parser can see each section.
+    function normalizeSections(text) {
+      let r = text;
+      // Each of these headers must start on a fresh line
+      const headers = ['Final Answer:','Explanation:','Step-by-step:','Step-by-Step:','Tip:','Insight:','Deeper Insight:','Common Mistake:','Key Points:','Key Point:','Resources:'];
+      headers.forEach(h => {
+        const escaped = h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        r = r.replace(new RegExp('([^\\n])\\s*(' + escaped + ')', 'g'), '$1\n\n$2');
+      });
+      // Numbered steps: ". 2. " → ".\n2. " so each step is its own line
+      r = r.replace(/([.!?])\s+(\d+\.\s)/g, '$1\n$2');
+      // "Step N:" variant on own line
+      r = r.replace(/([.!?])\s+(Step\s+\d+[:.]\s)/gi, '$1\n$2');
+      return r;
+    }
+    answer = normalizeSections(answer);
+
     const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-    let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
-    let mode = "other", currentParaLines = [];
 
     function flushPara(type) {
       if (currentParaLines.length > 0) { paragraphs.push({ type, text: currentParaLines.join(" ").trim() }); currentParaLines = []; }
@@ -2109,19 +2125,33 @@
       if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
       return out;
     }
-    const lines = item.answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+    // Normalise sections in history items too
+    let histAnswer = item.answer;
+    const histHeaders = ['Final Answer:','Explanation:','Step-by-step:','Step-by-Step:','Tip:','Insight:','Deeper Insight:','Common Mistake:','Key Points:','Key Point:','Resources:'];
+    histHeaders.forEach(h => {
+      const esc = h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      histAnswer = histAnswer.replace(new RegExp('([^\\n])\\s*(' + esc + ')', 'g'), '$1\n\n$2');
+    });
+    histAnswer = histAnswer.replace(/([.!?])\s+(\d+\.\s)/g, '$1\n$2');
+    histAnswer = histAnswer.replace(/([.!?])\s+(Step\s+\d+[:.]\s)/gi, '$1\n$2');
+
+    const lines = histAnswer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
     let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
     let mode = "other", cpl = [];
     function fp(type) { if (cpl.length > 0) { paragraphs.push({ type, text: cpl.join(" ").trim() }); cpl = []; } }
     for (const line of lines) {
       if (line.startsWith("Final Answer:")) { finalAnswerText = line.replace("Final Answer:", "").trim(); mode = "other"; }
-      else if (line.startsWith("Step-by-step:")) { fp(mode); mode = "steps"; }
+      else if (line.startsWith("Step-by-step:") || line.startsWith("Step-by-Step:")) { fp(mode); mode = "steps"; }
       else if (line.startsWith("Explanation:")) { fp(mode); mode = "explanation"; const inl = line.replace("Explanation:", "").trim(); if (inl) cpl.push(inl); }
       else if (line.startsWith("Insight:") || line.startsWith("Deeper Insight:")) { fp(mode); mode = "insight"; insightText = line.replace(/^(Deeper Insight|Insight):/, "").trim(); }
       else if (line.startsWith("Common Mistake:")) { fp(mode); mode = "common_mistake"; commonMistakeText = line.replace("Common Mistake:", "").trim(); }
       else if (line.startsWith("Key Points:") || line.startsWith("Key Point:")) { fp(mode); mode = "keypoints"; }
       else if (line.startsWith("Tip:")) { fp(mode); mode = "tip"; tipText = line.replace("Tip:", "").trim(); }
-      else if (mode === "steps" && /^\d+\./.test(line)) { const num = line.match(/^(\d+)\./)[1]; stepsHtml += '<div class="resp-step"><div class="resp-step-num">' + num + '</div><div class="resp-step-text">' + fi(line.replace(/^\d+\.\s*/,""), item.plan) + '</div></div>'; }
+      else if (mode === "steps" && /^(Step\s+\d+\b|\d+\.)/.test(line)) {
+        const num = (line.match(/^(?:Step\s+)?(\d+)/) || [])[1] || '•';
+        const txt = line.replace(/^(?:Step\s+)?\d+[:.]\s*/, '').trim();
+        stepsHtml += '<div class="resp-step"><div class="resp-step-num">' + num + '</div><div class="resp-step-text">' + fi(txt, item.plan) + '</div></div>';
+      }
       else if (mode === "keypoints" && /^[-\u2022*]/.test(line)) { paragraphs.push({ type:"bullet", text: line.replace(/^[-\u2022*]\s*/,"") }); }
       else if (mode === "tip") { tipText += " " + line; }
       else if (mode === "insight") { insightText += " " + line; }
@@ -2522,6 +2552,7 @@
 
 </body>
 </html>
+
 
 
 
