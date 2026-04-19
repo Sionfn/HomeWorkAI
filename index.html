@@ -80,12 +80,61 @@
 
     /* Mobile header — hide text labels to prevent overflow */
     @media (max-width: 640px) {
-      .logo-text { font-size: 15px; }
-      .logo-icon { width: 30px; height: 30px; }
+      .logo-text { display: none; }
+      .logo-icon { width: 32px; height: 32px; }
       .login-text { display: none; }
-      .pro-badge { padding: 11px 14px; font-size: 14px; }
-      #loginBtn { padding: 10px 12px; }
-      #accountBtn { padding: 10px 12px; }
+      .pro-badge { padding: 9px 12px; font-size: 13px; gap: 4px; }
+      #loginBtn { padding: 9px 12px; }
+      #accountBtn { padding: 8px 10px; gap: 4px; }
+      /* Hide account name on mobile — show only avatar icon */
+      #accountName { display: none; }
+      #accountBtn svg { display: none; }
+      /* Dropdown full width on mobile */
+      .account-dropdown { right: -8px; min-width: 200px; }
+
+      /* Modals full-width on mobile */
+      .login-panel { border-radius: 16px 16px 0 0; max-height: 92vh; }
+      .settings-panel { border-radius: 16px 16px 0 0; }
+      .history-panel { border-radius: 16px 16px 0 0; }
+      .login-modal, .settings-modal, .history-modal { align-items: flex-end; padding: 0; }
+
+      /* Calculator fits on mobile */
+      .calc-panel { border-radius: 16px 16px 0 0; max-height: 92vh; overflow-y: auto; }
+      .calc-modal { align-items: flex-end; padding: 0; }
+      .calc-btn { padding: 10px 2px; font-size: 11px; }
+
+      /* AI response box */
+      .ai-response-box { font-size: 14px; }
+      .resp-final { padding: 14px; }
+      .resp-final-text { font-size: 15px; }
+      .resp-step { gap: 8px; }
+      .resp-step-num { min-width: 24px; height: 24px; font-size: 12px; }
+      .resp-resource-link { padding: 10px 12px; }
+
+      /* Money back pill wraps on mobile */
+      .money-back-pill { font-size: 12px; padding: 8px 16px; text-align: center; }
+
+      /* Pricing cards full width */
+      .md-scale-105 { transform: none; }
+
+      /* Upload/calc buttons don't overlap on small screens */
+      .upload-image-btn { width: 40px; height: 40px; }
+      .calc-open-btn { width: 40px; height: 40px; right: 58px; }
+
+      /* Subject cards — 2 col on mobile */
+      .sm-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+      /* Plan banner text size */
+      .resp-plan-tag { font-size: 10px; padding: 2px 8px; }
+
+      /* Footer columns stack */
+      footer > div > div:first-child { width: 100%; }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 380px) {
+      .pro-badge { display: none; }
+      .logo-text { display: none; }
     }
 
     /* HERO — white background as requested */
@@ -2742,15 +2791,15 @@
 </div>
 
 <!-- ===================== COOKIE CONSENT ===================== -->
-<div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0f172a;border-top:3px solid black;padding:16px 24px;">
-  <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;">
-    <p style="color:#e2e8f0;font-size:13px;font-weight:600;line-height:1.6;max-width:600px;">
-      🍪 We use cookies to keep you signed in and improve your experience. By continuing, you agree to our 
+<div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0f172a;border-top:3px solid black;padding:14px 16px;">
+  <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+    <p style="color:#e2e8f0;font-size:13px;font-weight:600;line-height:1.5;flex:1;min-width:200px;">
+      🍪 We use cookies to keep you signed in. By continuing, you agree to our
       <a href="/privacy.html" style="color:#c4b5fd;text-decoration:underline;">Privacy Policy</a>.
     </p>
-    <div style="display:flex;gap:10px;flex-shrink:0;">
-      <button onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('cookie_ok','1');" style="background:var(--green);border:2px solid black;border-radius:10px;padding:9px 18px;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer;box-shadow:3px 3px 0 black;">Got it ✓</button>
-      <a href="/privacy.html" style="background:white;border:2px solid black;border-radius:10px;padding:9px 18px;font-weight:700;font-size:13px;text-decoration:none;color:#0f172a;box-shadow:3px 3px 0 black;">Learn More</a>
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('cookie_ok','1');" style="background:var(--green);border:2px solid black;border-radius:10px;padding:9px 16px;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer;box-shadow:3px 3px 0 black;white-space:nowrap;">Got it ✓</button>
+      <a href="/privacy.html" style="background:white;border:2px solid black;border-radius:10px;padding:9px 14px;font-weight:700;font-size:13px;text-decoration:none;color:#0f172a;box-shadow:3px 3px 0 black;white-space:nowrap;">Learn More</a>
     </div>
   </div>
 </div>
@@ -2766,6 +2815,7 @@
 
 </body>
 </html>
+
 
 
 
