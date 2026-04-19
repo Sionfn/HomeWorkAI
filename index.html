@@ -307,6 +307,14 @@
     .resp-plan-tag.tag-pro { background:#dcfce7;border-color:#16a34a;color:#15803d; }
     .resp-plan-tag.tag-pro-plus { background:#faf5ff;border-color:#9333ea;color:#7e22ce; }
 
+    /* Visual learner content */
+    .resp-visual-section { margin-top:18px;border-top:2px solid #e5e7eb;padding-top:16px; }
+    .resp-visual-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#7c3aed;margin-bottom:10px; }
+    .resp-video-embed { position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:2px solid black;box-shadow:4px 4px 0 black;margin-bottom:10px; }
+    .resp-video-embed iframe { position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px; }
+    .resp-image-search-btn { display:inline-flex;align-items:center;gap:8px;background:var(--blue);border:2px solid black;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;color:#1f2937;box-shadow:3px 3px 0 black;transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);margin-top:8px; }
+    .resp-image-search-btn:hover { transform:translateY(-2px);box-shadow:5px 5px 0 black; }
+
     /* Body paragraphs — proper spacing, no wall-of-text */
     .resp-body-para { color:#1f2937;font-size:14.5px;line-height:1.75;margin-top:12px; }
     .resp-para-explanation { color:#1e3a8a;background:#eff6ff;border-left:3px solid #3b82f6;padding:10px 14px;border-radius:0 8px 8px 0;margin-top:12px; }
@@ -1562,6 +1570,7 @@
     const askBtn     = document.getElementById('askBtn');
     const box        = document.getElementById('answerBox');
     const spinnerSVG = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+    const thinkingBox = (label) => `<div style="display:flex;align-items:center;gap:12px;padding:20px;"><div style="width:40px;height:40px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🧠</div><div><div style="font-weight:800;font-size:15px;letter-spacing:-0.01em;">HomeWorkAI</div><div style="font-size:13px;color:#6b7280;margin-top:2px;">${label}<span class="thinking-dots"></span></div></div></div>`;
     const errorBox   = (msg) => `<div class="ai-response-box"><div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div></div><div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px 18px;color:#dc2626;font-size:14px;line-height:1.6;">${msg}</div></div>`;
     const resetBtn   = () => {
       askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Get Answer';
@@ -1571,6 +1580,7 @@
     askBtn.disabled = true;
     askBtn.innerHTML = `${spinnerSVG} AI is thinking...`;
     box.classList.remove('hidden');
+    box.innerHTML = thinkingBox('Thinking');
 
     // Get Firebase ID token
     let idToken = null;
@@ -1582,18 +1592,14 @@
     const reqHeaders = { "Content-Type": "application/json" };
     if (idToken) reqHeaders["Authorization"] = `Bearer ${idToken}`;
 
-    // Build the question string (text only — image is sent as base64 separately)
-    const finalQuestion = typedQuestion;
-
     try {
       const res = await fetch("/api/ask", {
         method:  "POST",
         headers: reqHeaders,
         body:    JSON.stringify({
-          question:    finalQuestion,
+          question:    typedQuestion,
           imageBase64: pendingImageBase64 || null,
           imageType:   pendingImageType   || null,
-          // Send last 6 messages of history for conversation context
           history:     conversationHistory.slice(-6),
         }),
       });
@@ -1620,83 +1626,42 @@
         return;
       }
 
-      // ── STREAMING: read SSE response ─────────────────────────────────────
-      const reader    = res.body.getReader();
-      const decoder   = new TextDecoder();
-      let streamText  = '';
-      let sseBuffer   = '';
-      let finalData   = null;
+      const data = await res.json();
+      const serverPlan = data.plan || userPlan;
 
-      // Show live streaming box
-      const streamingPlan = userPlan;
-      box.innerHTML = `<div class="ai-response-box">
-        <div class="resp-header">
-          <div class="resp-brain">🧠</div>
-          <div class="resp-title">HomeWorkAI</div>
-          <div class="resp-plan-tag ${streamingPlan === 'pro_plus' ? 'tag-pro-plus' : streamingPlan === 'pro' ? 'tag-pro' : 'tag-free'}">${streamingPlan === 'pro_plus' ? '⭐ Pro+' : streamingPlan === 'pro' ? '⚡ Pro' : 'Free'}</div>
-        </div>
-        <div id="streamBox" style="color:#1f2937;font-size:14.5px;line-height:1.75;white-space:pre-wrap;padding:4px 0;min-height:24px;"></div>
-        <span class="thinking-dots" style="color:#9ca3af;font-size:13px;"></span>
-      </div>`;
+      // Acknowledgement-only response (learning preference stated, no question asked)
+      if (data.isAcknowledgement) {
+        box.innerHTML = renderAcknowledgement(data.answer, serverPlan);
+      } else {
+        box.innerHTML = renderResponse(
+          data.answer || data.error || 'No response received.',
+          data.resources || [],
+          serverPlan,
+          {
+            learningStyle:    data.learningStyle   || null,
+            embeddedVideo:    data.embeddedVideo    || null,
+            imageSearchQuery: data.imageSearchQuery || null,
+          }
+        );
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        sseBuffer += decoder.decode(value, { stream: true });
-        const lines = sseBuffer.split('\n');
-        sseBuffer   = lines.pop() || '';
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          try {
-            const event = JSON.parse(line.slice(6));
-            if (event.type === 'delta') {
-              streamText += event.delta;
-              const el = document.getElementById('streamBox');
-              if (el) el.textContent = streamText;
-            } else if (event.type === 'done') {
-              finalData = event;
-            } else if (event.type === 'error') {
-              box.innerHTML = errorBox(event.message || 'Something went wrong.');
-              resetBtn();
-              return;
-            }
-          } catch (_) {}
-        }
-      }
-
-      // ── Render final formatted response ──────────────────────────────────
-      if (finalData) {
-        const serverPlan = finalData.plan || userPlan;
-        box.innerHTML    = renderResponse(finalData.answer || streamText, finalData.resources || [], serverPlan);
-
-        // Add the Save Answer button
         const saveBtn     = document.createElement('button');
         saveBtn.className = 'save-answer-btn';
         saveBtn.innerHTML = '💾 Save Answer';
         saveBtn.onclick   = function() {
-          saveToHistory(finalQuestion, finalData.answer || streamText, serverPlan);
+          saveToHistory(typedQuestion, data.answer || '', serverPlan);
           saveBtn.className = 'save-answer-btn saved';
           saveBtn.innerHTML = '✓ Saved';
         };
         box.appendChild(saveBtn);
-
-        // Update conversation history for context on next question
-        const assistantText = finalData.answer || streamText;
-        conversationHistory.push(
-          { role: 'user',      content: finalQuestion || 'Image question' },
-          { role: 'assistant', content: assistantText.substring(0, 1500) }
-        );
-        // Keep last 6 messages (3 exchanges)
-        if (conversationHistory.length > 6) {
-          conversationHistory = conversationHistory.slice(-6);
-        }
-        updateConversationIndicator();
-      } else {
-        // Fallback: show streamed text if done event was missed
-        box.innerHTML = renderResponse(streamText, [], userPlan);
       }
+
+      // Update conversation history
+      conversationHistory.push(
+        { role: 'user',      content: typedQuestion || 'Image question' },
+        { role: 'assistant', content: (data.answer || '').substring(0, 1500) }
+      );
+      if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
+      updateConversationIndicator();
 
     } catch (err) {
       box.innerHTML = errorBox('Something went wrong. Please try again.');
@@ -1707,21 +1672,53 @@
     }
   }  // ← end of executeAskQuestion
 
+  // ── ACKNOWLEDGEMENT CARD ─────────────────────────────────────────────────
+  function renderAcknowledgement(message, plan) {
+    // Strip markdown links from acknowledgement text
+    const clean = (message || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
+    return `<div class="ai-response-box">
+      <div class="resp-header">
+        <div class="resp-brain">🧠</div>
+        <div class="resp-title">HomeWorkAI</div>
+        <div class="resp-plan-tag tag-pro-plus">⭐ Pro+</div>
+      </div>
+      <div style="background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:14px 18px;color:#14532d;font-size:15px;line-height:1.6;font-weight:600;">
+        ✓ ${clean}
+      </div>
+    </div>`;
+  }
+
   // ── RENDER RESPONSE ───────────────────────────────────────────────────────
-  function renderResponse(answer, resources, plan) {
+  function renderResponse(answer, resources, plan, extras = {}) {
+    const { learningStyle, embeddedVideo, imageSearchQuery } = extras;
+
+    // Strip ALL markdown link syntax [text](url) from displayed text
+    function stripMarkdownLinks(text) {
+      return text.replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
+    }
+
     function formatInline(text, p) {
-      let out = text;
+      let out = stripMarkdownLinks(text);
       if (p === "pro" || p === "pro_plus") out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
       if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
       return out;
     }
+
+    // Pre-pass: ensure Resources: is always on its own line (fixes Resources-in-Tip bug)
+    answer = answer.replace(/([^\n])(Resources:)/g, '$1\n\nResources:');
+
     const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
     let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
     let mode = "other", currentParaLines = [];
+
     function flushPara(type) {
       if (currentParaLines.length > 0) { paragraphs.push({ type, text: currentParaLines.join(" ").trim() }); currentParaLines = []; }
     }
+
     for (const line of lines) {
+      // If we're in any mode and hit Resources:, stop and ignore (already parsed server-side)
+      if (line.startsWith("Resources:")) { flushPara(mode); break; }
+
       if (line.startsWith("Final Answer:"))                              { finalAnswerText = line.replace("Final Answer:", "").trim(); mode = "other"; }
       else if (line.startsWith("Step-by-step:"))                        { flushPara(mode); mode = "steps"; }
       else if (line.startsWith("Explanation:"))                         { flushPara(mode); mode = "explanation"; const inl = line.replace("Explanation:", "").trim(); if (inl) currentParaLines.push(inl); }
@@ -1730,36 +1727,65 @@
       else if (line.startsWith("Key Points:") || line.startsWith("Key Point:")) { flushPara(mode); mode = "keypoints"; }
       else if (line.startsWith("Tip:"))                                 { flushPara(mode); mode = "tip"; tipText = line.replace("Tip:", "").trim(); }
       else if (mode === "steps"     && /^\d+\./.test(line))  { const num = line.match(/^(\d+)\./)[1]; stepsHtml += `<div class="resp-step"><div class="resp-step-num">${num}</div><div class="resp-step-text">${formatInline(line.replace(/^\d+\.\s*/,""), plan)}</div></div>`; }
-      else if (mode === "keypoints" && /^[-•*]/.test(line))  { paragraphs.push({ type:"bullet", text: line.replace(/^[-•*]\s*/,"") }); }
+      else if (mode === "keypoints" && /^[-•*]/.test(line))  { paragraphs.push({ type:"bullet", text: stripMarkdownLinks(line.replace(/^[-•*]\s*/,"")) }); }
       else if (mode === "tip")            { tipText          += " " + line; }
       else if (mode === "insight")        { insightText      += " " + line; }
       else if (mode === "common_mistake") { commonMistakeText += " " + line; }
       else { currentParaLines.push(line); }
     }
     flushPara(mode);
+
     const planTag      = plan === "pro_plus" ? "⭐ Pro+" : plan === "pro" ? "⚡ Pro" : "Free";
     const planTagClass = plan === "pro_plus" ? "tag-pro-plus" : plan === "pro" ? "tag-pro" : "tag-free";
     let html = `<div class="ai-response-box ${plan === 'pro_plus' ? 'resp-pro-plus' : ''}">`;
     html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
+
     if (finalAnswerText) html += `<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">${formatInline(finalAnswerText, plan)}</div></div>`;
     if (stepsHtml)       html += `<div class="resp-steps-label">Step-by-step</div><div class="resp-steps-wrap">${stepsHtml}</div>`;
+
     for (const p of paragraphs) {
       if (p.type === "explanation") html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
       else if (p.type === "bullet") html += `<div class="resp-bullet">• ${formatInline(p.text, plan)}</div>`;
       else if (p.text)              html += `<div class="resp-body-para">${formatInline(p.text, plan)}</div>`;
     }
+
     if (insightText.trim())       html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${formatInline(insightText.trim(), plan)}</div></div>`;
     if (tipText.trim())           html += `<div class="resp-tip"><div class="resp-tip-icon">💡</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">${formatInline(tipText.trim(), plan)}</div></div></div>`;
     if (commonMistakeText.trim()) html += `<div class="resp-common-mistake"><div class="resp-common-mistake-icon">⚠️</div><div><div class="resp-common-mistake-label">Common Mistake</div><div class="resp-common-mistake-text">${formatInline(commonMistakeText.trim(), plan)}</div></div></div>`;
+
+    // Resources section
     if (resources && resources.length > 0) {
       const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
       const qlIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg>`;
       const items  = resources.map(r => {
-        const isYT = r.type === "youtube";
-        return `<a href="${r.link}" target="_blank" rel="noopener" class="resp-resource-link ${isYT ? 'yt' : 'ql'}">${isYT ? ytIcon : qlIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:700;color:${isYT ? '#ef4444' : '#3b82f6'};white-space:nowrap;">${isYT ? 'YouTube ↗' : 'Quizlet ↗'}</span></a>`;
+        const isYT   = r.type === "youtube";
+        const target = r.link.includes('youtube.com') ? 'target="_blank"' : 'target="_blank"';
+        return `<a href="${r.link}" ${target} rel="noopener" class="resp-resource-link ${isYT ? 'yt' : 'ql'}">${isYT ? ytIcon : qlIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:700;color:${isYT ? '#ef4444' : '#3b82f6'};white-space:nowrap;">${isYT ? 'YouTube ↗' : 'Quizlet ↗'}</span></a>`;
       }).join("");
       html += `<div class="resp-resources"><div class="resp-resources-label">📚 Resources</div>${items}</div>`;
     }
+
+    // ── Visual Learner content (Pro+ only) ───────────────────────────────
+    if (plan === 'pro_plus' && learningStyle === 'visual') {
+      let visualHtml = '<div class="resp-visual-section"><div class="resp-visual-label">📺 Visual Content</div>';
+
+      if (embeddedVideo) {
+        visualHtml += `
+          <div class="resp-video-embed">
+            <iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:8px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
+      }
+
+      if (imageSearchQuery) {
+        const imgQuery = encodeURIComponent(imageSearchQuery);
+        visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${imgQuery}" target="_blank" rel="noopener" class="resp-image-search-btn">🖼️ Search Images: ${imageSearchQuery.substring(0, 45)}${imageSearchQuery.length > 45 ? '...' : ''}</a>`;
+      }
+
+      visualHtml += '</div>';
+      html += visualHtml;
+    }
+
     html += `</div>`;
     return html;
   }
