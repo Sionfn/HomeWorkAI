@@ -411,8 +411,9 @@ UNIVERSAL RULES (apply to ALL plans):
     userPlan === "pro"      ? "gpt-4.1-mini" :
                               "gpt-4o-mini";
 
-  // Use plan-based token limits — free users only need short answers
-  const maxTokens = userPlan === "pro_plus" ? 2000 :
+  // Use plan-based token limits — visual learner responses are longer so get extra tokens
+  const isVisualResponse = learningStyle === "visual" || /diagram|chart|graph|visuali[sz]e|show me|draw|picture this|video|image/i.test(trimmedQuestion);
+  const maxTokens = userPlan === "pro_plus" ? (isVisualResponse ? 2800 : 2000) :
                     userPlan === "pro"       ? 1000 :
                                                400;
 
