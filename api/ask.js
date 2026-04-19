@@ -156,6 +156,16 @@ function processAnswer(rawText, userPlan) {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
+  // Ensure section headers always start on their own lines
+  const headers = ['Final Answer:','Explanation:','Step-by-step:','Step-by-Step:','Tip:','Insight:','Deeper Insight:','Common Mistake:','Key Points:','Key Point:','Resources:'];
+  headers.forEach(h => {
+    const esc = h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    answer = answer.replace(new RegExp('([^\\n])\\s*(' + esc + ')', 'g'), '$1\n\n$2');
+  });
+  // Numbered steps on their own lines
+  answer = answer.replace(/([.!?])\s+(\d+\.\s)/g, '$1\n$2');
+  answer = answer.replace(/([.!?])\s+(Step\s+\d+[:.]\s)/gi, '$1\n$2');
+
   if (userPlan === "free") {
     answer = answer
       .replace(/\*\*(.*?)\*\*/g, "$1")
@@ -374,3 +384,4 @@ UNIVERSAL RULES:
     return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 }
+
