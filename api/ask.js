@@ -83,9 +83,14 @@ function detectLearningStyle(history, question) {
   const texts = [
     ...history.slice(-6).map(m => typeof m.content === "string" ? m.content : ""),
     question,
-  ].join(" ");
-  if (/visual learner|learn visually|i'?m? a? ?visual|prefer videos?|visual (person|style)|show me visually/i.test(texts)) return "visual";
-  if (/word person|verbal learner|descriptive words?|long (passage|explanation)|prefer (text|reading|words)|detailed prose/i.test(texts)) return "verbal";
+  ].join(" ").toLowerCase();
+
+  // Visual learner — catches many natural ways students express this
+  if (/visual learner|learn visually|i'?m? a? ?visual|prefer videos?|visual (person|style)|show me visually|show me (a )?(diagram|chart|graph|picture|image|video)|can you (draw|diagram|visualize|show)|i (like|love|prefer|learn better with) (videos?|diagrams?|pictures?|images?|charts?|visuals?)|help me (see|visualize|picture)|watch videos?|diagram (this|it|that)|draw (this|it|that)|picture this|visual(ly)?|seeing it|see (how|it|this)|watching|graphically/i.test(texts)) return "visual";
+
+  // Verbal learner — catches natural reading/word preference phrases
+  if (/word person|verbal learner|descriptive words?|long (passage|explanation)|prefer (text|reading|words)|detailed prose|i (like|love|prefer|learn better with) (reading|text|words?|writing|essays?)|just (explain|tell|write|describe)|no (videos?|diagrams?|pictures?)|text only|in words|write it out/i.test(texts)) return "verbal";
+
   return null;
 }
 
@@ -264,17 +269,20 @@ export default async function handler(req, res) {
   // 6. Build system prompt
   let learningStyleInstructions = "";
   if (userPlan === "pro_plus") {
+    const asksForVisual = /diagram|chart|graph|visuali[sz]e|show me|draw|picture this|video|image/i.test(trimmedQuestion);
+
     if (prefOnly) {
       learningStyleInstructions = `
 PREFERENCE STATEMENT DETECTED: The user is expressing a learning preference, not asking a subject question.
 - Respond with ONLY a warm, friendly 1-2 sentence acknowledgment. Do NOT use Final Answer: format.
 - Example: "Perfect! I'll include visual content and clear visual analogies in all my explanations for you."`;
-    } else if (learningStyle === "visual") {
+    } else if (learningStyle === "visual" || asksForVisual) {
       learningStyleInstructions = `
 LEARNING STYLE — VISUAL LEARNER:
 - Keep text concise and structured. Use vivid visual analogies ("imagine this as...", "picture this like...").
 - Think in terms of diagrams, timelines, and spatial relationships.
-- The system will automatically embed a relevant educational video alongside your response.`;
+- Describe what diagrams or charts would look like in text form if you can (e.g. "Picture a timeline where...").
+- The system will automatically show relevant diagrams and videos alongside your response.`;
     } else if (learningStyle === "verbal") {
       learningStyleInstructions = `
 LEARNING STYLE — VERBAL / WORD LEARNER:
@@ -432,7 +440,7 @@ UNIVERSAL RULES (apply to ALL plans):
       : { answer: processed, resources: [] };
 
     // 10. Use clean topic from Final Answer for accurate searches
-    const searchTopic = extractSearchTopic(rawAnswer) || trimmedQuestion.replace(/\b(visual learner|i'?m? a visual|show me|can you|please|help me)\b/gi, '').trim();
+    const searchTopic = extractSearchTopic(rawAnswer) || trimmedQuestion.replace(/\b(visual learner|i'?m? a visual|show me|can you|please|help me|diagram|draw|visualize)\b/gi, '').trim();
 
     let embeddedVideo    = null;
     let imageSearchQuery = null;
@@ -445,10 +453,17 @@ UNIVERSAL RULES (apply to ALL plans):
           if (vid) resources[i].link = vid.url;
         }
       }
-      // Visual learner embed
-      if (learningStyle === "visual" && !prefOnly) {
-        embeddedVideo    = await searchYouTubeVideo(searchTopic + " explained");
+
+      // Show visual content when:
+      // 1. Learning style is detected as visual, OR
+      // 2. The question itself explicitly asks for diagrams/videos/visuals
+      const asksForVisual = /diagram|chart|graph|visuali[sz]e|show me|draw|picture|video|image/i.test(trimmedQuestion);
+
+      if ((learningStyle === "visual" || asksForVisual) && !prefOnly) {
+        // Always provide image search — works without any API key
         imageSearchQuery = searchTopic;
+        // Try YouTube embed if API key is available
+        embeddedVideo = await searchYouTubeVideo(searchTopic);
       }
     }
 
