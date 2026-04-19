@@ -348,6 +348,8 @@
     /* Visual learner content */
     .resp-visual-section { margin-top:18px;border-top:2px solid #e5e7eb;padding-top:16px; }
     .resp-visual-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#7c3aed;margin-bottom:10px; }
+    .resp-image-search-btn { display:flex;align-items:center;gap:8px;background:var(--green);border:2px solid black;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;text-decoration:none;color:#1f2937;box-shadow:3px 3px 0 black;transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);margin-top:8px; }
+    .resp-image-search-btn:hover { transform:translateY(-2px);box-shadow:5px 5px 0 black; }
     .resp-video-embed { position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:2px solid black;box-shadow:4px 4px 0 black;margin-bottom:10px; }
     .resp-video-embed iframe { position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px; }
     .resp-image-search-btn { display:inline-flex;align-items:center;gap:8px;background:var(--blue);border:2px solid black;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;color:#1f2937;box-shadow:3px 3px 0 black;transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);margin-top:8px; }
@@ -2111,15 +2113,16 @@
       html += `<div class="resp-resources"><div class="resp-resources-label">📚 Resources</div>${items}</div>`;
     }
 
-    // Visual Learner content (Pro+ only)
-    if (plan === 'pro_plus' && learningStyle === 'visual') {
+    // Visual Learner content (Pro+ only) — show if we have video OR image search
+    if (plan === 'pro_plus' && (embeddedVideo || imageSearchQuery)) {
       let visualHtml = '<div class="resp-visual-section"><div class="resp-visual-label">📺 Visual Content</div>';
       if (embeddedVideo) {
-        visualHtml += `<div class="resp-video-embed"><iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:8px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
+        visualHtml += `<div class="resp-video-embed"><iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:10px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
       }
       if (imageSearchQuery) {
         const imgQuery = encodeURIComponent(imageSearchQuery);
-        visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${imgQuery}" target="_blank" rel="noopener" class="resp-image-search-btn">🖼️ Search Images: ${imageSearchQuery.substring(0, 45)}${imageSearchQuery.length > 45 ? '...' : ''}</a>`;
+        visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imageSearchQuery + ' diagram')}" target="_blank" rel="noopener" class="resp-image-search-btn">🖼️ View Diagrams &amp; Images: ${imageSearchQuery.substring(0, 40)}${imageSearchQuery.length > 40 ? '...' : ''}</a>`;
+        visualHtml += `<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(imageSearchQuery + ' explained')}" target="_blank" rel="noopener" class="resp-image-search-btn" style="margin-top:8px;background:var(--blue);">▶ Search YouTube Videos: ${imageSearchQuery.substring(0, 40)}${imageSearchQuery.length > 40 ? '...' : ''}</a>`;
       }
       visualHtml += '</div>';
       html += visualHtml;
