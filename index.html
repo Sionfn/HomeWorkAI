@@ -1744,9 +1744,9 @@
     if (stepsHtml)       html += `<div class="resp-steps-label">Step-by-step</div><div class="resp-steps-wrap">${stepsHtml}</div>`;
 
     for (const p of paragraphs) {
-      if (p.type === "explanation") html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
+      if (p.type === "explanation" || p.type === "other") html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
       else if (p.type === "bullet") html += `<div class="resp-bullet">• ${formatInline(p.text, plan)}</div>`;
-      else if (p.text)              html += `<div class="resp-body-para">${formatInline(p.text, plan)}</div>`;
+      else if (p.text)              html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
     }
 
     if (insightText.trim())       html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${formatInline(insightText.trim(), plan)}</div></div>`;
@@ -2516,6 +2516,7 @@
 
 </body>
 </html>
+
 
 
 
