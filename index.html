@@ -333,6 +333,9 @@
     .resp-final-text { font-weight:800;font-size:16px;color:#14532d;line-height:1.4; }
 
     .resp-steps-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#6b7280;margin:14px 0 8px; }
+    .resp-section-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#1d4ed8;margin:14px 0 6px; }
+    .resp-keypoints { margin-top:16px;border-top:2px solid #e5e7eb;padding-top:14px; }
+    .resp-keypoints-label { font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#059669;margin-bottom:8px; }
     .resp-step { display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f3f4f6; }
     .resp-step:last-child { border-bottom:none; }
     .resp-step-num { min-width:28px;height:28px;background:#c4b5fd;border:2px solid black;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0; }
@@ -1786,61 +1789,126 @@
       let out = stripMarkdownLinks(text);
       if (p === "pro" || p === "pro_plus") out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
       if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
+      // Strip any remaining orphaned ** or __ that didn't form valid pairs
+      out = out.replace(/\*\*/g, "").replace(/(?<![a-zA-Z])__(?![a-zA-Z])/g, "");
       return out;
     }
 
-    // Pre-pass: ensure Resources: is always on its own line (fixes Resources-in-Tip bug)
+    // Pre-pass: ensure Resources: is always on its own line
     answer = answer.replace(/([^\n])(Resources:)/g, '$1\n\nResources:');
 
-    // ── Normalise: force section headers and numbered steps onto their own lines ──
-    // The AI sometimes writes everything inline. This ensures the parser can see each section.
+    // ── Normalise section headers — map ALL known variants to canonical names ──
     function normalizeSections(text) {
       let r = text;
-      // Each of these headers must start on a fresh line
-      const headers = ['Final Answer:','Explanation:','Step-by-step:','Step-by-Step:','Tip:','Insight:','Deeper Insight:','Common Mistake:','Key Points:','Key Point:','Resources:'];
+
+      // Map ALL known AI-generated header variants to canonical section names
+      const mappings = [
+        // Step-by-step variants
+        [/Step-by-Step Process:/gi,    'Step-by-step:'],
+        [/Step by Step:/gi,            'Step-by-step:'],
+        [/Steps:/gi,                   'Step-by-step:'],
+        [/Solution Steps:/gi,          'Step-by-step:'],
+        [/Method:/gi,                  'Step-by-step:'],
+        [/Work:/gi,                    'Step-by-step:'],
+        [/Solution:/gi,                'Step-by-step:'],
+        [/Walkthrough:/gi,             'Step-by-step:'],
+        // Explanation variants
+        [/Explanation:/gi,             'Explanation:'],
+        [/Detailed Explanation:/gi,    'Explanation:'],
+        [/How it Works:/gi,            'Explanation:'],
+        // Insight variants
+        [/Deeper Insight:/gi,          'Insight:'],
+        [/Deep Dive:/gi,               'Insight:'],
+        [/Did You Know:/gi,            'Insight:'],
+        // Common Mistake variants
+        [/Common Error:/gi,            'Common Mistake:'],
+        [/Watch Out:/gi,               'Common Mistake:'],
+        [/Avoid This:/gi,              'Common Mistake:'],
+        // Key Points variants
+        [/Key Point:/gi,               'Key Points:'],
+        [/Key Takeaways:/gi,           'Key Points:'],
+        [/Summary:/gi,                 'Key Points:'],
+        [/Takeaway:/gi,                'Key Points:'],
+      ];
+
+      mappings.forEach(([pattern, canonical]) => {
+        r = r.replace(pattern, canonical);
+      });
+
+      // Force all canonical headers onto their own lines
+      const headers = ['Final Answer:','Explanation:','Step-by-step:','Tip:','Insight:','Common Mistake:','Key Points:','Resources:'];
       headers.forEach(h => {
         const escaped = h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         r = r.replace(new RegExp('([^\\n])\\s*(' + escaped + ')', 'g'), '$1\n\n$2');
       });
-      // Numbered steps: put each on its own line (handles ". 2." and ": 2." and ", 2.")
+
+      // Numbered steps on their own lines
       r = r.replace(/([.!?:;,])\s+(\d+\.\s)/g, '$1\n$2');
-      // "Step N:" variant on own line
       r = r.replace(/([.!?:;,])\s+(Step\s+\d+[:.]\s)/gi, '$1\n$2');
+
       return r;
     }
     answer = normalizeSections(answer);
 
     const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
     let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
+    let keyPointsBullets = [];
     let mode = "other", currentParaLines = [];
 
     function flushPara(type) {
-      if (currentParaLines.length > 0) { paragraphs.push({ type, text: currentParaLines.join(" ").trim() }); currentParaLines = []; }
+      if (currentParaLines.length > 0) {
+        paragraphs.push({ type, text: currentParaLines.join(" ").trim() });
+        currentParaLines = [];
+      }
     }
 
     for (const line of lines) {
-      // If we're in any mode and hit Resources:, stop and ignore (already parsed server-side)
       if (line.startsWith("Resources:")) { flushPara(mode); break; }
 
-      if (line.startsWith("Final Answer:"))                              { finalAnswerText = line.replace("Final Answer:", "").trim(); mode = "other"; }
-      else if (line.startsWith("Step-by-step:") || line.startsWith("Step-by-Step:")) { flushPara(mode); mode = "steps"; }
-      else if (line.startsWith("Explanation:"))                         { flushPara(mode); mode = "explanation"; const inl = line.replace("Explanation:", "").trim(); if (inl) currentParaLines.push(inl); }
-      else if (line.startsWith("Deeper Insight:") || line.startsWith("Insight:")) { flushPara(mode); mode = "insight"; insightText = line.replace(/^(Deeper Insight|Insight):/, "").trim(); }
-      else if (line.startsWith("Common Mistake:"))                      { flushPara(mode); mode = "common_mistake"; commonMistakeText = line.replace("Common Mistake:", "").trim(); }
-      else if (line.startsWith("Key Points:") || line.startsWith("Key Point:")) { flushPara(mode); mode = "keypoints"; }
-      else if (line.startsWith("Tip:"))                                 { flushPara(mode); mode = "tip"; tipText = line.replace("Tip:", "").trim(); }
-      // ── Numbered steps: detected in ANY mode — always render as step cards ──
+      if (line.startsWith("Final Answer:")) {
+        finalAnswerText = line.replace("Final Answer:", "").trim();
+        mode = "other";
+      }
+      else if (line.startsWith("Step-by-step:")) {
+        flushPara(mode); mode = "steps";
+      }
+      else if (line.startsWith("Explanation:")) {
+        flushPara(mode); mode = "explanation";
+        const inl = line.replace("Explanation:", "").trim();
+        if (inl) currentParaLines.push(inl);
+      }
+      else if (line.startsWith("Insight:")) {
+        flushPara(mode); mode = "insight";
+        insightText = line.replace("Insight:", "").trim();
+      }
+      else if (line.startsWith("Common Mistake:")) {
+        flushPara(mode); mode = "common_mistake";
+        commonMistakeText = line.replace("Common Mistake:", "").trim();
+      }
+      else if (line.startsWith("Key Points:")) {
+        flushPara(mode); mode = "keypoints";
+      }
+      else if (line.startsWith("Tip:")) {
+        flushPara(mode); mode = "tip";
+        tipText = line.replace("Tip:", "").trim();
+      }
+      // Numbered steps detected in ANY mode
       else if (/^(Step\s+\d+\b|\d+\.)/.test(line)) {
         if (mode !== "steps") { flushPara(mode); mode = "steps"; }
         const num = (line.match(/^(?:Step\s+)?(\d+)/) || [])[1] || '•';
         const stepText = line.replace(/^(?:Step\s+)?\d+[:.]\s*/, '').trim();
         stepsHtml += `<div class="resp-step"><div class="resp-step-num">${num}</div><div class="resp-step-text">${formatInline(stepText, plan)}</div></div>`;
       }
-      else if (mode === "keypoints" && /^[-•*]/.test(line))  { paragraphs.push({ type:"bullet", text: stripMarkdownLinks(line.replace(/^[-•*]\s*/,"")) }); }
-      else if (mode === "tip")            { tipText          += " " + line; }
-      else if (mode === "insight")        { insightText      += " " + line; }
+      // Key points bullets — detect -, •, *, or plain text lines in keypoints mode
+      else if (mode === "keypoints") {
+        const bulletText = line.replace(/^[-•*]\s*/, "").trim();
+        if (bulletText) keyPointsBullets.push(stripMarkdownLinks(bulletText));
+      }
+      else if (mode === "tip")            { tipText           += " " + line; }
+      else if (mode === "insight")        { insightText       += " " + line; }
       else if (mode === "common_mistake") { commonMistakeText += " " + line; }
-      else { currentParaLines.push(line); }
+      else if (mode === "explanation")    { currentParaLines.push(line); }
+      else                               { currentParaLines.push(line); }
     }
     flushPara(mode);
 
@@ -1849,48 +1917,75 @@
     let html = `<div class="ai-response-box ${plan === 'pro_plus' ? 'resp-pro-plus' : ''}">`;
     html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
 
-    if (finalAnswerText) html += `<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">${formatInline(finalAnswerText, plan)}</div></div>`;
-    if (stepsHtml)       html += `<div class="resp-steps-label">Step-by-step</div><div class="resp-steps-wrap">${stepsHtml}</div>`;
-
-    for (const p of paragraphs) {
-      if (p.type === "explanation" || p.type === "other") html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
-      else if (p.type === "bullet") html += `<div class="resp-bullet">• ${formatInline(p.text, plan)}</div>`;
-      else if (p.text)              html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
+    // Final Answer
+    if (finalAnswerText) {
+      html += `<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">${formatInline(finalAnswerText, plan)}</div></div>`;
     }
 
-    if (insightText.trim())       html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${formatInline(insightText.trim(), plan)}</div></div>`;
-    if (tipText.trim())           html += `<div class="resp-tip"><div class="resp-tip-icon">💡</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">${formatInline(tipText.trim(), plan)}</div></div></div>`;
-    if (commonMistakeText.trim()) html += `<div class="resp-common-mistake"><div class="resp-common-mistake-icon">⚠️</div><div><div class="resp-common-mistake-label">Common Mistake</div><div class="resp-common-mistake-text">${formatInline(commonMistakeText.trim(), plan)}</div></div></div>`;
+    // Steps
+    if (stepsHtml) {
+      html += `<div class="resp-steps-label">Step-by-Step</div><div class="resp-steps-wrap">${stepsHtml}</div>`;
+    }
 
-    // Resources section
+    // Explanation and other paragraphs — with label
+    const explanationParas = paragraphs.filter(p => p.type === "explanation" || p.type === "other");
+    if (explanationParas.length > 0) {
+      html += `<div class="resp-section-label">Explanation</div>`;
+      explanationParas.forEach(p => {
+        if (p.text) html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
+      });
+    }
+
+    // Bullets (non-explanation)
+    paragraphs.filter(p => p.type === "bullet").forEach(p => {
+      html += `<div class="resp-bullet">• ${formatInline(p.text, plan)}</div>`;
+    });
+
+    // Key Points
+    if (keyPointsBullets.length > 0) {
+      html += `<div class="resp-keypoints"><div class="resp-keypoints-label">📋 Key Points</div>`;
+      keyPointsBullets.forEach(b => {
+        html += `<div class="resp-bullet">• ${formatInline(b, plan)}</div>`;
+      });
+      html += `</div>`;
+    }
+
+    // Insight
+    if (insightText.trim()) {
+      html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${formatInline(insightText.trim(), plan)}</div></div>`;
+    }
+
+    // Tip
+    if (tipText.trim()) {
+      html += `<div class="resp-tip"><div class="resp-tip-icon">💡</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">${formatInline(tipText.trim(), plan)}</div></div></div>`;
+    }
+
+    // Common Mistake
+    if (commonMistakeText.trim()) {
+      html += `<div class="resp-common-mistake"><div class="resp-common-mistake-icon">⚠️</div><div><div class="resp-common-mistake-label">Common Mistake</div><div class="resp-common-mistake-text">${formatInline(commonMistakeText.trim(), plan)}</div></div></div>`;
+    }
+
+    // Resources
     if (resources && resources.length > 0) {
       const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
       const qlIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg>`;
       const items  = resources.map(r => {
-        const isYT   = r.type === "youtube";
-        const target = r.link.includes('youtube.com') ? 'target="_blank"' : 'target="_blank"';
-        return `<a href="${r.link}" ${target} rel="noopener" class="resp-resource-link ${isYT ? 'yt' : 'ql'}">${isYT ? ytIcon : qlIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:700;color:${isYT ? '#ef4444' : '#3b82f6'};white-space:nowrap;">${isYT ? 'YouTube ↗' : 'Quizlet ↗'}</span></a>`;
+        const isYT = r.type === "youtube";
+        return `<a href="${r.link}" target="_blank" rel="noopener" class="resp-resource-link ${isYT ? 'yt' : 'ql'}">${isYT ? ytIcon : qlIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:700;color:${isYT ? '#ef4444' : '#3b82f6'};white-space:nowrap;">${isYT ? 'YouTube ↗' : 'Quizlet ↗'}</span></a>`;
       }).join("");
       html += `<div class="resp-resources"><div class="resp-resources-label">📚 Resources</div>${items}</div>`;
     }
 
-    // ── Visual Learner content (Pro+ only) ───────────────────────────────
+    // Visual Learner content (Pro+ only)
     if (plan === 'pro_plus' && learningStyle === 'visual') {
       let visualHtml = '<div class="resp-visual-section"><div class="resp-visual-label">📺 Visual Content</div>';
-
       if (embeddedVideo) {
-        visualHtml += `
-          <div class="resp-video-embed">
-            <iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-          </div>
-          <div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:8px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
+        visualHtml += `<div class="resp-video-embed"><iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:8px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
       }
-
       if (imageSearchQuery) {
         const imgQuery = encodeURIComponent(imageSearchQuery);
         visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${imgQuery}" target="_blank" rel="noopener" class="resp-image-search-btn">🖼️ Search Images: ${imageSearchQuery.substring(0, 45)}${imageSearchQuery.length > 45 ? '...' : ''}</a>`;
       }
-
       visualHtml += '</div>';
       html += visualHtml;
     }
@@ -2671,6 +2766,7 @@
 
 </body>
 </html>
+
 
 
 
