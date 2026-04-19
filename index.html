@@ -1726,7 +1726,13 @@
       else if (line.startsWith("Common Mistake:"))                      { flushPara(mode); mode = "common_mistake"; commonMistakeText = line.replace("Common Mistake:", "").trim(); }
       else if (line.startsWith("Key Points:") || line.startsWith("Key Point:")) { flushPara(mode); mode = "keypoints"; }
       else if (line.startsWith("Tip:"))                                 { flushPara(mode); mode = "tip"; tipText = line.replace("Tip:", "").trim(); }
-      else if (mode === "steps"     && /^\d+\./.test(line))  { const num = line.match(/^(\d+)\./)[1]; stepsHtml += `<div class="resp-step"><div class="resp-step-num">${num}</div><div class="resp-step-text">${formatInline(line.replace(/^\d+\.\s*/,""), plan)}</div></div>`; }
+      else if (mode === "steps" && /^(Step\s+\d+\b|\d+\.)/.test(line)) {
+        const numMatch = line.match(/^(?:Step\s+)?(\d+)/);
+        const num = numMatch ? numMatch[1] : '•';
+        // Strip "Step N:" or "N." prefix, then strip optional short title like "Light Absorption "
+        const stepText = line.replace(/^(?:Step\s+)?\d+[:.]\s*/, '').trim();
+        stepsHtml += `<div class="resp-step"><div class="resp-step-num">${num}</div><div class="resp-step-text">${formatInline(stepText, plan)}</div></div>`;
+      }
       else if (mode === "keypoints" && /^[-•*]/.test(line))  { paragraphs.push({ type:"bullet", text: stripMarkdownLinks(line.replace(/^[-•*]\s*/,"")) }); }
       else if (mode === "tip")            { tipText          += " " + line; }
       else if (mode === "insight")        { insightText      += " " + line; }
@@ -2516,6 +2522,7 @@
 
 </body>
 </html>
+
 
 
 
