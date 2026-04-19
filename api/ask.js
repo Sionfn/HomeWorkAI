@@ -308,20 +308,26 @@ UNIVERSAL RULES:
 7. If asked about an image, carefully read and solve the homework problem shown.
 8. If not academic: "I'm here to help with homework and studying. Try asking me a subject question!"`;
 
-  // 7. Build conversation input
-  let currentUserMessage;
+  // 7. Build messages array (Chat Completions format — properly supports multi-turn history)
+  const messages = [{ role: "system", content: systemPrompt }];
+
+  // Add conversation history (previous turns)
+  safeHistory.forEach(m => {
+    if (m.role && m.content) messages.push({ role: m.role, content: m.content });
+  });
+
+  // Add current user message
   if (hasImage) {
-    currentUserMessage = {
+    messages.push({
       role: "user",
       content: [
-        { type: "input_image", image_url: `data:${imageType};base64,${imageBase64}`, detail: "high" },
-        { type: "input_text",  text: trimmedQuestion || "Please read this image and solve the homework problem shown." }
+        { type: "image_url", image_url: { url: `data:${imageType};base64,${imageBase64}`, detail: "high" } },
+        { type: "text", text: trimmedQuestion || "Please read this image and solve the homework problem shown." }
       ]
-    };
+    });
   } else {
-    currentUserMessage = { role: "user", content: `Question: ${trimmedQuestion}` };
+    messages.push({ role: "user", content: `Question: ${trimmedQuestion}` });
   }
-  const conversationInput = [...safeHistory, currentUserMessage];
 
   // 8. Pick model (gpt-4o for images; plan-based otherwise)
   const model = hasImage ? "gpt-4o" :
@@ -329,18 +335,26 @@ UNIVERSAL RULES:
     userPlan === "pro"      ? "gpt-4.1-mini" :
                               "gpt-4o-mini";
 
-  // 9. Call OpenAI (no streaming — full response before returning)
+  // 9. Call OpenAI Chat Completions API
   try {
-    const openaiRes = await fetch("https://api.openai.com/v1/responses", {
+    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method:  "POST",
       headers: { "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
-      body:    JSON.stringify({ model, instructions: systemPrompt, input: conversationInput }),
+      body:    JSON.stringify({ model, messages, max_tokens: 2000 }),
     });
 
     const data = await openaiRes.json();
+
+    // Surface the real OpenAI error if the call failed
+    if (!openaiRes.ok) {
+      console.error("OpenAI API error:", JSON.stringify(data));
+      throw new Error(data.error?.message || "OpenAI API returned an error");
+    }
+
     let rawAnswer = "No response";
-    const contentArray = data.output?.[0]?.content;
-    if (contentArray?.length > 0) rawAnswer = contentArray.map(c => c.text || "").join("");
+    if (data.choices?.[0]?.message?.content) {
+      rawAnswer = data.choices[0].message.content;
+    }
 
     const processed = processAnswer(rawAnswer, userPlan);
     let { answer, resources } = userPlan === "pro_plus"
@@ -384,4 +398,5 @@ UNIVERSAL RULES:
     return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 }
+
 
