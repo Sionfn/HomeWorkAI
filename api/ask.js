@@ -40,7 +40,7 @@ const ADMIN_EMAIL      = process.env.ADMIN_EMAIL || "";
 const VIP_PRO_EMAILS   = (process.env.VIP_PRO_EMAILS || "")
   .split(",").map(e => e.trim()).filter(Boolean);
 
-// ── Extract clean search topic from AI's Final Answer (much more accurate than raw question) ──
+// ── Extract clean search topic from AI's Final Answer ──────────────────────
 function extractSearchTopic(rawAnswer) {
   const match = rawAnswer.match(/Final Answer:\s*(.+?)(?:\n|$)/i);
   if (!match) return null;
@@ -291,7 +291,7 @@ ${learningStyleInstructions}
 UNIVERSAL RULES:
 1. Always start with: Final Answer: [one direct sentence] (unless handling a preference statement)
 2. Never write one long wall of text. Every paragraph = one idea, 2-3 sentences max.
-3. Steps must show REAL work with actual numbers — never vague.
+3. Steps must show REAL work with actual numbers — never vague. Format EVERY step as: "1. Description" (use digits and periods like 1. 2. 3. — never write "Step 1:" format).
 4. NEVER start a step with: Identify, Notice, Consider, Think, Remember, Set up, Look at, Understand.
 5. Scale length to complexity.
 6. No LaTeX, no markdown headers (##), no dollar signs for math.
@@ -337,25 +337,21 @@ UNIVERSAL RULES:
       ? parseResources(processed)
       : { answer: processed, resources: [] };
 
-    // 10. For Pro+: upgrade YouTube resource links to actual videos + visual learner embed
+    // 10. Use clean topic from Final Answer for accurate searches
+    const searchTopic = extractSearchTopic(rawAnswer) || trimmedQuestion.replace(/\b(visual learner|i'?m? a visual|show me|can you|please|help me)\b/gi, '').trim();
+
     let embeddedVideo    = null;
     let imageSearchQuery = null;
 
-    // Extract the clean topic from the AI's Final Answer — much more accurate than the raw question
-    const searchTopic = extractSearchTopic(rawAnswer) || trimmedQuestion;
-
     if (userPlan === "pro_plus") {
       // Upgrade any YouTube resource links that are still search URLs to real video links
-      if (resources.length > 0) {
-        for (let i = 0; i < resources.length; i++) {
-          if (resources[i].type === "youtube" && resources[i].link.includes("youtube.com/results")) {
-            const video = await searchYouTubeVideo(resources[i].title);
-            if (video) resources[i].link = video.url;
-          }
+      for (let i = 0; i < resources.length; i++) {
+        if (resources[i].type === "youtube" && resources[i].link.includes("youtube.com/results")) {
+          const vid = await searchYouTubeVideo(resources[i].title);
+          if (vid) resources[i].link = vid.url;
         }
       }
-
-      // Embed a relevant video + image search for visual learners
+      // Visual learner embed
       if (learningStyle === "visual" && !prefOnly) {
         embeddedVideo    = await searchYouTubeVideo(searchTopic + " explained");
         imageSearchQuery = searchTopic;
