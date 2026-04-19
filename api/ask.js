@@ -229,6 +229,22 @@ export default async function handler(req, res) {
 
   // 4. Parse request body
   const { question, imageBase64, imageType, history } = req.body;
+
+  // Validate image if provided — prevents cost abuse and type spoofing
+  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+  const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB limit (base64 is ~4/3 of original)
+
+  if (imageBase64 && imageType) {
+    if (!ALLOWED_IMAGE_TYPES.includes(imageType.toLowerCase())) {
+      return res.status(400).json({ error: "Invalid image type. Please upload a JPEG, PNG, GIF, or WebP image." });
+    }
+    // base64 string length * 0.75 gives approximate byte size
+    const approxBytes = imageBase64.length * 0.75;
+    if (approxBytes > MAX_IMAGE_SIZE_BYTES) {
+      return res.status(400).json({ error: "Image is too large. Please upload an image under 5MB." });
+    }
+  }
+
   const hasImage = !!(imageBase64 && imageType);
   if (!question && !hasImage) return res.status(400).json({ error: "No question provided." });
 
@@ -335,12 +351,17 @@ UNIVERSAL RULES:
     userPlan === "pro"      ? "gpt-4.1-mini" :
                               "gpt-4o-mini";
 
+  // Use plan-based token limits — free users only need short answers
+  const maxTokens = userPlan === "pro_plus" ? 2000 :
+                    userPlan === "pro"       ? 1000 :
+                                               400;
+
   // 9. Call OpenAI Chat Completions API
   try {
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method:  "POST",
       headers: { "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
-      body:    JSON.stringify({ model, messages, max_tokens: 2000 }),
+      body:    JSON.stringify({ model, messages, max_tokens: maxTokens }),
     });
 
     const data = await openaiRes.json();
