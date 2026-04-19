@@ -1717,10 +1717,10 @@
         const escaped = h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         r = r.replace(new RegExp('([^\\n])\\s*(' + escaped + ')', 'g'), '$1\n\n$2');
       });
-      // Numbered steps: ". 2. " → ".\n2. " so each step is its own line
-      r = r.replace(/([.!?])\s+(\d+\.\s)/g, '$1\n$2');
+      // Numbered steps: put each on its own line (handles ". 2." and ": 2." and ", 2.")
+      r = r.replace(/([.!?:;,])\s+(\d+\.\s)/g, '$1\n$2');
       // "Step N:" variant on own line
-      r = r.replace(/([.!?])\s+(Step\s+\d+[:.]\s)/gi, '$1\n$2');
+      r = r.replace(/([.!?:;,])\s+(Step\s+\d+[:.]\s)/gi, '$1\n$2');
       return r;
     }
     answer = normalizeSections(answer);
@@ -1738,16 +1738,16 @@
       if (line.startsWith("Resources:")) { flushPara(mode); break; }
 
       if (line.startsWith("Final Answer:"))                              { finalAnswerText = line.replace("Final Answer:", "").trim(); mode = "other"; }
-      else if (line.startsWith("Step-by-step:"))                        { flushPara(mode); mode = "steps"; }
+      else if (line.startsWith("Step-by-step:") || line.startsWith("Step-by-Step:")) { flushPara(mode); mode = "steps"; }
       else if (line.startsWith("Explanation:"))                         { flushPara(mode); mode = "explanation"; const inl = line.replace("Explanation:", "").trim(); if (inl) currentParaLines.push(inl); }
       else if (line.startsWith("Deeper Insight:") || line.startsWith("Insight:")) { flushPara(mode); mode = "insight"; insightText = line.replace(/^(Deeper Insight|Insight):/, "").trim(); }
       else if (line.startsWith("Common Mistake:"))                      { flushPara(mode); mode = "common_mistake"; commonMistakeText = line.replace("Common Mistake:", "").trim(); }
       else if (line.startsWith("Key Points:") || line.startsWith("Key Point:")) { flushPara(mode); mode = "keypoints"; }
       else if (line.startsWith("Tip:"))                                 { flushPara(mode); mode = "tip"; tipText = line.replace("Tip:", "").trim(); }
-      else if (mode === "steps" && /^(Step\s+\d+\b|\d+\.)/.test(line)) {
-        const numMatch = line.match(/^(?:Step\s+)?(\d+)/);
-        const num = numMatch ? numMatch[1] : '•';
-        // Strip "Step N:" or "N." prefix, then strip optional short title like "Light Absorption "
+      // ── Numbered steps: detected in ANY mode — always render as step cards ──
+      else if (/^(Step\s+\d+\b|\d+\.)/.test(line)) {
+        if (mode !== "steps") { flushPara(mode); mode = "steps"; }
+        const num = (line.match(/^(?:Step\s+)?(\d+)/) || [])[1] || '•';
         const stepText = line.replace(/^(?:Step\s+)?\d+[:.]\s*/, '').trim();
         stepsHtml += `<div class="resp-step"><div class="resp-step-num">${num}</div><div class="resp-step-text">${formatInline(stepText, plan)}</div></div>`;
       }
@@ -2149,7 +2149,8 @@
       else if (line.startsWith("Common Mistake:")) { fp(mode); mode = "common_mistake"; commonMistakeText = line.replace("Common Mistake:", "").trim(); }
       else if (line.startsWith("Key Points:") || line.startsWith("Key Point:")) { fp(mode); mode = "keypoints"; }
       else if (line.startsWith("Tip:")) { fp(mode); mode = "tip"; tipText = line.replace("Tip:", "").trim(); }
-      else if (mode === "steps" && /^(Step\s+\d+\b|\d+\.)/.test(line)) {
+      else if (/^(Step\s+\d+\b|\d+\.)/.test(line)) {
+        if (mode !== "steps") { fp(mode); mode = "steps"; }
         const num = (line.match(/^(?:Step\s+)?(\d+)/) || [])[1] || '•';
         const txt = line.replace(/^(?:Step\s+)?\d+[:.]\s*/, '').trim();
         stepsHtml += '<div class="resp-step"><div class="resp-step-num">' + num + '</div><div class="resp-step-text">' + fi(txt, item.plan) + '</div></div>';
@@ -2554,14 +2555,6 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
 
 
 <!-- deploy -->
