@@ -1110,6 +1110,7 @@
         const data = await resp.json();
         userPlan = data.plan || 'free';
         window.userPlan = userPlan; // expose to global scripts
+        window.userRenewalDate = data.renewalDate || null; // Unix timestamp from Stripe
       } catch (e) {
         console.warn('Could not fetch plan, defaulting to free:', e.message);
         userPlan = 'free';
@@ -2395,9 +2396,17 @@
     document.getElementById('settingsUpgradeBtn').style.display = isPaid ? 'none' : 'flex';
 
     if (isPaid) {
-      // Renewal date: only show if real Stripe data is available via Firestore
-      // Until integrated, hide this row rather than show a fake date
-      document.getElementById('settingsRenewalRow').style.display = 'none';
+      // Show real renewal date if available from Stripe (stored via webhook)
+      const renewalRow = document.getElementById('settingsRenewalRow');
+      const renewalDateEl = document.getElementById('settingsRenewalDate');
+      if (window.userRenewalDate) {
+        // Stripe stores current_period_end as a Unix timestamp (seconds)
+        const d = new Date(window.userRenewalDate * 1000);
+        renewalDateEl.textContent = d.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+        renewalRow.style.display = 'flex';
+      } else {
+        renewalRow.style.display = 'none';
+      }
     }
 
     const questionsUsed = usage.count || 0;
@@ -2673,6 +2682,7 @@
 
 </body>
 </html>
+
 
 
 
