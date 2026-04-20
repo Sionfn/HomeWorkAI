@@ -137,7 +137,7 @@ function parseResources(text) {
         const raw   = qlPlain[1].trim();
         const title = raw.replace(/\[([^\]]+)\]\([^)]+\)/, "$1").replace(/^\[|\]$/g, "").trim();
         const urlM  = raw.match(/\((https?:[^)]+)\)/);
-        const link  = urlM ? urlM[1] : `https://quizlet.com/search?query=${encodeURIComponent(title)}&type=sets`;
+        const link  = urlM ? urlM[1] : `https://quizlet.com/search?query=${encodeURIComponent(title)}`;
         resources.push({ type: "quizlet", title, link });
       }
     }
@@ -499,4 +499,5 @@ UNIVERSAL RULES (apply to ALL plans):
     return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 }
+
 
