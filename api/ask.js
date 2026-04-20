@@ -317,17 +317,18 @@ LEARNING STYLE — VERBAL / WORD LEARNER:
   let planInstructions = "";
   if (userPlan === "free") {
     planInstructions = `=== PLAN: FREE ===
-Give a direct answer and a brief explanation. Nothing more.
+Give a direct answer and a brief explanation. Always answer the academic question — NEVER refuse a school subject question.
 
 USE EXACTLY THESE TWO HEADERS — NO OTHERS:
-Final Answer: [One clear sentence — the direct answer to the question]
-Explanation: [2-3 sentences only explaining how or why. Plain prose, no lists.]
+Final Answer: [One clear, direct sentence answering the question]
+Explanation: [2-3 sentences explaining the concept in plain prose. If the student asks for steps, briefly describe them as plain sentences — do NOT use numbered lists or bullet points]
 
 STRICT RULES:
-- ONLY "Final Answer:" and "Explanation:" — no other headers ever
+- ALWAYS answer the question if it is about any school subject (math, science, history, English, etc.)
+- ONLY use "Final Answer:" and "Explanation:" — no other headers ever
 - No bold, no asterisks, no underlines, no numbered lists, no bullet points
-- Total response MUST be under 100 words — be concise
-- If not academic: "I'm here to help with homework and studying. Try asking me a subject question!"`;
+- Total response under 100 words
+- ONLY say "I'm here to help with homework and studying. Try asking me a subject question!" if the question has absolutely nothing to do with school or academics — never say this for any real school topic`;
 
   } else if (userPlan === "pro") {
     planInstructions = `=== PLAN: PRO ===
@@ -349,9 +350,7 @@ STRICT RULES:
 - Bold 2-4 key terms using **term** format
 - NEVER repeat a section — write each section ONCE only
 - NEVER use alternative header names like "Step-by-Step Process:", "Steps:", "Solution:", "Work:", "Method:"
-- If not academic: "I'm here to help with homework and studying. Try asking me a subject question!"`;
-
-  } else if (userPlan === "pro_plus") {
+- If not academic: "I'm here to help with homework and studying. Try asking me a subject question!" — only use this if the question has absolutely nothing to do with school`;
     planInstructions = `=== PLAN: PRO+ ===
 Give the deepest, most complete academic explanations possible. You are a world-class tutor.
 
@@ -381,8 +380,7 @@ STRICT RULES:
 - Bold key terms using **term**, underline the single most important concept using __phrase__
 - NEVER repeat a section — write each section ONCE only
 - NEVER use alternative header names — use EXACTLY the headers shown above
-- If not academic: "I'm here to help with homework and studying. Try asking me a subject question!"`;
-  }
+- If not academic: "I'm here to help with homework and studying. Try asking me a subject question!" — only use this if the question has absolutely nothing to do with school`;
 
   const systemPrompt = `You are HomeWorkAI — a world-class AI tutor covering every academic subject from K-12 through college. Your goal is to help students genuinely understand material, not just get answers.
 
@@ -499,5 +497,6 @@ UNIVERSAL RULES (apply to ALL plans):
     return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 }
+
 
 
