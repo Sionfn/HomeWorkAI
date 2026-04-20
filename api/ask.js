@@ -85,13 +85,14 @@ function detectLearningStyle(history, question) {
     question,
   ].join(" ").toLowerCase();
 
-  // Visual learner — catches many natural ways students express this
-  if (/visual learner|learn visually|i'?m? a? ?visual|prefer videos?|visual (person|style)|show me visually|show me (a )?(diagram|chart|graph|picture|image|video)|can you (draw|diagram|visualize|show)|i (like|love|prefer|learn better with) (videos?|diagrams?|pictures?|images?|charts?|visuals?)|help me (see|visualize|picture)|watch videos?|diagram (this|it|that)|draw (this|it|that)|picture this|visual(ly)?|seeing it|see (how|it|this)|watching|graphically/i.test(texts)) return "visual";
-
-  // Verbal learner — catches natural reading/word preference phrases
+  if (/visual learner|learn visually|i'?m? a? ?visual|prefer videos?|visual (person|style|way)|show me visually|show me (a )?(diagram|chart|graph|picture|image|video)|can you (draw|diagram|visualize|show)|i (like|love|prefer|learn better with) (videos?|diagrams?|pictures?|images?|charts?|visuals?)|help me (see|visualize|picture)|watch videos?|diagram (this|it|that)|draw (this|it|that)|picture this|seeing it|see (how|it|this)|watching|graphically|in a visual/i.test(texts)) return "visual";
   if (/word person|verbal learner|descriptive words?|long (passage|explanation)|prefer (text|reading|words)|detailed prose|i (like|love|prefer|learn better with) (reading|text|words?|writing|essays?)|just (explain|tell|write|describe)|no (videos?|diagrams?|pictures?)|text only|in words|write it out/i.test(texts)) return "verbal";
-
   return null;
+}
+
+// ── Check if the question is asking for visual/diagram content ────────────
+function asksForVisualContent(question) {
+  return /diagram|chart|graph|visual(ly|ize|ise|ization|isation|ly| way| style| form| learner| learning)?|show me|draw|picture this|video|image|in a visual|visually|explain.*visual|visual.*explain|illustrat/i.test(question);
 }
 
 // ── True if message only states a preference, asks no academic question ──
@@ -136,7 +137,7 @@ function parseResources(text) {
         const raw   = qlPlain[1].trim();
         const title = raw.replace(/\[([^\]]+)\]\([^)]+\)/, "$1").replace(/^\[|\]$/g, "").trim();
         const urlM  = raw.match(/\((https?:[^)]+)\)/);
-        const link  = urlM ? urlM[1] : `https://quizlet.com/search?query=${encodeURIComponent(title)}`;
+        const link  = urlM ? urlM[1] : `https://quizlet.com/search?query=${encodeURIComponent(title)}&type=sets`;
         resources.push({ type: "quizlet", title, link });
       }
     }
@@ -263,12 +264,12 @@ export default async function handler(req, res) {
   const safeHistory   = Array.isArray(history) ? history.slice(-6) : [];
   const hasHistory    = safeHistory.length > 0;
 
-  // If the user is just stating a learning preference AND there's prior history,
-  // automatically re-ask the last question so the AI re-answers it with that context
+  // If Pro or Pro+ user states a learning preference AND there's prior history,
+  // auto re-ask the last question so the AI re-explains it with the new style.
+  // Free plan does NOT get this — visual learning is a paid feature.
   const isJustPreference = isPreferenceOnly(trimmedQuestion);
-  if (isJustPreference && hasHistory && !hasImage) {
-    // Find the last user question from history
-    const lastUserMsg = [...safeHistory].reverse().find(m => m.role === "user");
+  if (isJustPreference && hasHistory && !hasImage && userPlan !== "free") {
+    const lastUserMsg  = [...safeHistory].reverse().find(m => m.role === "user");
     const lastQuestion = typeof lastUserMsg?.content === "string"
       ? lastUserMsg.content.replace(/^Question:\s*/i, "").trim()
       : null;
@@ -277,36 +278,40 @@ export default async function handler(req, res) {
     }
   }
 
-  // 5. Detect learning style and preference-only (Pro+ only)
-  const learningStyle = userPlan === "pro_plus" ? detectLearningStyle(safeHistory, trimmedQuestion) : null;
-  // Only show acknowledgment if there's NO conversation history
+  // 5. Detect learning style — Pro+ uses full detection, Pro only checks current question
+  const wantsVisual  = asksForVisualContent(trimmedQuestion);
+  const learningStyle = userPlan === "pro_plus"
+    ? detectLearningStyle(safeHistory, trimmedQuestion)
+    : (userPlan === "pro" && wantsVisual ? "visual" : null);
+
+  // prefOnly only applies to Pro+ with no history
   const prefOnly = userPlan === "pro_plus" && !hasImage && !hasHistory && isJustPreference;
 
-  // 6. Build system prompt
+  // 6. Build learning style instructions
   let learningStyleInstructions = "";
-  if (userPlan === "pro_plus") {
-    const asksForVisual = /diagram|chart|graph|visuali[sz]e|show me|draw|picture this|video|image/i.test(trimmedQuestion);
 
-    if (prefOnly) {
-      learningStyleInstructions = `
+  if (prefOnly) {
+    // Pro+ no-history acknowledgment
+    learningStyleInstructions = `
 PREFERENCE STATEMENT DETECTED: The user is expressing a learning preference with no prior conversation.
 - Respond with ONLY a warm, friendly 1-2 sentence acknowledgment. Do NOT use Final Answer: format.
 - Example: "Perfect! I'll include visual explanations, diagrams, and clear visual analogies in all my explanations to help you learn best."`;
-    } else if (learningStyle === "visual" || asksForVisual) {
-      learningStyleInstructions = `
+  } else if (learningStyle === "visual" || wantsVisual) {
+    // Visual — applies to Pro AND Pro+
+    learningStyleInstructions = `
 LEARNING STYLE — VISUAL LEARNER:
-- Keep text concise and structured. Use vivid visual analogies ("imagine this as...", "picture this like...").
-- Think in terms of diagrams, timelines, and spatial relationships.
-- Describe what diagrams or charts would look like in text form if you can (e.g. "Picture a timeline where...").
-- If the user just told you they are a visual learner and there is prior conversation context, re-explain the previous topic using this visual style — do NOT just acknowledge.
-- The system will automatically show relevant diagrams and videos alongside your response.`;
-    } else if (learningStyle === "verbal") {
-      learningStyleInstructions = `
+- Use vivid visual analogies throughout ("imagine this as...", "picture this like...", "think of it as...").
+- Describe spatial relationships and what a diagram of this would look like.
+- Keep each paragraph short and visual — one clear image per paragraph.
+- If re-explaining a previous topic, re-explain it fully using this visual style.
+- The system will show relevant diagrams and videos alongside your response.`;
+  } else if (learningStyle === "verbal") {
+    // Verbal — Pro+ only
+    learningStyleInstructions = `
 LEARNING STYLE — VERBAL / WORD LEARNER:
 - Write in rich, flowing, highly descriptive prose. Use vivid literary analogies and narrative language.
 - Expand explanations with nuanced detail and context. Make it feel like a well-written essay.
 - Use full, eloquent sentences. Avoid bullet points where prose works better.`;
-    }
   }
 
   let planInstructions = "";
@@ -316,13 +321,13 @@ Give a direct answer and a brief explanation. Nothing more.
 
 USE EXACTLY THESE TWO HEADERS — NO OTHERS:
 Final Answer: [One clear sentence — the direct answer to the question]
-Explanation: [2-3 sentences explaining how or why. If the student asked for steps, briefly describe the main steps as plain prose sentences here — do NOT use numbered lists or a Step-by-step section]
+Explanation: [2-3 sentences only explaining how or why. Plain prose, no lists.]
 
 STRICT RULES:
-- ONLY use "Final Answer:" and "Explanation:" — never any other section headers
-- No bold text, no asterisks (**), no underlines, no numbered lists, no bullet points
-- Keep total response under 100 words
-- If not academic, say: "I'm here to help with homework and studying. Try asking me a subject question!"`;
+- ONLY "Final Answer:" and "Explanation:" — no other headers ever
+- No bold, no asterisks, no underlines, no numbered lists, no bullet points
+- Total response MUST be under 100 words — be concise
+- If not academic: "I'm here to help with homework and studying. Try asking me a subject question!"`;
 
   } else if (userPlan === "pro") {
     planInstructions = `=== PLAN: PRO ===
@@ -331,7 +336,7 @@ Give thorough, clear explanations. Use step-by-step breakdowns when the question
 USE THESE HEADERS IN THIS ORDER (only include what applies):
 Final Answer: [One clear sentence — the direct answer]
 Explanation: [2-3 solid paragraphs. Explain the concept thoroughly. Show real understanding of why it works.]
-Step-by-step: [ONLY include for math calculations, science processes, or any question that needs sequential steps]
+Step-by-step: [ONLY for math calculations, science processes, or questions needing sequential steps]
   1. [Specific step — show real numbers, real values, actual work]
   2. [Next step]
   3. [Continue until complete]
@@ -344,7 +349,7 @@ STRICT RULES:
 - Bold 2-4 key terms using **term** format
 - NEVER repeat a section — write each section ONCE only
 - NEVER use alternative header names like "Step-by-Step Process:", "Steps:", "Solution:", "Work:", "Method:"
-- If not academic, say: "I'm here to help with homework and studying. Try asking me a subject question!"`;
+- If not academic: "I'm here to help with homework and studying. Try asking me a subject question!"`;
 
   } else if (userPlan === "pro_plus") {
     planInstructions = `=== PLAN: PRO+ ===
@@ -358,7 +363,7 @@ Step-by-step: [For math, science, or any sequential process — show ALL work wi
   2. [Next step — show the work]
   3. [Continue until completely solved]
 Tip: [ONE high-value shortcut, pattern, or memory trick that genuinely helps]
-Insight: [A deeper connection, surprising fact, or bigger-picture context — only for complex topics worth exploring]
+Insight: [A deeper connection, surprising fact, or bigger-picture context — only for complex topics]
 Common Mistake: [The single most common error students make on this exact topic — one sentence]
 Key Points:
   - [Key point 1 — one sentence]
@@ -371,12 +376,12 @@ Resources:
 
 STRICT RULES:
 - ALWAYS include "Final Answer:" and "Explanation:"
-- Only include optional sections when they genuinely add value — do NOT force all sections every time
+- Only include optional sections when they genuinely add value — do NOT force all sections
 - Skip Resources for simple calculations or basic definitions
 - Bold key terms using **term**, underline the single most important concept using __phrase__
 - NEVER repeat a section — write each section ONCE only
-- NEVER use alternative header names — use EXACTLY the headers shown above, nothing else
-- If not academic, say: "I'm here to help with homework and studying. Try asking me a subject question!"`;
+- NEVER use alternative header names — use EXACTLY the headers shown above
+- If not academic: "I'm here to help with homework and studying. Try asking me a subject question!"`;
   }
 
   const systemPrompt = `You are HomeWorkAI — a world-class AI tutor covering every academic subject from K-12 through college. Your goal is to help students genuinely understand material, not just get answers.
@@ -425,9 +430,8 @@ UNIVERSAL RULES (apply to ALL plans):
     userPlan === "pro"      ? "gpt-4.1-mini" :
                               "gpt-4o-mini";
 
-  // Use plan-based token limits — visual learner responses are longer so get extra tokens
-  const isVisualResponse = learningStyle === "visual" || /diagram|chart|graph|visuali[sz]e|show me|draw|picture this|video|image/i.test(trimmedQuestion);
-  const maxTokens = userPlan === "pro_plus" ? (isVisualResponse ? 2800 : 2000) :
+  // Token limits — visual responses are longer, so Pro+ gets more room
+  const maxTokens = userPlan === "pro_plus" ? ((learningStyle === "visual" || wantsVisual) ? 2800 : 2000) :
                     userPlan === "pro"       ? 1000 :
                                                400;
 
@@ -441,7 +445,6 @@ UNIVERSAL RULES (apply to ALL plans):
 
     const data = await openaiRes.json();
 
-    // Surface the real OpenAI error if the call failed
     if (!openaiRes.ok) {
       console.error("OpenAI API error:", JSON.stringify(data));
       throw new Error(data.error?.message || "OpenAI API returned an error");
@@ -457,31 +460,26 @@ UNIVERSAL RULES (apply to ALL plans):
       ? parseResources(processed)
       : { answer: processed, resources: [] };
 
-    // 10. Use clean topic from Final Answer for accurate searches
-    const searchTopic = extractSearchTopic(rawAnswer) || trimmedQuestion.replace(/\b(visual learner|i'?m? a visual|show me|can you|please|help me|diagram|draw|visualize)\b/gi, '').trim();
+    // 10. Extract search topic from Final Answer for accurate video/image searches
+    const searchTopic = extractSearchTopic(rawAnswer) ||
+      trimmedQuestion.replace(/\b(visual learner|im a visual|show me|can you|please|help me|diagram|draw|visualize|in a visual way|visually)\b/gi, '').trim();
 
     let embeddedVideo    = null;
     let imageSearchQuery = null;
 
-    if (userPlan === "pro_plus") {
-      // Upgrade any YouTube resource links that are still search URLs to real video links
+    // Visual content — Pro+ only (Pro gets visual style in text but not embedded video/images)
+    if (userPlan === "pro_plus" && !prefOnly) {
+      // Upgrade any YouTube resource search URLs to real video links
       for (let i = 0; i < resources.length; i++) {
         if (resources[i].type === "youtube" && resources[i].link.includes("youtube.com/results")) {
           const vid = await searchYouTubeVideo(resources[i].title);
           if (vid) resources[i].link = vid.url;
         }
       }
-
-      // Show visual content when:
-      // 1. Learning style is detected as visual, OR
-      // 2. The question itself explicitly asks for diagrams/videos/visuals
-      const asksForVisual = /diagram|chart|graph|visuali[sz]e|show me|draw|picture|video|image/i.test(trimmedQuestion);
-
-      if ((learningStyle === "visual" || asksForVisual) && !prefOnly) {
-        // Always provide image search — works without any API key
+      // Show embedded video + image search when visual style is active
+      if (learningStyle === "visual" || wantsVisual) {
         imageSearchQuery = searchTopic;
-        // Try YouTube embed if API key is available
-        embeddedVideo = await searchYouTubeVideo(searchTopic);
+        embeddedVideo    = await searchYouTubeVideo(searchTopic);
       }
     }
 
