@@ -2440,7 +2440,7 @@
       updateConversationIndicator();
 
     } catch (err) {
-      replaceThinkingWithResponse(`<div style="padding:16px;color:var(--red);font-weight:700;">Something went wrong. Please try again.</div>`, true);
+      replaceThinkingWithResponse(`<div style="padding:16px 18px;font-size:14px;font-weight:700;color:#DC2626;line-height:1.6;">Something went wrong — Knox could not reach the server.<br><span style="font-size:12px;font-weight:600;color:#9CA3AF;margin-top:4px;display:block;">Open browser console (F12) and check for the error details.</span></div>`, true);
       console.error(err);
     } finally {
       resetBtn();
