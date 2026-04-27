@@ -830,9 +830,9 @@
     .login-error.show { display:block; }
     .login-success { background:var(--green-light); border:2px solid var(--green); border-radius:12px; padding:10px 14px; color:var(--green-dark); font-size:13px; font-weight:700; margin-bottom:14px; display:none; }
     .login-success.show { display:block; }
-    .login-tab { display:inline-flex; align-items:center; padding:8px 18px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; border:2px solid transparent; transition:all 0.2s; font-family:inherit; background:none; }
-    .login-tab.active { background:white; border-color:var(--border); box-shadow:0 2px 0 var(--border); }
-    .login-tab:not(.active) { color:#6b7280; }
+    .login-tab { display:inline-flex; align-items:center; justify-content:center; padding:12px 18px; border-radius:12px; font-weight:800; font-size:15px; cursor:pointer; border:2px solid transparent; transition:all 0.15s; font-family:inherit; background:none; color:#9CA3AF; flex:1; }
+    .login-tab.active { background:#FF6B00; color:white; border-color:#FF6B00; box-shadow:0 3px 0 #CC5500; }
+    .login-tab:not(.active) { color:#9CA3AF; background:transparent; }
 
     /* Modals (settings, calculator, history) */
     .settings-modal,.history-modal,.calc-modal { position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,0.5); display:none; align-items:flex-end; justify-content:center; }
@@ -1561,7 +1561,7 @@
     <div class="login-body">
 
       <!-- Tab switcher -->
-      <div style="display:flex;gap:6px;background:#f3f4f6;border-radius:10px;padding:4px;margin-bottom:20px;">
+      <div style="display:flex;gap:4px;background:#F3F4F6;border-radius:14px;padding:4px;margin-bottom:20px;">
         <button class="login-tab active" id="tabSignIn" onclick="switchLoginTab('signin')" style="flex:1;justify-content:center;">Sign In</button>
         <button class="login-tab" id="tabSignUp" onclick="switchLoginTab('signup')" style="flex:1;justify-content:center;">Create Account</button>
       </div>
@@ -1589,9 +1589,9 @@
         <div style="display:flex;flex-direction:column;gap:12px;">
           <input class="login-input" id="signinEmail" type="email" placeholder="Email address" autocomplete="email">
           <input class="login-input" id="signinPassword" type="password" placeholder="Password" autocomplete="current-password">
-          <button class="btn w-full" style="background:var(--purple);justify-content:center;font-size:15px;" onclick="handleEmailSignIn()">Sign In</button>
+          <button class="btn w-full" style="background:#FF6B00;color:white;justify-content:center;font-size:15px;font-weight:900;box-shadow:0 4px 0 #CC5500;border-radius:14px;padding:15px;" onclick="handleEmailSignIn()">Sign In</button>
         </div>
-        <button onclick="switchLoginTab('forgot')" style="background:none;border:none;cursor:pointer;color:#7c3aed;font-size:13px;font-weight:600;margin-top:12px;padding:0;width:100%;text-align:center;">Forgot password?</button>
+        <button onclick="switchLoginTab('forgot')" style="background:none;border:none;cursor:pointer;color:#FF6B00;font-size:13px;font-weight:700;margin-top:12px;padding:0;width:100%;text-align:center;">Forgot password?</button>
       </div>
 
       <!-- SIGN UP FORM -->
@@ -1600,9 +1600,9 @@
           <input class="login-input" id="signupName" type="text" placeholder="Full name" autocomplete="name">
           <input class="login-input" id="signupEmail" type="email" placeholder="Email address" autocomplete="email">
           <input class="login-input" id="signupPassword" type="password" placeholder="Password (min 6 characters)" autocomplete="new-password">
-          <button class="btn w-full" style="background:var(--green);justify-content:center;font-size:15px;" onclick="handleEmailSignUp()">Create Account</button>
+          <button class="btn w-full" style="background:#FF6B00;color:white;justify-content:center;font-size:15px;font-weight:900;box-shadow:0 4px 0 #CC5500;border-radius:14px;padding:15px;" onclick="handleEmailSignUp()">Create Account</button>
         </div>
-        <p style="font-size:12px;color:#9ca3af;text-align:center;margin-top:12px;">By creating an account you agree to our <a href="/terms.html" style="color:#7c3aed;">Terms of Service</a>. you must be 13 or older to use Knox Knows.</p>
+        <p style="font-size:12px;color:#9ca3af;text-align:center;margin-top:12px;">By creating an account you agree to our <a href="/terms.html" style="color:#FF6B00;">Terms of Service</a>. you must be 13 or older to use Knox Knows.</p>
       </div>
 
       <!-- FORGOT PASSWORD FORM -->
@@ -1612,7 +1612,7 @@
           <input class="login-input" id="forgotEmail" type="email" placeholder="Email address">
           <button class="btn w-full" style="background:var(--blue);justify-content:center;font-size:15px;" onclick="handleForgotPassword()">Send Reset Email</button>
         </div>
-        <button onclick="switchLoginTab('signin')" style="background:none;border:none;cursor:pointer;color:#7c3aed;font-size:13px;font-weight:600;margin-top:12px;padding:0;width:100%;text-align:center;">← Back to Sign In</button>
+        <button onclick="switchLoginTab('signin')" style="background:none;border:none;cursor:pointer;color:#FF6B00;font-size:13px;font-weight:700;margin-top:12px;padding:0;width:100%;text-align:center;">← Back to Sign In</button>
       </div>
 
     </div>
@@ -1974,17 +1974,13 @@
     const aiHeaderDesc = document.getElementById('aiHeaderDesc');
     const qInput = document.getElementById('chatInput') || document.getElementById('questionInput');
     if (mode === 'answer') {
-      if (aBtn) { aBtn.className = 'ai-mode-tab active-orange'; }
-      if (lBtn) { lBtn.className = 'ai-mode-tab'; }
-      if (askBtn) { askBtn.className = 'ask-btn ask-btn-orange'; }
-      if (askBtnText) askBtnText.textContent = 'Get Answer';
+      if (aBtn) { aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;'; }
+      if (lBtn) { lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;'; }
       if (aiHeaderDesc) aiHeaderDesc.textContent = 'Ready to help you ace it';
       if (qInput) qInput.placeholder = 'Ask Knox anything — type or paste your question...';
     } else {
-      if (lBtn) { lBtn.className = 'ai-mode-tab active-blue'; }
-      if (aBtn) { aBtn.className = 'ai-mode-tab'; }
-      if (askBtn) { askBtn.className = 'ask-btn ask-btn-blue'; }
-      if (askBtnText) askBtnText.textContent = 'Ask Knox';
+      if (lBtn) { lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#1CB0F6;color:white;box-shadow:0 3px 0 #0A85C2;transition:all 0.15s;line-height:1;'; }
+      if (aBtn) { aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;'; }
       if (aiHeaderDesc) aiHeaderDesc.textContent = 'Knox will guide you step by step';
       if (qInput) qInput.placeholder = 'What would you like to learn? Knox will guide you step by step...';
     }
