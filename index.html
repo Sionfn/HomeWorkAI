@@ -492,9 +492,10 @@
 
     /* Response cards */
     .ai-response-box {
-      background:white; border-radius:20px;
-      border:2px solid var(--border);
-      overflow:hidden; font-family:'Nunito',sans-serif;
+      background:white;
+      font-family:'Nunito',sans-serif;
+      overflow:hidden;
+      border-radius:6px 18px 18px 18px;
     }
     .resp-header {
       display:flex; align-items:center; gap:12px;
@@ -519,8 +520,8 @@
 
     .resp-final {
       background:var(--green-light); border-left:5px solid var(--green);
-      padding:16px 20px; margin:16px;
-      border-radius:12px;
+      padding:14px 18px; margin:10px 14px;
+      border-radius:10px;
     }
     .resp-final-label {
       font-size:11px; font-weight:900; letter-spacing:0.08em;
@@ -2429,8 +2430,8 @@
       const row = document.createElement('div');
       row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
       row.innerHTML = `
-        <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
-        <div style="background:white;border:2px solid #E5E7EB;border-radius:6px 18px 18px 18px;max-width:88%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05);">${html}</div>`;
+        <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;margin-top:4px;"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
+        <div style="max-width:88%;border:2px solid #E5E7EB;border-radius:6px 18px 18px 18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);background:white;">${html}</div>`;
       if (old) old.replaceWith(row);
       else chatThread.appendChild(row);
       scrollBottom();
@@ -2489,26 +2490,25 @@
 
       // Handle any other non-OK status
       if (!res.ok) {
-        replaceThinkingWithResponse(`<div style="padding:16px 18px;font-size:14px;font-weight:700;color:var(--red);">Knox ran into a server error (${res.status}). Please try again in a moment.</div>`, true);
+        replaceThinkingWithResponse(`<div style="padding:14px 16px;font-size:14px;font-weight:700;color:var(--red);">Knox ran into a server error (${res.status}). Please try again in a moment.</div>`, true);
         resetBtn(); return;
       }
 
       let data;
       try { data = await res.json(); }
       catch(jsonErr) {
-        replaceThinkingWithResponse(`<div style="padding:16px 18px;font-size:14px;font-weight:700;color:var(--red);">Knox couldn't read the response. Please try again.</div>`, true);
+        replaceThinkingWithResponse(`<div style="padding:14px 16px;font-size:14px;font-weight:700;color:var(--red);">Knox couldn't read the response. Please try again.</div>`, true);
         resetBtn(); return;
       }
       const serverPlan = data.plan || userPlan;
 
       let responseHtml;
       if (data.isCasual) {
-        // Plain text chat bubble — no sections, just Knox talking
         const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
-        responseHtml = `<div style="padding:14px 18px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
+        responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
       } else if (data.isAcknowledgement) {
         const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
-        responseHtml = `<div style="padding:14px 18px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
+        responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
       } else {
         responseHtml = renderResponse(
           data.answer || data.error || 'No response received.',
@@ -2554,7 +2554,7 @@
       updateConversationIndicator();
 
     } catch (err) {
-      replaceThinkingWithResponse(`<div style="padding:16px 18px;font-size:14px;font-weight:700;color:#DC2626;line-height:1.6;">Something went wrong — Knox could not reach the server.<br><span style="font-size:12px;font-weight:600;color:#9CA3AF;margin-top:4px;display:block;">Open browser console (F12) and check for the error details.</span></div>`, true);
+      replaceThinkingWithResponse(`<div style="padding:14px 16px;font-size:14px;font-weight:700;color:#DC2626;line-height:1.6;">Something went wrong — Knox could not reach the server.<br><span style="font-size:12px;font-weight:600;color:#9CA3AF;margin-top:4px;display:block;">Open browser console (F12) and check for the error details.</span></div>`, true);
       console.error(err);
     } finally {
       resetBtn();
@@ -2719,26 +2719,24 @@
     if (!finalAnswerText && !stepsHtml && paragraphs.length === 0) {
       // Strip any accidental headers and render as clean plain text
       const cleanText = answer.replace(/^(Final Answer:|Explanation:|Tip:|Insight:|Common Mistake:|Key Points:|Resources:)\s*/gim, '').replace(/\n+/g, ' ').trim();
-      return `<div class="ai-response-box"><div class="resp-header"><div class="resp-brain"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div><div class="resp-title">Knox Knows</div><div class="resp-plan-tag ${plan === 'pro_plus' ? 'tag-pro-plus' : plan === 'pro' ? 'tag-pro' : 'tag-free'}">${plan === 'pro_plus' ? 'Pro+' : plan === 'pro' ? 'Pro' : 'Free'}</div></div><div style="padding:16px 18px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${cleanText}</div></div>`;
+      const planTagClass2 = plan === 'pro_plus' ? 'tag-pro-plus' : plan === 'pro' ? 'tag-pro' : 'tag-free';
+      const planTag2 = plan === 'pro_plus' ? 'Pro+' : plan === 'pro' ? 'Pro' : 'Free';
+      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div><div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${cleanText}</div>`;
     }
     const planTag      = plan === "pro_plus" ? "Pro+" : plan === "pro" ? "Pro" : "Free";
     const planTagClass = plan === "pro_plus" ? "tag-pro-plus" : plan === "pro" ? "tag-pro" : "tag-free";
-    let html = `<div class="ai-response-box">`;
+    let html = ``;
 
-    // ── Header bar ──────────────────────────────────────────────────────────
-    html += `<div class="resp-header">
-      <div class="resp-brain"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>
-      <div class="resp-title">Knox Knows</div>
-      <div class="resp-plan-tag ${planTagClass}">${planTag}</div>
-    </div>`;
+    // ── Thin plan tag bar at top ──────────────────────────────────────────
+    html += `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass}">${planTag}</span></div>`;
 
     // ── Answer ───────────────────────────────────────────────────────────────
     if (finalAnswerText) {
-      html += `<div style="margin:16px 16px 0;">
+      html += `<div style="margin:10px 14px 0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <div style="background:var(--green);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--green-dark);">Answer</div>
         </div>
-        <div style="background:var(--green-light);border-left:5px solid var(--green);border-radius:0 14px 14px 0;padding:16px 18px;">
+        <div style="background:var(--green-light);border-left:5px solid var(--green);border-radius:0 14px 14px 0;padding:14px 16px;">
           <div style="font-size:17px;font-weight:800;color:#1a1a1a;line-height:1.5;">${formatInline(finalAnswerText, plan)}</div>
         </div>
       </div>`;
@@ -2746,7 +2744,7 @@
 
     // ── Step-by-Step ─────────────────────────────────────────────────────────
     if (stepsHtml) {
-      html += `<div style="margin:16px 16px 0;">
+      html += `<div style="margin:10px 14px 0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
           <div style="background:var(--orange);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Step-by-Step</div>
         </div>
@@ -2757,11 +2755,11 @@
     // ── Explanation ───────────────────────────────────────────────────────────
     const explanationParas = paragraphs.filter(p => p.type === "explanation" || p.type === "other");
     if (explanationParas.length > 0) {
-      html += `<div style="margin:16px 16px 0;">
+      html += `<div style="margin:10px 14px 0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <div style="background:var(--blue);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--blue-dark);">Explanation</div>
         </div>
-        <div style="background:var(--blue-light);border-left:5px solid var(--blue);border-radius:0 14px 14px 0;padding:16px 18px;">`;
+        <div style="background:var(--blue-light);border-left:5px solid var(--blue);border-radius:0 14px 14px 0;padding:14px 16px;">`;
       explanationParas.forEach(p => {
         if (p.text) html += `<div style="font-size:15px;font-weight:500;color:#333;line-height:1.75;margin-bottom:10px;">${formatInline(p.text, plan)}</div>`;
       });
@@ -2770,7 +2768,7 @@
 
     // ── Key Points ────────────────────────────────────────────────────────────
     if (keyPointsBullets.length > 0) {
-      html += `<div style="margin:16px 16px 0;">
+      html += `<div style="margin:10px 14px 0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
           <div style="background:#8B5CF6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #6D28D9;">Key Points</div>
         </div>
@@ -2786,7 +2784,7 @@
 
     // ── Insight ───────────────────────────────────────────────────────────────
     if (insightText.trim()) {
-      html += `<div style="margin:16px 16px 0;">
+      html += `<div style="margin:10px 14px 0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div>
         </div>
@@ -2798,7 +2796,7 @@
 
     // ── Tip ───────────────────────────────────────────────────────────────────
     if (tipText.trim()) {
-      html += `<div style="margin:16px 16px 0;">
+      html += `<div style="margin:10px 14px 0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div>
         </div>
@@ -2810,7 +2808,7 @@
 
     // ── Common Mistake ────────────────────────────────────────────────────────
     if (commonMistakeText.trim()) {
-      html += `<div style="margin:16px 16px 0;">
+      html += `<div style="margin:10px 14px 0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div>
         </div>
@@ -2828,7 +2826,7 @@
         const isYT = r.type === "youtube";
         return `<a href="${r.link}" target="_blank" rel="noopener" class="resp-resource-link ${isYT ? 'yt' : 'ql'}">${isYT ? ytIcon : qlIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:800;color:${isYT ? '#ef4444' : '#3b82f6'};white-space:nowrap;">${isYT ? 'YouTube ↗' : 'Quizlet ↗'}</span></a>`;
       }).join("");
-      html += `<div style="margin:16px 16px 0;">
+      html += `<div style="margin:10px 14px 0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
           <div style="background:#6B7280;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #374151;">Resources</div>
         </div>
@@ -2838,7 +2836,7 @@
 
     // ── Visual Content ────────────────────────────────────────────────────────
     if (plan === 'pro_plus' && (embeddedVideo || imageSearchQuery)) {
-      let visualHtml = `<div style="margin:16px 16px 0;">
+      let visualHtml = `<div style="margin:10px 14px 0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
           <div style="background:var(--blue-dark);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #075985;">Visual Content</div>
         </div>`;
@@ -2852,7 +2850,7 @@
       html += visualHtml;
     }
 
-    html += `<div style="height:16px;"></div></div>`;
+    html += `<div style="height:12px;"></div>`;
     return html;
   }
 
