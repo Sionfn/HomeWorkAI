@@ -2592,11 +2592,44 @@
 
     function formatInline(text, p) {
       let out = stripMarkdownLinks(text);
-      if (p === "pro" || p === "pro_plus") out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
       if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
-      // Strip any remaining orphaned ** or __ that didn't form valid pairs
       out = out.replace(/\*\*/g, "").replace(/(?<![a-zA-Z])__(?![a-zA-Z])/g, "");
       return out;
+    }
+
+    // Render a free-form Knox response beautifully — detects numbered steps, paragraphs, bold
+    function renderFreeformText(text, plan) {
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+      let html = '';
+      let stepBuffer = [];
+
+      function flushSteps() {
+        if (stepBuffer.length === 0) return;
+        html += `<div style="display:flex;flex-direction:column;gap:8px;margin:10px 14px;">`;
+        stepBuffer.forEach(({num, text: t}) => {
+          html += `<div style="display:flex;align-items:flex-start;gap:10px;background:white;border:2px solid #FFE0C2;border-radius:12px;padding:12px 14px;">
+            <div style="min-width:26px;height:26px;border-radius:8px;background:#FF6B00;color:white;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${num}</div>
+            <div style="font-size:14px;font-weight:500;color:#3C3C3C;line-height:1.6;padding-top:3px;">${formatInline(t, plan)}</div>
+          </div>`;
+        });
+        html += `</div>`;
+        stepBuffer = [];
+      }
+
+      for (const line of lines) {
+        const stepMatch = line.match(/^(\d+)\.\s+(.+)/);
+        if (stepMatch) {
+          stepBuffer.push({ num: stepMatch[1], text: stepMatch[2] });
+        } else {
+          flushSteps();
+          if (line.length > 0) {
+            html += `<div style="padding:6px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.7;">${formatInline(line, plan)}</div>`;
+          }
+        }
+      }
+      flushSteps();
+      return html;
     }
 
     // Pre-pass: ensure Resources: is always on its own line
@@ -2713,21 +2746,19 @@
     }
     flushPara(mode);
 
-    // ── Fallback: nothing parsed at all → plain text ─────────────────────────
+    // ── Fallback: nothing parsed at all → styled freeform ─────────────────────
     if (!finalAnswerText && !stepsHtml && paragraphs.length === 0 && !tipText && !insightText && !commonMistakeText && keyPointsBullets.length === 0) {
-      const cleanText = answer.replace(/^(Final Answer:|Explanation:|Tip:|Insight:|Common Mistake:|Key Points:|Resources:)\s*/gim, '').replace(/\n+/g, ' ').trim();
       const planTagClass2 = plan === 'pro_plus' ? 'tag-pro-plus' : plan === 'pro' ? 'tag-pro' : 'tag-free';
       const planTag2 = plan === 'pro_plus' ? 'Pro+' : plan === 'pro' ? 'Pro' : 'Free';
-      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div><div style="padding:12px 16px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${cleanText}</div>`;
+      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(answer, plan)}<div style="height:10px;"></div>`;
     }
 
-    // ── If no Final Answer but has paragraphs → show as plain Knox message ───
-    // (Knox asked a clarifying question or responded conversationally but in structured format)
+    // ── If no Final Answer but has paragraphs → styled Knox message ───────────
     if (!finalAnswerText && paragraphs.length > 0 && !stepsHtml) {
-      const allText = paragraphs.map(p => p.text).join('<br><br>');
+      const allText = paragraphs.map(p => p.text).join('\n');
       const planTagClass2 = plan === 'pro_plus' ? 'tag-pro-plus' : plan === 'pro' ? 'tag-pro' : 'tag-free';
       const planTag2 = plan === 'pro_plus' ? 'Pro+' : plan === 'pro' ? 'Pro' : 'Free';
-      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div><div style="padding:12px 16px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${formatInline(allText, plan)}</div>`;
+      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(allText, plan)}<div style="height:10px;"></div>`;
     }
     const planTag      = plan === "pro_plus" ? "Pro+" : plan === "pro" ? "Pro" : "Free";
     const planTagClass = plan === "pro_plus" ? "tag-pro-plus" : plan === "pro" ? "tag-pro" : "tag-free";
