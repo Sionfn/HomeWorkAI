@@ -2432,7 +2432,11 @@
         <div style="max-width:88%;border:2px solid #E5E7EB;border-radius:6px 18px 18px 18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);background:white;">${html}</div>`;
       if (old) old.replaceWith(row);
       else chatThread.appendChild(row);
-      scrollBottom();
+      // Scroll the chat thread so the TOP of Knox's response is visible
+      setTimeout(() => {
+        const rowTop = row.offsetTop - chatThread.offsetTop - 12;
+        chatThread.scrollTo({ top: rowTop, behavior: 'smooth' });
+      }, 80);
       return row;
     }
 
@@ -2604,17 +2608,14 @@
 
       // Map ALL known AI-generated header variants to canonical section names
       const mappings = [
-        // Step-by-step variants
+        // Final Answer variants — always capture these
+        [/Answer:/gi,                  'Final Answer:'],
+        // Step-by-step variants — safe ones only
         [/Step-by-Step Process:/gi,    'Step-by-step:'],
         [/Step by Step:/gi,            'Step-by-step:'],
-        [/Steps:/gi,                   'Step-by-step:'],
-        [/Solution Steps:/gi,          'Step-by-step:'],
-        [/Method:/gi,                  'Step-by-step:'],
-        [/Work:/gi,                    'Step-by-step:'],
-        [/Solution:/gi,                'Step-by-step:'],
-        [/Walkthrough:/gi,             'Step-by-step:'],
+        // Remove dangerous mappings: Solution:, Method:, Work:, Steps:
+        // These often appear as part of the answer text itself
         // Explanation variants
-        [/Explanation:/gi,             'Explanation:'],
         [/Detailed Explanation:/gi,    'Explanation:'],
         [/How it Works:/gi,            'Explanation:'],
         // Insight variants
@@ -2628,7 +2629,6 @@
         // Key Points variants
         [/Key Point:/gi,               'Key Points:'],
         [/Key Takeaways:/gi,           'Key Points:'],
-        [/Summary:/gi,                 'Key Points:'],
         [/Takeaway:/gi,                'Key Points:'],
       ];
 
