@@ -1247,7 +1247,7 @@
       </div>
 
       <!-- PRO -->
-      <div class="reveal delay-2" style="background:white;border-radius:24px;border:3px solid var(--green);box-shadow:0 6px 0 var(--green-dark);padding:28px;padding-top:42px;text-align:left;position:relative;overflow:hidden;">
+      <div class="reveal delay-2" style="background:white;border-radius:24px;border:3px solid var(--green);box-shadow:0 6px 0 var(--green-dark);padding:28px;padding-top:56px;text-align:left;position:relative;overflow:hidden;">
         <div style="position:absolute;top:0;right:0;width:80px;height:80px;background:var(--green-light);border-radius:0 24px 0 80%;opacity:0.8;"></div>
         <div class="popular-badge">MOST POPULAR</div>
         <div style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:0.04em;background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);margin-bottom:14px;">⚡ PRO</div>
@@ -1386,7 +1386,7 @@
   <div class="login-panel">
     <div class="login-header">
       <div>
-        <div style="font-weight:800;font-size:18px;letter-spacing:-0.03em;">Welcome to HomeWorkAI</div>
+        <div style="font-weight:800;font-size:18px;letter-spacing:-0.03em;">Welcome to Knox Knows 🦊</div>
         <div style="font-size:13px;color:#4b5563;margin-top:2px;">Sign in or create an account</div>
       </div>
       <button onclick="closeLoginModal()" style="background:none;border:2px solid black;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:800;font-size:16px;">✕</button>
@@ -1435,7 +1435,7 @@
           <input class="login-input" id="signupPassword" type="password" placeholder="Password (min 6 characters)" autocomplete="new-password">
           <button class="btn w-full" style="background:var(--green);justify-content:center;font-size:15px;" onclick="handleEmailSignUp()">Create Account</button>
         </div>
-        <p style="font-size:12px;color:#9ca3af;text-align:center;margin-top:12px;">By creating an account you agree to our <a href="/terms.html" style="color:#7c3aed;">Terms of Service</a>. You must be 13 or older to use HomeWorkAI.</p>
+        <p style="font-size:12px;color:#9ca3af;text-align:center;margin-top:12px;">By creating an account you agree to our <a href="/terms.html" style="color:#7c3aed;">Terms of Service</a>. you must be 13 or older to use Knox Knows.</p>
       </div>
 
       <!-- FORGOT PASSWORD FORM -->
@@ -2128,8 +2128,8 @@
     const askBtn     = document.getElementById('askBtn');
     const box        = document.getElementById('answerBox');
     const spinnerSVG = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
-    const thinkingBox = (label) => `<div style="display:flex;align-items:center;gap:12px;padding:20px;"><div style="width:40px;height:40px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🧠</div><div><div style="font-weight:800;font-size:15px;letter-spacing:-0.01em;">HomeWorkAI</div><div style="font-size:13px;color:#6b7280;margin-top:2px;">${label}<span class="thinking-dots"></span></div></div></div>`;
-    const errorBox   = (msg) => `<div class="ai-response-box"><div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div></div><div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px 18px;color:#dc2626;font-size:14px;line-height:1.6;">${msg}</div></div>`;
+    const thinkingBox = (label) => `<div style="display:flex;align-items:center;gap:12px;padding:20px;"><div style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:#FED7AA;flex-shrink:0;"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;"></div><div><div style="font-weight:800;font-size:15px;letter-spacing:-0.01em;">Knox Knows</div><div style="font-size:13px;color:#6b7280;margin-top:2px;">${label}<span class="thinking-dots"></span></div></div></div>`;
+    const errorBox   = (msg) => `<div class="ai-response-box"><div class="resp-header"><div class="resp-brain"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div><div class="resp-title">Knox Knows</div></div><div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px 18px;color:#dc2626;font-size:14px;line-height:1.6;">${msg}</div></div>`;
     const resetBtn   = () => {
       askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Get Answer';
       askBtn.disabled  = false;
@@ -2236,8 +2236,8 @@
     const clean = (message || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
     return `<div class="ai-response-box">
       <div class="resp-header">
-        <div class="resp-brain">🧠</div>
-        <div class="resp-title">HomeWorkAI</div>
+        <div class="resp-brain"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>
+        <div class="resp-title">Knox Knows</div>
         <div class="resp-plan-tag tag-pro-plus">⭐ Pro+</div>
       </div>
       <div style="background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:14px 18px;color:#14532d;font-size:15px;line-height:1.6;font-weight:600;">
@@ -2385,7 +2385,7 @@
     const planTag      = plan === "pro_plus" ? "⭐ Pro+" : plan === "pro" ? "⚡ Pro" : "Free";
     const planTagClass = plan === "pro_plus" ? "tag-pro-plus" : plan === "pro" ? "tag-pro" : "tag-free";
     let html = `<div class="ai-response-box ${plan === 'pro_plus' ? 'resp-pro-plus' : ''}">`;
-    html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
+    html += `<div class="resp-header"><div class="resp-brain"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div><div class="resp-title">Knox Knows</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
 
     // Final Answer
     if (finalAnswerText) {
@@ -2815,7 +2815,7 @@
     const planTagClass = item.plan === "pro_plus" ? "tag-pro-plus" : item.plan === "pro" ? "tag-pro" : "tag-free";
     let html = '<div class="ai-response-box ' + (item.plan === "pro_plus" ? "resp-pro-plus" : "") + '">';
     html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 12px;background:#f3f4f6;border-radius:8px;font-size:12px;font-weight:700;color:#6b7280;">\uD83D\uDD50 From history &nbsp;&middot;&nbsp; ' + item.time + '</div>';
-    html += '<div class="resp-header"><div class="resp-brain">\uD83E\uDDE0</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ' + planTagClass + '">' + planTag + '</div></div>';
+    html += '<div class="resp-header"><div class="resp-brain">\uD83E\uDDE0</div><div class="resp-title">Knox Knows</div><div class="resp-plan-tag ' + planTagClass + '">' + planTag + '</div></div>';
     if (finalAnswerText) html += '<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">' + fi(finalAnswerText, item.plan) + '</div></div>';
     if (stepsHtml) html += '<div class="resp-steps-label">Step-by-step</div><div class="resp-steps-wrap">' + stepsHtml + '</div>';
     for (const p of paragraphs) {
@@ -2993,40 +2993,55 @@
 </script>
 
 <!-- ===================== SETTINGS MODAL ===================== -->
+<!-- ===================== SETTINGS MODAL ===================== -->
 <div class="settings-modal" id="settingsModal" onclick="if(event.target===this)closeSettings()">
-  <div class="settings-panel">
-    <div class="settings-header">
-      <div>
-        <div style="font-weight:800;font-size:18px;letter-spacing:-0.03em;">Account &amp; Plan</div>
-        <div style="font-size:13px;color:#4b5563;margin-top:2px;">Manage your subscription</div>
+  <div class="settings-panel" style="border-radius:24px;padding:0;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+
+    <!-- Header with Knox logo -->
+    <div style="background:var(--orange);padding:24px 28px;display:flex;align-items:center;gap:14px;">
+      <div style="width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,0.5);overflow:hidden;background:#FED7AA;flex-shrink:0;">
+        <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
       </div>
-      <button onclick="closeSettings()" style="background:none;border:2px solid black;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:800;font-size:16px;">✕</button>
+      <div style="flex:1;">
+        <div style="font-weight:900;font-size:18px;color:white;">Account &amp; Plan</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:600;margin-top:2px;">Manage your subscription</div>
+      </div>
+      <button onclick="closeSettings()" style="background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:900;font-size:16px;color:white;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">✕</button>
     </div>
-    <div class="settings-body">
-      <div class="settings-row">
+
+    <div style="padding:24px 28px;display:flex;flex-direction:column;gap:14px;">
+
+      <!-- Current Plan row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:#f9fafb;border-radius:16px;padding:16px 20px;border:2px solid #f3f4f6;">
         <div>
-          <div style="font-weight:800;font-size:15px;">Current Plan</div>
-          <div class="settings-label">Your active subscription</div>
+          <div style="font-weight:800;font-size:15px;color:#1f2937;">Current Plan</div>
+          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Your active subscription</div>
         </div>
         <div id="settingsPlanBadge" style="font-weight:800;font-size:14px;"></div>
       </div>
-      <div class="settings-row" id="settingsRenewalRow" style="display:none;">
+
+      <!-- Renewal Date row -->
+      <div id="settingsRenewalRow" style="display:none;align-items:center;justify-content:space-between;background:#f9fafb;border-radius:16px;padding:16px 20px;border:2px solid #f3f4f6;">
         <div>
-          <div style="font-weight:800;font-size:15px;">Renewal Date</div>
-          <div class="settings-label">Next billing cycle</div>
+          <div style="font-weight:800;font-size:15px;color:#1f2937;">Renewal Date</div>
+          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Next billing cycle</div>
         </div>
         <div style="font-weight:700;font-size:14px;color:#374151;" id="settingsRenewalDate">—</div>
       </div>
-      <div class="settings-row">
+
+      <!-- Questions Today row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:#f9fafb;border-radius:16px;padding:16px 20px;border:2px solid #f3f4f6;">
         <div>
-          <div style="font-weight:800;font-size:15px;">Questions Today</div>
-          <div class="settings-label">Resets at midnight</div>
+          <div style="font-weight:800;font-size:15px;color:#1f2937;">Questions Today</div>
+          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Resets at midnight</div>
         </div>
-        <div id="settingsUsage" style="font-weight:700;font-size:14px;color:#374151;">—</div>
+        <div id="settingsUsage" style="font-weight:800;font-size:14px;color:#374151;">—</div>
       </div>
-      <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;">
-        <button id="settingsUpgradeBtn" onclick="closeSettings();scrollToPricing();" class="btn w-full" style="background:var(--green);justify-content:center;">⚡ Upgrade Plan</button>
-        <button id="settingsCancelBtn" onclick="handleCancelSubscription()" class="btn w-full" style="background:#fef2f2;color:#dc2626;justify-content:center;display:none;">Cancel Subscription</button>
+
+      <!-- Buttons -->
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+        <button id="settingsUpgradeBtn" onclick="closeSettings();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:var(--orange);color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'">⚡ Upgrade Plan</button>
+        <button id="settingsCancelBtn" onclick="handleCancelSubscription()" style="display:none;width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:800;font-family:inherit;border:2px solid #fca5a5;background:#fef2f2;color:#dc2626;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">Cancel Subscription</button>
       </div>
     </div>
   </div>
