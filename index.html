@@ -546,15 +546,16 @@
       display:flex; align-items:flex-start; gap:12px;
       background:white; border:2px solid var(--orange-light);
       border-radius:14px; padding:14px 16px;
+      box-shadow:0 2px 0 #FFD0A0;
     }
     .resp-step-num {
-      min-width:28px; height:28px; border-radius:8px;
+      min-width:30px; height:30px; border-radius:10px;
       background:var(--orange); color:white;
-      font-weight:900; font-size:13px;
+      font-weight:900; font-size:14px;
       display:flex; align-items:center; justify-content:center;
-      flex-shrink:0; box-shadow:0 2px 0 #CC5500;
+      flex-shrink:0; box-shadow:0 3px 0 #CC5500;
     }
-    .resp-step-text { font-size:14px; font-weight:600; color:var(--text); line-height:1.55; padding-top:3px; }
+    .resp-step-text { font-size:14px; font-weight:600; color:var(--text); line-height:1.6; padding-top:4px; }
 
     .resp-tip {
       display:flex; align-items:flex-start; gap:12px;
@@ -907,7 +908,7 @@
   </a>
 
   <div class="header-nav">
-    <a href="#pricing" class="pro-badge" id="proBadge" style="text-decoration:none;">⚡ Try Pro</a>
+    <a href="#pricing" class="pro-badge" id="proBadge" style="text-decoration:none;">Try Pro</a>
 
     <div class="account-dropdown-wrapper" id="accountDropdownWrapper" style="display:none;">
       <button id="accountBtn" onclick="toggleDropdown(event)" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.2);color:white;border:2px solid rgba(255,255,255,0.4);border-radius:12px;padding:9px 14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
@@ -970,8 +971,8 @@
     </p>
 
     <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:36px;">
-      <button class="btn-orange" style="font-size:17px;padding:17px 32px;" onclick="scrollToAI();setMode('answer')">⚡ Get the Answer</button>
-      <button class="btn-blue" style="font-size:17px;padding:17px 32px;" onclick="scrollToAI();setMode('learn')">🦊 Learn with Knox</button>
+      <button class="btn-orange" style="font-size:17px;padding:17px 32px;" onclick="scrollToAI();setMode('answer')">Get the Answer</button>
+      <button class="btn-blue" style="font-size:17px;padding:17px 32px;" onclick="scrollToAI();setMode('learn')">Learn with Knox</button>
     </div>
 
     <p style="font-size:13px;font-weight:800;color:var(--green-dark);margin-top:16px;">✔ Free account — 5 questions every day, no credit card needed</p>
@@ -1005,7 +1006,7 @@
       <!-- Get the Answer -->
       <div class="reveal delay-1" onclick="scrollToAI();setMode('answer')" style="background:white;border-radius:24px;border:3px solid var(--orange);box-shadow:0 6px 0 #CC5500;padding:40px 32px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;text-align:left;" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 12px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 0 #CC5500'">
         <img src="./knox-laptop.png" alt="Knox with laptop" style="width:100px;height:auto;float:right;margin:-10px -10px 10px 16px;" onerror="this.style.display='none'">
-        <h3 style="font-size:24px;font-weight:900;color:var(--text);margin-bottom:10px;">⚡ Get the Answer</h3>
+        <h3 style="font-size:24px;font-weight:900;color:var(--text);margin-bottom:10px;">Get the Answer</h3>
         <p style="font-size:15px;font-weight:600;color:#666;line-height:1.6;">Stuck on a problem? Knox gives you a clear, instant answer with full explanations. Fast and accurate.</p>
         <div style="margin-top:24px;display:inline-flex;align-items:center;gap:6px;background:var(--orange);color:white;border-radius:12px;padding:11px 20px;font-size:14px;font-weight:800;box-shadow:0 3px 0 #CC5500;">
           Try it now →
@@ -1015,7 +1016,7 @@
       <!-- Learn with Knox -->
       <div class="reveal delay-2" onclick="scrollToAI();setMode('learn')" style="background:white;border-radius:24px;border:3px solid var(--blue);box-shadow:0 6px 0 #0A85C2;padding:40px 32px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;text-align:left;" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 12px 0 #0A85C2'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 0 #0A85C2'">
         <img src="./knox-book.png" alt="Knox reading book" style="width:100px;height:auto;float:right;margin:-10px -10px 10px 16px;" onerror="this.style.display='none'">
-        <h3 style="font-size:24px;font-weight:900;color:var(--text);margin-bottom:10px;">🦊 Learn with Knox</h3>
+        <h3 style="font-size:24px;font-weight:900;color:var(--text);margin-bottom:10px;">Learn with Knox</h3>
         <p style="font-size:15px;font-weight:600;color:#666;line-height:1.6;">Knox guides you step-by-step like a real tutor — asking questions, giving hints, helping you actually understand.</p>
         <div style="margin-top:24px;display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:white;border-radius:12px;padding:11px 20px;font-size:14px;font-weight:800;box-shadow:0 3px 0 #0A85C2;">
           Learn with Knox →
@@ -1121,15 +1122,15 @@
         </div>
         <div class="ai-box-header-text">
           <h3>Knox Knows</h3>
-          <p id="aiHeaderDesc">Ready to help you ace it 🦊</p>
+          <p id="aiHeaderDesc">Ready to help you ace it</p>
         </div>
       </div>
 
       <div class="ai-box-body">
         <!-- Mode tabs -->
         <div class="ai-mode-tabs">
-          <button id="modeAnswerBtn" class="ai-mode-tab active-orange" onclick="setMode('answer')">⚡ Get the Answer</button>
-          <button id="modeLearnBtn" class="ai-mode-tab" onclick="setMode('learn')">🦊 Learn with Knox</button>
+          <button id="modeAnswerBtn" class="ai-mode-tab active-orange" onclick="setMode('answer')">Get the Answer</button>
+          <button id="modeLearnBtn" class="ai-mode-tab" onclick="setMode('learn')">Learn with Knox</button>
         </div>
 
         <!-- Question area -->
@@ -1317,7 +1318,7 @@
     <h2 style="font-size:clamp(28px,5vw,52px);font-weight:900;color:white;letter-spacing:-0.02em;">Knox is ready when you are.</h2>
     <p style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.85);margin:12px auto 0;max-width:440px;">Start free, no credit card needed. Knox knows the answer.</p>
     <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:32px;">
-      <button class="btn-white" style="font-size:17px;padding:17px 32px;" onclick="scrollToAI()">Start for Free 🦊</button>
+      <button class="btn-white" style="font-size:17px;padding:17px 32px;" onclick="scrollToAI()">Start for Free</button>
       <button onclick="scrollToPricing()" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,0.2);color:white;border:2px solid rgba(255,255,255,0.5);border-radius:16px;padding:15px 28px;font-size:17px;font-weight:800;cursor:pointer;transition:all 0.15s;font-family:inherit;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">View Plans →</button>
     </div>
   </div>
@@ -1774,14 +1775,14 @@
       if (lBtn) { lBtn.className = 'ai-mode-tab'; }
       if (askBtn) { askBtn.className = 'ask-btn ask-btn-orange'; }
       if (askBtnText) askBtnText.textContent = 'Get Answer';
-      if (aiHeaderDesc) aiHeaderDesc.textContent = 'Ready to help you ace it 🦊';
+      if (aiHeaderDesc) aiHeaderDesc.textContent = 'Ready to help you ace it';
       if (qInput) qInput.placeholder = 'Type your homework question here... (or upload an image)';
     } else {
       if (lBtn) { lBtn.className = 'ai-mode-tab active-blue'; }
       if (aBtn) { aBtn.className = 'ai-mode-tab'; }
       if (askBtn) { askBtn.className = 'ask-btn ask-btn-blue'; }
       if (askBtnText) askBtnText.textContent = 'Ask Knox';
-      if (aiHeaderDesc) aiHeaderDesc.textContent = 'Knox will guide you step by step 🦊';
+      if (aiHeaderDesc) aiHeaderDesc.textContent = 'Knox will guide you step by step';
       if (qInput) qInput.placeholder = 'What would you like to understand today? Knox will guide you...';
     }
   }
@@ -2384,84 +2385,138 @@
     }
     flushPara(mode);
 
-    const planTag      = plan === "pro_plus" ? "⭐ Pro+" : plan === "pro" ? "⚡ Pro" : "Free";
+    const planTag      = plan === "pro_plus" ? "Pro+" : plan === "pro" ? "Pro" : "Free";
     const planTagClass = plan === "pro_plus" ? "tag-pro-plus" : plan === "pro" ? "tag-pro" : "tag-free";
-    let html = `<div class="ai-response-box ${plan === 'pro_plus' ? 'resp-pro-plus' : ''}">`;
-    html += `<div class="resp-header"><div class="resp-brain"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div><div class="resp-title">Knox Knows</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
+    let html = `<div class="ai-response-box">`;
 
-    // Final Answer
+    // ── Header bar ──────────────────────────────────────────────────────────
+    html += `<div class="resp-header">
+      <div class="resp-brain"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>
+      <div class="resp-title">Knox Knows</div>
+      <div class="resp-plan-tag ${planTagClass}">${planTag}</div>
+    </div>`;
+
+    // ── Answer ───────────────────────────────────────────────────────────────
     if (finalAnswerText) {
-      html += `<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">${formatInline(finalAnswerText, plan)}</div></div>`;
+      html += `<div style="margin:16px 16px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:var(--green);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--green-dark);">Answer</div>
+        </div>
+        <div style="background:var(--green-light);border-left:5px solid var(--green);border-radius:0 14px 14px 0;padding:16px 18px;">
+          <div style="font-size:17px;font-weight:800;color:#1a1a1a;line-height:1.5;">${formatInline(finalAnswerText, plan)}</div>
+        </div>
+      </div>`;
     }
 
-    // Steps
+    // ── Step-by-Step ─────────────────────────────────────────────────────────
     if (stepsHtml) {
-      html += `<div class="resp-steps-label">Step-by-Step</div><div class="resp-steps-wrap">${stepsHtml}</div>`;
+      html += `<div style="margin:16px 16px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="background:var(--orange);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Step-by-Step</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">${stepsHtml}</div>
+      </div>`;
     }
 
-    // Explanation and other paragraphs — with label
+    // ── Explanation ───────────────────────────────────────────────────────────
     const explanationParas = paragraphs.filter(p => p.type === "explanation" || p.type === "other");
     if (explanationParas.length > 0) {
-      html += `<div class="resp-section-label">Explanation</div>`;
+      html += `<div style="margin:16px 16px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:var(--blue);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--blue-dark);">Explanation</div>
+        </div>
+        <div style="background:var(--blue-light);border-left:5px solid var(--blue);border-radius:0 14px 14px 0;padding:16px 18px;">`;
       explanationParas.forEach(p => {
-        if (p.text) html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
+        if (p.text) html += `<div style="font-size:15px;font-weight:500;color:#333;line-height:1.75;margin-bottom:10px;">${formatInline(p.text, plan)}</div>`;
       });
+      html += `</div></div>`;
     }
 
-    // Bullets (non-explanation)
-    paragraphs.filter(p => p.type === "bullet").forEach(p => {
-      html += `<div class="resp-bullet">• ${formatInline(p.text, plan)}</div>`;
-    });
-
-    // Key Points
+    // ── Key Points ────────────────────────────────────────────────────────────
     if (keyPointsBullets.length > 0) {
-      html += `<div class="resp-keypoints"><div class="resp-keypoints-label">📋 Key Points</div>`;
+      html += `<div style="margin:16px 16px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="background:#8B5CF6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #6D28D9;">Key Points</div>
+        </div>
+        <div style="background:#F5F3FF;border-left:5px solid #8B5CF6;border-radius:0 14px 14px 0;padding:14px 18px;display:flex;flex-direction:column;gap:8px;">`;
       keyPointsBullets.forEach(b => {
-        html += `<div class="resp-bullet">• ${formatInline(b, plan)}</div>`;
+        html += `<div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:600;color:#333;line-height:1.55;">
+          <div style="width:20px;height:20px;border-radius:50%;background:#8B5CF6;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:10px;font-weight:900;">✓</div>
+          <span>${formatInline(b, plan)}</span>
+        </div>`;
       });
-      html += `</div>`;
+      html += `</div></div>`;
     }
 
-    // Insight
+    // ── Insight ───────────────────────────────────────────────────────────────
     if (insightText.trim()) {
-      html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${formatInline(insightText.trim(), plan)}</div></div>`;
+      html += `<div style="margin:16px 16px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div>
+        </div>
+        <div style="background:#FDF2F8;border-left:5px solid #EC4899;border-radius:0 14px 14px 0;padding:14px 18px;">
+          <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(insightText.trim(), plan)}</div>
+        </div>
+      </div>`;
     }
 
-    // Tip
+    // ── Tip ───────────────────────────────────────────────────────────────────
     if (tipText.trim()) {
-      html += `<div class="resp-tip"><div class="resp-tip-icon">💡</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">${formatInline(tipText.trim(), plan)}</div></div></div>`;
+      html += `<div style="margin:16px 16px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div>
+        </div>
+        <div style="background:#FFFBEB;border-left:5px solid #F59E0B;border-radius:0 14px 14px 0;padding:14px 18px;">
+          <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(tipText.trim(), plan)}</div>
+        </div>
+      </div>`;
     }
 
-    // Common Mistake
+    // ── Common Mistake ────────────────────────────────────────────────────────
     if (commonMistakeText.trim()) {
-      html += `<div class="resp-common-mistake"><div class="resp-common-mistake-icon">⚠️</div><div><div class="resp-common-mistake-label">Common Mistake</div><div class="resp-common-mistake-text">${formatInline(commonMistakeText.trim(), plan)}</div></div></div>`;
+      html += `<div style="margin:16px 16px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div>
+        </div>
+        <div style="background:#FEF2F2;border-left:5px solid #EF4444;border-radius:0 14px 14px 0;padding:14px 18px;">
+          <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(commonMistakeText.trim(), plan)}</div>
+        </div>
+      </div>`;
     }
 
-    // Resources
+    // ── Resources ─────────────────────────────────────────────────────────────
     if (resources && resources.length > 0) {
-      const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
-      const qlIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg>`;
+      const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
+      const qlIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg>`;
       const items  = resources.map(r => {
         const isYT = r.type === "youtube";
-        return `<a href="${r.link}" target="_blank" rel="noopener" class="resp-resource-link ${isYT ? 'yt' : 'ql'}">${isYT ? ytIcon : qlIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:700;color:${isYT ? '#ef4444' : '#3b82f6'};white-space:nowrap;">${isYT ? 'YouTube ↗' : 'Quizlet ↗'}</span></a>`;
+        return `<a href="${r.link}" target="_blank" rel="noopener" class="resp-resource-link ${isYT ? 'yt' : 'ql'}">${isYT ? ytIcon : qlIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:800;color:${isYT ? '#ef4444' : '#3b82f6'};white-space:nowrap;">${isYT ? 'YouTube ↗' : 'Quizlet ↗'}</span></a>`;
       }).join("");
-      html += `<div class="resp-resources"><div class="resp-resources-label">📚 Resources</div>${items}</div>`;
+      html += `<div style="margin:16px 16px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="background:#6B7280;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #374151;">Resources</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">${items}</div>
+      </div>`;
     }
 
-    // Visual Learner content (Pro+ only) — show if we have video OR image search
+    // ── Visual Content ────────────────────────────────────────────────────────
     if (plan === 'pro_plus' && (embeddedVideo || imageSearchQuery)) {
-      let visualHtml = '<div class="resp-visual-section"><div class="resp-visual-label">📺 Visual Content</div>';
+      let visualHtml = `<div style="margin:16px 16px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="background:var(--blue-dark);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #075985;">Visual Content</div>
+        </div>`;
       if (embeddedVideo) {
-        visualHtml += `<div class="resp-video-embed"><iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:10px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
+        visualHtml += `<div class="resp-video-embed"><iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div style="font-size:12px;color:#6b7280;font-weight:600;margin:6px 0 10px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
       }
       if (imageSearchQuery) {
-        visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imageSearchQuery + ' diagram')}" target="_blank" rel="noopener" class="resp-image-search-btn">🖼️ View Diagrams &amp; Images: ${imageSearchQuery.substring(0, 40)}${imageSearchQuery.length > 40 ? '...' : ''}</a>`;
+        visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imageSearchQuery + ' diagram')}" target="_blank" rel="noopener" class="resp-image-search-btn">View Diagrams: ${imageSearchQuery.substring(0, 40)}${imageSearchQuery.length > 40 ? '...' : ''}</a>`;
       }
-      visualHtml += '</div>';
+      visualHtml += `</div>`;
       html += visualHtml;
     }
 
-    html += `</div>`;
+    html += `<div style="height:16px;"></div></div>`;
     return html;
   }
 
@@ -2987,7 +3042,7 @@
           <p style="font-size:13px;color:rgba(255,255,255,0.85);font-weight:600;margin-top:6px;">You'll lose access to all Pro features at the end of your billing period.</p>
         </div>
         <div style="padding:24px 28px;display:flex;flex-direction:column;gap:10px;">
-          <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:var(--green);color:white;cursor:pointer;box-shadow:0 4px 0 var(--green-dark);transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">Keep My Plan ✓</button>
+          <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:var(--green);color:white;cursor:pointer;box-shadow:0 4px 0 var(--green-dark);transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">Keep My Plan</button>
           <button onclick="this.closest('div[style*=fixed]').remove();window.openCustomerPortal();" style="width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:800;font-family:inherit;border:2px solid #fca5a5;background:#fef2f2;color:#dc2626;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">Go to Billing Portal →</button>
         </div>
       </div>`;
@@ -3044,7 +3099,7 @@
 
       <!-- Buttons -->
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
-        <button id="settingsUpgradeBtn" onclick="closeSettings();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:var(--orange);color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'">⚡ Upgrade Plan</button>
+        <button id="settingsUpgradeBtn" onclick="closeSettings();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:var(--orange);color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'">Upgrade Plan</button>
         <button id="settingsCancelBtn" onclick="handleCancelSubscription()" style="display:none;width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:800;font-family:inherit;border:2px solid #fca5a5;background:#fef2f2;color:#dc2626;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">Cancel Subscription</button>
       </div>
     </div>
