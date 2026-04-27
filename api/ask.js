@@ -35,9 +35,14 @@ if (!getApps().length) {
 const adminAuth = getAdminAuth();
 const db        = getFirestore();
 
-const FREE_DAILY_LIMIT = 5;
-const ADMIN_EMAIL      = process.env.ADMIN_EMAIL || "";
-const VIP_PRO_EMAILS   = (process.env.VIP_PRO_EMAILS || "")
+const FREE_DAILY_LIMIT   = 5;   // homework questions per 24hr rolling window
+const PRO_DAILY_LIMIT    = 25;  // homework questions per 24hr rolling window
+const PROPLUS_DAILY_LIMIT= 40;  // homework questions per 24hr rolling window
+const FREE_CASUAL_LIMIT  = 20;  // casual messages per 24hr rolling window
+const PRO_CASUAL_LIMIT   = 50;  // casual messages per 24hr rolling window
+const WINDOW_MS          = 24 * 60 * 60 * 1000; // 24 hour rolling window in ms
+const ADMIN_EMAIL        = process.env.ADMIN_EMAIL || "";
+const VIP_PRO_EMAILS     = (process.env.VIP_PRO_EMAILS || "")
   .split(",").map(e => e.trim()).filter(Boolean);
 
 // ── Extract clean search topic from AI's Final Answer ──────────────────────
@@ -233,26 +238,89 @@ export default async function handler(req, res) {
     }
   }
 
-  // 3. Daily usage limits (free plan only)
-  if (userPlan === "free") {
-    const today    = new Date().toISOString().split("T")[0];
-    const usageRef = db.collection("usage").doc(`${uid}_${today}`);
+  // 3. Rolling 24hr usage limits
+  const now = Date.now();
+  const usageRef = db.collection("usage").doc(uid);
+
+  // Limits per plan
+  const hwLimit     = userPlan === "pro_plus" ? PROPLUS_DAILY_LIMIT
+                    : userPlan === "pro"       ? PRO_DAILY_LIMIT
+                    : FREE_DAILY_LIMIT;
+  const casualLimit = userPlan === "pro_plus" ? Infinity
+                    : userPlan === "pro"       ? PRO_CASUAL_LIMIT
+                    : FREE_CASUAL_LIMIT;
+
+  // Skip limits for admin
+  const isAdmin = (userEmail === ADMIN_EMAIL);
+
+  // Detect casual before limit check so we can apply the right bucket
+  const { question: rawQ, imageBase64, imageType, history } = req.body;
+  const preCheckQuestion = (rawQ || "").trim();
+  const preCheckCasual   = isCasualChat(preCheckQuestion) && !imageBase64;
+
+  if (!isAdmin) {
     try {
-      const snap  = await usageRef.get();
-      const count = snap.exists ? (snap.data()?.count || 0) : 0;
-      if (count >= FREE_DAILY_LIMIT) {
-        return res.status(429).json({ error: `Daily limit reached. Upgrade to Pro for unlimited access.` });
+      const snap    = await usageRef.get();
+      const data    = snap.exists ? snap.data() : {};
+      const hwTimes = (data.hwTimes     || []).filter(t => now - t < WINDOW_MS);
+      const csTimes = (data.casualTimes || []).filter(t => now - t < WINDOW_MS);
+
+      if (preCheckCasual) {
+        // Casual message limit check
+        if (casualLimit !== Infinity && csTimes.length >= casualLimit) {
+          const oldest    = Math.min(...csTimes);
+          const unlockMs  = WINDOW_MS - (now - oldest);
+          const unlockMin = Math.ceil(unlockMs / 60000);
+          const hrs = Math.floor(unlockMin / 60);
+          const min = unlockMin % 60;
+          const countdown = hrs > 0 ? `${hrs}h ${min}m` : `${min}m`;
+          return res.status(429).json({
+            error:     "casual_limit",
+            countdown,
+            limit:     casualLimit,
+            used:      csTimes.length,
+            nextUnlock: oldest + WINDOW_MS,
+          });
+        }
+        // Record casual message
+        await usageRef.set({
+          casualTimes: [...csTimes, now],
+          hwTimes,
+          uid, email: userEmail,
+          updatedAt: now,
+        }, { merge: true });
+      } else {
+        // Homework question limit check
+        if (hwTimes.length >= hwLimit) {
+          const oldest    = Math.min(...hwTimes);
+          const unlockMs  = WINDOW_MS - (now - oldest);
+          const unlockMin = Math.ceil(unlockMs / 60000);
+          const hrs = Math.floor(unlockMin / 60);
+          const min = unlockMin % 60;
+          const countdown = hrs > 0 ? `${hrs}h ${min}m` : `${min}m`;
+          return res.status(429).json({
+            error:     "limit_reached",
+            countdown,
+            limit:     hwLimit,
+            used:      hwTimes.length,
+            nextUnlock: oldest + WINDOW_MS,
+          });
+        }
+        // Record homework question
+        await usageRef.set({
+          hwTimes: [...hwTimes, now],
+          casualTimes: csTimes,
+          uid, email: userEmail,
+          updatedAt: now,
+        }, { merge: true });
       }
-      await usageRef.set({ count: count + 1, uid, email: userEmail, date: today }, { merge: true });
     } catch (err) {
       console.error("Usage tracking error:", err.message);
     }
   }
 
-  // 4. Parse request body
-  const { question, imageBase64, imageType, history } = req.body;
-
-  // Validate image if provided — prevents cost abuse and type spoofing
+  // 4. Use already-parsed body variables
+  const question   = rawQ;
   const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
   const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB limit (base64 is ~4/3 of original)
 
@@ -523,6 +591,15 @@ UNIVERSAL RULES:
       }
     }
 
+    // Get current usage counts for frontend progress bar
+    let hwUsed = 0, csUsed = 0;
+    try {
+      const snap  = await usageRef.get();
+      const udata = snap.exists ? snap.data() : {};
+      hwUsed = ((udata.hwTimes || []).filter(t => now - t < WINDOW_MS)).length;
+      csUsed = ((udata.casualTimes || []).filter(t => now - t < WINDOW_MS)).length;
+    } catch(e) {}
+
     return res.status(200).json({
       answer,
       resources,
@@ -533,6 +610,12 @@ UNIVERSAL RULES:
       embeddedVideo,
       imageSearchQuery,
       videos: [],
+      usage: {
+        hw:       hwUsed,
+        hwLimit,
+        casual:   csUsed,
+        casualLimit: casualLimit === Infinity ? null : casualLimit,
+      },
     });
 
   } catch (err) {
