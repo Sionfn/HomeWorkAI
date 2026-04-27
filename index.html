@@ -2605,6 +2605,7 @@
     if (!finalAnswerText && !stepsHtml && paragraphs.length === 0) {
       paragraphs.push({ type: 'explanation', text: answer.replace(/\n+/g, ' ').trim() });
     }
+    const planTag      = plan === "pro_plus" ? "Pro+" : plan === "pro" ? "Pro" : "Free";
     const planTagClass = plan === "pro_plus" ? "tag-pro-plus" : plan === "pro" ? "tag-pro" : "tag-free";
     let html = `<div class="ai-response-box">`;
 
