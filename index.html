@@ -2598,37 +2598,109 @@
       return out;
     }
 
-    // Render a free-form Knox response beautifully — detects numbered steps, paragraphs, bold
+    // Render ANY Knox response beautifully — detects structure even without headers
     function renderFreeformText(text, plan) {
-      const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+      // Split into blocks by double newline (paragraphs)
+      const rawBlocks = text.split(/\n{2,}/).map(b => b.trim()).filter(b => b);
+
+      // Check if any block starts with known inline headers
+      const hasInlineExplanation = rawBlocks.some(b => /^Explanation:/i.test(b));
+      const hasInlineTip         = rawBlocks.some(b => /^Tip:/i.test(b));
+      const hasInlineInsight     = rawBlocks.some(b => /^Insight:/i.test(b));
+      const hasInlineMistake     = rawBlocks.some(b => /^Common Mistake:/i.test(b));
+
       let html = '';
-      let stepBuffer = [];
+      let isFirst = true;
 
-      function flushSteps() {
-        if (stepBuffer.length === 0) return;
-        html += `<div style="display:flex;flex-direction:column;gap:8px;margin:10px 14px;">`;
-        stepBuffer.forEach(({num, text: t}) => {
-          html += `<div style="display:flex;align-items:flex-start;gap:10px;background:white;border:2px solid #FFE0C2;border-radius:12px;padding:12px 14px;">
-            <div style="min-width:26px;height:26px;border-radius:8px;background:#FF6B00;color:white;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${num}</div>
-            <div style="font-size:14px;font-weight:500;color:#3C3C3C;line-height:1.6;padding-top:3px;">${formatInline(t, plan)}</div>
-          </div>`;
-        });
-        html += `</div>`;
-        stepBuffer = [];
-      }
+      for (const block of rawBlocks) {
+        // Detect numbered list blocks — render as step cards
+        const lines = block.split('\n').map(l => l.trim()).filter(l => l);
+        const isNumberedList = lines.length > 0 && lines.every(l => /^\d+\./.test(l));
 
-      for (const line of lines) {
-        const stepMatch = line.match(/^(\d+)\.\s+(.+)/);
-        if (stepMatch) {
-          stepBuffer.push({ num: stepMatch[1], text: stepMatch[2] });
-        } else {
-          flushSteps();
-          if (line.length > 0) {
-            html += `<div style="padding:6px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.7;">${formatInline(line, plan)}</div>`;
-          }
+        if (isNumberedList) {
+          html += `<div style="display:flex;flex-direction:column;gap:8px;margin:10px 14px;">`;
+          lines.forEach(l => {
+            const num  = (l.match(/^(\d+)\./) || [])[1] || '•';
+            const txt  = l.replace(/^\d+\.\s*/, '');
+            html += `<div style="display:flex;align-items:flex-start;gap:10px;background:white;border:2px solid #FFE0C2;border-radius:12px;padding:12px 14px;">
+              <div style="min-width:26px;height:26px;border-radius:8px;background:#FF6B00;color:white;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${num}</div>
+              <div style="font-size:14px;font-weight:500;color:#3C3C3C;line-height:1.6;padding-top:3px;">${formatInline(txt, plan)}</div>
+            </div>`;
+          });
+          html += `</div>`;
+          isFirst = false;
+          continue;
         }
+
+        // Strip inline header labels for display
+        let blockText = block;
+        let blockType = 'body';
+
+        if (/^Explanation:/i.test(blockText)) { blockText = blockText.replace(/^Explanation:\s*/i, ''); blockType = 'explanation'; }
+        else if (/^Tip:/i.test(blockText))    { blockText = blockText.replace(/^Tip:\s*/i, '');         blockType = 'tip'; }
+        else if (/^Insight:/i.test(blockText)){ blockText = blockText.replace(/^Insight:\s*/i, '');      blockType = 'insight'; }
+        else if (/^Common Mistake:/i.test(blockText)){ blockText = blockText.replace(/^Common Mistake:\s*/i,''); blockType = 'mistake'; }
+        else if (isFirst) { blockType = 'answer'; }
+
+        const formatted = formatInline(blockText.replace(/\n/g, ' '), plan);
+
+        if (blockType === 'answer') {
+          html += `<div style="margin:10px 14px 0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="background:#58CC02;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #46A302;">Answer</div>
+            </div>
+            <div style="background:#D7FFB8;border-left:5px solid #58CC02;border-radius:0 12px 12px 0;padding:14px 16px;">
+              <div style="font-size:16px;font-weight:800;color:#1a1a1a;line-height:1.5;">${formatted}</div>
+            </div>
+          </div>`;
+        } else if (blockType === 'explanation') {
+          html += `<div style="margin:10px 14px 0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="background:#1CB0F6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #0A85C2;">Explanation</div>
+            </div>
+            <div style="background:#D7F2FD;border-left:5px solid #1CB0F6;border-radius:0 12px 12px 0;padding:14px 16px;">
+              <div style="font-size:15px;font-weight:500;color:#333;line-height:1.75;">${formatted}</div>
+            </div>
+          </div>`;
+        } else if (blockType === 'tip') {
+          html += `<div style="margin:10px 14px 0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div>
+            </div>
+            <div style="background:#FFFBEB;border-left:5px solid #F59E0B;border-radius:0 12px 12px 0;padding:14px 16px;">
+              <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatted}</div>
+            </div>
+          </div>`;
+        } else if (blockType === 'insight') {
+          html += `<div style="margin:10px 14px 0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div>
+            </div>
+            <div style="background:#FDF2F8;border-left:5px solid #EC4899;border-radius:0 12px 12px 0;padding:14px 16px;">
+              <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatted}</div>
+            </div>
+          </div>`;
+        } else if (blockType === 'mistake') {
+          html += `<div style="margin:10px 14px 0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div>
+            </div>
+            <div style="background:#FEF2F2;border-left:5px solid #EF4444;border-radius:0 12px 12px 0;padding:14px 16px;">
+              <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatted}</div>
+            </div>
+          </div>`;
+        } else {
+          // Regular continuation paragraph — style as secondary explanation
+          html += `<div style="margin:6px 14px 0;">
+            <div style="background:#EFF6FF;border-left:5px solid #93C5FD;border-radius:0 12px 12px 0;padding:12px 16px;">
+              <div style="font-size:15px;font-weight:500;color:#333;line-height:1.7;">${formatted}</div>
+            </div>
+          </div>`;
+        }
+
+        isFirst = false;
       }
-      flushSteps();
+
       return html;
     }
 
@@ -2760,16 +2832,16 @@
     }
     flushPara(mode);
 
-    // ── Fallback: nothing parsed at all → styled freeform ─────────────────────
+    // ── Fallback: nothing structured parsed → use smart freeform renderer ─────
     if (!finalAnswerText && !stepsHtml && paragraphs.length === 0 && !tipText && !insightText && !commonMistakeText && keyPointsBullets.length === 0) {
       const planTagClass2 = plan === 'pro_plus' ? 'tag-pro-plus' : plan === 'pro' ? 'tag-pro' : 'tag-free';
       const planTag2 = plan === 'pro_plus' ? 'Pro+' : plan === 'pro' ? 'Pro' : 'Free';
       return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(answer, plan)}<div style="height:10px;"></div>`;
     }
 
-    // ── If no Final Answer but has paragraphs → styled Knox message ───────────
+    // ── Only paragraphs (no Final Answer) → smart freeform ───────────────────
     if (!finalAnswerText && paragraphs.length > 0 && !stepsHtml) {
-      const allText = paragraphs.map(p => p.text).join('\n');
+      const allText = paragraphs.map(p => p.text).join('\n\n');
       const planTagClass2 = plan === 'pro_plus' ? 'tag-pro-plus' : plan === 'pro' ? 'tag-pro' : 'tag-free';
       const planTag2 = plan === 'pro_plus' ? 'Pro+' : plan === 'pro' ? 'Pro' : 'Free';
       return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(allText, plan)}<div style="height:10px;"></div>`;
