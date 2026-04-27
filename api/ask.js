@@ -5,7 +5,6 @@
 //  ✅ Resources-in-Tip bug fixed (robust parsing, pre-normalisation)
 //  ✅ Markdown link syntax [text](url) stripped from all output
 //  ✅ YouTube links go to actual videos (via YOUTUBE_API_KEY)
-//  ✅ Quizlet uses real URLs when AI provides them
 //  ✅ Visual learner detection — embeds YouTube video + image search
 //  ✅ Verbal learner detection — rich prose response style
 //  ✅ Preference-only statements get warm acknowledgement, not full answer
@@ -145,8 +144,6 @@ function parseResources(text) {
       // Match markdown format: YouTube: [Title](url)
       const ytMd    = line.match(/^[-*]?\s*YouTube:\s*\[([^\]]+)\]\((https?:[^)]+)\)/i);
       const ytPlain = line.match(/^[-*]?\s*YouTube:\s*(.+)/i);
-      const qlMd    = line.match(/^[-*]?\s*Quizlet:\s*\[([^\]]+)\]\((https?:[^)]+)\)/i);
-      const qlPlain = line.match(/^[-*]?\s*Quizlet:\s*(.+)/i);
 
       if (ytMd) {
         resources.push({ type: "youtube", title: ytMd[1].trim(), link: ytMd[2].trim() });
@@ -159,13 +156,10 @@ function parseResources(text) {
       }
 
       if (qlMd) {
-        resources.push({ type: "quizlet", title: qlMd[1].trim(), link: qlMd[2].trim() });
       } else if (qlPlain && !ytPlain) {
         const raw   = qlPlain[1].trim();
         const title = raw.replace(/\[([^\]]+)\]\([^)]+\)/, "$1").replace(/^\[|\]$/g, "").trim();
         const urlM  = raw.match(/\((https?:[^)]+)\)/);
-        const link  = urlM ? urlM[1] : `https://quizlet.com/search?query=${encodeURIComponent(title)}`;
-        resources.push({ type: "quizlet", title, link });
       }
     }
     // Remove resources block from answer text
@@ -462,7 +456,6 @@ Key Points:
   (3-6 bullets maximum)
 Resources:
   - YouTube: [Specific descriptive video title for this exact topic]
-  - Quizlet: [Specific study set name for this topic]
 
 STRICT RULES:
 - ALWAYS include "Final Answer:" and "Explanation:"
