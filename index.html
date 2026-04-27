@@ -1279,14 +1279,14 @@
           <!-- Tools -->
           <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">
             <input type="file" id="fileInput" accept="image/*" style="display:none;">
-            <button onclick="openCalc()" title="Calculator"
+            <button onclick="openCalc()" title="Calculator" class="chat-icon-btn" data-hover-color="#FF6B00"
               style="width:34px;height:34px;border-radius:9px;border:none;background:transparent;cursor:pointer;color:#D1D5DB;display:flex;align-items:center;justify-content:center;transition:color 0.15s;"
-              onmouseover="this.style.color='#FF6B00'" onmouseout="this.style.color='#D1D5DB'">
+              onmouseover="this.style.color=(this.dataset.hoverColor||'#FF6B00')" onmouseout="this.style.color='#D1D5DB'">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>
             </button>
-            <button onclick="document.getElementById('fileInput').click()" title="Upload image"
+            <button onclick="document.getElementById('fileInput').click()" title="Upload image" class="chat-icon-btn" data-hover-color="#FF6B00"
               style="width:34px;height:34px;border-radius:9px;border:none;background:transparent;cursor:pointer;color:#D1D5DB;display:flex;align-items:center;justify-content:center;transition:color 0.15s;"
-              onmouseover="this.style.color='#FF6B00'" onmouseout="this.style.color='#D1D5DB'">
+              onmouseover="this.style.color=(this.dataset.hoverColor||'#FF6B00')" onmouseout="this.style.color='#D1D5DB'">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
             </button>
             <button id="askBtn" onclick="handleAskQuestion()" title="Send"
@@ -1562,8 +1562,8 @@
 
       <!-- Tab switcher -->
       <div style="display:flex;gap:4px;background:#F3F4F6;border-radius:14px;padding:4px;margin-bottom:20px;">
-        <button class="login-tab active" id="tabSignIn" onclick="switchLoginTab('signin')" style="flex:1;justify-content:center;">Sign In</button>
-        <button class="login-tab" id="tabSignUp" onclick="switchLoginTab('signup')" style="flex:1;justify-content:center;">Create Account</button>
+        <button id="tabSignIn" onclick="switchLoginTab('signin')" style="flex:1;justify-content:center;padding:12px 18px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;border:none;transition:all 0.15s;font-family:inherit;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;">Sign In</button>
+        <button id="tabSignUp" onclick="switchLoginTab('signup')" style="flex:1;justify-content:center;padding:12px 18px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;border:none;transition:all 0.15s;font-family:inherit;background:transparent;color:#9CA3AF;">Create Account</button>
       </div>
 
       <!-- Error / Success messages -->
@@ -1589,7 +1589,7 @@
         <div style="display:flex;flex-direction:column;gap:12px;">
           <input class="login-input" id="signinEmail" type="email" placeholder="Email address" autocomplete="email">
           <input class="login-input" id="signinPassword" type="password" placeholder="Password" autocomplete="current-password">
-          <button class="btn w-full" style="background:#FF6B00;color:white;justify-content:center;font-size:15px;font-weight:900;box-shadow:0 4px 0 #CC5500;border-radius:14px;padding:15px;" onclick="handleEmailSignIn()">Sign In</button>
+          <button onclick="handleEmailSignIn()" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='none'" onmouseup="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'">Sign In</button>
         </div>
         <button onclick="switchLoginTab('forgot')" style="background:none;border:none;cursor:pointer;color:#FF6B00;font-size:13px;font-weight:700;margin-top:12px;padding:0;width:100%;text-align:center;">Forgot password?</button>
       </div>
@@ -1600,7 +1600,7 @@
           <input class="login-input" id="signupName" type="text" placeholder="Full name" autocomplete="name">
           <input class="login-input" id="signupEmail" type="email" placeholder="Email address" autocomplete="email">
           <input class="login-input" id="signupPassword" type="password" placeholder="Password (min 6 characters)" autocomplete="new-password">
-          <button class="btn w-full" style="background:#FF6B00;color:white;justify-content:center;font-size:15px;font-weight:900;box-shadow:0 4px 0 #CC5500;border-radius:14px;padding:15px;" onclick="handleEmailSignUp()">Create Account</button>
+          <button onclick="handleEmailSignUp()" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:#1CB0F6;color:white;cursor:pointer;box-shadow:0 4px 0 #0A85C2;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0A85C2'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #0A85C2'" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='none'" onmouseup="this.style.transform='';this.style.boxShadow='0 4px 0 #0A85C2'">Create Account</button>
         </div>
         <p style="font-size:12px;color:#9ca3af;text-align:center;margin-top:12px;">By creating an account you agree to our <a href="/terms.html" style="color:#FF6B00;">Terms of Service</a>. you must be 13 or older to use Knox Knows.</p>
       </div>
@@ -1610,7 +1610,7 @@
         <p style="font-size:14px;color:#4b5563;margin-bottom:14px;">Enter your email and we'll send you a reset link.</p>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <input class="login-input" id="forgotEmail" type="email" placeholder="Email address">
-          <button class="btn w-full" style="background:var(--blue);justify-content:center;font-size:15px;" onclick="handleForgotPassword()">Send Reset Email</button>
+          <button onclick="handleForgotPassword()" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='none'" onmouseup="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'">Send Reset Email</button>
         </div>
         <button onclick="switchLoginTab('signin')" style="background:none;border:none;cursor:pointer;color:#FF6B00;font-size:13px;font-weight:700;margin-top:12px;padding:0;width:100%;text-align:center;">← Back to Sign In</button>
       </div>
@@ -1733,8 +1733,12 @@
     document.getElementById('signinForm').style.display  = tab === 'signin'  ? 'block' : 'none';
     document.getElementById('signupForm').style.display  = tab === 'signup'  ? 'block' : 'none';
     document.getElementById('forgotForm').style.display  = tab === 'forgot'  ? 'block' : 'none';
-    document.getElementById('tabSignIn').className  = 'login-tab' + (tab === 'signin' ? ' active' : '');
-    document.getElementById('tabSignUp').className  = 'login-tab' + (tab === 'signup' ? ' active' : '');
+    const _siBtn = document.getElementById('tabSignIn');
+    const _suBtn = document.getElementById('tabSignUp');
+    const _activeStyle = (color, shadow) => `flex:1;justify-content:center;padding:12px 18px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;border:none;transition:all 0.15s;font-family:inherit;background:${color};color:white;box-shadow:0 3px 0 ${shadow};`;
+    const _inactiveStyle = 'flex:1;justify-content:center;padding:12px 18px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;border:none;transition:all 0.15s;font-family:inherit;background:transparent;color:#9CA3AF;box-shadow:none;';
+    if (_siBtn) _siBtn.style.cssText = tab === 'signin' ? _activeStyle('#FF6B00','#CC5500') : _inactiveStyle;
+    if (_suBtn) _suBtn.style.cssText = tab === 'signup' ? _activeStyle('#1CB0F6','#0A85C2') : _inactiveStyle;
     clearLoginMessages();
   };
 
@@ -1970,17 +1974,24 @@
     const aBtn = document.getElementById('modeAnswerBtn');
     const lBtn = document.getElementById('modeLearnBtn');
     const askBtn = document.getElementById('askBtn');
-    const askBtnText = document.getElementById('askBtnText');
     const aiHeaderDesc = document.getElementById('aiHeaderDesc');
     const qInput = document.getElementById('chatInput') || document.getElementById('questionInput');
+
+    // Icon buttons (calc + camera)
+    const iconBtns = document.querySelectorAll('.chat-icon-btn');
+
     if (mode === 'answer') {
-      if (aBtn) { aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;'; }
-      if (lBtn) { lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;'; }
+      if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;';
+      if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
+      if (askBtn) { askBtn.style.background = '#FF6B00'; askBtn.style.boxShadow = '0 3px 0 #CC5500'; askBtn.onmouseover = () => { askBtn.style.transform='translateY(-1px)'; askBtn.style.boxShadow='0 5px 0 #CC5500'; }; askBtn.onmouseout = () => { askBtn.style.transform=''; askBtn.style.boxShadow='0 3px 0 #CC5500'; }; }
+      iconBtns.forEach(b => { b.dataset.hoverColor = '#FF6B00'; });
       if (aiHeaderDesc) aiHeaderDesc.textContent = 'Ready to help you ace it';
       if (qInput) qInput.placeholder = 'Ask Knox anything — type or paste your question...';
     } else {
-      if (lBtn) { lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#1CB0F6;color:white;box-shadow:0 3px 0 #0A85C2;transition:all 0.15s;line-height:1;'; }
-      if (aBtn) { aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;'; }
+      if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#1CB0F6;color:white;box-shadow:0 3px 0 #0A85C2;transition:all 0.15s;line-height:1;';
+      if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
+      if (askBtn) { askBtn.style.background = '#1CB0F6'; askBtn.style.boxShadow = '0 3px 0 #0A85C2'; askBtn.onmouseover = () => { askBtn.style.transform='translateY(-1px)'; askBtn.style.boxShadow='0 5px 0 #0A85C2'; }; askBtn.onmouseout = () => { askBtn.style.transform=''; askBtn.style.boxShadow='0 3px 0 #0A85C2'; }; }
+      iconBtns.forEach(b => { b.dataset.hoverColor = '#1CB0F6'; });
       if (aiHeaderDesc) aiHeaderDesc.textContent = 'Knox will guide you step by step';
       if (qInput) qInput.placeholder = 'What would you like to learn? Knox will guide you step by step...';
     }
