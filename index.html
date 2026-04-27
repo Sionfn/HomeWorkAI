@@ -2684,7 +2684,14 @@
     }
     answer = normalizeSections(answer);
 
+    const knownHeaders = ['Final Answer:', 'Explanation:', 'Step-by-step:', 'Tip:', 'Insight:', 'Common Mistake:', 'Key Points:', 'Resources:'];
     const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+
+    // If the first line isn't a known header, auto-treat it as Final Answer
+    if (lines.length > 0 && !knownHeaders.some(h => lines[0].startsWith(h))) {
+      lines[0] = 'Final Answer: ' + lines[0];
+    }
+
     let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
     let keyPointsBullets = [];
     let mode = "other", currentParaLines = [];
@@ -2710,6 +2717,13 @@
         flushPara(mode); mode = "explanation";
         const inl = line.replace("Explanation:", "").trim();
         if (inl) currentParaLines.push(inl);
+      }
+      // Catch "Explanation:" appearing mid-line (e.g. "Word. Explanation: more text")
+      else if (line.includes("Explanation:") && !line.startsWith("Final Answer:")) {
+        const parts = line.split("Explanation:");
+        if (parts[0].trim()) currentParaLines.push(parts[0].trim());
+        flushPara(mode); mode = "explanation";
+        if (parts[1] && parts[1].trim()) currentParaLines.push(parts[1].trim());
       }
       else if (line.startsWith("Insight:")) {
         flushPara(mode); mode = "insight";
