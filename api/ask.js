@@ -108,14 +108,26 @@ function isPreferenceOnly(question) {
   return isPref && !hasIntent && q.length < 200;
 }
 
-// ── True if message is casual chat, not a homework question ──────────────
+// ── True if message is casual chat, not a real school problem ────────────
 function isCasualChat(question) {
   const q = question.trim().toLowerCase();
-  // Short greetings and casual messages
-  if (q.length < 80 && /^(hey|hi|hello|sup|what'?s? up|how are you|how'?s? it going|yo|heyy|heyyy|good morning|good afternoon|good night|thanks|thank you|thx|cool|nice|ok|okay|lol|lmao|haha|😂|🦊|who are you|what are you|what'?s? your name|you'?re? (cool|awesome|great|smart|amazing)|i love|i like|you|ur|you're|are you)/i.test(q)) return true;
-  // No academic keywords at all
-  const hasAcademic = /explain|solve|what is|how does|why does|calculate|define|help me|homework|essay|problem|question|formula|equation|theorem|theory|history|science|math|english|biology|chemistry|physics|write|analyze|summarize|steps|example|prove|show me how|study|test|exam|quiz|assignment/i.test(q);
-  return !hasAcademic && q.length < 120;
+
+  // Always casual: pure greetings / reactions / identity questions
+  if (/^(hey|hi|hello|sup|yo+|heyy+|what'?s? up|how are you|how'?s? it going|good morning|good afternoon|good night|thanks|thank you|thx|cool|nice|ok|okay|lol|lmao|haha|who are you|what are you|what'?s? your name|are you (ai|real|a fox|a bot)|you'?re? (cool|awesome|great|smart|amazing|the best)|i (love|like) (you|this|knox)|that'?s? (cool|awesome|crazy|wild|insane)|no way|for real|seriously|bro|dude|omg|wait what|🦊)[.!?]?$/.test(q)) return true;
+
+  // These patterns = ALWAYS homework, never casual, even if short or friendly-sounding
+  const definitelyHomework = /\b(solve|calculate|what is \d|simplify|factor|derive|integrate|differentiate|prove that|find the (value|area|volume|angle|slope|distance|derivative|integral|solution|answer|equation)|write (an? )?(essay|paragraph|thesis|summary|analysis)|explain (how|why|what|the (process|concept|theory|formula|law|rule|difference))|what (causes?|is the (formula|definition|law|rule|theorem|equation|process|difference|meaning))|how (does|do|did|can|should|would)|why (does|do|did|is|are|was|were)|when (did|was|were|is|are)|who (was|is|were|are|invented|discovered|wrote|created)|define |describe (the|how|why)|what are (the|some)|step[- ]by[- ]step|solve for|in the equation|in (chemistry|physics|biology|math|history|english|science|economics|calculus|algebra|geometry|literature)|ap (exam|class|test|course)|sat |act |gre |gmat |lsat )\b/i.test(q);
+  if (definitelyHomework) return false;
+
+  // Homework mentioned casually = still casual
+  // e.g. "ugh i have so much homework" "knox do you like homework" "homework is hard lol"
+  const homeworkCasual = /\b(hate|love|like|dislike|have|got|so much|too much|lots of|a lot of|my|this|the) homework\b/i.test(q) && !definitelyHomework;
+  if (homeworkCasual) return true;
+
+  // Short messages with no real school question structure = casual
+  const hasRealQuestion = /\b(explain|solve|calculate|define|describe|summarize|analyze|write|find|prove|show|evaluate|compare|contrast|what is the (formula|law|theorem|rule|definition|meaning|difference|equation)|how (does|do|did|can) (the|a|an|it|this|that)|why (is|are|was|were|does|do|did))\b/i.test(q);
+
+  return !hasRealQuestion && q.length < 150;
 }
 
 // ── Parse and extract Resources section (handles markdown links too) ──────
@@ -489,8 +501,14 @@ YOUR NAME & IDENTITY:
 
 TWO MODES — READ THIS CAREFULLY:
 
-MODE 1 — CASUAL CHAT (when someone is just talking, greeting, or not asking a homework question):
-${casual ? `THIS MESSAGE IS CASUAL CHAT. Do NOT use any section headers. Do NOT start with "Final Answer:". Just respond naturally like you're texting a friend. Keep it short, warm, and real. Be Knox the fox — not a homework bot. You can ask what they need help with. 1-3 sentences max. Use 🦊 occasionally but not every message.` : `THIS IS A HOMEWORK/ACADEMIC QUESTION. Use the structured format below.`}
+MODE 1 — CASUAL CHAT (when someone is just talking, greeting, or not asking a real school problem):
+${casual ? `THIS MESSAGE IS CASUAL CHAT. Rules:
+- Do NOT use any section headers. Do NOT start with "Final Answer:". 
+- Talk like you're texting a friend — natural, warm, short.
+- 1-4 sentences max. Be Knox the fox, not a homework bot.
+- Use 🦊 occasionally but not every message.
+- If they mention homework casually (like "ugh i have so much homework"), just vibe with them — maybe ask what subject or offer to help.
+- This is the same experience for everyone — Free, Pro, Pro+ — all get Knox at his best for casual chat.` : `THIS IS A REAL SCHOOL QUESTION. Use the structured format below.`}
 
 MODE 2 — HOMEWORK QUESTIONS (any actual academic question):
 Use the structured sections defined in your plan below. But keep your Knox voice throughout — even technical explanations should feel like they're coming from a sharp friend, not a textbook.
@@ -532,16 +550,19 @@ UNIVERSAL RULES:
     messages.push({ role: "user", content: `Question: ${trimmedQuestion}` });
   }
 
-  // 8. Pick model (gpt-4o for images; plan-based otherwise)
-  const model = hasImage ? "gpt-4o" :
-    userPlan === "pro_plus" ? "gpt-4.1"      :
-    userPlan === "pro"      ? "gpt-4.1-mini" :
-                              "gpt-4o-mini";
+  // 8. Pick model and token limit
+  // Casual chat: everyone gets gpt-4o with 800 tokens — same quality for all plans
+  // Homework: plan-based model and token limits apply
+  const model = hasImage  ? "gpt-4o" :
+    casual                ? "gpt-4o" :
+    userPlan === "pro_plus"? "gpt-4.1" :
+    userPlan === "pro"     ? "gpt-4.1-mini" :
+                             "gpt-4o-mini";
 
-  // Token limits — visual responses are longer, so Pro+ gets more room
-  const maxTokens = userPlan === "pro_plus" ? ((learningStyle === "visual" || wantsVisual) ? 2800 : 2000) :
-                    userPlan === "pro"       ? 1000 :
-                                               400;
+  const maxTokens = casual ? 800 :
+    userPlan === "pro_plus" ? ((learningStyle === "visual" || wantsVisual) ? 2800 : 2000) :
+    userPlan === "pro"      ? 1000 :
+                              400;
 
   // 9. Call OpenAI Chat Completions API
   try {
