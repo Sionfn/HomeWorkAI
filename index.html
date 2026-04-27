@@ -2608,8 +2608,8 @@
 
       // Map ALL known AI-generated header variants to canonical section names
       const mappings = [
-        // Final Answer variants — always capture these
-        [/Answer:/gi,                  'Final Answer:'],
+        // Final Answer variants — only exact matches at line start
+        [/^Answer:/gim,                'Final Answer:'],
         // Step-by-step variants — safe ones only
         [/Step-by-Step Process:/gi,    'Step-by-step:'],
         [/Step by Step:/gi,            'Step-by-step:'],
@@ -2713,13 +2713,21 @@
     }
     flushPara(mode);
 
-    // ── Fallback: if nothing parsed into sections, show raw text as plain message ──
-    if (!finalAnswerText && !stepsHtml && paragraphs.length === 0) {
-      // Strip any accidental headers and render as clean plain text
+    // ── Fallback: nothing parsed at all → plain text ─────────────────────────
+    if (!finalAnswerText && !stepsHtml && paragraphs.length === 0 && !tipText && !insightText && !commonMistakeText && keyPointsBullets.length === 0) {
       const cleanText = answer.replace(/^(Final Answer:|Explanation:|Tip:|Insight:|Common Mistake:|Key Points:|Resources:)\s*/gim, '').replace(/\n+/g, ' ').trim();
       const planTagClass2 = plan === 'pro_plus' ? 'tag-pro-plus' : plan === 'pro' ? 'tag-pro' : 'tag-free';
       const planTag2 = plan === 'pro_plus' ? 'Pro+' : plan === 'pro' ? 'Pro' : 'Free';
-      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div><div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${cleanText}</div>`;
+      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div><div style="padding:12px 16px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${cleanText}</div>`;
+    }
+
+    // ── If no Final Answer but has paragraphs → show as plain Knox message ───
+    // (Knox asked a clarifying question or responded conversationally but in structured format)
+    if (!finalAnswerText && paragraphs.length > 0 && !stepsHtml) {
+      const allText = paragraphs.map(p => p.text).join('<br><br>');
+      const planTagClass2 = plan === 'pro_plus' ? 'tag-pro-plus' : plan === 'pro' ? 'tag-pro' : 'tag-free';
+      const planTag2 = plan === 'pro_plus' ? 'Pro+' : plan === 'pro' ? 'Pro' : 'Free';
+      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div><div style="padding:12px 16px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${formatInline(allText, plan)}</div>`;
     }
     const planTag      = plan === "pro_plus" ? "Pro+" : plan === "pro" ? "Pro" : "Free";
     const planTagClass = plan === "pro_plus" ? "tag-pro-plus" : plan === "pro" ? "tag-pro" : "tag-free";
