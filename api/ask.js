@@ -141,7 +141,7 @@ function parseResources(text) {
   if (match) {
     const lines = match[1].split("\n").map(l => l.trim()).filter(Boolean);
     for (const line of lines) {
-      // Match markdown format: YouTube: [Title](url)
+      // YouTube only — Quizlet removed
       const ytMd    = line.match(/^[-*]?\s*YouTube:\s*\[([^\]]+)\]\((https?:[^)]+)\)/i);
       const ytPlain = line.match(/^[-*]?\s*YouTube:\s*(.+)/i);
 
@@ -153,13 +153,6 @@ function parseResources(text) {
         const urlM  = raw.match(/\((https?:[^)]+)\)/);
         const link  = urlM ? urlM[1] : `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}`;
         resources.push({ type: "youtube", title, link });
-      }
-
-      if (qlMd) {
-      } else if (qlPlain && !ytPlain) {
-        const raw   = qlPlain[1].trim();
-        const title = raw.replace(/\[([^\]]+)\]\([^)]+\)/, "$1").replace(/^\[|\]$/g, "").trim();
-        const urlM  = raw.match(/\((https?:[^)]+)\)/);
       }
     }
     // Remove resources block from answer text
