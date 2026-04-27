@@ -977,6 +977,14 @@
     .chat-tools-row {
       display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;
     }
+    /* Usage progress bar */
+    .usage-bar-wrap { padding:8px 20px 10px;background:#FAFAFA;border-top:1.5px solid #F3F4F6; }
+    .usage-bar-label { display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#9CA3AF;margin-bottom:4px; }
+    .usage-bar-track { height:5px;background:#F3F4F6;border-radius:999px;overflow:hidden; }
+    .usage-bar-fill  { height:100%;border-radius:999px;transition:width 0.4s ease;background:#58CC02; }
+    .usage-bar-fill.warn   { background:#F59E0B; }
+    .usage-bar-fill.danger { background:#EF4444; }
+
     @keyframes spin { to { transform:rotate(360deg); } }
 
     /* User avatar */
@@ -1300,6 +1308,17 @@
         </div>
       </div>
 
+      <!-- Usage bar -->
+      <div id="usageBarWrap" class="usage-bar-wrap" style="display:none;">
+        <div class="usage-bar-label">
+          <span id="usageBarLabel">0 / 5 questions used</span>
+          <span id="usageBarCountdown"></span>
+        </div>
+        <div class="usage-bar-track">
+          <div id="usageBarFill" class="usage-bar-fill" style="width:0%;"></div>
+        </div>
+      </div>
+
       <!-- ── FOOTER ── -->
       <div style="padding:10px 16px;border-top:2px solid #F3F4F6;background:#F9FAFB;display:flex;align-items:center;">
         <button onclick="openHistory()" style="display:inline-flex;align-items:center;gap:6px;background:white;border:2px solid #E5E7EB;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:#6B7280;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#6B7280'">
@@ -1342,13 +1361,25 @@
       </div>
     </div>
 
-    <!-- Billing toggle -->
+    <!-- Yearly savings banner -->
     <div style="display:flex;justify-content:center;margin-top:24px;">
+      <div style="background:linear-gradient(135deg,#58CC02,#46A302);border-radius:16px;padding:14px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 0 #46A302;max-width:500px;width:100%;">
+        <div style="font-size:26px;">🎉</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:900;color:white;">Save 30%+ by going yearly</div>
+          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.85);margin-top:2px;">Pro yearly: <strong>$6.67/mo</strong> · Pro+ yearly: <strong>$10/mo</strong> — billed once a year</div>
+        </div>
+        <button onclick="setBilling('yearly')" style="background:white;color:var(--green-dark);font-size:12px;font-weight:900;padding:8px 14px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;">Switch to Yearly</button>
+      </div>
+    </div>
+
+    <!-- Billing toggle -->
+    <div style="display:flex;justify-content:center;margin-top:16px;">
       <div style="display:inline-flex;background:white;border:2px solid var(--border);border-radius:14px;padding:4px;gap:4px;box-shadow:0 3px 0 var(--border);">
         <button id="monthlyBtn" onclick="setBilling('monthly')" style="padding:10px 22px;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:var(--orange);color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;">Monthly</button>
         <button id="yearlyBtn" onclick="setBilling('yearly')" style="padding:10px 22px;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#777;transition:all 0.15s;">
           Yearly
-          <span style="margin-left:6px;font-size:11px;font-weight:900;background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);border-radius:6px;padding:2px 7px;">Save $39+</span>
+          <span style="margin-left:6px;font-size:11px;font-weight:900;background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);border-radius:6px;padding:2px 7px;">Save 30%+</span>
         </button>
       </div>
     </div>
@@ -1366,12 +1397,12 @@
         <div style="border-top:2px solid var(--border);padding-top:16px;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;">
           <div style="font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:#999;margin-bottom:4px;">What you get</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>Free account — no card needed</div>
-          <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>5 questions per day</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>5 questions per day (rolling 24hr)</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>Short answer + explanation</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>All subjects</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>Photo upload</div>
           <div style="font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:#ccc;margin:8px 0 4px;">Upgrade to unlock</div>
-          <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#ccc;"><span style="width:22px;height:22px;border-radius:6px;background:#f9fafb;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">🔒</span>Unlimited questions</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#ccc;"><span style="width:22px;height:22px;border-radius:6px;background:#f9fafb;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">🔒</span>25 questions per day (Pro)</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#ccc;"><span style="width:22px;height:22px;border-radius:6px;background:#f9fafb;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">🔒</span>Step-by-step breakdowns</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#ccc;"><span style="width:22px;height:22px;border-radius:6px;background:#f9fafb;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">🔒</span>Tip section</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#ccc;"><span style="width:22px;height:22px;border-radius:6px;background:#f9fafb;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">🔒</span>Conversation memory</div>
@@ -1395,7 +1426,7 @@
         <p style="font-size:13px;font-weight:700;color:var(--green-dark);margin:10px 0 20px;">Real explanations that teach you</p>
         <div style="border-top:2px solid var(--border);padding-top:16px;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;">
           <div style="font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:#999;margin-bottom:4px;">Everything in Free, plus</div>
-          <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>Unlimited questions</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>25 questions per day</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>Smarter AI — deeper answers</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>Numbered step-by-step breakdowns</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text);"><span style="width:22px;height:22px;border-radius:6px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 2px 0 var(--green-dark);">✔</span>Tip section — shortcuts &amp; tricks</div>
@@ -1425,6 +1456,7 @@
         </div>
         <div style="border-top:2px solid rgba(255,255,255,0.25);padding-top:16px;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;">
           <div style="font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:4px;">Everything in Pro, plus</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:white;"><span style="width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,0.25);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>40 questions per day</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:white;"><span style="width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,0.25);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>Best-in-class AI model</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:white;"><span style="width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,0.25);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>3–4 paragraph deep explanations</div>
           <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:white;"><span style="width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,0.25);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✔</span>Insight — deeper context</div>
@@ -1889,6 +1921,45 @@
   function closeDropdown() { const d = document.getElementById('accountDropdown'); if (d) d.classList.remove('open'); }
   function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
   function closeMobileNav() { document.getElementById('mobileNav').classList.remove('open'); }
+
+  // ── Update usage progress bar ─────────────────────────────────────────────
+  function updateUsageBar(usage) {
+    if (!usage) return;
+    const wrap  = document.getElementById('usageBarWrap');
+    const label = document.getElementById('usageBarLabel');
+    const fill  = document.getElementById('usageBarFill');
+    if (!wrap || !label || !fill) return;
+
+    const used  = usage.hw  || 0;
+    const limit = usage.hwLimit || 5;
+    const pct   = Math.min((used / limit) * 100, 100);
+
+    wrap.style.display = 'block';
+    label.textContent  = `${used} / ${limit} questions used today`;
+    fill.style.width   = pct + '%';
+    fill.className     = 'usage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warn' : '');
+  }
+
+  // ── Show limit reached modal with countdown ───────────────────────────────
+  function showLimitModal(data) {
+    const isPro = userPlan === 'pro' || userPlan === 'pro_plus';
+    const m = document.createElement('div');
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;';
+    m.innerHTML = `<div style="background:white;max-width:420px;width:100%;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+      <div style="background:var(--orange);padding:28px;text-align:center;">
+        <div style="font-size:44px;margin-bottom:8px;">⏰</div>
+        <h3 style="font-size:22px;font-weight:900;color:white;">You're all out!</h3>
+        <p style="font-size:14px;color:rgba(255,255,255,0.9);font-weight:600;margin-top:6px;">You've used all ${data.limit || ''} questions for this 24hr window.</p>
+        ${data.countdown ? `<div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:10px 16px;margin-top:14px;font-size:15px;font-weight:800;color:white;">Next question unlocks in <span style="font-size:18px;">${data.countdown}</span></div>` : ''}
+      </div>
+      <div style="padding:24px 28px;display:flex;flex-direction:column;gap:10px;">
+        ${!isPro ? `<button onclick="this.closest('div[style*=fixed]').remove();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:var(--green);color:white;cursor:pointer;box-shadow:0 4px 0 var(--green-dark);">Upgrade for More Questions</button>` : ''}
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:13px;border-radius:14px;font-size:14px;font-weight:800;font-family:inherit;border:2px solid var(--border);background:white;color:#777;cursor:pointer;">Got it</button>
+      </div>
+    </div>`;
+    m.onclick = (e) => { if (e.target === m) m.remove(); };
+    document.body.appendChild(m);
+  }
 
   function scrollToAI() { document.getElementById('ai-helper').scrollIntoView({ behavior:'smooth' }); }
   function scrollToPricing() { document.getElementById('pricing').scrollIntoView({ behavior:'smooth' }); }
@@ -2364,24 +2435,12 @@
       }
 
       if (res.status === 429) {
-        const old = document.getElementById('knoxThinkingRow');
-        if (old) old.remove();
+        const old429 = document.getElementById('knoxThinkingRow');
+        if (old429) old429.remove();
         resetBtn();
-        const m = document.createElement('div');
-        m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;';
-        m.innerHTML = `<div style="background:white;max-width:400px;width:100%;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
-          <div style="background:var(--orange);padding:24px 28px;text-align:center;">
-            <div style="font-size:40px;margin-bottom:8px;">⏰</div>
-            <h3 style="font-size:20px;font-weight:900;color:white;">Daily Limit Reached</h3>
-            <p style="font-size:13px;color:rgba(255,255,255,0.85);font-weight:600;margin-top:6px;">You've used all your free questions for today.</p>
-          </div>
-          <div style="padding:24px 28px;display:flex;flex-direction:column;gap:10px;">
-            <button onclick="this.closest('div[style*=fixed]').remove();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:var(--green);color:white;cursor:pointer;box-shadow:0 4px 0 var(--green-dark);">Upgrade to Pro</button>
-            <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:13px;border-radius:14px;font-size:14px;font-weight:800;font-family:inherit;border:2px solid var(--border);background:white;color:#777;cursor:pointer;">Close</button>
-          </div>
-        </div>`;
-        m.onclick = (e) => { if (e.target === m) m.remove(); };
-        document.body.appendChild(m);
+        let limitData = {};
+        try { limitData = await res.json(); } catch(e) {}
+        showLimitModal(limitData);
         return;
       }
 
@@ -2434,6 +2493,9 @@
         const bubble = knoxRow.querySelector('.chat-knox-bubble');
         if (bubble) bubble.appendChild(saveBtn);
       }
+
+      // Update usage progress bar
+      if (data.usage) updateUsageBar(data.usage);
 
       // Update conversation memory
       conversationHistory.push(
@@ -3248,6 +3310,9 @@
     const questionsUsed = usage.count || 0;
     const questionsLeft = userPlan === 'pro' || userPlan === 'pro_plus' ? '∞' : Math.max(0, DAILY_LIMIT - questionsUsed);
     document.getElementById('settingsUsage').textContent = isPaid ? 'Unlimited' : `${questionsLeft} remaining`;
+    // Show countdown row if at limit
+    const cdRow = document.getElementById('settingsCountdownRow');
+    if (cdRow) cdRow.style.display = 'none';
 
     document.getElementById('settingsModal').classList.add('open');
   };
@@ -3318,9 +3383,14 @@
       <div style="display:flex;align-items:center;justify-content:space-between;background:#f9fafb;border-radius:16px;padding:16px 20px;border:2px solid #f3f4f6;">
         <div>
           <div style="font-weight:800;font-size:15px;color:#1f2937;">Questions Today</div>
-          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Resets at midnight</div>
+          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Rolling 24hr window</div>
         </div>
-        <div id="settingsUsage" style="font-weight:800;font-size:14px;color:#374151;">—</div>
+        <div id="settingsUsage" style="font-weight:800;font-size:14px;color:#374151;text-align:right;">—</div>
+      </div>
+      <!-- Countdown row — shown when limit hit -->
+      <div id="settingsCountdownRow" style="display:none;background:#FFF4EC;border-radius:16px;padding:14px 20px;border:2px solid #FFCFA0;">
+        <div style="font-size:11px;font-weight:900;color:#CC5500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Next question unlocks in</div>
+        <div id="settingsCountdown" style="font-size:22px;font-weight:900;color:#FF6B00;">—</div>
       </div>
 
       <!-- Buttons -->
