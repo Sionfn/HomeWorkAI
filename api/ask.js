@@ -114,19 +114,18 @@ function isCasualChat(question) {
   // Always casual: pure greetings / reactions / identity questions
   if (/^(hey|hi|hello|sup|yo+|heyy+|what'?s? up|how are you|how'?s? it going|good morning|good afternoon|good night|thanks|thank you|thx|cool|nice|ok|okay|lol|lmao|haha|who are you|what are you|what'?s? your name|are you (ai|real|a fox|a bot)|you'?re? (cool|awesome|great|smart|amazing|the best)|i (love|like) (you|this|knox)|that'?s? (cool|awesome|crazy|wild|insane)|no way|for real|seriously|bro|dude|omg|wait what|🦊)[.!?]?$/.test(q)) return true;
 
-  // These patterns = ALWAYS homework, never casual, even if short or friendly-sounding
-  const definitelyHomework = /\b(solve|calculate|what is \d|simplify|factor|derive|integrate|differentiate|prove that|find the (value|area|volume|angle|slope|distance|derivative|integral|solution|answer|equation)|write (an? )?(essay|paragraph|thesis|summary|analysis)|explain (how|why|what|the (process|concept|theory|formula|law|rule|difference))|what (causes?|is the (formula|definition|law|rule|theorem|equation|process|difference|meaning))|how (does|do|did|can|should|would)|why (does|do|did|is|are|was|were)|when (did|was|were|is|are)|who (was|is|were|are|invented|discovered|wrote|created)|define |describe (the|how|why)|what are (the|some)|step[- ]by[- ]step|solve for|in the equation|in (chemistry|physics|biology|math|history|english|science|economics|calculus|algebra|geometry|literature)|ap (exam|class|test|course)|sat |act |gre |gmat |lsat )\b/i.test(q);
+  // ALWAYS homework — never casual, even if phrased casually or visually
+  const definitelyHomework = /\b(solve|calculate|what is \d|simplify|factor|derive|integrate|differentiate|prove that|find the (value|area|volume|angle|slope|distance|derivative|integral|solution|answer|equation)|write (an? )?(essay|paragraph|thesis|summary|analysis)|explain (how|why|what|the (process|concept|theory|formula|law|rule|difference))|what (causes?|is the (formula|definition|law|rule|theorem|equation|process|difference|meaning))|how (does|do|did|can|should|would)|why (does|do|did|is|are|was|were)|when (did|was|were|is|are)|who (was|is|were|are|invented|discovered|wrote|created)|define |describe (the|how|why)|what are (the|some)|step[- ]by[- ]step|solve for|in the equation|in (chemistry|physics|biology|math|history|english|science|economics|calculus|algebra|geometry|literature)|ap (exam|class|test|course)|sat |act |gre |gmat |lsat |teach me|show me how|help me (understand|learn|study|write|solve|figure)|in a visual way|visually|in a (simple|easy|fun|creative|different) way|like i('?m| am) (5|a kid|a beginner|new|dumb)|break (it|this|that) down|walk me through|explain (it|this|that)|can you explain|how do (i|you)|what('?s| is) (a|an|the) \w+\??$)\b/i.test(q);
   if (definitelyHomework) return false;
 
   // Homework mentioned casually = still casual
-  // e.g. "ugh i have so much homework" "knox do you like homework" "homework is hard lol"
   const homeworkCasual = /\b(hate|love|like|dislike|have|got|so much|too much|lots of|a lot of|my|this|the) homework\b/i.test(q) && !definitelyHomework;
   if (homeworkCasual) return true;
 
-  // Short messages with no real school question structure = casual
-  const hasRealQuestion = /\b(explain|solve|calculate|define|describe|summarize|analyze|write|find|prove|show|evaluate|compare|contrast|what is the (formula|law|theorem|rule|definition|meaning|difference|equation)|how (does|do|did|can) (the|a|an|it|this|that)|why (is|are|was|were|does|do|did))\b/i.test(q);
+  // Has any real question structure = homework
+  const hasRealQuestion = /\b(explain|solve|calculate|define|describe|summarize|analyze|write|find|prove|teach|show|evaluate|compare|contrast|what is the (formula|law|theorem|rule|definition|meaning|difference|equation)|how (does|do|did|can) (the|a|an|it|this|that)|why (is|are|was|were|does|do|did)|what (is|are|was|were) (a|an|the)|tell me about|what happens|how (it|this) works)\b/i.test(q);
 
-  return !hasRealQuestion && q.length < 150;
+  return !hasRealQuestion && q.length < 120;
 }
 
 // ── Parse and extract Resources section (handles markdown links too) ──────
