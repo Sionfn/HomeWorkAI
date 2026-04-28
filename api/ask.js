@@ -393,17 +393,17 @@ LEARNING STYLE — VERBAL / WORD LEARNER:
   let planInstructions = "";
   if (userPlan === "free") {
     planInstructions = `=== PLAN: FREE ===
-Give a direct answer and a brief explanation. Nothing more.
+This is a real school question. Answer it directly and concisely.
 
 USE EXACTLY THESE TWO HEADERS — NO OTHERS:
-Final Answer: [One clear sentence — the direct answer to the question]
-Explanation: [2-3 sentences only explaining how or why. Plain prose, no lists.]
+Final Answer: [One clear, direct sentence answering the question]
+Explanation: [2-3 sentences explaining how or why. Plain prose only — no lists, no bullets.]
 
 STRICT RULES:
-- ONLY "Final Answer:" and "Explanation:" — no other headers ever
-- No bold, no asterisks, no underlines, no numbered lists, no bullet points
-- HARD LIMIT: Your ENTIRE response must be 100 words or fewer. Count them. Stop at 100.
-- If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
+- Start your response with "Final Answer:" — always, no exceptions
+- ONLY use "Final Answer:" and "Explanation:" headers — zero others
+- No bold, no asterisks, no underlines, no numbered lists, no bullet points, no markdown
+- Your ENTIRE response must be 100 words or fewer — be concise and direct`;
 
   } else if (userPlan === "pro") {
     planInstructions = `=== PLAN: PRO ===
@@ -547,7 +547,7 @@ UNIVERSAL RULES:
   const maxTokens = casual ? 800 :
     userPlan === "pro_plus" ? ((learningStyle === "visual" || wantsVisual) ? 2800 : 2000) :
     userPlan === "pro"      ? 2000 :
-                              250;  // ~100 words for free plan (100 words ≈ 130 tokens, 250 gives clean buffer)
+                              350;  // 100 words ≈ 130 tokens; 350 gives clean buffer without over-generating
 
   // 9. Call OpenAI Chat Completions API
   try {
