@@ -979,8 +979,8 @@
       display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;
     }
     /* Usage progress bar */
-    .usage-bar-wrap { padding:8px 20px 10px;background:#FAFAFA;border-top:1.5px solid #F3F4F6; }
-    .usage-bar-label { display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#9CA3AF;margin-bottom:4px; }
+    .usage-bar-wrap { padding:10px 16px 12px;background:#FAFAFA;border-top:1.5px solid #F3F4F6; }
+    .usage-bar-label { display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;color:#9CA3AF;margin-bottom:4px; }
     .usage-bar-track { height:5px;background:#F3F4F6;border-radius:999px;overflow:hidden; }
     .usage-bar-fill  { height:100%;border-radius:999px;transition:width 0.4s ease;background:#58CC02; }
     .usage-bar-fill.warn   { background:#F59E0B; }
@@ -1310,14 +1310,47 @@
         </div>
       </div>
 
-      <!-- Usage bar -->
+      <!-- Usage bars -->
       <div id="usageBarWrap" class="usage-bar-wrap" style="display:none;">
-        <div class="usage-bar-label">
-          <span id="usageBarLabel">0 / 5 questions used</span>
-          <span id="usageBarCountdown"></span>
+        <!-- Homework credits -->
+        <div style="margin-bottom:8px;">
+          <div class="usage-bar-label">
+            <span style="display:flex;align-items:center;gap:5px;">
+              <span style="font-size:10px;">📚</span>
+              <span id="usageBarLabel">0 / 5 homework questions used</span>
+            </span>
+            <span id="usageBarCountdown" style="font-size:11px;font-weight:800;"></span>
+          </div>
+          <div class="usage-bar-track">
+            <div id="usageBarFill" class="usage-bar-fill" style="width:0%;"></div>
+          </div>
+          <!-- Live countdown clock -->
+          <div id="hwClockWrap" style="display:none;margin-top:5px;padding:6px 10px;background:#FEF2F2;border-radius:8px;border:1.5px solid #FECACA;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:11px;font-weight:700;color:#DC2626;">⏱ Next homework credit unlocks in:</span>
+              <span id="hwClockDisplay" style="font-size:13px;font-weight:900;color:#DC2626;font-variant-numeric:tabular-nums;letter-spacing:0.04em;">--:--:--</span>
+            </div>
+          </div>
         </div>
-        <div class="usage-bar-track">
-          <div id="usageBarFill" class="usage-bar-fill" style="width:0%;"></div>
+        <!-- Casual credits -->
+        <div id="casualBarSection">
+          <div class="usage-bar-label">
+            <span style="display:flex;align-items:center;gap:5px;">
+              <span style="font-size:10px;">💬</span>
+              <span id="casualBarLabel">0 / 20 chat messages used</span>
+            </span>
+            <span id="casualBarCountdown" style="font-size:11px;font-weight:800;"></span>
+          </div>
+          <div class="usage-bar-track">
+            <div id="casualBarFill" class="usage-bar-fill" style="width:0%;background:#1CB0F6;"></div>
+          </div>
+          <!-- Live countdown clock for casual -->
+          <div id="csClockWrap" style="display:none;margin-top:5px;padding:6px 10px;background:#EFF9FF;border-radius:8px;border:1.5px solid #BAE6FD;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:11px;font-weight:700;color:#0369A1;">⏱ Next chat credit unlocks in:</span>
+              <span id="csClockDisplay" style="font-size:13px;font-weight:900;color:#0369A1;font-variant-numeric:tabular-nums;letter-spacing:0.04em;">--:--:--</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1998,40 +2031,106 @@
   function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
   function closeMobileNav() { document.getElementById('mobileNav').classList.remove('open'); }
 
-  // ── Update usage progress bar ─────────────────────────────────────────────
+  // ── Live clock timers ─────────────────────────────────────────────────────
+  let _hwClockInterval = null;
+  let _csClockInterval = null;
+
+  function startHwClock(unlockTs) {
+    if (_hwClockInterval) clearInterval(_hwClockInterval);
+    const el = document.getElementById('hwClockDisplay');
+    const wrap = document.getElementById('hwClockWrap');
+    if (!el || !wrap) return;
+    wrap.style.display = 'block';
+    function tick() {
+      const ms = unlockTs - Date.now();
+      if (ms <= 0) { clearInterval(_hwClockInterval); wrap.style.display = 'none'; return; }
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    tick();
+    _hwClockInterval = setInterval(tick, 1000);
+  }
+
+  function startCsClock(unlockTs) {
+    if (_csClockInterval) clearInterval(_csClockInterval);
+    const el = document.getElementById('csClockDisplay');
+    const wrap = document.getElementById('csClockWrap');
+    if (!el || !wrap) return;
+    wrap.style.display = 'block';
+    function tick() {
+      const ms = unlockTs - Date.now();
+      if (ms <= 0) { clearInterval(_csClockInterval); wrap.style.display = 'none'; return; }
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    tick();
+    _csClockInterval = setInterval(tick, 1000);
+  }
+
+  // ── Update usage progress bars ────────────────────────────────────────────
   function updateUsageBar(usage) {
     if (!usage) return;
-    const wrap      = document.getElementById('usageBarWrap');
-    const label     = document.getElementById('usageBarLabel');
-    const fill      = document.getElementById('usageBarFill');
-    const countdown = document.getElementById('usageBarCountdown');
-    if (!wrap || !label || !fill) return;
+    const wrap = document.getElementById('usageBarWrap');
+    if (!wrap) return;
 
-    const used  = usage.hw  || 0;
-    const limit = usage.hwLimit || 5;
-    const pct   = Math.min((used / limit) * 100, 100);
-    const left  = Math.max(0, limit - used);
+    const uPlan = window.userPlan || userPlan || 'free';
 
+    // Hide bars entirely for Pro+ (unlimited casual) and Pro (show hw only)
+    // Always show for free
     wrap.style.display = 'block';
-    label.textContent  = `${used} / ${limit} questions used (rolling 24hr)`;
-    fill.style.width   = pct + '%';
-    fill.className     = 'usage-bar-fill' + (pct >= 100 ? ' danger' : pct >= 80 ? ' warn' : '');
 
-    // Show countdown when at limit or 1 question left
-    if (countdown) {
-      if (usage.nextUnlock && left === 0) {
-        const msLeft = usage.nextUnlock - Date.now();
-        if (msLeft > 0) {
-          const hrs = Math.floor(msLeft / 3600000);
-          const min = Math.floor((msLeft % 3600000) / 60000);
-          countdown.textContent = hrs > 0 ? `Next unlocks in ${hrs}h ${min}m` : `Next unlocks in ${min}m`;
-          countdown.style.color = '#EF4444';
-        }
-      } else if (left === 1) {
-        countdown.textContent = '1 question left!';
-        countdown.style.color = '#F59E0B';
+    // ── Homework bar ──────────────────────────────────────────────────────
+    const hwUsed  = usage.hw       || 0;
+    const hwLimit = usage.hwLimit  || 5;
+    const hwLeft  = Math.max(0, hwLimit - hwUsed);
+    const hwPct   = Math.min((hwUsed / hwLimit) * 100, 100);
+
+    const hwLabel = document.getElementById('usageBarLabel');
+    const hwFill  = document.getElementById('usageBarFill');
+    const hwCd    = document.getElementById('usageBarCountdown');
+    const hwClockWrap = document.getElementById('hwClockWrap');
+
+    if (hwLabel) hwLabel.textContent = `${hwUsed} / ${hwLimit} homework questions used`;
+    if (hwFill)  { hwFill.style.width = hwPct + '%'; hwFill.className = 'usage-bar-fill' + (hwPct >= 100 ? ' danger' : hwPct >= 80 ? ' warn' : ''); }
+    if (hwCd)    { hwCd.textContent = hwLeft === 1 ? '1 left!' : ''; hwCd.style.color = '#F59E0B'; }
+
+    if (usage.nextUnlock && hwLeft === 0) {
+      startHwClock(usage.nextUnlock);
+    } else {
+      if (_hwClockInterval) clearInterval(_hwClockInterval);
+      if (hwClockWrap) hwClockWrap.style.display = 'none';
+    }
+
+    // ── Casual bar ────────────────────────────────────────────────────────
+    const casualSection = document.getElementById('casualBarSection');
+    const csLabel = document.getElementById('casualBarLabel');
+    const csFill  = document.getElementById('casualBarFill');
+    const csCd    = document.getElementById('casualBarCountdown');
+    const csClockWrap = document.getElementById('csClockWrap');
+
+    if (uPlan === 'pro_plus') {
+      // Pro+: unlimited casual — hide the casual bar
+      if (casualSection) casualSection.style.display = 'none';
+    } else {
+      if (casualSection) casualSection.style.display = 'block';
+      const csUsed  = usage.casual      || 0;
+      const csLimit = usage.casualLimit || (uPlan === 'pro' ? 50 : 20);
+      const csLeft  = Math.max(0, csLimit - csUsed);
+      const csPct   = Math.min((csUsed / csLimit) * 100, 100);
+
+      if (csLabel) csLabel.textContent = `${csUsed} / ${csLimit} chat messages used`;
+      if (csFill)  { csFill.style.width = csPct + '%'; csFill.className = 'usage-bar-fill' + (csPct >= 100 ? ' danger' : csPct >= 80 ? ' warn' : ''); csFill.style.background = csPct >= 100 ? '' : csPct >= 80 ? '' : '#1CB0F6'; }
+      if (csCd)    { csCd.textContent = csLeft === 1 ? '1 left!' : ''; csCd.style.color = '#F59E0B'; }
+
+      if (usage.csNextUnlock && csLeft === 0) {
+        startCsClock(usage.csNextUnlock);
       } else {
-        countdown.textContent = '';
+        if (_csClockInterval) clearInterval(_csClockInterval);
+        if (csClockWrap) csClockWrap.style.display = 'none';
       }
     }
   }
