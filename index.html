@@ -2507,7 +2507,15 @@
       let responseHtml;
       if (data.isCasual) {
         const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
-        responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
+        // Short casual replies = plain text; longer ones = styled freeform
+        if (clean.split('\n').filter(l => l.trim()).length <= 3 && clean.length < 300) {
+          responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
+        } else {
+          // Multi-paragraph casual = use freeform renderer (handles visual responses)
+          const planTagClass2 = serverPlan === 'pro_plus' ? 'tag-pro-plus' : serverPlan === 'pro' ? 'tag-pro' : 'tag-free';
+          const planTag2 = serverPlan === 'pro_plus' ? 'Pro+' : serverPlan === 'pro' ? 'Pro' : 'Free';
+          responseHtml = `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(clean, serverPlan)}<div style="height:10px;"></div>`;
+        }
       } else if (data.isAcknowledgement) {
         const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
         responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
