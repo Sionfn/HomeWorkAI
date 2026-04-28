@@ -20,13 +20,26 @@ if (!getApps().length) {
 const adminAuth = getAdminAuth();
 
 const PRICES = {
+  wonder: {
+    monthly: process.env.STRIPE_PRICE_WONDER_MONTHLY,
+    yearly:  process.env.STRIPE_PRICE_WONDER_YEARLY,
+  },
+  super: {
+    monthly: process.env.STRIPE_PRICE_SUPER_MONTHLY,
+    yearly:  process.env.STRIPE_PRICE_SUPER_YEARLY,
+  },
+  max: {
+    monthly: process.env.STRIPE_PRICE_MAX_MONTHLY,
+    yearly:  process.env.STRIPE_PRICE_MAX_YEARLY,
+  },
+  // Legacy keys (keep so old links don't break)
   pro: {
-    monthly: process.env.STRIPE_PRICE_PRO_MONTHLY,
-    yearly:  process.env.STRIPE_PRICE_PRO_YEARLY,
+    monthly: process.env.STRIPE_PRICE_WONDER_MONTHLY,
+    yearly:  process.env.STRIPE_PRICE_WONDER_YEARLY,
   },
   pro_plus: {
-    monthly: process.env.STRIPE_PRICE_PRO_PLUS_MONTHLY,
-    yearly:  process.env.STRIPE_PRICE_PRO_PLUS_YEARLY,
+    monthly: process.env.STRIPE_PRICE_SUPER_MONTHLY,
+    yearly:  process.env.STRIPE_PRICE_SUPER_YEARLY,
   },
 };
 
@@ -72,7 +85,7 @@ export default async function handler(req, res) {
 
     // 3-day trial only on Pro monthly
     let subscriptionData = { metadata: { plan, billing } };
-    if (plan === "pro" && billing === "monthly") {
+    if ((plan === "wonder" || plan === "pro") && billing === "monthly") {
       subscriptionData.trial_period_days = 3;
     }
 
