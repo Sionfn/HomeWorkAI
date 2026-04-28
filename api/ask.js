@@ -307,7 +307,7 @@ export default async function handler(req, res) {
   const isAdmin = (userEmail === ADMIN_EMAIL);
 
   // Detect casual before limit check so we can apply the right bucket
-  const { question: rawQ, imageBase64, imageType, history } = req.body;
+  const { question: rawQ, imageBase64, imageType, history, learnMode, isStuck, showMe, gradeLevel, isCorrectAnswer } = req.body;
   const preCheckQuestion = (rawQ || "").trim();
   const preCheckCasual   = isCasualChat(preCheckQuestion) && !imageBase64;
 
@@ -514,10 +514,88 @@ STRICT RULES:
 - If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
   }
 
-  // Detect if this is casual chat vs homework question
-  const casual = isCasualChat(trimmedQuestion) && !hasImage;
+  // ── Grade level detection ─────────────────────────────────────────────────
+  function detectGradeLevel(hist, q) {
+    const text = [...(hist||[]).map(m=>m.content||''), q].join(' ');
+    if (/calculus|derivative|integral|linear algebra|differential|multivariable|ap calc|ap physics c|quantum|thermodynamics|organic chem/i.test(text)) return 'college';
+    if (/pre.?calc|trigonometry|ap |sat |act |honors|physics|chemistry|algebra 2|statistics|macroeconomics/i.test(text)) return 'high';
+    if (/algebra|geometry|biology|earth science|civics|world history|us history|middle school/i.test(text)) return 'middle';
+    if (/multiplication|division|fractions|decimals|addition|subtraction|spelling|elementary/i.test(text)) return 'elementary';
+    return 'high';
+  }
+  const inferredGrade = gradeLevel || detectGradeLevel(safeHistory, trimmedQuestion);
+  const isPaidUser = userPlan !== 'free';
 
-  const systemPrompt = `You are Knox — a clever, warm, enthusiastic orange fox and the heart of Knox Knows. You are a real character with personality. Students talk to you like a friend, and you talk back like one too.
+  // ── Socratic prompt (Learn with Knox) ────────────────────────────────────
+  let socraticPrompt = null;
+  if (learnMode) {
+    const gradeMap = {
+      elementary: 'Talk like a kind teacher to a 3rd-5th grader. Super simple words, lots of encouragement.',
+      middle:     'Clear friendly language, relate to everyday life. Think 6th-8th grade student.',
+      high:       'Use subject terms but explain them. High school level — capable but still learning.',
+      college:    'Treat as a peer. Precise academic language. Expect rigorous thinking.',
+    };
+    const gradeHint = gradeMap[inferredGrade] || gradeMap.high;
+
+    if (isStuck) {
+      socraticPrompt = `You are Knox — a Socratic tutor. The student is stuck. Convert your last guiding question into 4 multiple choice options.
+
+FORMAT — use EXACTLY this structure, nothing else:
+MULTIPLE_CHOICE
+Question: [The guiding question restated clearly]
+A) [Plausible option]
+B) [Plausible option]
+C) [Plausible option]
+D) [Plausible option]
+ANSWER: [correct letter only, e.g. B]
+HINT: [One warm sentence hinting toward the answer without giving it away]
+
+RULES: Shuffle the correct answer position randomly. Make wrong options plausible. Keep options concise.
+Grade level: ${gradeHint}`;
+
+    } else if (showMe && isPaidUser) {
+      socraticPrompt = `You are Knox — a Socratic tutor. The student asked to see a similar problem solved.
+
+FORMAT — use EXACTLY this structure:
+SHOW_ME
+Similar Problem: [A comparable problem with different numbers/context but same concept]
+Step-by-step solution:
+1. [Step with clear work shown]
+2. [Next step]
+3. [Continue to completion]
+Now try yours: [One sentence encouraging them back to their original problem]
+
+RULES: DIFFERENT problem, same skill. Show ALL work. No shortcuts. End with encouragement.
+Grade level: ${gradeHint}`;
+
+    } else {
+      const phase = safeHistory.length === 0 ? 'DIAGNOSE — first message, identify what they need help with'
+        : safeHistory.length <= 2 ? 'OPEN QUESTION — ask one question to test their baseline understanding'
+        : safeHistory.length <= 6 ? 'SCAFFOLD — guide step by step, one hint at a time, never give the answer'
+        : 'CONFIRM or QUICK CHECK — if correct celebrate and ask a reinforcement question, if wrong gently redirect';
+
+      socraticPrompt = `You are Knox — a warm clever Socratic tutor. You NEVER give the answer directly.
+
+CURRENT PHASE: ${phase}
+
+THE LOOP: Diagnose → Ask one opening question → Scaffold step by step → Let them arrive → Confirm → Quick Check
+
+CRITICAL RULES:
+- NEVER write the answer. Not even partially. Not as an example.
+- Ask ONE question at a time. Never stack questions.
+- Keep responses SHORT — 2-4 sentences max. This is a conversation not a lecture.
+- Be warm. When they get it right, celebrate genuinely.
+- When wrong, never say "wrong" — say "almost!" or "not quite — think about..."
+- Sound like Knox: smart friend texting them, not a textbook.
+- NO section headers (Final Answer:, Explanation: etc.) — pure conversation only.
+Grade level: ${gradeHint}`;
+    }
+  }
+
+  // Detect if this is casual chat vs homework question
+  const casual = learnMode ? false : isCasualChat(trimmedQuestion) && !hasImage;
+
+  const systemPrompt = learnMode ? socraticPrompt : `You are Knox — a clever, warm, enthusiastic orange fox and the heart of Knox Knows. You are a real character with personality. Students talk to you like a friend, and you talk back like one too.
 
 YOUR PERSONALITY:
 - You're that one friend who's somehow great at every subject — but you're not cocky about it, you just love helping
@@ -679,10 +757,15 @@ UNIVERSAL RULES:
     return res.status(200).json({
       answer,
       resources,
-      plan:             userPlan,
+      plan:              userPlan,
       learningStyle,
       isAcknowledgement: prefOnly || casual,
-      isCasual:         casual,
+      isCasual:          casual,
+      isLearnMode:       !!learnMode,
+      isStuck:           !!isStuck,
+      isShowMe:          !!showMe,
+      inferredGrade:     inferredGrade || 'high',
+      canShowMe:         isPaidUser,
       embeddedVideo,
       imageSearchQuery,
       videos: [],
