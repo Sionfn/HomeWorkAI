@@ -34,12 +34,13 @@ if (!getApps().length) {
 const adminAuth = getAdminAuth();
 const db        = getFirestore();
 
-const FREE_DAILY_LIMIT   = 5;   // homework questions per 24hr rolling window
-const PRO_DAILY_LIMIT    = 25;  // homework questions per 24hr rolling window
-const PROPLUS_DAILY_LIMIT= 40;  // homework questions per 24hr rolling window
-const FREE_CASUAL_LIMIT  = 20;  // casual messages per 24hr rolling window
-const PRO_CASUAL_LIMIT   = 50;  // casual messages per 24hr rolling window
-const WINDOW_MS          = 24 * 60 * 60 * 1000; // 24 hour rolling window in ms
+const FREE_DAILY_LIMIT    = 5;    // homework questions per 24hr rolling window
+const WONDER_DAILY_LIMIT  = 25;   // Wonder (was Pro)
+const SUPER_DAILY_LIMIT   = 40;   // Super (was Pro+)
+const MAX_DAILY_LIMIT     = Infinity; // Max — unlimited homework
+const FREE_CASUAL_LIMIT   = 20;
+const WONDER_CASUAL_LIMIT = 50;
+const WINDOW_MS           = 24 * 60 * 60 * 1000;
 const ADMIN_EMAIL        = process.env.ADMIN_EMAIL || "";
 const VIP_PRO_EMAILS     = (process.env.VIP_PRO_EMAILS || "")
   .split(",").map(e => e.trim()).filter(Boolean);
@@ -224,9 +225,9 @@ export default async function handler(req, res) {
   // 2. Resolve plan server-side
   let userPlan = "free";
   if (userEmail === ADMIN_EMAIL) {
-    userPlan = "pro_plus";
+    userPlan = "max";
   } else if (VIP_PRO_EMAILS.includes(userEmail)) {
-    userPlan = "pro";
+    userPlan = "wonder";
   } else {
     try {
       const doc = await db.collection("users").doc(uid).get();
@@ -236,16 +237,20 @@ export default async function handler(req, res) {
     }
   }
 
-  // 3. Rolling 24hr usage limits
+  // 3. Rolling 24hr usage limits with IP-layer protection
   const now = Date.now();
+  const clientIP = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim();
   const usageRef = db.collection("usage").doc(uid);
+  // IP shadow doc — blocks credit farming via account switching
+  const ipRef    = db.collection("ip_usage").doc(clientIP.replace(/[.:]/g, '_'));
 
   // Limits per plan
-  const hwLimit     = userPlan === "pro_plus" ? PROPLUS_DAILY_LIMIT
-                    : userPlan === "pro"       ? PRO_DAILY_LIMIT
+  const hwLimit     = (userPlan === "max")                          ? Infinity
+                    : (userPlan === "super"  || userPlan === "pro_plus") ? SUPER_DAILY_LIMIT
+                    : (userPlan === "wonder" || userPlan === "pro")      ? WONDER_DAILY_LIMIT
                     : FREE_DAILY_LIMIT;
-  const casualLimit = userPlan === "pro_plus" ? Infinity
-                    : userPlan === "pro"       ? PRO_CASUAL_LIMIT
+  const casualLimit = (userPlan === "max" || userPlan === "super" || userPlan === "pro_plus") ? Infinity
+                    : (userPlan === "wonder" || userPlan === "pro")      ? WONDER_CASUAL_LIMIT
                     : FREE_CASUAL_LIMIT;
 
   // Skip limits for admin
@@ -288,8 +293,27 @@ export default async function handler(req, res) {
           updatedAt: now,
         }, { merge: true });
       } else {
+        // IP-layer check — prevents credit farming via account switching
+        // (free/wonder users only — paid plans aren't affected)
+        if (userPlan === "free" || userPlan === "wonder") {
+          try {
+            const ipSnap = await ipRef.get();
+            const ipData = ipSnap.exists ? ipSnap.data() : {};
+            const ipHwTimes = (ipData.hwTimes || []).filter(t => now - t < WINDOW_MS);
+            if (ipHwTimes.length >= hwLimit) {
+              const oldest = Math.min(...ipHwTimes);
+              const unlockMs = WINDOW_MS - (now - oldest);
+              const unlockMin = Math.ceil(unlockMs / 60000);
+              const hrs = Math.floor(unlockMin / 60);
+              const min = unlockMin % 60;
+              const countdown = hrs > 0 ? `${hrs}h ${min}m` : `${min}m`;
+              return res.status(429).json({ error: "limit_reached", countdown, limit: hwLimit, used: ipHwTimes.length, nextUnlock: oldest + WINDOW_MS });
+            }
+          } catch(ipErr) { console.warn("IP check failed:", ipErr.message); }
+        }
+
         // Homework question limit check
-        if (hwTimes.length >= hwLimit) {
+        if (hwLimit !== Infinity && hwTimes.length >= hwLimit) {
           const oldest    = Math.min(...hwTimes);
           const unlockMs  = WINDOW_MS - (now - oldest);
           const unlockMin = Math.ceil(unlockMs / 60000);
@@ -304,13 +328,20 @@ export default async function handler(req, res) {
             nextUnlock: oldest + WINDOW_MS,
           });
         }
-        // Record homework question
+        // Record homework question (uid + IP)
         await usageRef.set({
           hwTimes: [...hwTimes, now],
           casualTimes: csTimes,
           uid, email: userEmail,
           updatedAt: now,
         }, { merge: true });
+        // Write IP shadow record
+        try {
+          const ipSnap2 = await ipRef.get();
+          const ipD2 = ipSnap2.exists ? ipSnap2.data() : {};
+          const ipHw2 = (ipD2.hwTimes || []).filter(t => now - t < WINDOW_MS);
+          await ipRef.set({ hwTimes: [...ipHw2, now], updatedAt: now }, { merge: true });
+        } catch(e2) {}
       }
     } catch (err) {
       console.error("Usage tracking error:", err.message);
@@ -344,7 +375,7 @@ export default async function handler(req, res) {
   // auto re-ask the last question so the AI re-explains it with the new style.
   // Free plan does NOT get this — visual learning is a paid feature.
   const isJustPreference = isPreferenceOnly(trimmedQuestion);
-  if (isJustPreference && hasHistory && !hasImage && userPlan !== "free") {
+  if (isJustPreference && hasHistory && !hasImage && userPlan !== "free" && userPlan !== "wonder") {
     const lastUserMsg  = [...safeHistory].reverse().find(m => m.role === "user");
     const lastQuestion = typeof lastUserMsg?.content === "string"
       ? lastUserMsg.content.replace(/^Question:\s*/i, "").trim()
@@ -356,12 +387,12 @@ export default async function handler(req, res) {
 
   // 5. Detect learning style — Pro+ uses full detection, Pro only checks current question
   const wantsVisual  = asksForVisualContent(trimmedQuestion);
-  const learningStyle = userPlan === "pro_plus"
+  const learningStyle = isPaidTop
     ? detectLearningStyle(safeHistory, trimmedQuestion)
-    : (userPlan === "pro" && wantsVisual ? "visual" : null);
+    : (isPaidMid && wantsVisual ? "visual" : null);
 
   // prefOnly only applies to Pro+ with no history
-  const prefOnly = userPlan === "pro_plus" && !hasImage && !hasHistory && isJustPreference;
+  const prefOnly = isPaidTop && !hasImage && !hasHistory && isJustPreference;
 
   // 6. Build learning style instructions
   let learningStyleInstructions = "";
@@ -405,7 +436,7 @@ STRICT RULES:
 - No bold, no asterisks, no underlines, no numbered lists, no bullet points, no markdown
 - Your ENTIRE response must be 100 words or fewer — be concise and direct`;
 
-  } else if (userPlan === "pro") {
+  } else if (userPlan === "wonder" || userPlan === "pro") {
     planInstructions = `=== PLAN: PRO ===
 Give thorough, clear explanations. Use step-by-step breakdowns when the question needs them.
 
@@ -427,7 +458,7 @@ STRICT RULES:
 - NEVER use alternative header names like "Step-by-Step Process:", "Steps:", "Solution:", "Work:", "Method:"
 - If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
 
-  } else if (userPlan === "pro_plus") {
+  } else if (userPlan === "super" || userPlan === "pro_plus" || userPlan === "max") {
     planInstructions = `=== PLAN: PRO+ ===
 Give the deepest, most complete academic explanations possible. You are a world-class tutor.
 
@@ -570,7 +601,7 @@ UNIVERSAL RULES:
     }
 
     const processed = processAnswer(rawAnswer, userPlan);
-    let { answer, resources } = userPlan === "pro_plus"
+    let { answer, resources } = isPaidTop
       ? parseResources(processed)
       : { answer: processed, resources: [] };
 
@@ -582,7 +613,7 @@ UNIVERSAL RULES:
     let imageSearchQuery = null;
 
     // Visual content — Pro+ only (Pro gets visual style in text but not embedded video/images)
-    if (userPlan === "pro_plus" && !prefOnly) {
+    if (isPaidTop && !prefOnly) {
       // Upgrade any YouTube resource search URLs to real video links
       for (let i = 0; i < resources.length; i++) {
         if (resources[i].type === "youtube" && resources[i].link.includes("youtube.com/results")) {
