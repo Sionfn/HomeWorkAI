@@ -128,7 +128,62 @@ function isCasualChat(question) {
   return !hasRealQuestion && q.length < 120;
 }
 
-// ── Parse and extract Resources section (handles markdown links too) ──────
+// ── Week start helper (Monday-based) ─────────────────────────────────────
+function getWeekStart() {
+  const d = new Date();
+  const day = d.getUTCDay(); // 0=Sun, 1=Mon...
+  const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
+  d.setUTCDate(diff);
+  return d.toISOString().split('T')[0]; // e.g. "2026-04-27"
+}
+
+// ── Award KP + update streak ──────────────────────────────────────────────
+async function awardKP(db, uid, kpAmount, casual) {
+  if (!uid || kpAmount <= 0) return { kp: 0, streak: 1, totalKP: 0 };
+  const today     = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  const weekStart = getWeekStart();
+  const gamRef    = db.collection('gamification').doc(uid);
+
+  try {
+    const snap = await gamRef.get();
+    const gd   = snap.exists ? snap.data() : {};
+
+    // Streak logic
+    const lastDate  = gd.lastActiveDate || '';
+    let newStreak   = 1;
+    let streakBonus = 0;
+    if (lastDate === today) {
+      newStreak = gd.streak || 1;
+    } else if (lastDate === yesterday) {
+      newStreak   = (gd.streak || 0) + 1;
+      streakBonus = newStreak >= 30 ? 30 : newStreak >= 7 ? 15 : newStreak >= 3 ? 5 : 0;
+    } else {
+      newStreak = 1;
+    }
+
+    const earned    = kpAmount + streakBonus;
+    const totalKP   = (gd.totalKP   || 0) + earned;
+    const weeklyKP  = (gd.weekStart === weekStart) ? (gd.weeklyKP || 0) + earned : earned;
+
+    await gamRef.set({
+      streak:         newStreak,
+      lastActiveDate: today,
+      totalKP,
+      weeklyKP,
+      weekStart,
+      uid,
+      updatedAt:      Date.now(),
+    }, { merge: true });
+
+    return { kp: earned, streak: newStreak, totalKP, weeklyKP, streakBonus };
+  } catch(e) {
+    console.warn('awardKP error:', e.message);
+    return { kp: 0, streak: 1, totalKP: 0 };
+  }
+}
+
+
 function parseResources(text) {
   let resources = [];
   let answer    = text;
@@ -252,7 +307,7 @@ export default async function handler(req, res) {
   const isAdmin = (userEmail === ADMIN_EMAIL);
 
   // Detect casual before limit check so we can apply the right bucket
-  const { question: rawQ, imageBase64, imageType, history, learnMode, isStuck, showMe, gradeLevel } = req.body;
+  const { question: rawQ, imageBase64, imageType, history } = req.body;
   const preCheckQuestion = (rawQ || "").trim();
   const preCheckCasual   = isCasualChat(preCheckQuestion) && !imageBase64;
 
@@ -459,116 +514,10 @@ STRICT RULES:
 - If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
   }
 
-  // ── Grade level detection ─────────────────────────────────────────────────
-  function detectGradeLevel(history, question) {
-    const text = [...(history || []).map(m => m.content || ''), question].join(' ').toLowerCase();
-    if (/calculus|derivative|integral|linear algebra|differential|multivariable|ap calc|ap physics c|quantum|thermodynamics|organic chem/i.test(text)) return 'college';
-    if (/pre.?calc|trigonometry|ap |sat |act |honors|physics|chemistry|algebra 2|statistics|macroeconomics|microeconomics/i.test(text)) return 'high';
-    if (/algebra|geometry|biology|earth science|civics|world history|us history|middle school/i.test(text)) return 'middle';
-    if (/multiplication|division|fractions|decimals|addition|subtraction|spelling|grammar|basic|elementary/i.test(text)) return 'elementary';
-    return 'high'; // default
-  }
-
-  const inferredGrade = gradeLevel || detectGradeLevel(safeHistory, trimmedQuestion);
-
-  // ── Socratic system prompt (Learn with Knox mode) ─────────────────────────
-  const isPaidUser = userPlan !== 'free';
-
-  let socraticPrompt = '';
-  if (learnMode) {
-    const gradeInstructions = {
-      elementary: 'Use very simple words. Short sentences. Lots of encouragement. Think of talking to a 3rd-5th grader.',
-      middle:     'Use clear, friendly language. Avoid jargon. Relate concepts to everyday life. Think 6th-8th grade.',
-      high:       'You can use subject terminology but always explain it. Think high school student — capable but still learning.',
-      college:    'Treat them as a peer who is learning. Use precise academic language. Expect them to think rigorously.',
-    };
-
-    if (isStuck) {
-      // "I'm Stuck" — convert to multiple choice
-      socraticPrompt = `You are Knox — a Socratic tutor. The student is stuck and needs multiple choice options.
-
-TASK: Convert your last guiding question into a multiple choice question with exactly 4 options (A, B, C, D).
-
-FORMAT — use EXACTLY this structure:
-MULTIPLE_CHOICE
-Question: [The question you were guiding them toward]
-A) [Plausible option]
-B) [Plausible option]  
-C) [Correct answer]
-D) [Plausible option]
-ANSWER: [correct letter]
-HINT: [one warm sentence nudging toward the answer without giving it away]
-
-RULES:
-- Shuffle the correct answer randomly (don't always put it in position C)
-- Make wrong options plausible — not obviously wrong
-- Keep options concise — one sentence each
-- After they answer you will confirm and continue guiding
-- Grade level: ${gradeInstructions[inferredGrade]}`;
-
-    } else if (showMe && isPaidUser) {
-      // "Show Me" — solve a SIMILAR problem, not the same one
-      socraticPrompt = `You are Knox — a Socratic tutor. The student asked to see a similar problem solved.
-
-TASK: Create and solve a SIMILAR but DIFFERENT problem step by step. Do NOT solve their actual problem.
-
-FORMAT — use EXACTLY this structure:
-SHOW_ME
-Similar Problem: [A comparable problem with different numbers/context]
-Step-by-step solution:
-1. [Step with clear work shown]
-2. [Next step]
-3. [Continue until complete]
-Now try yours: [One encouraging sentence pushing them back to their original problem]
-
-RULES:
-- The similar problem must test the SAME concept/skill
-- Show ALL work — no shortcuts
-- Use real numbers, not variables where possible
-- End with encouragement to try their own
-- Grade level: ${gradeInstructions[inferredGrade]}`;
-
-    } else {
-      // Standard Socratic loop
-      const phaseDetection = safeHistory.length === 0
-        ? 'PHASE: DIAGNOSE — This is the first message. Identify what concept the student needs help with.'
-        : safeHistory.length <= 2
-        ? 'PHASE: OPEN QUESTION — Ask one question to test their baseline understanding of the concept.'
-        : safeHistory.length <= 6
-        ? 'PHASE: SCAFFOLD — Guide them step by step. Never give the answer. Ask leading questions.'
-        : 'PHASE: CONFIRM or REINFORCE — If they got it right, confirm warmly and ask a Quick Check question. If wrong, gently redirect.';
-
-      socraticPrompt = `You are Knox — a warm, clever Socratic tutor. You NEVER give the answer directly.
-
-YOUR ONLY JOB: Guide the student to discover the answer themselves through questions and hints.
-
-THE SOCRATIC LOOP:
-1. DIAGNOSE → Understand exactly where they're stuck
-2. OPEN QUESTION → Test their existing knowledge with one question
-3. SCAFFOLD → Break it down. One hint or question at a time. Build understanding step by step.
-4. LET THEM ARRIVE → They answer, you confirm or gently redirect
-5. CONFIRM → "Yes! Exactly. Here's why that works..." — validate their thinking
-6. QUICK CHECK → Ask one new related question to lock in the learning
-
-${phaseDetection}
-
-RULES — CRITICAL:
-- NEVER write the answer. Not even partially. Not even as an example.
-- Ask ONE question at a time. Never stack multiple questions.
-- Keep responses SHORT — 2-4 sentences max. This is a conversation, not a lecture.
-- Be warm and encouraging. When they get something right, celebrate it genuinely.
-- When they're wrong, don't say "wrong" — say "almost!" or "close — think about..." 
-- If they're clearly lost after 3 exchanges, offer a smaller hint but still don't give the answer.
-- Use Knox's natural voice — like a smart friend texting them, not a textbook.
-- Grade level: ${gradeInstructions[inferredGrade]}
-- Never use section headers (Final Answer:, Explanation:, etc.) — this is pure conversation.`;
-    }
-  }
-
   // Detect if this is casual chat vs homework question
   const casual = isCasualChat(trimmedQuestion) && !hasImage;
 
-  const systemPrompt = learnMode ? socraticPrompt : `You are Knox — a clever, warm, enthusiastic orange fox and the heart of Knox Knows. You are a real character with personality. Students talk to you like a friend, and you talk back like one too.
+  const systemPrompt = `You are Knox — a clever, warm, enthusiastic orange fox and the heart of Knox Knows. You are a real character with personality. Students talk to you like a friend, and you talk back like one too.
 
 YOUR PERSONALITY:
 - You're that one friend who's somehow great at every subject — but you're not cocky about it, you just love helping
@@ -642,21 +591,18 @@ UNIVERSAL RULES:
   }
 
   // 8. Pick model and token limit
-  const isPaidTop = userPlan === "max" || userPlan === "super" || userPlan === "pro_plus";
-  const isPaidMid = userPlan === "wonder" || userPlan === "pro";
-  const model = hasImage   ? "gpt-4o" :
-    learnMode              ? "gpt-4o" :   // Socratic needs strong reasoning
-    casual                 ? "gpt-4o" :
-    isPaidTop              ? "gpt-4.1" :
-    isPaidMid              ? "gpt-4.1-mini" :
+  // Casual chat: everyone gets gpt-4o with 800 tokens — same quality for all plans
+  // Homework: plan-based model and token limits apply
+  const model = hasImage  ? "gpt-4o" :
+    casual                ? "gpt-4o" :
+    userPlan === "pro_plus"? "gpt-4.1" :
+    userPlan === "pro"     ? "gpt-4.1-mini" :
                              "gpt-4o-mini";
 
-  // Learn mode is conversational — keep short. Get the Answer uses full token limits.
-  const maxTokens = learnMode ? 350 :
-    casual    ? 800 :
-    isPaidTop ? 2800 :
-    isPaidMid ? 2000 :
-                350;
+  const maxTokens = casual ? 800 :
+    userPlan === "pro_plus" ? 2800 :
+    userPlan === "pro"      ? 2000 :
+                              350;  // free: 100 words ≈ 130 tokens; 350 gives clean buffer
 
   // 9. Call OpenAI Chat Completions API
   try {
@@ -720,18 +666,23 @@ UNIVERSAL RULES:
       if (csTimes2.length > 0) csNextUnlock = Math.min(...csTimes2) + WINDOW_MS;
     } catch(e) {}
 
+    // ── Award KP + update streak ──────────────────────────────────────────────
+    let gamResult = { kp: 0, streak: 1, totalKP: 0, weeklyKP: 0, streakBonus: 0 };
+    if (uid && !prefOnly) {
+      // KP amounts: Get the Answer = 3, casual = 1, Learn (correct) = 20
+      // learnMode and isCorrect come from request body
+      const { learnMode, isCorrectAnswer } = req.body;
+      let kpBase = casual ? 1 : (learnMode && isCorrectAnswer) ? 20 : learnMode ? 5 : 3;
+      gamResult = await awardKP(db, uid, kpBase, casual);
+    }
+
     return res.status(200).json({
       answer,
       resources,
-      plan:              userPlan,
+      plan:             userPlan,
       learningStyle,
       isAcknowledgement: prefOnly || casual,
-      isCasual:          casual,
-      isLearnMode:       !!learnMode,
-      isStuck:           !!isStuck,
-      isShowMe:          !!showMe,
-      inferredGrade,
-      canShowMe:         isPaidUser,
+      isCasual:         casual,
       embeddedVideo,
       imageSearchQuery,
       videos: [],
@@ -742,6 +693,13 @@ UNIVERSAL RULES:
         casualLimit: casualLimit === Infinity ? null : casualLimit,
         nextUnlock:  hwNextUnlock,
         csNextUnlock: csNextUnlock,
+      },
+      gamification: {
+        kpEarned:    gamResult.kp,
+        streak:      gamResult.streak,
+        totalKP:     gamResult.totalKP,
+        weeklyKP:    gamResult.weeklyKP,
+        streakBonus: gamResult.streakBonus,
       },
     });
 
