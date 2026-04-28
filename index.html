@@ -1866,11 +1866,9 @@
         window.userRenewalDate = data.renewalDate || null; // Unix timestamp from Stripe
       } catch (e) {
         console.warn('Could not fetch plan, defaulting to free:', e.message);
-        userPlan = 'free';
         window.userPlan = 'free';
       }
     } else {
-      userPlan = 'free';
       window.userPlan = 'free';
     }
     updateLoginUI();
@@ -3094,14 +3092,8 @@
       // Update usage progress bar
       if (data.usage) {
         updateUsageBar(data.usage);
-      }
-      // Process gamification rewards (KP + streak)
-      if (data.gamification && window.processGamification) {
-        window.processGamification(data.gamification);
-      }
-        // ── Show upgrade popup instantly when the last free question is used ──
-        // Don't wait for the next attempt to hit a 429 — show it right now.
-        const uPlan = window.userPlan || userPlan || 'free';
+        // Show upgrade popup instantly when the last free question is used
+        const uPlan = window.userPlan || 'free';
         if (uPlan === 'free' && data.usage.hw >= data.usage.hwLimit && !data.isCasual) {
           setTimeout(() => showLimitModal({
             limit:     data.usage.hwLimit,
@@ -3115,8 +3107,12 @@
                   return hrs > 0 ? `${hrs}h ${min}m` : `${min}m`;
                 })()
               : null,
-          }), 800); // short delay so the answer renders first
+          }), 800);
         }
+      }
+      // Process gamification rewards (KP + streak)
+      if (data.gamification && window.processGamification) {
+        window.processGamification(data.gamification);
       }
 
       // Update conversation memory
