@@ -2712,25 +2712,21 @@
     </div>`;
   }
 
-  // ── RENDER RESPONSE ───────────────────────────────────────────────────────
-  function renderResponse(answer, resources, plan, extras = {}) {
-    const { learningStyle, embeddedVideo, imageSearchQuery } = extras;
+  // ── SHARED RENDER HELPERS (outer scope — used by renderResponse AND executeAskQuestion) ──
+  function stripMarkdownLinks(text) {
+    return text.replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
+  }
 
-    // Strip ALL markdown link syntax [text](url) from displayed text
-    function stripMarkdownLinks(text) {
-      return text.replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
-    }
+  function formatInline(text, p) {
+    let out = stripMarkdownLinks(text);
+    out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
+    out = out.replace(/\*\*/g, "").replace(/(?<![a-zA-Z])__(?![a-zA-Z])/g, "");
+    return out;
+  }
 
-    function formatInline(text, p) {
-      let out = stripMarkdownLinks(text);
-      out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-      if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
-      out = out.replace(/\*\*/g, "").replace(/(?<![a-zA-Z])__(?![a-zA-Z])/g, "");
-      return out;
-    }
-
-    // Render ANY Knox response beautifully — works line-by-line
-    function renderFreeformText(rawText, plan) {
+  // Render ANY Knox response beautifully — works line-by-line
+  function renderFreeformText(rawText, plan) {
       const allLines = rawText.split('\n').map(l => l.trim()).filter(l => l);
       let html = '';
       let isFirstPara = true;
@@ -2841,6 +2837,10 @@
 
       return html;
     }
+
+  // ── RENDER RESPONSE ───────────────────────────────────────────────────────
+  function renderResponse(answer, resources, plan, extras = {}) {
+    const { learningStyle, embeddedVideo, imageSearchQuery } = extras;
 
     // Pre-pass: ensure Resources: is always on its own line
     answer = answer.replace(/([^\n])(Resources:)/g, '$1\n\nResources:');
