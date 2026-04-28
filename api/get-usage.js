@@ -49,6 +49,7 @@ export default async function handler(req, res) {
 
   const now = Date.now();
   let hwUsed = 0, csUsed = 0, nextUnlock = null, csNextUnlock = null;
+  let streak = 0, totalKP = 0, weeklyKP = 0;
 
   try {
     const snap = await db.collection("usage").doc(uid).get();
@@ -69,6 +70,17 @@ export default async function handler(req, res) {
     console.warn("Usage fetch error:", e.message);
   }
 
+  // Also fetch gamification data (streak + KP)
+  try {
+    const gamSnap = await db.collection("gamification").doc(uid).get();
+    if (gamSnap.exists) {
+      const gd = gamSnap.data();
+      streak   = gd.streak   || 0;
+      totalKP  = gd.totalKP  || 0;
+      weeklyKP = gd.weeklyKP || 0;
+    }
+  } catch(e) {}
+
   return res.status(200).json({
     hw:          hwUsed,
     hwLimit:     hwLimit ?? Infinity,
@@ -77,5 +89,8 @@ export default async function handler(req, res) {
     nextUnlock,
     csNextUnlock,
     plan:        userPlan,
+    streak,
+    totalKP,
+    weeklyKP,
   });
 }
