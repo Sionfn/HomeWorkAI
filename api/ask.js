@@ -402,7 +402,7 @@ Explanation: [2-3 sentences only explaining how or why. Plain prose, no lists.]
 STRICT RULES:
 - ONLY "Final Answer:" and "Explanation:" — no other headers ever
 - No bold, no asterisks, no underlines, no numbered lists, no bullet points
-- Total response MUST be under 100 words — be concise
+- HARD LIMIT: Your ENTIRE response must be 100 words or fewer. Count them. Stop at 100.
 - If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
 
   } else if (userPlan === "pro") {
@@ -547,7 +547,7 @@ UNIVERSAL RULES:
   const maxTokens = casual ? 800 :
     userPlan === "pro_plus" ? ((learningStyle === "visual" || wantsVisual) ? 2800 : 2000) :
     userPlan === "pro"      ? 2000 :
-                              400;
+                              250;  // ~100 words for free plan (100 words ≈ 130 tokens, 250 gives clean buffer)
 
   // 9. Call OpenAI Chat Completions API
   try {
@@ -633,6 +633,7 @@ UNIVERSAL RULES:
 
   } catch (err) {
     console.error("SERVER ERROR:", err);
-    return res.status(500).json({ error: "Something went wrong. Please try again." });
+    // Return a friendly error message rather than a raw 500 so the frontend can display it nicely
+    return res.status(500).json({ error: "Knox hit a snag — please try again in a moment. If this keeps happening, try refreshing the page." });
   }
 }
