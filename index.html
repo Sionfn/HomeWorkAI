@@ -2321,23 +2321,28 @@
     // Save to cache so bars show correct numbers on next page load
     saveUsageCache(usage);
 
-    const uPlan = window.userPlan || userPlan || 'free';
+    const uPlan = window.userPlan || 'free';
     wrap.style.display = 'block';
 
     // ── Homework bar ──────────────────────────────────────────────────────
-    const hwUsed  = usage.hw       || 0;
-    const hwLimit = usage.hwLimit  || 5;
+    const hwUsed  = usage.hw      || 0;
+    const hwLimit = usage.hwLimit === Infinity ? 9999 : (usage.hwLimit || 5);
     const hwLeft  = Math.max(0, hwLimit - hwUsed);
-    const hwPct   = Math.min((hwUsed / hwLimit) * 100, 100);
+    const hwPct   = hwLimit >= 9999 ? 0 : Math.min((hwUsed / hwLimit) * 100, 100);
 
-    const hwLabel = document.getElementById('usageBarLabel');
-    const hwFill  = document.getElementById('usageBarFill');
-    const hwCd    = document.getElementById('usageBarCountdown');
+    const hwLabel    = document.getElementById('usageBarLabel');
+    const hwFill     = document.getElementById('usageBarFill');
+    const hwCd       = document.getElementById('usageBarCountdown');
     const hwClockWrap = document.getElementById('hwClockWrap');
 
-    if (hwLabel) hwLabel.textContent = `${hwUsed} / ${hwLimit} homework questions used`;
-    if (hwFill)  { hwFill.style.width = hwPct + '%'; hwFill.className = 'usage-bar-fill hw-fill' + (hwPct >= 100 ? ' danger' : hwPct >= 80 ? ' warn' : ''); }
-    if (hwCd)    { hwCd.textContent = hwLeft === 1 ? '1 left!' : ''; hwCd.style.color = '#F59E0B'; }
+    if (hwLimit >= 9999) {
+      if (hwLabel) hwLabel.textContent = `Unlimited homework questions`;
+      if (hwFill)  { hwFill.style.width = '100%'; hwFill.className = 'usage-bar-fill hw-fill'; hwFill.style.background = '#58CC02'; }
+    } else {
+      if (hwLabel) hwLabel.textContent = `${hwUsed} / ${hwLimit} homework questions used`;
+      if (hwFill)  { hwFill.style.width = hwPct + '%'; hwFill.style.background = ''; hwFill.className = 'usage-bar-fill hw-fill' + (hwPct >= 100 ? ' danger' : hwPct >= 80 ? ' warn' : ''); }
+    }
+    if (hwCd) { hwCd.textContent = hwLeft === 1 ? '1 left!' : ''; hwCd.style.color = '#F59E0B'; }
 
     if (usage.nextUnlock && hwLeft === 0) {
       startHwClock(usage.nextUnlock);
@@ -2348,24 +2353,28 @@
 
     // ── Casual bar ────────────────────────────────────────────────────────
     const casualSection = document.getElementById('casualBarSection');
-    const csLabel = document.getElementById('casualBarLabel');
-    const csFill  = document.getElementById('casualBarFill');
-    const csCd    = document.getElementById('casualBarCountdown');
+    const csLabel    = document.getElementById('casualBarLabel');
+    const csFill     = document.getElementById('casualBarFill');
+    const csCd       = document.getElementById('casualBarCountdown');
     const csClockWrap = document.getElementById('csClockWrap');
 
-    if (uPlan === 'pro_plus') {
-      if (casualSection) casualSection.style.display = 'none';
+    const unlimitedCasual = uPlan === 'max' || uPlan === 'super' || uPlan === 'pro_plus';
+    if (unlimitedCasual) {
+      // Still show bar but as "Unlimited"
+      if (casualSection) casualSection.style.display = 'block';
+      if (csLabel) csLabel.textContent = 'Unlimited casual chat';
+      if (csFill)  { csFill.style.width = '100%'; csFill.style.background = '#1CB0F6'; csFill.className = 'usage-bar-fill cs-fill'; }
+      if (csCd)    csCd.textContent = '';
+      if (csClockWrap) csClockWrap.style.display = 'none';
     } else {
       if (casualSection) casualSection.style.display = 'block';
       const csUsed  = usage.casual      || 0;
-      const csLimit = usage.casualLimit || (uPlan === 'pro' ? 50 : 20);
+      const csLimit = usage.casualLimit === Infinity ? 9999 : (usage.casualLimit || (uPlan === 'wonder' || uPlan === 'pro' ? 50 : 20));
       const csLeft  = Math.max(0, csLimit - csUsed);
       const csPct   = Math.min((csUsed / csLimit) * 100, 100);
-
       if (csLabel) csLabel.textContent = `${csUsed} / ${csLimit} chat messages used`;
-      if (csFill)  { csFill.style.width = csPct + '%'; csFill.className = 'usage-bar-fill cs-fill' + (csPct >= 100 ? ' danger' : csPct >= 80 ? ' warn' : ''); }
+      if (csFill)  { csFill.style.background = ''; csFill.style.width = csPct + '%'; csFill.className = 'usage-bar-fill cs-fill' + (csPct >= 100 ? ' danger' : csPct >= 80 ? ' warn' : ''); }
       if (csCd)    { csCd.textContent = csLeft === 1 ? '1 left!' : ''; csCd.style.color = '#F59E0B'; }
-
       if (usage.csNextUnlock && csLeft === 0) {
         startCsClock(usage.csNextUnlock);
       } else {
@@ -2377,44 +2386,40 @@
 
   window.updateUsageBar = updateUsageBar;
   (function initBarsFromCache() {
-    // Guests: show 1 use limit for both bars
     if (!window.currentUser) {
       updateUsageBar({ hw: 0, hwLimit: 1, casual: 0, casualLimit: 1, nextUnlock: null, csNextUnlock: null });
       return;
     }
-    const cached = loadUsageCache();
-    if (cached) {
-      updateUsageBar(cached);
-    } else {
-      const uPlan = window.userPlan || 'free';
-      const hwLimit = uPlan === 'pro_plus' ? 40 : uPlan === 'pro' ? 25 : 5;
-      const csLimit = uPlan === 'pro' ? 50 : 20;
-      updateUsageBar({ hw: 0, hwLimit, casual: 0, casualLimit: csLimit, nextUnlock: null, csNextUnlock: null });
-    }
+    const uPlan   = window.userPlan || 'free';
+    const hwLimit = (uPlan === 'max') ? Infinity : (uPlan === 'super' || uPlan === 'pro_plus') ? 40 : (uPlan === 'wonder' || uPlan === 'pro') ? 25 : 5;
+    const csLimit = (uPlan === 'max' || uPlan === 'super' || uPlan === 'pro_plus') ? Infinity : (uPlan === 'wonder' || uPlan === 'pro') ? 50 : 20;
+    updateUsageBar({ hw: 0, hwLimit, casual: 0, casualLimit: csLimit, nextUnlock: null, csNextUnlock: null });
   })();
 
   // ── Show limit reached modal with countdown ───────────────────────────────
   function showLimitModal(data) {
-    const isPro     = userPlan === 'pro';
-    const isProPlus = userPlan === 'pro_plus';
+    const uPlan     = window.userPlan || 'free';
+    const isWonder  = uPlan === 'wonder' || uPlan === 'pro';
+    const isPro     = uPlan === 'super'  || uPlan === 'pro_plus';
+    const isMax     = uPlan === 'max';
     const m = document.createElement('div');
     m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;';
-    const upgradeSection = isProPlus ? '' : `
-      <div style="background:#FFF4EC;border:2px solid #FFCFA0;border-radius:14px;padding:14px 16px;margin-bottom:2px;">
-        <div style="font-size:13px;font-weight:900;color:#CC5500;margin-bottom:4px;">${isPro ? '🚀 Get 40 questions/day with Pro+' : '🚀 Get 25 questions/day with Pro'}</div>
-        <div style="font-size:12px;font-weight:600;color:#888;">${isPro ? 'Pro+ gives you 40 questions/day, the best AI, deeper explanations, resources, and unlimited casual chat.' : 'Pro gives you 25 questions/day, smarter AI, and step-by-step breakdowns.'}</div>
+    const upgradeSection = isMax ? '' : `
+      <div style="background:#FFF4EC;border:2px solid #FFCFA0;border-radius:14px;padding:14px 16px;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:900;color:#CC5500;margin-bottom:4px;">${isPro ? '🚀 Get unlimited questions with Max Knox' : isWonder ? '🚀 Get 40 questions/day with Pro Knox' : '🚀 Get 25 questions/day with Wonder Knox'}</div>
+        <div style="font-size:12px;font-weight:600;color:#888;">${isPro ? 'Max Knox gives you truly unlimited questions every day — no caps, no countdowns.' : isWonder ? 'Pro Knox gives you 40 questions/day, the best AI, deep explanations, and Learn with Knox.' : 'Wonder Knox gives you 25 questions/day, smarter AI, and step-by-step breakdowns.'}</div>
       </div>
-      <button onclick="this.closest('div[style*=fixed]').remove();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:var(--green);color:white;cursor:pointer;box-shadow:0 4px 0 var(--green-dark);transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${isPro ? 'Upgrade to Pro+' : 'Upgrade to Pro'}</button>`;
+      <button onclick="this.closest('div[style*=fixed]').remove();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${isPro ? 'Get Max Knox →' : isWonder ? 'Get Pro Knox →' : 'Get Wonder Knox →'}</button>`;
     m.innerHTML = `<div style="background:white;max-width:420px;width:100%;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
-      <div style="background:var(--orange);padding:28px;text-align:center;">
+      <div style="background:#FF6B00;padding:28px;text-align:center;">
         <div style="font-size:44px;margin-bottom:8px;">⏰</div>
         <h3 style="font-size:22px;font-weight:900;color:white;">You're all out!</h3>
         <p style="font-size:14px;color:rgba(255,255,255,0.9);font-weight:600;margin-top:6px;">You've used all ${data.limit || ''} questions in this 24hr window.</p>
-        ${data.countdown ? `<div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:10px 16px;margin-top:14px;font-size:14px;font-weight:800;color:white;">Next question unlocks in <span style="font-size:20px;display:block;margin-top:4px;">${data.countdown}</span></div>` : ''}
+        ${data.countdown ? `<div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:10px 16px;margin-top:14px;font-size:14px;font-weight:800;color:white;">Next question unlocks in<br><span style="font-size:24px;letter-spacing:0.05em;display:block;margin-top:4px;">${data.countdown}</span></div>` : ''}
       </div>
       <div style="padding:24px 28px;display:flex;flex-direction:column;gap:10px;">
         ${upgradeSection}
-        <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:13px;border-radius:14px;font-size:14px;font-weight:800;font-family:inherit;border:2px solid var(--border);background:white;color:#777;cursor:pointer;">Got it, I'll wait</button>
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:13px;border-radius:14px;font-size:14px;font-weight:800;font-family:inherit;border:2px solid #E5E7EB;background:white;color:#777;cursor:pointer;">Got it, I'll wait</button>
       </div>
     </div>`;
     m.onclick = (e) => { if (e.target === m) m.remove(); };
