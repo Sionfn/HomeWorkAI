@@ -251,11 +251,18 @@ function processAnswer(rawText, userPlan) {
       .replace(/\n{3,}/g, "\n\n")
       .trim();
   } else {
-    // For pro/pro+ — strip orphaned markers that didn't form valid pairs
-    answer = answer.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "$1");
-    // Clean up any double-asterisks that are empty or orphaned
+    // For pro/pro+ — strip orphaned markdown markers safely
+    // Step 1: Remove empty bold markers **  **
     answer = answer.replace(/\*\*\s*\*\*/g, "");
-    answer = answer.replace(/(?<!\w)\*\*(?!\w)/g, "");
+    // Step 2: Remove lone single asterisks (not part of **) safely — split on ** then clean * in between
+    answer = answer.split('**').map((chunk, i) => {
+      // Even-indexed chunks are outside bold markers — strip lone * there
+      // Odd-indexed chunks are inside ** bold ** — leave them alone
+      return i % 2 === 0 ? chunk.replace(/\*/g, '') : chunk;
+    }).join('**');
+    // Step 3: Strip any remaining orphaned ** that have no pair (odd number left)
+    const boldCount = (answer.match(/\*\*/g) || []).length;
+    if (boldCount % 2 !== 0) answer = answer.replace(/\*\*/g, '');
   }
   return answer;
 }
