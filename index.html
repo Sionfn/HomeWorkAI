@@ -2587,7 +2587,12 @@
 
       // Handle any other non-OK status
       if (!res.ok) {
-        replaceThinkingWithResponse(`<div style="padding:14px 16px;font-size:14px;font-weight:700;color:var(--red);">Knox ran into a server error (${res.status}). Please try again in a moment.</div>`, true);
+        let errMsg = 'Knox ran into a snag. Please try again!';
+        try { const ed = await res.json(); if (ed.error) errMsg = ed.error; } catch(e) {}
+        replaceThinkingWithResponse(`<div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+          <div style="font-size:14px;font-weight:700;color:#DC2626;line-height:1.6;">😬 ${errMsg}</div>
+          <button onclick="handleAskQuestion()" style="padding:10px 18px;border-radius:10px;font-size:13px;font-weight:800;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 3px 0 #CC5500;align-self:flex-start;">↩ Try Again</button>
+        </div>`, true);
         resetBtn(); return;
       }
 
@@ -2648,7 +2653,27 @@
       }
 
       // Update usage progress bar
-      if (data.usage) updateUsageBar(data.usage);
+      if (data.usage) {
+        updateUsageBar(data.usage);
+        // ── Show upgrade popup instantly when the last free question is used ──
+        // Don't wait for the next attempt to hit a 429 — show it right now.
+        const uPlan = window.userPlan || userPlan || 'free';
+        if (uPlan === 'free' && data.usage.hw >= data.usage.hwLimit && !data.isCasual) {
+          setTimeout(() => showLimitModal({
+            limit:     data.usage.hwLimit,
+            used:      data.usage.hw,
+            countdown: data.usage.nextUnlock
+              ? (() => {
+                  const ms  = data.usage.nextUnlock - Date.now();
+                  if (ms <= 0) return null;
+                  const hrs = Math.floor(ms / 3600000);
+                  const min = Math.floor((ms % 3600000) / 60000);
+                  return hrs > 0 ? `${hrs}h ${min}m` : `${min}m`;
+                })()
+              : null,
+          }), 800); // short delay so the answer renders first
+        }
+      }
 
       // Update conversation memory
       conversationHistory.push(
@@ -2659,7 +2684,10 @@
       updateConversationIndicator();
 
     } catch (err) {
-      replaceThinkingWithResponse(`<div style="padding:14px 16px;font-size:14px;font-weight:700;color:#DC2626;line-height:1.6;">Something went wrong — Knox could not reach the server.<br><span style="font-size:12px;font-weight:600;color:#9CA3AF;margin-top:4px;display:block;">Open browser console (F12) and check for the error details.</span></div>`, true);
+      replaceThinkingWithResponse(`<div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:14px;font-weight:700;color:#DC2626;line-height:1.6;">😬 Knox couldn't reach the server — check your connection and try again.</div>
+        <button onclick="handleAskQuestion()" style="padding:10px 18px;border-radius:10px;font-size:13px;font-weight:800;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 3px 0 #CC5500;align-self:flex-start;">↩ Try Again</button>
+      </div>`, true);
       console.error(err);
     } finally {
       resetBtn();
