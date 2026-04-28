@@ -34,12 +34,13 @@ if (!getApps().length) {
 const adminAuth = getAdminAuth();
 const db        = getFirestore();
 
-const FREE_DAILY_LIMIT   = 5;   // homework questions per 24hr rolling window
-const PRO_DAILY_LIMIT    = 25;  // homework questions per 24hr rolling window
-const PROPLUS_DAILY_LIMIT= 40;  // homework questions per 24hr rolling window
-const FREE_CASUAL_LIMIT  = 20;  // casual messages per 24hr rolling window
-const PRO_CASUAL_LIMIT   = 50;  // casual messages per 24hr rolling window
-const WINDOW_MS          = 24 * 60 * 60 * 1000; // 24 hour rolling window in ms
+const FREE_DAILY_LIMIT    = 5;    // Free plan
+const WONDER_DAILY_LIMIT  = 25;   // Wonder Knox
+const SUPER_DAILY_LIMIT   = 40;   // Pro Knox (super)
+const MAX_DAILY_LIMIT     = Infinity; // Max Knox
+const FREE_CASUAL_LIMIT   = 20;
+const WONDER_CASUAL_LIMIT = 50;
+const WINDOW_MS           = 24 * 60 * 60 * 1000;
 const ADMIN_EMAIL        = process.env.ADMIN_EMAIL || "";
 const VIP_PRO_EMAILS     = (process.env.VIP_PRO_EMAILS || "")
   .split(",").map(e => e.trim()).filter(Boolean);
@@ -279,7 +280,7 @@ export default async function handler(req, res) {
   // 2. Resolve plan server-side
   let userPlan = "free";
   if (userEmail === ADMIN_EMAIL) {
-    userPlan = "pro_plus";
+    userPlan = "max";
   } else if (VIP_PRO_EMAILS.includes(userEmail)) {
     userPlan = "pro";
   } else {
@@ -295,12 +296,13 @@ export default async function handler(req, res) {
   const now = Date.now();
   const usageRef = db.collection("usage").doc(uid);
 
-  // Limits per plan
-  const hwLimit     = userPlan === "pro_plus" ? PROPLUS_DAILY_LIMIT
-                    : userPlan === "pro"       ? PRO_DAILY_LIMIT
+  // Limits per plan — wonder/super/max + legacy pro/pro_plus
+  const hwLimit     = (userPlan === "max")                           ? Infinity
+                    : (userPlan === "super"  || userPlan === "pro_plus") ? SUPER_DAILY_LIMIT
+                    : (userPlan === "wonder" || userPlan === "pro")      ? WONDER_DAILY_LIMIT
                     : FREE_DAILY_LIMIT;
-  const casualLimit = userPlan === "pro_plus" ? Infinity
-                    : userPlan === "pro"       ? PRO_CASUAL_LIMIT
+  const casualLimit = (userPlan === "max" || userPlan === "super" || userPlan === "pro_plus") ? Infinity
+                    : (userPlan === "wonder" || userPlan === "pro")      ? WONDER_CASUAL_LIMIT
                     : FREE_CASUAL_LIMIT;
 
   // Skip limits for admin
@@ -399,7 +401,7 @@ export default async function handler(req, res) {
   // auto re-ask the last question so the AI re-explains it with the new style.
   // Free plan does NOT get this — visual learning is a paid feature.
   const isJustPreference = isPreferenceOnly(trimmedQuestion);
-  if (isJustPreference && hasHistory && !hasImage && userPlan !== "free") {
+  if (isJustPreference && hasHistory && !hasImage && (isPaidMid || isPaidTop)) {
     const lastUserMsg  = [...safeHistory].reverse().find(m => m.role === "user");
     const lastQuestion = typeof lastUserMsg?.content === "string"
       ? lastUserMsg.content.replace(/^Question:\s*/i, "").trim()
@@ -411,12 +413,12 @@ export default async function handler(req, res) {
 
   // 5. Detect learning style — Pro+ uses full detection, Pro only checks current question
   const wantsVisual  = asksForVisualContent(trimmedQuestion);
-  const learningStyle = userPlan === "pro_plus"
+  const learningStyle = isPaidTop
     ? detectLearningStyle(safeHistory, trimmedQuestion)
-    : (userPlan === "pro" && wantsVisual ? "visual" : null);
+    : (isPaidMid && wantsVisual ? "visual" : null);
 
   // prefOnly only applies to Pro+ with no history
-  const prefOnly = userPlan === "pro_plus" && !hasImage && !hasHistory && isJustPreference;
+  const prefOnly = isPaidTop && !hasImage && !hasHistory && isJustPreference;
 
   // 6. Build learning style instructions
   let learningStyleInstructions = "";
@@ -460,8 +462,8 @@ STRICT RULES:
 - No bold, no asterisks, no underlines, no numbered lists, no bullet points, no markdown
 - Your ENTIRE response must be 100 words or fewer — be concise and direct`;
 
-  } else if (userPlan === "pro") {
-    planInstructions = `=== PLAN: PRO ===
+  } else if (userPlan === "wonder" || userPlan === "pro") {
+    planInstructions = `=== PLAN: WONDER KNOX ===
 Give thorough, clear explanations. Use step-by-step breakdowns when the question needs them.
 
 USE THESE HEADERS IN THIS ORDER (only include what applies):
@@ -482,8 +484,8 @@ STRICT RULES:
 - NEVER use alternative header names like "Step-by-Step Process:", "Steps:", "Solution:", "Work:", "Method:"
 - If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
 
-  } else if (userPlan === "pro_plus") {
-    planInstructions = `=== PLAN: PRO+ ===
+  } else if (userPlan === "super" || userPlan === "pro_plus" || userPlan === "max") {
+    planInstructions = `=== PLAN: PRO KNOX / MAX KNOX ===
 Give the deepest, most complete academic explanations possible. You are a world-class tutor.
 
 USE THESE HEADERS IN THIS ORDER (include sections that genuinely add value):
@@ -671,16 +673,20 @@ UNIVERSAL RULES:
   // 8. Pick model and token limit
   // Casual chat: everyone gets gpt-4o with 800 tokens — same quality for all plans
   // Homework: plan-based model and token limits apply
-  const model = hasImage  ? "gpt-4o" :
-    casual                ? "gpt-4o" :
-    userPlan === "pro_plus"? "gpt-4.1" :
-    userPlan === "pro"     ? "gpt-4.1-mini" :
+  const isPaidTop = userPlan === "max"   || userPlan === "super"  || userPlan === "pro_plus";
+  const isPaidMid = userPlan === "wonder" || userPlan === "pro";
+  const model = hasImage   ? "gpt-4o" :
+    learnMode              ? "gpt-4o" :
+    casual                 ? "gpt-4o" :
+    isPaidTop              ? "gpt-4.1" :
+    isPaidMid              ? "gpt-4.1-mini" :
                              "gpt-4o-mini";
 
-  const maxTokens = casual ? 800 :
-    userPlan === "pro_plus" ? 2800 :
-    userPlan === "pro"      ? 2000 :
-                              350;  // free: 100 words ≈ 130 tokens; 350 gives clean buffer
+  const maxTokens = learnMode ? 400 :
+    casual    ? 800 :
+    isPaidTop ? 2800 :
+    isPaidMid ? 2000 :
+                350;
 
   // 9. Call OpenAI Chat Completions API
   try {
@@ -715,7 +721,7 @@ UNIVERSAL RULES:
     let imageSearchQuery = null;
 
     // Visual content — Pro+ only (Pro gets visual style in text but not embedded video/images)
-    if (userPlan === "pro_plus" && !prefOnly) {
+    if (isPaidTop && !prefOnly) {
       // Upgrade any YouTube resource search URLs to real video links
       for (let i = 0; i < resources.length; i++) {
         if (resources[i].type === "youtube" && resources[i].link.includes("youtube.com/results")) {
@@ -747,9 +753,7 @@ UNIVERSAL RULES:
     // ── Award KP + update streak ──────────────────────────────────────────────
     let gamResult = { kp: 0, streak: 1, totalKP: 0, weeklyKP: 0, streakBonus: 0 };
     if (uid && !prefOnly) {
-      // KP amounts: Get the Answer = 3, casual = 1, Learn (correct) = 20
-      // learnMode and isCorrect come from request body
-      const { learnMode, isCorrectAnswer } = req.body;
+      // KP amounts: casual=1, Learn correct=20, Learn attempt=5, Get the Answer=3
       let kpBase = casual ? 1 : (learnMode && isCorrectAnswer) ? 20 : learnMode ? 5 : 3;
       gamResult = await awardKP(db, uid, kpBase, casual);
     }
