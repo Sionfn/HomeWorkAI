@@ -179,7 +179,7 @@ async function awardKP(db, uid, kpAmount, casual) {
     return { kp: earned, streak: newStreak, totalKP, weeklyKP, streakBonus };
   } catch(e) {
     console.warn('awardKP error:', e.message);
-    return { kp: 0, streak: 1, totalKP: 0, weeklyKP: 0, streakBonus: 0 };
+    return { kp: 0, streak: 1, totalKP: 0 };
   }
 }
 
@@ -251,18 +251,11 @@ function processAnswer(rawText, userPlan) {
       .replace(/\n{3,}/g, "\n\n")
       .trim();
   } else {
-    // For pro/pro+ — strip orphaned markdown markers safely
-    // Step 1: Remove empty bold markers **  **
+    // For pro/pro+ — strip orphaned markers that didn't form valid pairs
+    answer = answer.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "$1");
+    // Clean up any double-asterisks that are empty or orphaned
     answer = answer.replace(/\*\*\s*\*\*/g, "");
-    // Step 2: Remove lone single asterisks (not part of **) safely — split on ** then clean * in between
-    answer = answer.split('**').map((chunk, i) => {
-      // Even-indexed chunks are outside bold markers — strip lone * there
-      // Odd-indexed chunks are inside ** bold ** — leave them alone
-      return i % 2 === 0 ? chunk.replace(/\*/g, '') : chunk;
-    }).join('**');
-    // Step 3: Strip any remaining orphaned ** that have no pair (odd number left)
-    const boldCount = (answer.match(/\*\*/g) || []).length;
-    if (boldCount % 2 !== 0) answer = answer.replace(/\*\*/g, '');
+    answer = answer.replace(/(?<!\w)\*\*(?!\w)/g, "");
   }
   return answer;
 }
@@ -314,12 +307,9 @@ export default async function handler(req, res) {
   const isAdmin = (userEmail === ADMIN_EMAIL);
 
   // Detect casual before limit check so we can apply the right bucket
-  const { question: rawQ, imageBase64, imageType, history, learnMode: learnModeRaw, isCorrectAnswer: isCorrectAnswerRaw } = req.body;
-  const learnMode       = !!learnModeRaw;
-  const isCorrectAnswer = !!isCorrectAnswerRaw;
+  const { question: rawQ, imageBase64, imageType, history } = req.body;
   const preCheckQuestion = (rawQ || "").trim();
-  // learnMode always counts as homework — never casual, even for short math expressions
-  const preCheckCasual   = !learnMode && isCasualChat(preCheckQuestion) && !imageBase64;
+  const preCheckCasual   = isCasualChat(preCheckQuestion) && !imageBase64;
 
   if (!isAdmin) {
     try {
@@ -525,7 +515,7 @@ STRICT RULES:
   }
 
   // Detect if this is casual chat vs homework question
-  const casual = !learnMode && isCasualChat(trimmedQuestion) && !hasImage;
+  const casual = isCasualChat(trimmedQuestion) && !hasImage;
 
   const systemPrompt = `You are Knox — a clever, warm, enthusiastic orange fox and the heart of Knox Knows. You are a real character with personality. Students talk to you like a friend, and you talk back like one too.
 
@@ -678,14 +668,12 @@ UNIVERSAL RULES:
 
     // ── Award KP + update streak ──────────────────────────────────────────────
     let gamResult = { kp: 0, streak: 1, totalKP: 0, weeklyKP: 0, streakBonus: 0 };
-    try {
-      if (uid && !prefOnly) {
-        // KP amounts: Get the Answer = 3, casual = 1, Learn (correct) = 20
-        let kpBase = casual ? 1 : (learnMode && isCorrectAnswer) ? 20 : learnMode ? 5 : 3;
-        gamResult = await awardKP(db, uid, kpBase, casual);
-      }
-    } catch(gamErr) {
-      console.warn('Gamification block error (non-fatal):', gamErr.message);
+    if (uid && !prefOnly) {
+      // KP amounts: Get the Answer = 3, casual = 1, Learn (correct) = 20
+      // learnMode and isCorrect come from request body
+      const { learnMode, isCorrectAnswer } = req.body;
+      let kpBase = casual ? 1 : (learnMode && isCorrectAnswer) ? 20 : learnMode ? 5 : 3;
+      gamResult = await awardKP(db, uid, kpBase, casual);
     }
 
     return res.status(200).json({
