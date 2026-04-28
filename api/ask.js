@@ -545,9 +545,9 @@ UNIVERSAL RULES:
                              "gpt-4o-mini";
 
   const maxTokens = casual ? 800 :
-    userPlan === "pro_plus" ? ((learningStyle === "visual" || wantsVisual) ? 2800 : 2000) :
+    userPlan === "pro_plus" ? 2800 :
     userPlan === "pro"      ? 2000 :
-                              350;  // 100 words ≈ 130 tokens; 350 gives clean buffer without over-generating
+                              350;  // free: 100 words ≈ 130 tokens; 350 gives clean buffer
 
   // 9. Call OpenAI Chat Completions API
   try {
@@ -598,18 +598,17 @@ UNIVERSAL RULES:
     }
 
     // Get current usage counts + nextUnlock for frontend progress bar
-    let hwUsed = 0, csUsed = 0, hwNextUnlock = null;
+    let hwUsed = 0, csUsed = 0, hwNextUnlock = null, csNextUnlock = null;
     try {
       const snap  = await usageRef.get();
       const udata = snap.exists ? snap.data() : {};
-      const hwTimes2 = (udata.hwTimes || []).filter(t => now - t < WINDOW_MS);
+      const hwTimes2 = (udata.hwTimes     || []).filter(t => now - t < WINDOW_MS);
+      const csTimes2 = (udata.casualTimes || []).filter(t => now - t < WINDOW_MS);
       hwUsed = hwTimes2.length;
-      csUsed = ((udata.casualTimes || []).filter(t => now - t < WINDOW_MS)).length;
-      // nextUnlock = when the oldest question in the window expires
-      if (hwTimes2.length > 0) {
-        const oldest = Math.min(...hwTimes2);
-        hwNextUnlock = oldest + WINDOW_MS;
-      }
+      csUsed = csTimes2.length;
+      // nextUnlock = when the oldest entry in the window expires
+      if (hwTimes2.length > 0) hwNextUnlock = Math.min(...hwTimes2) + WINDOW_MS;
+      if (csTimes2.length > 0) csNextUnlock = Math.min(...csTimes2) + WINDOW_MS;
     } catch(e) {}
 
     return res.status(200).json({
@@ -628,6 +627,7 @@ UNIVERSAL RULES:
         casual:      csUsed,
         casualLimit: casualLimit === Infinity ? null : casualLimit,
         nextUnlock:  hwNextUnlock,
+        csNextUnlock: csNextUnlock,
       },
     });
 
