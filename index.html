@@ -1247,6 +1247,10 @@
             style="flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;">
             Learn with Knox
           </button>
+          <button id="modeChatBtn" onclick="setMode('chat')"
+            style="flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;">
+            🦊 Talk to Knox
+          </button>
         </div>
       </div>
 
@@ -1473,6 +1477,75 @@
   </div>
 </section>
 
+
+<!-- ===================== SCHOOL & DISTRICT PLAN ===================== -->
+<section id="schools" style="background:white;padding:72px 24px;border-top:2px solid var(--border);">
+  <div style="max-width:1100px;margin:0 auto;text-align:center;">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:var(--blue-light);border:2px solid var(--blue);border-radius:999px;padding:7px 18px;font-size:14px;font-weight:800;color:var(--blue-dark);margin-bottom:20px;">
+      🏫 For Schools &amp; Districts
+    </div>
+    <h2 class="section-title section-title-underline reveal" style="display:inline-block;">Knox Knows for Schools</h2>
+    <p style="font-size:18px;font-weight:600;color:#666;margin-top:14px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.6;">Give every student at your school access to Knox — the AI study companion that actually helps them learn.</p>
+
+    <!-- Value props -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;max-width:900px;margin-left:auto;margin-right:auto;">
+      <div style="background:var(--blue-light);border:2px solid var(--blue);border-radius:20px;padding:28px 24px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">📚</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:8px;">Every Subject</div>
+        <div style="font-size:14px;font-weight:600;color:#555;line-height:1.6;">Math, science, history, English and more — K-12 through college level.</div>
+      </div>
+      <div style="background:var(--green-light);border:2px solid var(--green);border-radius:20px;padding:28px 24px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">🎓</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:8px;">Teacher Dashboard</div>
+        <div style="font-size:14px;font-weight:600;color:#555;line-height:1.6;">Monitor student usage, track progress, and manage classroom access.</div>
+      </div>
+      <div style="background:var(--orange-light);border:2px solid var(--orange);border-radius:20px;padding:28px 24px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">🔒</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:8px;">Safe &amp; Compliant</div>
+        <div style="font-size:14px;font-weight:600;color:#555;line-height:1.6;">FERPA &amp; COPPA ready. Google &amp; Microsoft school login supported.</div>
+      </div>
+    </div>
+
+    <!-- Pricing card -->
+    <div style="max-width:700px;margin:48px auto 0;background:var(--blue);border-radius:24px;border:3px solid var(--blue-dark);box-shadow:0 6px 0 var(--blue-dark);padding:36px;text-align:left;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:0;right:0;width:120px;height:120px;background:rgba(255,255,255,0.1);border-radius:0 24px 0 120px;"></div>
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:20px;">
+        <div>
+          <div style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:0.04em;background:rgba(255,255,255,0.2);color:white;border:1.5px solid rgba(255,255,255,0.4);margin-bottom:14px;">🏫 DISTRICT PLAN</div>
+          <div style="font-size:36px;font-weight:900;color:white;line-height:1;">$9,999<span style="font-size:16px;font-weight:600;color:rgba(255,255,255,0.75);">/school year</span></div>
+          <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.85);margin-top:6px;">For up to 400 students · 9-month school year</div>
+          <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);margin-top:4px;">That's only <strong style="color:white;">$25/student</strong> for the whole school year</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:16px;padding:16px 20px;min-width:200px;">
+          <div style="font-size:12px;font-weight:900;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Every student gets</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="font-size:16px;">✅</span>Pro+ level answers</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="font-size:16px;">✅</span>25 questions/day</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="font-size:16px;">✅</span>All subjects covered</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="font-size:16px;">✅</span>Teacher dashboard</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="font-size:16px;">✅</span>Priority support</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parent upsell -->
+      <div style="background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:16px;padding:16px 20px;margin-top:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="font-size:28px;">👨‍👩‍👧</div>
+        <div style="flex:1;min-width:200px;">
+          <div style="font-size:14px;font-weight:900;color:white;">Parents can upgrade to Pro+ for just $4.99/mo</div>
+          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.8);margin-top:3px;">Schools can share this exclusive discount with parents — unlimited questions, best AI, deeper answers.</div>
+        </div>
+        <div style="background:var(--yellow);color:#3C3C3C;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:900;white-space:nowrap;">Parent Upgrade: $4.99/mo</div>
+      </div>
+
+      <a href="mailto:support@knoxknowsapp.com?subject=School District Plan Inquiry" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;background:white;color:var(--blue-dark);border:none;border-radius:14px;padding:15px 32px;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);transition:all 0.15s;text-decoration:none;margin-top:24px;width:100%;box-sizing:border-box;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.2)'">
+        📧 Contact Us for a School Quote
+      </a>
+      <p style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.65);text-align:center;margin-top:12px;">Custom pricing available for larger districts · Free demo available</p>
+    </div>
+  </div>
+</section>
+
 <!-- ===================== CTA BANNER ===================== -->
 <section style="background:var(--orange);padding:80px 24px;text-align:center;position:relative;overflow:hidden;">
   <div style="position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
@@ -1520,6 +1593,7 @@
         <a href="#how-it-works" style="display:block;font-size:14px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">How it works</a>
         <a href="#ai-helper" style="display:block;font-size:14px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Ask Knox</a>
         <a href="#pricing" style="display:block;font-size:14px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Pricing</a>
+        <a href="#schools" style="display:block;font-size:14px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">For Schools</a>
       </div>
 
       <!-- Legal -->
@@ -1928,19 +2002,39 @@
   // ── Update usage progress bar ─────────────────────────────────────────────
   function updateUsageBar(usage) {
     if (!usage) return;
-    const wrap  = document.getElementById('usageBarWrap');
-    const label = document.getElementById('usageBarLabel');
-    const fill  = document.getElementById('usageBarFill');
+    const wrap      = document.getElementById('usageBarWrap');
+    const label     = document.getElementById('usageBarLabel');
+    const fill      = document.getElementById('usageBarFill');
+    const countdown = document.getElementById('usageBarCountdown');
     if (!wrap || !label || !fill) return;
 
     const used  = usage.hw  || 0;
     const limit = usage.hwLimit || 5;
     const pct   = Math.min((used / limit) * 100, 100);
+    const left  = Math.max(0, limit - used);
 
     wrap.style.display = 'block';
     label.textContent  = `${used} / ${limit} questions used (rolling 24hr)`;
     fill.style.width   = pct + '%';
-    fill.className     = 'usage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warn' : '');
+    fill.className     = 'usage-bar-fill' + (pct >= 100 ? ' danger' : pct >= 80 ? ' warn' : '');
+
+    // Show countdown when at limit or 1 question left
+    if (countdown) {
+      if (usage.nextUnlock && left === 0) {
+        const msLeft = usage.nextUnlock - Date.now();
+        if (msLeft > 0) {
+          const hrs = Math.floor(msLeft / 3600000);
+          const min = Math.floor((msLeft % 3600000) / 60000);
+          countdown.textContent = hrs > 0 ? `Next unlocks in ${hrs}h ${min}m` : `Next unlocks in ${min}m`;
+          countdown.style.color = '#EF4444';
+        }
+      } else if (left === 1) {
+        countdown.textContent = '1 question left!';
+        countdown.style.color = '#F59E0B';
+      } else {
+        countdown.textContent = '';
+      }
+    }
   }
 
   // ── Show limit reached modal with countdown ───────────────────────────────
@@ -1977,29 +2071,39 @@
   let currentMode = 'answer';
   function setMode(mode) {
     currentMode = mode;
-    const aBtn = document.getElementById('modeAnswerBtn');
-    const lBtn = document.getElementById('modeLearnBtn');
-    const askBtn = document.getElementById('askBtn');
+    const aBtn    = document.getElementById('modeAnswerBtn');
+    const lBtn    = document.getElementById('modeLearnBtn');
+    const cBtn    = document.getElementById('modeChatBtn');
+    const askBtn  = document.getElementById('askBtn');
     const aiHeaderDesc = document.getElementById('aiHeaderDesc');
-    const qInput = document.getElementById('chatInput') || document.getElementById('questionInput');
-
-    // Icon buttons (calc + camera)
+    const qInput  = document.getElementById('chatInput') || document.getElementById('questionInput');
     const iconBtns = document.querySelectorAll('.chat-icon-btn');
+
+    const inactiveStyle = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
+
+    // Reset all tabs to inactive first
+    if (aBtn) aBtn.style.cssText = inactiveStyle;
+    if (lBtn) lBtn.style.cssText = inactiveStyle;
+    if (cBtn) cBtn.style.cssText = inactiveStyle;
 
     if (mode === 'answer') {
       if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;';
-      if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
       if (askBtn) { askBtn.style.background = '#FF6B00'; askBtn.style.boxShadow = '0 3px 0 #CC5500'; askBtn.onmouseover = () => { askBtn.style.transform='translateY(-1px)'; askBtn.style.boxShadow='0 5px 0 #CC5500'; }; askBtn.onmouseout = () => { askBtn.style.transform=''; askBtn.style.boxShadow='0 3px 0 #CC5500'; }; }
       iconBtns.forEach(b => { b.dataset.hoverColor = '#FF6B00'; });
       if (aiHeaderDesc) aiHeaderDesc.textContent = 'Ready to help you ace it';
       if (qInput) qInput.placeholder = 'Ask Knox anything — type or paste your question...';
-    } else {
+    } else if (mode === 'learn') {
       if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#1CB0F6;color:white;box-shadow:0 3px 0 #0A85C2;transition:all 0.15s;line-height:1;';
-      if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
       if (askBtn) { askBtn.style.background = '#1CB0F6'; askBtn.style.boxShadow = '0 3px 0 #0A85C2'; askBtn.onmouseover = () => { askBtn.style.transform='translateY(-1px)'; askBtn.style.boxShadow='0 5px 0 #0A85C2'; }; askBtn.onmouseout = () => { askBtn.style.transform=''; askBtn.style.boxShadow='0 3px 0 #0A85C2'; }; }
       iconBtns.forEach(b => { b.dataset.hoverColor = '#1CB0F6'; });
       if (aiHeaderDesc) aiHeaderDesc.textContent = 'Knox will guide you step by step';
       if (qInput) qInput.placeholder = 'What would you like to learn? Knox will guide you step by step...';
+    } else if (mode === 'chat') {
+      if (cBtn) cBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#9B59B6;color:white;box-shadow:0 3px 0 #7D3C98;transition:all 0.15s;line-height:1;';
+      if (askBtn) { askBtn.style.background = '#9B59B6'; askBtn.style.boxShadow = '0 3px 0 #7D3C98'; askBtn.onmouseover = () => { askBtn.style.transform='translateY(-1px)'; askBtn.style.boxShadow='0 5px 0 #7D3C98'; }; askBtn.onmouseout = () => { askBtn.style.transform=''; askBtn.style.boxShadow='0 3px 0 #7D3C98'; }; }
+      iconBtns.forEach(b => { b.dataset.hoverColor = '#9B59B6'; });
+      if (aiHeaderDesc) aiHeaderDesc.textContent = 'Knox is here to chat 🦊';
+      if (qInput) qInput.placeholder = 'Just talk to Knox — anything on your mind...';
     }
   }
   document.addEventListener('DOMContentLoaded', () => setMode('answer'));
@@ -2257,9 +2361,9 @@
     const banner = document.getElementById('planBanner');
     if (banner) {
       if (userPlan === 'pro_plus') {
-        banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:#FFF4EC;border-top:1.5px solid #FFCFA0;border-bottom:1.5px solid #FFCFA0;"><div style="width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:#CC5500;letter-spacing:0.01em;">Pro+ Plan &nbsp;·&nbsp; Unlimited &nbsp;·&nbsp; Best AI &nbsp;·&nbsp; All Resources</span></div>';
+        banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:#FFF4EC;border-top:1.5px solid #FFCFA0;border-bottom:1.5px solid #FFCFA0;"><div style="width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:#CC5500;letter-spacing:0.01em;">Pro+ Plan &nbsp;·&nbsp; 40 questions/day &nbsp;·&nbsp; Best AI &nbsp;·&nbsp; Unlimited Chat</span></div>';
       } else if (userPlan === 'pro') {
-        banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:#F0FDF4;border-top:1.5px solid #86EFAC;border-bottom:1.5px solid #86EFAC;"><div style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:var(--green-dark);letter-spacing:0.01em;">Pro Plan &nbsp;·&nbsp; Unlimited &nbsp;·&nbsp; Smarter AI</span></div>';
+        banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:#F0FDF4;border-top:1.5px solid #86EFAC;border-bottom:1.5px solid #86EFAC;"><div style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:var(--green-dark);letter-spacing:0.01em;">Pro Plan &nbsp;·&nbsp; 25 questions/day &nbsp;·&nbsp; Smarter AI &nbsp;·&nbsp; <span style="cursor:pointer;text-decoration:underline;" onclick="scrollToPricing()">Upgrade to Pro+</span></span></div>';
       } else {
         banner.innerHTML = '';
       }
@@ -3491,7 +3595,8 @@
 
     const questionsUsed = usage.count || 0;
     const questionsLeft = userPlan === 'pro' || userPlan === 'pro_plus' ? '∞' : Math.max(0, DAILY_LIMIT - questionsUsed);
-    document.getElementById('settingsUsage').textContent = isPaid ? 'Unlimited' : `${questionsLeft} remaining`;
+    const planLimit = userPlan === 'pro_plus' ? 40 : userPlan === 'pro' ? 25 : 0;
+    document.getElementById('settingsUsage').textContent = isPaid ? `${planLimit} questions/day (rolling 24hr)` : `${questionsLeft} of 5 remaining`;
     // Show countdown row if at limit
     const cdRow = document.getElementById('settingsCountdownRow');
     if (cdRow) cdRow.style.display = 'none';
