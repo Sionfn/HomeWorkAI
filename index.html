@@ -1311,7 +1311,7 @@
       </div>
 
       <!-- Usage bars -->
-      <div id="usageBarWrap" class="usage-bar-wrap" style="display:none;">
+      <div id="usageBarWrap" class="usage-bar-wrap" style="display:block;">
         <!-- Homework credits -->
         <div style="margin-bottom:8px;">
           <div class="usage-bar-label">
@@ -1793,6 +1793,21 @@
     }
     updateLoginUI();
     updatePricingButtons();
+    // Re-render bars with correct plan limits after auth resolves
+    if (!user) {
+      // Logged out — guest view: 1 use each
+      if (window.updateUsageBar) window.updateUsageBar({ hw: 0, hwLimit: 1, casual: 0, casualLimit: 1, nextUnlock: null, csNextUnlock: null });
+    } else {
+      const cached = window.loadUsageCache ? window.loadUsageCache() : null;
+      if (cached) {
+        if (window.updateUsageBar) window.updateUsageBar(cached);
+      } else {
+        const uPlan = window.userPlan || 'free';
+        const hwLimit = uPlan === 'pro_plus' ? 40 : uPlan === 'pro' ? 25 : 5;
+        const csLimit = uPlan === 'pro' ? 50 : 20;
+        if (window.updateUsageBar) window.updateUsageBar({ hw: 0, hwLimit, casual: 0, casualLimit: csLimit, nextUnlock: null, csNextUnlock: null });
+      }
+    }
     if (user && window.pendingAction) {
       const action = window.pendingAction;
       window.pendingAction = null;
@@ -1955,6 +1970,8 @@
     closeDropdown();
     await signOut(auth);
     window.currentUser = null;
+    try { localStorage.removeItem('knox_usage_cache'); } catch(e) {}
+    if (window.updateUsageBar) updateUsageBar({ hw: 0, hwLimit: 5, casual: 0, casualLimit: 20, nextUnlock: null, csNextUnlock: null });
     updateLoginUI();
   };
 
@@ -2071,16 +2088,32 @@
     _csClockInterval = setInterval(tick, 1000);
   }
 
+  // ── Usage cache (localStorage) — persists bars across page loads ──────────
+  const USAGE_CACHE_KEY = 'knox_usage_cache';
+  function saveUsageCache(usage) {
+    try { localStorage.setItem(USAGE_CACHE_KEY, JSON.stringify({ ...usage, _savedAt: Date.now() })); } catch(e) {}
+  }
+  function loadUsageCache() {
+    try {
+      const raw = localStorage.getItem(USAGE_CACHE_KEY);
+      if (!raw) return null;
+      const d = JSON.parse(raw);
+      if (Date.now() - (d._savedAt || 0) > 25 * 3600000) { localStorage.removeItem(USAGE_CACHE_KEY); return null; }
+      return d;
+    } catch(e) { return null; }
+  }
+  window.loadUsageCache = loadUsageCache;
+
   // ── Update usage progress bars ────────────────────────────────────────────
   function updateUsageBar(usage) {
     if (!usage) return;
     const wrap = document.getElementById('usageBarWrap');
     if (!wrap) return;
 
-    const uPlan = window.userPlan || userPlan || 'free';
+    // Save to cache so bars show correct numbers on next page load
+    saveUsageCache(usage);
 
-    // Hide bars entirely for Pro+ (unlimited casual) and Pro (show hw only)
-    // Always show for free
+    const uPlan = window.userPlan || userPlan || 'free';
     wrap.style.display = 'block';
 
     // ── Homework bar ──────────────────────────────────────────────────────
@@ -2113,7 +2146,6 @@
     const csClockWrap = document.getElementById('csClockWrap');
 
     if (uPlan === 'pro_plus') {
-      // Pro+: unlimited casual — hide the casual bar
       if (casualSection) casualSection.style.display = 'none';
     } else {
       if (casualSection) casualSection.style.display = 'block';
@@ -2134,6 +2166,24 @@
       }
     }
   }
+
+  window.updateUsageBar = updateUsageBar;
+  (function initBarsFromCache() {
+    // Guests: show 1 use limit for both bars
+    if (!window.currentUser) {
+      updateUsageBar({ hw: 0, hwLimit: 1, casual: 0, casualLimit: 1, nextUnlock: null, csNextUnlock: null });
+      return;
+    }
+    const cached = loadUsageCache();
+    if (cached) {
+      updateUsageBar(cached);
+    } else {
+      const uPlan = window.userPlan || 'free';
+      const hwLimit = uPlan === 'pro_plus' ? 40 : uPlan === 'pro' ? 25 : 5;
+      const csLimit = uPlan === 'pro' ? 50 : 20;
+      updateUsageBar({ hw: 0, hwLimit, casual: 0, casualLimit: csLimit, nextUnlock: null, csNextUnlock: null });
+    }
+  })();
 
   // ── Show limit reached modal with countdown ───────────────────────────────
   function showLimitModal(data) {
@@ -2494,6 +2544,7 @@
       }
       // First question — let it through, flag it, then show sign-up after answer
       guestQuestionUsed = true;
+      updateUsageBar({ hw: 1, hwLimit: 1, casual: 0, casualLimit: 1, nextUnlock: null, csNextUnlock: null });
       executeAskQuestion(/* afterCallback */ () => appendKnoxSignUpPrompt(true));
       return;
     }
