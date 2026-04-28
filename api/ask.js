@@ -546,7 +546,7 @@ UNIVERSAL RULES:
 
   const maxTokens = casual ? 800 :
     userPlan === "pro_plus" ? ((learningStyle === "visual" || wantsVisual) ? 2800 : 2000) :
-    userPlan === "pro"      ? 1000 :
+    userPlan === "pro"      ? 2000 :
                               400;
 
   // 9. Call OpenAI Chat Completions API
@@ -597,13 +597,19 @@ UNIVERSAL RULES:
       }
     }
 
-    // Get current usage counts for frontend progress bar
-    let hwUsed = 0, csUsed = 0;
+    // Get current usage counts + nextUnlock for frontend progress bar
+    let hwUsed = 0, csUsed = 0, hwNextUnlock = null;
     try {
       const snap  = await usageRef.get();
       const udata = snap.exists ? snap.data() : {};
-      hwUsed = ((udata.hwTimes || []).filter(t => now - t < WINDOW_MS)).length;
+      const hwTimes2 = (udata.hwTimes || []).filter(t => now - t < WINDOW_MS);
+      hwUsed = hwTimes2.length;
       csUsed = ((udata.casualTimes || []).filter(t => now - t < WINDOW_MS)).length;
+      // nextUnlock = when the oldest question in the window expires
+      if (hwTimes2.length > 0) {
+        const oldest = Math.min(...hwTimes2);
+        hwNextUnlock = oldest + WINDOW_MS;
+      }
     } catch(e) {}
 
     return res.status(200).json({
@@ -617,10 +623,11 @@ UNIVERSAL RULES:
       imageSearchQuery,
       videos: [],
       usage: {
-        hw:       hwUsed,
+        hw:          hwUsed,
         hwLimit,
-        casual:   csUsed,
+        casual:      csUsed,
         casualLimit: casualLimit === Infinity ? null : casualLimit,
+        nextUnlock:  hwNextUnlock,
       },
     });
 
