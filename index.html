@@ -1247,10 +1247,7 @@
             style="flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;">
             Learn with Knox
           </button>
-          <button id="modeChatBtn" onclick="setMode('chat')"
-            style="flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;">
-            🦊 Talk to Knox
-          </button>
+
         </div>
       </div>
 
@@ -2075,7 +2072,6 @@
     currentMode = mode;
     const aBtn    = document.getElementById('modeAnswerBtn');
     const lBtn    = document.getElementById('modeLearnBtn');
-    const cBtn    = document.getElementById('modeChatBtn');
     const askBtn  = document.getElementById('askBtn');
     const aiHeaderDesc = document.getElementById('aiHeaderDesc');
     const qInput  = document.getElementById('chatInput') || document.getElementById('questionInput');
@@ -2086,7 +2082,6 @@
     // Reset all tabs to inactive first
     if (aBtn) aBtn.style.cssText = inactiveStyle;
     if (lBtn) lBtn.style.cssText = inactiveStyle;
-    if (cBtn) cBtn.style.cssText = inactiveStyle;
 
     if (mode === 'answer') {
       if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;';
@@ -2100,12 +2095,6 @@
       iconBtns.forEach(b => { b.dataset.hoverColor = '#1CB0F6'; });
       if (aiHeaderDesc) aiHeaderDesc.textContent = 'Knox will guide you step by step';
       if (qInput) qInput.placeholder = 'What would you like to learn? Knox will guide you step by step...';
-    } else if (mode === 'chat') {
-      if (cBtn) cBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#9B59B6;color:white;box-shadow:0 3px 0 #7D3C98;transition:all 0.15s;line-height:1;';
-      if (askBtn) { askBtn.style.background = '#9B59B6'; askBtn.style.boxShadow = '0 3px 0 #7D3C98'; askBtn.onmouseover = () => { askBtn.style.transform='translateY(-1px)'; askBtn.style.boxShadow='0 5px 0 #7D3C98'; }; askBtn.onmouseout = () => { askBtn.style.transform=''; askBtn.style.boxShadow='0 3px 0 #7D3C98'; }; }
-      iconBtns.forEach(b => { b.dataset.hoverColor = '#9B59B6'; });
-      if (aiHeaderDesc) aiHeaderDesc.textContent = 'Knox is here to chat 🦊';
-      if (qInput) qInput.placeholder = 'Just talk to Knox — anything on your mind...';
     }
   }
   document.addEventListener('DOMContentLoaded', () => setMode('answer'));
