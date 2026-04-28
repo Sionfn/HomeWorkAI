@@ -2198,6 +2198,120 @@
   }
   window.loadUsageCache = loadUsageCache;
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // LEARN WITH KNOX — Renderers + Actions
+  // ═══════════════════════════════════════════════════════════════════════
+
+  function renderLearnResponse(data) {
+    const raw = (data.answer || '').trim();
+
+    // Multiple Choice (I'm Stuck)
+    if (data.isStuck || raw.startsWith('MULTIPLE_CHOICE')) {
+      const body   = raw.replace(/^MULTIPLE_CHOICE\n?/, '');
+      const qMatch = body.match(/Question:\s*(.+?)(?:\n|$)/);
+      const aMatch = body.match(/A\)\s*(.+?)(?:\n|$)/);
+      const bMatch = body.match(/B\)\s*(.+?)(?:\n|$)/);
+      const cMatch = body.match(/C\)\s*(.+?)(?:\n|$)/);
+      const dMatch = body.match(/D\)\s*(.+?)(?:\n|$)/);
+      const ansMatch  = body.match(/ANSWER:\s*([ABCD])/);
+      const hintMatch = body.match(/HINT:\s*(.+?)(?:\n|$)/);
+      const question  = qMatch?.[1]  || 'Which answer is correct?';
+      const options   = { A: aMatch?.[1], B: bMatch?.[1], C: cMatch?.[1], D: dMatch?.[1] };
+      const correct   = ansMatch?.[1] || 'A';
+      const hint      = hintMatch?.[1] || '';
+
+      let html = `<div style="padding:14px 18px 6px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <div style="background:#1CB0F6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #0A85C2;">Multiple Choice</div>
+          <span style="font-size:12px;font-weight:700;color:#9CA3AF;">Pick the best answer</span>
+        </div>
+        <p style="font-size:15px;font-weight:700;color:#1f2937;margin-bottom:14px;line-height:1.5;">${question}</p>
+        <div style="display:flex;flex-direction:column;gap:8px;" id="mcOptions_${Date.now()}">`;
+      ['A','B','C','D'].forEach(letter => {
+        if (!options[letter]) return;
+        html += `<button onclick="handleMCAnswer('${letter}','${correct}',this)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;border:2px solid #E5E7EB;background:white;cursor:pointer;font-family:inherit;text-align:left;transition:all 0.15s;width:100%;" onmouseover="if(!this.dataset.answered)this.style.borderColor='#1CB0F6'" onmouseout="if(!this.dataset.answered)this.style.borderColor='#E5E7EB'">
+          <span style="width:28px;height:28px;border-radius:8px;background:#F3F4F6;color:#374151;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${letter}</span>
+          <span style="font-size:14px;font-weight:600;color:#374151;line-height:1.4;">${options[letter]}</span>
+        </button>`;
+      });
+      if (hint) html += `<div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:10px;padding:10px 14px;margin-top:4px;font-size:13px;font-weight:600;color:#92400E;">💡 ${hint}</div>`;
+      html += `</div></div>`;
+      return html;
+    }
+
+    // Show Me — similar problem
+    if (data.isShowMe || raw.startsWith('SHOW_ME')) {
+      const body      = raw.replace(/^SHOW_ME\n?/, '');
+      const probMatch = body.match(/Similar Problem:\s*(.+?)(?:\n|$)/);
+      const tryMatch  = body.match(/Now try yours:\s*(.+?)(?:\n|$)/);
+      const prob      = probMatch?.[1] || '';
+      const tryYours  = tryMatch?.[1]  || "Now try your original problem — you've got this! 🦊";
+      const stepsSection = body.replace(/Similar Problem:.+?\n/, '').replace(/Now try yours:.*/s, '').trim();
+      let stepsHtml = '';
+      stepsSection.split('\n').filter(l => l.trim()).forEach(l => {
+        const m = l.match(/^(\d+)\.\s*(.*)/);
+        if (m) stepsHtml += `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #F3F4F6;">
+          <div style="min-width:24px;height:24px;border-radius:7px;background:#FF6B00;color:white;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${m[1]}</div>
+          <span style="font-size:14px;font-weight:500;color:#374151;line-height:1.55;padding-top:2px;">${m[2]}</span>
+        </div>`;
+        else if (l.trim()) stepsHtml += `<p style="font-size:14px;color:#6B7280;padding:4px 0;">${l}</p>`;
+      });
+      return `<div style="padding:14px 18px 14px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <div style="background:#FF6B00;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Similar Problem</div>
+          <span style="font-size:12px;font-weight:700;color:#9CA3AF;">Not your actual problem</span>
+        </div>
+        ${prob ? `<div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:15px;font-weight:700;color:#92400E;">${prob}</div>` : ''}
+        <div style="margin-bottom:12px;">${stepsHtml}</div>
+        <div style="background:#F0FDF4;border:2px solid #86EFAC;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:700;color:#166534;">🦊 ${tryYours}</div>
+      </div>`;
+    }
+
+    // Standard Socratic — clean blue conversation bubble
+    const clean = raw.replace(/Final Answer:\s*/i, '').trim();
+    return `<div style="padding:14px 18px 14px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:#1CB0F6;flex-shrink:0;"></div>
+        <span style="font-size:11px;font-weight:800;color:#1CB0F6;text-transform:uppercase;letter-spacing:0.06em;">Learn with Knox</span>
+      </div>
+      <div style="font-size:15px;font-weight:500;color:#1e3a5f;line-height:1.7;">${clean.replace(/\n/g,'<br>')}</div>
+    </div>`;
+  }
+
+  // Multiple choice answer handler
+  window.handleMCAnswer = function(chosen, correct, btn) {
+    const allBtns = btn.parentElement.querySelectorAll('button');
+    allBtns.forEach(b => { b.dataset.answered='1'; b.style.pointerEvents='none'; b.onmouseover=null; b.onmouseout=null; });
+    const isCorrect = chosen === correct;
+    btn.style.background   = isCorrect ? '#F0FDF4' : '#FEF2F2';
+    btn.style.borderColor  = isCorrect ? '#16A34A' : '#DC2626';
+    if (!isCorrect) {
+      allBtns.forEach(b => {
+        if (b.querySelector('span')?.textContent?.trim() === correct) {
+          b.style.background='#F0FDF4'; b.style.borderColor='#16A34A';
+        }
+      });
+    }
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) {
+      const optTxt = btn.querySelectorAll('span')[1]?.textContent || '';
+      chatInput.value = isCorrect
+        ? `I answered ${chosen}: ${optTxt} ✓`
+        : `I answered ${chosen}: ${optTxt} — correct was ${correct}`;
+      setTimeout(handleAskQuestion, 600);
+    }
+  };
+
+  // I'm Stuck / Show Me buttons
+  function sendLearnAction(type) {
+    const chatInput = document.getElementById('chatInput');
+    if (!chatInput) return;
+    chatInput.value = type === 'stuck'
+      ? "I'm stuck — give me multiple choice options please"
+      : "Can you show me a similar problem solved step by step?";
+    handleAskQuestion();
+  }
+
   // ── Update usage progress bars ────────────────────────────────────────────
   function updateUsageBar(usage) {
     if (!usage) return;
@@ -2313,7 +2427,53 @@
   let currentMode = 'answer';
   function setMode(mode) {
     currentMode = mode;
-    const aBtn    = document.getElementById('modeAnswerBtn');
+    const aBtn   = document.getElementById('modeAnswerBtn');
+    const lBtn   = document.getElementById('modeLearnBtn');
+    const askBtn = document.getElementById('askBtn');
+    const qInput = document.getElementById('chatInput') || document.getElementById('questionInput');
+    const desc   = document.getElementById('aiHeaderDesc');
+    const iconBtns = document.querySelectorAll('.chat-icon-btn');
+
+    if (mode === 'answer') {
+      if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;';
+      if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
+      if (askBtn) { askBtn.style.background='#FF6B00'; askBtn.style.boxShadow='0 3px 0 #CC5500'; }
+      if (qInput) qInput.placeholder = 'Ask Knox anything — type or paste your question...';
+      if (desc)   desc.textContent   = 'Ready to help you ace it';
+      iconBtns.forEach(b => b.dataset.hoverColor='#FF6B00');
+    } else {
+      if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#1CB0F6;color:white;box-shadow:0 3px 0 #0A85C2;transition:all 0.15s;line-height:1;';
+      if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
+      if (askBtn) { askBtn.style.background='#1CB0F6'; askBtn.style.boxShadow='0 3px 0 #0A85C2'; }
+      if (qInput) qInput.placeholder = "What are you working on? Knox will guide you to the answer...";
+      if (desc)   desc.textContent   = 'Knox will guide you step by step';
+      iconBtns.forEach(b => b.dataset.hoverColor='#1CB0F6');
+    }
+
+    // Switch greeting if chat hasn't started yet
+    const thread = document.getElementById('chatThread');
+    if (thread && conversationHistory.length === 0) {
+      if (mode === 'learn') {
+        thread.innerHTML = `<div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2px solid #93C5FD;overflow:hidden;flex-shrink:0;background:#DBEAFE;">
+            <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+          </div>
+          <div style="background:#EFF9FF;border:2px solid #93C5FD;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
+            <p style="font-size:15px;font-weight:600;color:#1e3a5f;line-height:1.6;margin:0;"><strong>Let's learn together! 📚</strong> Tell me what you're working on and I'll guide you to the answer step by step. I won't just hand it to you — you'll actually get it. 🦊</p>
+          </div>
+        </div>`;
+      } else {
+        thread.innerHTML = `<div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
+            <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+          </div>
+          <div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
+            <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
+          </div>
+        </div>`;
+      }
+    }
+  }
     const lBtn    = document.getElementById('modeLearnBtn');
     const askBtn  = document.getElementById('askBtn');
     const aiHeaderDesc = document.getElementById('aiHeaderDesc');
@@ -2808,6 +2968,8 @@
           imageBase64: pendingImageBase64 || null,
           imageType:   pendingImageType   || null,
           history:     conversationHistory.slice(-6),
+          learnMode:   currentMode === 'learn',
+          gradeLevel:  window.knoxGradeLevel || null,
         }),
       });
 
@@ -2846,13 +3008,13 @@
       const serverPlan = data.plan || userPlan;
 
       let responseHtml;
-      if (data.isCasual) {
+      if (data.isLearnMode) {
+        responseHtml = renderLearnResponse(data);
+      } else if (data.isCasual) {
         const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
-        // Short casual replies = plain text; longer ones = styled freeform
         if (clean.split('\n').filter(l => l.trim()).length <= 3 && clean.length < 300) {
           responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
         } else {
-          // Multi-paragraph casual = use freeform renderer (handles visual responses)
           const planTagClass2 = serverPlan === 'pro_plus' ? 'tag-pro-plus' : serverPlan === 'pro' ? 'tag-pro' : 'tag-free';
           const planTag2 = serverPlan === 'pro_plus' ? 'Pro+' : serverPlan === 'pro' ? 'Pro' : 'Free';
           responseHtml = `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(clean, serverPlan)}<div style="height:10px;"></div>`;
@@ -2871,13 +3033,41 @@
 
       const knoxRow = replaceThinkingWithResponse(responseHtml, false);
 
+      // ── Learn mode action buttons ────────────────────────────────────────
+      if (data.isLearnMode && !data.isStuck && !data.isShowMe) {
+        const actionBar = document.createElement('div');
+        actionBar.style.cssText = 'display:flex;gap:8px;padding:6px 14px 14px;flex-wrap:wrap;';
+
+        const stuckBtn = document.createElement('button');
+        stuckBtn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:11px;border:2px solid #E5E7EB;background:white;font-size:13px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;transition:all 0.15s;';
+        stuckBtn.innerHTML = "🤔 I'm Stuck";
+        stuckBtn.onmouseover = () => { stuckBtn.style.borderColor='#1CB0F6'; stuckBtn.style.color='#1CB0F6'; };
+        stuckBtn.onmouseout  = () => { stuckBtn.style.borderColor='#E5E7EB'; stuckBtn.style.color='#6B7280'; };
+        stuckBtn.onclick = () => sendLearnAction('stuck');
+        actionBar.appendChild(stuckBtn);
+
+        const canShowMe = data.canShowMe || (serverPlan !== 'free');
+        if (canShowMe) {
+          const showBtn = document.createElement('button');
+          showBtn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:11px;border:2px solid #E5E7EB;background:white;font-size:13px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;transition:all 0.15s;';
+          showBtn.innerHTML = '👁️ Show Me';
+          showBtn.onmouseover = () => { showBtn.style.borderColor='#FF6B00'; showBtn.style.color='#FF6B00'; };
+          showBtn.onmouseout  = () => { showBtn.style.borderColor='#E5E7EB'; showBtn.style.color='#6B7280'; };
+          showBtn.onclick = () => sendLearnAction('showMe');
+          actionBar.appendChild(showBtn);
+        }
+
+        const bubble = knoxRow.querySelector('div:nth-child(2)');
+        if (bubble) bubble.appendChild(actionBar);
+      }
+
       // Fire optional after-answer callback (e.g. guest sign-up prompt)
       if (typeof afterCallback === 'function') {
         setTimeout(afterCallback, 600);
       }
 
-      // Save answer button inside chat bubble
-      if (!data.isAcknowledgement) {
+      // Save button (not in learn mode)
+      if (!data.isAcknowledgement && !data.isLearnMode) {
         const saveBtn = document.createElement('button');
         saveBtn.style.cssText = 'display:flex;align-items:center;gap:6px;margin:0 16px 16px;padding:8px 14px;background:var(--gray);border:2px solid var(--border);border-radius:10px;font-size:12px;font-weight:800;color:#777;cursor:pointer;font-family:inherit;transition:all 0.15s;';
         saveBtn.innerHTML = '💾 Save';
