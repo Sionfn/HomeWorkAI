@@ -2474,32 +2474,6 @@
       }
     }
   }
-    const lBtn    = document.getElementById('modeLearnBtn');
-    const askBtn  = document.getElementById('askBtn');
-    const aiHeaderDesc = document.getElementById('aiHeaderDesc');
-    const qInput  = document.getElementById('chatInput') || document.getElementById('questionInput');
-    const iconBtns = document.querySelectorAll('.chat-icon-btn');
-
-    const inactiveStyle = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
-
-    // Reset all tabs to inactive first
-    if (aBtn) aBtn.style.cssText = inactiveStyle;
-    if (lBtn) lBtn.style.cssText = inactiveStyle;
-
-    if (mode === 'answer') {
-      if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;';
-      if (askBtn) { askBtn.style.background = '#FF6B00'; askBtn.style.boxShadow = '0 3px 0 #CC5500'; askBtn.onmouseover = () => { askBtn.style.transform='translateY(-1px)'; askBtn.style.boxShadow='0 5px 0 #CC5500'; }; askBtn.onmouseout = () => { askBtn.style.transform=''; askBtn.style.boxShadow='0 3px 0 #CC5500'; }; }
-      iconBtns.forEach(b => { b.dataset.hoverColor = '#FF6B00'; });
-      if (aiHeaderDesc) aiHeaderDesc.textContent = 'Ready to help you ace it';
-      if (qInput) qInput.placeholder = 'Ask Knox anything — type or paste your question...';
-    } else if (mode === 'learn') {
-      if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#1CB0F6;color:white;box-shadow:0 3px 0 #0A85C2;transition:all 0.15s;line-height:1;';
-      if (askBtn) { askBtn.style.background = '#1CB0F6'; askBtn.style.boxShadow = '0 3px 0 #0A85C2'; askBtn.onmouseover = () => { askBtn.style.transform='translateY(-1px)'; askBtn.style.boxShadow='0 5px 0 #0A85C2'; }; askBtn.onmouseout = () => { askBtn.style.transform=''; askBtn.style.boxShadow='0 3px 0 #0A85C2'; }; }
-      iconBtns.forEach(b => { b.dataset.hoverColor = '#1CB0F6'; });
-      if (aiHeaderDesc) aiHeaderDesc.textContent = 'Knox will guide you step by step';
-      if (qInput) qInput.placeholder = 'What would you like to learn? Knox will guide you step by step...';
-    }
-  }
   document.addEventListener('DOMContentLoaded', () => setMode('answer'));
 
   function setBilling(type) {
