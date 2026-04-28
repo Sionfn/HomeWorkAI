@@ -224,7 +224,77 @@
     }
     .header-login:hover { background:rgba(255,255,255,0.3); }
 
-    /* Mobile header */
+    /* ── GAMIFICATION ─────────────────────────────────────────────────── */
+    .streak-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.35);
+      border-radius:20px; padding:5px 10px;
+      font-size:13px; font-weight:900; color:white; cursor:pointer;
+      transition:all 0.15s;
+    }
+    .streak-badge:hover { background:rgba(255,255,255,0.25); }
+    .streak-badge.on-fire { background:rgba(255,165,0,0.3); border-color:rgba(255,200,0,0.6); }
+
+    .kp-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.35);
+      border-radius:20px; padding:5px 10px;
+      font-size:13px; font-weight:900; color:white; cursor:pointer;
+      transition:all 0.15s;
+    }
+    .kp-badge:hover { background:rgba(255,255,255,0.25); }
+
+    /* +KP floating animation */
+    @keyframes kpFloat {
+      0%   { opacity:1; transform:translateY(0) scale(1); }
+      70%  { opacity:1; transform:translateY(-40px) scale(1.1); }
+      100% { opacity:0; transform:translateY(-60px) scale(0.9); }
+    }
+    .kp-float {
+      position:fixed; pointer-events:none; z-index:9999;
+      font-size:16px; font-weight:900; color:#FFD700;
+      text-shadow:0 2px 4px rgba(0,0,0,0.4);
+      animation:kpFloat 1.4s ease-out forwards;
+    }
+
+    /* League modal */
+    .league-modal {
+      position:fixed; inset:0; background:rgba(0,0,0,0.55);
+      z-index:2000; display:flex; align-items:center; justify-content:center; padding:16px;
+    }
+    .league-panel {
+      background:white; border-radius:24px; overflow:hidden;
+      width:100%; max-width:440px; max-height:85vh;
+      box-shadow:0 20px 60px rgba(0,0,0,0.2);
+      display:flex; flex-direction:column;
+    }
+    .league-tier-bronze  { background:linear-gradient(135deg,#92400E,#B45309); }
+    .league-tier-silver  { background:linear-gradient(135deg,#374151,#6B7280); }
+    .league-tier-gold    { background:linear-gradient(135deg,#92400E,#D97706); }
+    .league-tier-diamond { background:linear-gradient(135deg,#1E40AF,#7C3AED); }
+
+    .league-row { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid #F3F4F6; }
+    .league-row.me { background:#FFF4EC; border-left:4px solid #FF6B00; }
+    .league-row.promote { background:#F0FDF4; }
+    .league-row.demote  { background:#FEF2F2; }
+    .league-rank { width:28px; font-size:14px; font-weight:900; color:#9CA3AF; text-align:center; flex-shrink:0; }
+    .league-rank.gold-rank { color:#D97706; font-size:16px; }
+    .league-avatar { font-size:22px; flex-shrink:0; }
+    .league-name { flex:1; font-size:14px; font-weight:700; color:#374151; }
+    .league-kp   { font-size:13px; font-weight:900; color:#FF6B00; }
+
+    /* Avatar picker */
+    .avatar-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:16px; }
+    .avatar-item {
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      padding:12px 8px; border-radius:14px; border:2px solid #E5E7EB;
+      cursor:pointer; transition:all 0.15s; background:white;
+    }
+    .avatar-item:hover { border-color:#FF6B00; transform:translateY(-2px); }
+    .avatar-item.equipped { border-color:#FF6B00; background:#FFF4EC; }
+    .avatar-item.locked { opacity:0.5; cursor:not-allowed; }
+    .avatar-item span { font-size:32px; }
+    .avatar-item p { font-size:10px; font-weight:800; color:#9CA3AF; text-align:center; line-height:1.2; }
     @media (max-width:640px) {
       .header-logo-text { display:none; }
       .header-logo-img  { width:36px; height:36px; }
@@ -1019,6 +1089,14 @@
   </a>
 
   <div class="header-nav">
+    <!-- Gamification badges (shown when logged in) -->
+    <button id="streakBadge" class="streak-badge" style="display:none;" onclick="openLeagueModal()" title="Daily streak">
+      🔥 <span id="streakCount">0</span>
+    </button>
+    <button id="kpBadge" class="kp-badge" style="display:none;" onclick="openLeagueModal()" title="Know Points">
+      💡 <span id="kpCount">0</span> KP
+    </button>
+
     <a href="#pricing" class="pro-badge" id="proBadge" style="text-decoration:none;">Try Pro</a>
 
     <div class="account-dropdown-wrapper" id="accountDropdownWrapper" style="display:none;">
@@ -1797,6 +1875,8 @@
     }
     updateLoginUI();
     updatePricingButtons();
+    // Load gamification badges whenever auth state changes
+    if (window.loadGamificationData) window.loadGamificationData(user);
     // Re-render bars with correct plan limits after auth resolves
     if (!user) {
       // Logged out — guest view: 1 use each
@@ -2108,143 +2188,6 @@
   }
   window.loadUsageCache = loadUsageCache;
 
-  // ── LEARN WITH KNOX — Response Renderers ─────────────────────────────────
-  function renderLearnResponse(data) {
-    const raw = (data.answer || '').trim();
-
-    // Multiple Choice (I'm Stuck)
-    if (data.isStuck || raw.startsWith('MULTIPLE_CHOICE')) {
-      const body = raw.replace(/^MULTIPLE_CHOICE\n?/, '');
-      const qMatch    = body.match(/Question:\s*(.+?)(?:\n|$)/);
-      const aMatch    = body.match(/A\)\s*(.+?)(?:\n|$)/);
-      const bMatch    = body.match(/B\)\s*(.+?)(?:\n|$)/);
-      const cMatch    = body.match(/C\)\s*(.+?)(?:\n|$)/);
-      const dMatch    = body.match(/D\)\s*(.+?)(?:\n|$)/);
-      const ansMatch  = body.match(/ANSWER:\s*([ABCD])/);
-      const hintMatch = body.match(/HINT:\s*(.+?)(?:\n|$)/);
-      const question  = qMatch?.[1] || 'Which answer is correct?';
-      const options   = { A: aMatch?.[1], B: bMatch?.[1], C: cMatch?.[1], D: dMatch?.[1] };
-      const correct   = ansMatch?.[1] || 'A';
-      const hint      = hintMatch?.[1] || '';
-
-      let html = `<div style="padding:14px 18px 6px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-          <div style="background:#1CB0F6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #0A85C2;">Multiple Choice</div>
-          <span style="font-size:12px;font-weight:700;color:#9CA3AF;">Pick the best answer</span>
-        </div>
-        <p style="font-size:15px;font-weight:700;color:#1f2937;margin-bottom:14px;line-height:1.5;">${question}</p>
-        <div style="display:flex;flex-direction:column;gap:8px;" id="mcOptions">`;
-      ['A','B','C','D'].forEach(letter => {
-        if (!options[letter]) return;
-        html += `<button onclick="handleMCAnswer('${letter}','${correct}',this)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;border:2px solid #E5E7EB;background:white;cursor:pointer;font-family:inherit;text-align:left;transition:all 0.15s;width:100%;" onmouseover="if(!this.dataset.answered)this.style.borderColor='#1CB0F6'" onmouseout="if(!this.dataset.answered)this.style.borderColor='#E5E7EB'">
-          <span style="width:28px;height:28px;border-radius:8px;background:#F3F4F6;color:#374151;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${letter}</span>
-          <span style="font-size:14px;font-weight:600;color:#374151;line-height:1.4;">${options[letter]}</span>
-        </button>`;
-      });
-      if (hint) html += `<div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:10px;padding:10px 14px;margin-top:4px;font-size:13px;font-weight:600;color:#92400E;">💡 ${hint}</div>`;
-      html += `</div></div>`;
-      return html;
-    }
-
-    // Show Me — similar problem solution
-    if (data.isShowMe || raw.startsWith('SHOW_ME')) {
-      const body = raw.replace(/^SHOW_ME\n?/, '');
-      const probMatch = body.match(/Similar Problem:\s*(.+?)(?:\n|$)/);
-      const prob = probMatch?.[1] || '';
-      const tryMatch = body.match(/Now try yours:\s*(.+?)(?:\n|$)/);
-      const tryYours = tryMatch?.[1] || "Now try your original problem — you've got this! 🦊";
-      const stepsSection = body.replace(/Similar Problem:.+?\n/, '').replace(/Now try yours:.*/s, '').trim();
-      const lines = stepsSection.split('\n').filter(l => l.trim());
-      let stepsHtml = '';
-      lines.forEach(l => {
-        const m = l.match(/^(\d+)\.\s*(.*)/);
-        if (m) stepsHtml += `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #F3F4F6;">
-          <div style="min-width:24px;height:24px;border-radius:7px;background:#FF6B00;color:white;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${m[1]}</div>
-          <span style="font-size:14px;font-weight:500;color:#374151;line-height:1.55;padding-top:2px;">${m[2]}</span>
-        </div>`;
-        else if (l.trim()) stepsHtml += `<p style="font-size:14px;color:#6B7280;padding:4px 0;">${l}</p>`;
-      });
-      return `<div style="padding:14px 18px 14px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-          <div style="background:#FF6B00;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Similar Problem</div>
-          <span style="font-size:12px;font-weight:700;color:#9CA3AF;">Not your actual problem</span>
-        </div>
-        ${prob ? `<div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:15px;font-weight:700;color:#92400E;">${prob}</div>` : ''}
-        <div style="margin-bottom:12px;">${stepsHtml}</div>
-        <div style="background:#F0FDF4;border:2px solid #86EFAC;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:700;color:#166534;">🦊 ${tryYours}</div>
-      </div>`;
-    }
-
-    // Standard Socratic response — clean blue conversational bubble
-    const clean = raw.replace(/Final Answer:\s*/i, '').trim();
-    return `<div style="padding:14px 18px 14px;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-        <div style="width:6px;height:6px;border-radius:50%;background:#1CB0F6;flex-shrink:0;"></div>
-        <span style="font-size:11px;font-weight:800;color:#1CB0F6;text-transform:uppercase;letter-spacing:0.06em;">Learn with Knox</span>
-      </div>
-      <div style="font-size:15px;font-weight:500;color:#1e3a5f;line-height:1.7;">${clean.replace(/\n/g,'<br>')}</div>
-    </div>`;
-  }
-
-  // Handle multiple choice answer
-  window.handleMCAnswer = function(chosen, correct, btn) {
-    const container = btn.closest('#mcOptions') || btn.closest('div[id]');
-    const allBtns = btn.parentElement.querySelectorAll('button');
-    allBtns.forEach(b => { b.dataset.answered = '1'; b.style.pointerEvents = 'none'; b.onmouseover = null; b.onmouseout = null; });
-    const isCorrect = chosen === correct;
-    btn.style.background = isCorrect ? '#F0FDF4' : '#FEF2F2';
-    btn.style.borderColor = isCorrect ? '#16A34A' : '#DC2626';
-    if (!isCorrect) {
-      allBtns.forEach(b => {
-        const letter = b.querySelector('span')?.textContent?.trim();
-        if (letter === correct) { b.style.background='#F0FDF4'; b.style.borderColor='#16A34A'; }
-      });
-    }
-    // Auto-send result so Knox continues the Socratic loop
-    const chatInput = document.getElementById('chatInput');
-    if (chatInput) {
-      const optionText = btn.querySelectorAll('span')[1]?.textContent || '';
-      chatInput.value = isCorrect
-        ? `I answered ${chosen}: ${optionText} ✓`
-        : `I answered ${chosen}: ${optionText} — but the correct answer was ${correct}`;
-      setTimeout(handleAskQuestion, 600);
-    }
-  };
-
-  // Send I'm Stuck / Show Me to the API
-  function sendLearnAction(type) {
-    const chatInput = document.getElementById('chatInput');
-    if (!chatInput) return;
-    if (type === 'stuck') {
-      chatInput.value = "I'm stuck — give me multiple choice options please";
-    } else {
-      chatInput.value = "Can you show me a similar problem solved step by step?";
-    }
-    handleAskQuestion();
-  }
-
-  function getLearnGreeting() {
-    return `<div style="display:flex;gap:10px;align-items:flex-start;">
-      <div style="width:36px;height:36px;border-radius:50%;border:2px solid #93C5FD;overflow:hidden;flex-shrink:0;background:#DBEAFE;">
-        <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
-      </div>
-      <div style="background:#EFF9FF;border:2px solid #93C5FD;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
-        <p style="font-size:15px;font-weight:600;color:#1e3a5f;line-height:1.6;margin:0;"><strong>Let's learn together! 📚</strong> Tell me what you're working on and I'll guide you to the answer — step by step. I won't just hand it to you. You'll actually get it. 🦊</p>
-      </div>
-    </div>`;
-  }
-
-  function getAnswerGreeting() {
-    return `<div style="display:flex;gap:10px;align-items:flex-start;">
-      <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
-        <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
-      </div>
-      <div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
-        <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
-      </div>
-    </div>`;
-  }
-
   // ── Update usage progress bars ────────────────────────────────────────────
   function updateUsageBar(usage) {
     if (!usage) return;
@@ -2309,6 +2252,211 @@
   }
 
   window.updateUsageBar = updateUsageBar;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // GAMIFICATION — Streak, KP, League, Avatar
+  // ═══════════════════════════════════════════════════════════════════════
+
+  const AVATARS = [
+    { id:'default',  emoji:'🦊', name:'Knox',       cost:0,    desc:'Your fox' },
+    { id:'cap',      emoji:'🎓', name:'Grad Cap',   cost:100,  desc:'100 KP' },
+    { id:'shades',   emoji:'😎', name:'Cool Fox',   cost:250,  desc:'250 KP' },
+    { id:'crown',    emoji:'👑', name:'King Fox',   cost:500,  desc:'500 KP' },
+    { id:'star',     emoji:'⭐', name:'Star Fox',   cost:1000, desc:'1000 KP' },
+    { id:'wizard',   emoji:'🧙', name:'Wizard',     cost:2500, desc:'2500 KP' },
+    { id:'rocket',   emoji:'🚀', name:'Rocket',     cost:5000, desc:'5000 KP' },
+    { id:'diamond',  emoji:'💎', name:'Diamond',    cost:10000,desc:'10000 KP'},
+  ];
+
+  let _localStreak   = 0;
+  let _localTotalKP  = 0;
+  let _localWeeklyKP = 0;
+  let _equippedAvatar = 'default';
+
+  // Update header badges
+  function updateGameBadges(streak, totalKP) {
+    _localStreak  = streak  || _localStreak;
+    _localTotalKP = totalKP || _localTotalKP;
+    const sb = document.getElementById('streakBadge');
+    const kb = document.getElementById('kpBadge');
+    const sc = document.getElementById('streakCount');
+    const kc = document.getElementById('kpCount');
+    if (!window.currentUser) { if(sb)sb.style.display='none'; if(kb)kb.style.display='none'; return; }
+    if (sb) { sb.style.display='inline-flex'; if(sc) sc.textContent=_localStreak; sb.className='streak-badge'+((_localStreak>=3)?' on-fire':''); }
+    if (kb) { kb.style.display='inline-flex'; if(kc) kc.textContent=_localTotalKP; }
+  }
+
+  // Show +KP floating animation
+  function showKPGain(amount, streakBonus) {
+    if (!amount || amount <= 0) return;
+    const el = document.createElement('div');
+    el.className = 'kp-float';
+    const total = amount;
+    el.textContent = `+${total} KP 💡`;
+    if (streakBonus > 0) el.textContent += ` 🔥+${streakBonus}`;
+    // Position near KP badge
+    const badge = document.getElementById('kpBadge');
+    const rect  = badge ? badge.getBoundingClientRect() : { left: window.innerWidth - 100, top: 60 };
+    el.style.left = (rect.left + rect.width / 2 - 40) + 'px';
+    el.style.top  = rect.bottom + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+  }
+
+  // Process gamification data from API response
+  window.processGamification = function(gam) {
+    if (!gam) return;
+    _localTotalKP  = gam.totalKP  || _localTotalKP;
+    _localWeeklyKP = gam.weeklyKP || _localWeeklyKP;
+    updateGameBadges(gam.streak, gam.totalKP);
+    if (gam.kpEarned > 0) {
+      setTimeout(() => showKPGain(gam.kpEarned, gam.streakBonus || 0), 400);
+    }
+    // Streak milestone celebration
+    if (gam.streak > 0 && [3,7,14,30,100].includes(gam.streak)) {
+      setTimeout(() => showStreakMilestone(gam.streak), 800);
+    }
+  };
+
+  function showStreakMilestone(days) {
+    const msgs = { 3:'3-day streak!', 7:'One whole week!', 14:'Two weeks!', 30:'30 days!', 100:'100 days!' };
+    const m = document.createElement('div');
+    m.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;padding:14px 24px;border-radius:16px;font-size:15px;font-weight:900;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.3);animation:kpFloat 2.5s ease-out forwards;';
+    m.innerHTML = `🔥 ${msgs[days] || days+'-day streak!'} Keep it up!`;
+    document.body.appendChild(m);
+    setTimeout(() => m.remove(), 2600);
+  }
+
+  // ── League Modal ──────────────────────────────────────────────────────
+  const TIER_CONFIG = {
+    Bronze:  { icon:'🥉', cls:'league-tier-bronze', next:'Silver'  },
+    Silver:  { icon:'🥈', cls:'league-tier-silver', next:'Gold'    },
+    Gold:    { icon:'🥇', cls:'league-tier-gold',   next:'Diamond' },
+    Diamond: { icon:'💎', cls:'league-tier-diamond', next:null     },
+  };
+
+  window.openLeagueModal = async function() {
+    const modal = document.getElementById('leagueModal');
+    if (!modal) return;
+    if (!window.currentUser) { openLoginModal(); return; }
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    showLeagueTab('league');
+    loadLeague();
+  };
+
+  window.closeLeagueModal = function() {
+    const modal = document.getElementById('leagueModal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+  };
+
+  window.showLeagueTab = function(tab) {
+    document.getElementById('leagueTabContent').style.display = tab === 'league' ? 'block' : 'none';
+    document.getElementById('avatarTabContent').style.display  = tab === 'avatar'  ? 'block' : 'none';
+    document.getElementById('tabLeague').style.cssText = `flex:1;padding:12px;font-size:13px;font-weight:800;font-family:inherit;border:none;cursor:pointer;${tab==='league'?'color:#FF6B00;background:white;border-bottom:3px solid #FF6B00;':'color:#9CA3AF;background:white;border-bottom:3px solid transparent;'}`;
+    document.getElementById('tabAvatar').style.cssText  = `flex:1;padding:12px;font-size:13px;font-weight:800;font-family:inherit;border:none;cursor:pointer;${tab==='avatar'?'color:#FF6B00;background:white;border-bottom:3px solid #FF6B00;':'color:#9CA3AF;background:white;border-bottom:3px solid transparent;'}`;
+    if (tab === 'avatar') renderAvatarGrid();
+  };
+
+  async function loadLeague() {
+    const listEl = document.getElementById('leaderboardList');
+    if (listEl) listEl.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;font-weight:700;">Loading...</div>';
+    try {
+      const tok  = await window.currentUser.getIdToken();
+      const resp = await fetch('/api/league', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok}, body:'{}' });
+      if (!resp.ok) throw new Error('failed');
+      const data = await resp.json();
+      renderLeague(data);
+    } catch(e) {
+      if (listEl) listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#9CA3AF;font-weight:700;">League data unavailable — try again later.</div>';
+    }
+  }
+
+  function renderLeague(data) {
+    const tier   = data.tier || 'Bronze';
+    const cfg    = TIER_CONFIG[tier] || TIER_CONFIG.Bronze;
+    // Update header
+    const hdr = document.getElementById('leagueHeader');
+    if (hdr) { hdr.className = `league-tier-bronze`; hdr.style.background=''; hdr.className = cfg.cls; hdr.style.padding='24px 20px'; hdr.style.textAlign='center'; hdr.style.flexShrink='0'; }
+    const ti = document.getElementById('leagueTierIcon');    if (ti) ti.textContent = cfg.icon;
+    const tn = document.getElementById('leagueTierName');    if (tn) tn.textContent = tier + ' League';
+    const wk = document.getElementById('myWeeklyKP');        if (wk) wk.textContent = data.weeklyKP || 0;
+    const rk = document.getElementById('myLeagueRank');      if (rk) rk.textContent = '#' + (data.myRank || '-');
+    const st = document.getElementById('myStreakDisplay');    if (st) st.textContent = _localStreak + '🔥';
+    _localWeeklyKP = data.weeklyKP || 0;
+
+    // Leaderboard
+    const listEl = document.getElementById('leaderboardList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    (data.leaderboard || []).forEach((user, i) => {
+      const row = document.createElement('div');
+      const isPromote = i < 5;
+      const isDemote  = data.totalMembers >= 10 && i >= data.totalMembers - 5;
+      row.className = 'league-row' + (user.isMe ? ' me' : isPromote ? ' promote' : isDemote ? ' demote' : '');
+      const rankDisplay = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}`;
+      const avatarCfg = AVATARS.find(a => a.id === (user.avatar || 'default')) || AVATARS[0];
+      row.innerHTML = `
+        <div class="league-rank ${i<3?'gold-rank':''}">${rankDisplay}</div>
+        <div class="league-avatar">${avatarCfg.emoji}</div>
+        <div class="league-name">${user.name}${user.isMe ? ' <span style="font-size:10px;background:#FF6B00;color:white;padding:1px 6px;border-radius:6px;">YOU</span>' : ''}</div>
+        <div class="league-kp">${user.kp} KP</div>
+        ${user.streak >= 3 ? `<div style="font-size:13px;">🔥${user.streak}</div>` : ''}`;
+      listEl.appendChild(row);
+    });
+
+    if (data.nextTier && data.promotionZone) {
+      const promo = document.createElement('div');
+      promo.style.cssText = 'padding:10px 16px;background:#F0FDF4;font-size:12px;font-weight:800;color:#16A34A;text-align:center;';
+      promo.textContent = `🚀 You're in the top 5! Promote to ${data.nextTier} on Monday`;
+      listEl.prepend(promo);
+    }
+  }
+
+  // ── Avatar System ─────────────────────────────────────────────────────
+  function renderAvatarGrid() {
+    const grid = document.getElementById('avatarGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    AVATARS.forEach(av => {
+      const unlocked  = _localTotalKP >= av.cost;
+      const equipped  = _equippedAvatar === av.id;
+      const item = document.createElement('div');
+      item.className = `avatar-item${equipped?' equipped':''}${!unlocked?' locked':''}`;
+      item.title = unlocked ? (equipped ? 'Equipped' : 'Click to equip') : `Need ${av.cost} KP`;
+      item.innerHTML = `<span>${av.emoji}</span><p>${av.name}</p><p style="color:${unlocked?'#16A34A':'#9CA3AF'}">${equipped?'✓ On':'${av.desc}'}</p>`.replace('${av.desc}', av.desc);
+      if (unlocked && !equipped) {
+        item.onclick = () => equipAvatar(av.id);
+      }
+      grid.appendChild(item);
+    });
+  }
+
+  async function equipAvatar(avatarId) {
+    _equippedAvatar = avatarId;
+    renderAvatarGrid();
+    if (!window.currentUser) return;
+    try {
+      const tok = await window.currentUser.getIdToken();
+      await fetch('/api/league', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok}, body: JSON.stringify({ equipAvatar: avatarId }) });
+    } catch(e) {}
+  }
+
+  // Load gamification data on login
+  async function loadGamificationData(user) {
+    if (!user) { updateGameBadges(0, 0); return; }
+    try {
+      // We get streak/KP from the gamification Firestore doc via get-usage or a separate call
+      const tok  = await user.getIdToken();
+      const resp = await fetch('/api/get-usage', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok}, body:'{}' });
+      if (resp.ok) {
+        const d = await resp.json();
+        if (d.streak !== undefined) updateGameBadges(d.streak, d.totalKP);
+      }
+    } catch(e) {}
+  }
+  window.loadGamificationData = loadGamificationData;
   (function initBarsFromCache() {
     // Guests: show 1 use limit for both bars
     if (!window.currentUser) {
@@ -2367,26 +2515,24 @@
     const qInput  = document.getElementById('chatInput') || document.getElementById('questionInput');
     const iconBtns = document.querySelectorAll('.chat-icon-btn');
 
+    const inactiveStyle = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
+
+    // Reset all tabs to inactive first
+    if (aBtn) aBtn.style.cssText = inactiveStyle;
+    if (lBtn) lBtn.style.cssText = inactiveStyle;
+
     if (mode === 'answer') {
       if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;';
-      if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
-      if (askBtn) { askBtn.style.background='#FF6B00'; askBtn.style.boxShadow='0 3px 0 #CC5500'; askBtn.onmouseover=()=>{askBtn.style.transform='translateY(-1px)';askBtn.style.boxShadow='0 5px 0 #CC5500';}; askBtn.onmouseout=()=>{askBtn.style.transform='';askBtn.style.boxShadow='0 3px 0 #CC5500';}; }
+      if (askBtn) { askBtn.style.background = '#FF6B00'; askBtn.style.boxShadow = '0 3px 0 #CC5500'; askBtn.onmouseover = () => { askBtn.style.transform='translateY(-1px)'; askBtn.style.boxShadow='0 5px 0 #CC5500'; }; askBtn.onmouseout = () => { askBtn.style.transform=''; askBtn.style.boxShadow='0 3px 0 #CC5500'; }; }
+      iconBtns.forEach(b => { b.dataset.hoverColor = '#FF6B00'; });
       if (aiHeaderDesc) aiHeaderDesc.textContent = 'Ready to help you ace it';
       if (qInput) qInput.placeholder = 'Ask Knox anything — type or paste your question...';
-      iconBtns.forEach(b => { b.dataset.hoverColor='#FF6B00'; });
-    } else {
+    } else if (mode === 'learn') {
       if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#1CB0F6;color:white;box-shadow:0 3px 0 #0A85C2;transition:all 0.15s;line-height:1;';
-      if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
-      if (askBtn) { askBtn.style.background='#1CB0F6'; askBtn.style.boxShadow='0 3px 0 #0A85C2'; askBtn.onmouseover=()=>{askBtn.style.transform='translateY(-1px)';askBtn.style.boxShadow='0 5px 0 #0A85C2';}; askBtn.onmouseout=()=>{askBtn.style.transform='';askBtn.style.boxShadow='0 3px 0 #0A85C2';}; }
+      if (askBtn) { askBtn.style.background = '#1CB0F6'; askBtn.style.boxShadow = '0 3px 0 #0A85C2'; askBtn.onmouseover = () => { askBtn.style.transform='translateY(-1px)'; askBtn.style.boxShadow='0 5px 0 #0A85C2'; }; askBtn.onmouseout = () => { askBtn.style.transform=''; askBtn.style.boxShadow='0 3px 0 #0A85C2'; }; }
+      iconBtns.forEach(b => { b.dataset.hoverColor = '#1CB0F6'; });
       if (aiHeaderDesc) aiHeaderDesc.textContent = 'Knox will guide you step by step';
-      if (qInput) qInput.placeholder = "What are you working on? Knox will guide you to the answer...";
-      iconBtns.forEach(b => { b.dataset.hoverColor='#1CB0F6'; });
-    }
-
-    // Reset thread with the right greeting when switching modes
-    const thread = document.getElementById('chatThread');
-    if (thread && conversationHistory.length === 0) {
-      thread.innerHTML = mode === 'learn' ? getLearnGreeting() : getAnswerGreeting();
+      if (qInput) qInput.placeholder = 'What would you like to learn? Knox will guide you step by step...';
     }
   }
   document.addEventListener('DOMContentLoaded', () => setMode('answer'));
@@ -2860,8 +3006,6 @@
           imageBase64: pendingImageBase64 || null,
           imageType:   pendingImageType   || null,
           history:     conversationHistory.slice(-6),
-          learnMode:   currentMode === 'learn',
-          gradeLevel:  window.knoxGradeLevel || null,
         }),
       });
 
@@ -2900,14 +3044,13 @@
       const serverPlan = data.plan || userPlan;
 
       let responseHtml;
-      if (data.isLearnMode) {
-        // ── Learn with Knox — Socratic / Multiple Choice / Show Me ────────────
-        responseHtml = renderLearnResponse(data);
-      } else if (data.isCasual) {
+      if (data.isCasual) {
         const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
+        // Short casual replies = plain text; longer ones = styled freeform
         if (clean.split('\n').filter(l => l.trim()).length <= 3 && clean.length < 300) {
           responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
         } else {
+          // Multi-paragraph casual = use freeform renderer (handles visual responses)
           const planTagClass2 = serverPlan === 'pro_plus' ? 'tag-pro-plus' : serverPlan === 'pro' ? 'tag-pro' : 'tag-free';
           const planTag2 = serverPlan === 'pro_plus' ? 'Pro+' : serverPlan === 'pro' ? 'Pro' : 'Free';
           responseHtml = `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(clean, serverPlan)}<div style="height:10px;"></div>`;
@@ -2926,39 +3069,13 @@
 
       const knoxRow = replaceThinkingWithResponse(responseHtml, false);
 
-      // ── Learn mode action buttons (I'm Stuck / Show Me) ────────────────────
-      if (data.isLearnMode && !data.isStuck && !data.isShowMe) {
-        const actionBar = document.createElement('div');
-        actionBar.style.cssText = 'display:flex;gap:8px;padding:8px 16px 14px;flex-wrap:wrap;';
-        const stuckBtn = document.createElement('button');
-        stuckBtn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:11px;border:2px solid #E5E7EB;background:white;font-size:13px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;transition:all 0.15s;';
-        stuckBtn.innerHTML = '🤔 I\'m Stuck';
-        stuckBtn.onmouseover = () => { stuckBtn.style.borderColor = '#1CB0F6'; stuckBtn.style.color = '#1CB0F6'; };
-        stuckBtn.onmouseout  = () => { stuckBtn.style.borderColor = '#E5E7EB'; stuckBtn.style.color = '#6B7280'; };
-        stuckBtn.onclick = () => sendLearnAction('stuck');
-        actionBar.appendChild(stuckBtn);
-
-        if (data.canShowMe) {
-          const showBtn = document.createElement('button');
-          showBtn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:11px;border:2px solid #E5E7EB;background:white;font-size:13px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;transition:all 0.15s;';
-          showBtn.innerHTML = '👁️ Show Me';
-          showBtn.onmouseover = () => { showBtn.style.borderColor = '#FF6B00'; showBtn.style.color = '#FF6B00'; };
-          showBtn.onmouseout  = () => { showBtn.style.borderColor = '#E5E7EB'; showBtn.style.color = '#6B7280'; };
-          showBtn.onclick = () => sendLearnAction('showMe');
-          actionBar.appendChild(showBtn);
-        }
-
-        const bubble = knoxRow.querySelector('div:last-child');
-        if (bubble) bubble.appendChild(actionBar);
-      }
-
       // Fire optional after-answer callback (e.g. guest sign-up prompt)
       if (typeof afterCallback === 'function') {
         setTimeout(afterCallback, 600);
       }
 
-      // Save answer button (not in learn mode — it's a conversation)
-      if (!data.isAcknowledgement && !data.isLearnMode) {
+      // Save answer button inside chat bubble
+      if (!data.isAcknowledgement) {
         const saveBtn = document.createElement('button');
         saveBtn.style.cssText = 'display:flex;align-items:center;gap:6px;margin:0 16px 16px;padding:8px 14px;background:var(--gray);border:2px solid var(--border);border-radius:10px;font-size:12px;font-weight:800;color:#777;cursor:pointer;font-family:inherit;transition:all 0.15s;';
         saveBtn.innerHTML = '💾 Save';
@@ -2977,6 +3094,11 @@
       // Update usage progress bar
       if (data.usage) {
         updateUsageBar(data.usage);
+      }
+      // Process gamification rewards (KP + streak)
+      if (data.gamification && window.processGamification) {
+        window.processGamification(data.gamification);
+      }
         // ── Show upgrade popup instantly when the last free question is used ──
         // Don't wait for the next attempt to hit a 429 — show it right now.
         const uPlan = window.userPlan || userPlan || 'free';
@@ -4249,3 +4371,44 @@
 
 
 <!-- deploy -->
+
+<!-- ===================== LEAGUE MODAL ===================== -->
+<div id="leagueModal" class="league-modal" style="display:none;" onclick="if(event.target===this)closeLeagueModal()">
+  <div class="league-panel">
+    <div id="leagueHeader" class="league-tier-bronze" style="padding:24px 20px;text-align:center;flex-shrink:0;">
+      <div style="font-size:40px;margin-bottom:6px;" id="leagueTierIcon">🥉</div>
+      <div style="font-size:20px;font-weight:900;color:white;" id="leagueTierName">Bronze League</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-top:4px;">This week's leaderboard resets Monday</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;">
+        <div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:8px 14px;text-align:center;">
+          <div style="font-size:20px;font-weight:900;color:white;" id="myWeeklyKP">0</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:700;">My KP</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:8px 14px;text-align:center;">
+          <div style="font-size:20px;font-weight:900;color:white;" id="myLeagueRank">#-</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:700;">Rank</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:8px 14px;text-align:center;">
+          <div style="font-size:20px;font-weight:900;color:white;" id="myStreakDisplay">0🔥</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:700;">Streak</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;border-bottom:2px solid #F3F4F6;flex-shrink:0;">
+      <button id="tabLeague" onclick="showLeagueTab('league')" style="flex:1;padding:12px;font-size:13px;font-weight:800;font-family:inherit;border:none;background:white;cursor:pointer;color:#FF6B00;border-bottom:3px solid #FF6B00;">🏆 League</button>
+      <button id="tabAvatar" onclick="showLeagueTab('avatar')" style="flex:1;padding:12px;font-size:13px;font-weight:800;font-family:inherit;border:none;background:white;cursor:pointer;color:#9CA3AF;border-bottom:3px solid transparent;">🦊 Avatar</button>
+      <button onclick="closeLeagueModal()" style="padding:12px 16px;border:none;background:white;cursor:pointer;font-size:18px;color:#9CA3AF;">✕</button>
+    </div>
+    <div id="leagueTabContent" style="overflow-y:auto;flex:1;">
+      <div style="padding:8px 16px;background:#F0FDF4;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#16A34A;border-bottom:1px solid #DCFCE7;">🚀 Top 5 promote to next league this Monday</div>
+      <div id="leaderboardList" style="display:flex;flex-direction:column;"><div style="padding:40px;text-align:center;color:#9CA3AF;font-weight:700;">Loading league...</div></div>
+    </div>
+    <div id="avatarTabContent" style="display:none;overflow-y:auto;flex:1;">
+      <div style="padding:12px 16px 4px;font-size:12px;font-weight:700;color:#9CA3AF;">Unlock accessories with KP · Equipped on your league card</div>
+      <div class="avatar-grid" id="avatarGrid"></div>
+    </div>
+    <div style="padding:12px 16px;border-top:2px solid #F3F4F6;flex-shrink:0;">
+      <button onclick="scrollToAI();closeLeagueModal();" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">Keep Earning KP 💡</button>
+    </div>
+  </div>
+</div>
