@@ -34,13 +34,12 @@ if (!getApps().length) {
 const adminAuth = getAdminAuth();
 const db        = getFirestore();
 
-const FREE_DAILY_LIMIT    = 5;    // homework questions per 24hr rolling window
-const WONDER_DAILY_LIMIT  = 25;   // Wonder (was Pro)
-const SUPER_DAILY_LIMIT   = 40;   // Super (was Pro+)
-const MAX_DAILY_LIMIT     = Infinity; // Max — unlimited homework
-const FREE_CASUAL_LIMIT   = 20;
-const WONDER_CASUAL_LIMIT = 50;
-const WINDOW_MS           = 24 * 60 * 60 * 1000;
+const FREE_DAILY_LIMIT   = 5;   // homework questions per 24hr rolling window
+const PRO_DAILY_LIMIT    = 25;  // homework questions per 24hr rolling window
+const PROPLUS_DAILY_LIMIT= 40;  // homework questions per 24hr rolling window
+const FREE_CASUAL_LIMIT  = 20;  // casual messages per 24hr rolling window
+const PRO_CASUAL_LIMIT   = 50;  // casual messages per 24hr rolling window
+const WINDOW_MS          = 24 * 60 * 60 * 1000; // 24 hour rolling window in ms
 const ADMIN_EMAIL        = process.env.ADMIN_EMAIL || "";
 const VIP_PRO_EMAILS     = (process.env.VIP_PRO_EMAILS || "")
   .split(",").map(e => e.trim()).filter(Boolean);
@@ -225,9 +224,9 @@ export default async function handler(req, res) {
   // 2. Resolve plan server-side
   let userPlan = "free";
   if (userEmail === ADMIN_EMAIL) {
-    userPlan = "max";
+    userPlan = "pro_plus";
   } else if (VIP_PRO_EMAILS.includes(userEmail)) {
-    userPlan = "wonder";
+    userPlan = "pro";
   } else {
     try {
       const doc = await db.collection("users").doc(uid).get();
@@ -237,27 +236,23 @@ export default async function handler(req, res) {
     }
   }
 
-  // 3. Rolling 24hr usage limits with IP-layer protection
+  // 3. Rolling 24hr usage limits
   const now = Date.now();
-  const clientIP = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim();
   const usageRef = db.collection("usage").doc(uid);
-  // IP shadow doc — blocks credit farming via account switching
-  const ipRef    = db.collection("ip_usage").doc(clientIP.replace(/[.:]/g, '_'));
 
   // Limits per plan
-  const hwLimit     = (userPlan === "max")                          ? Infinity
-                    : (userPlan === "super"  || userPlan === "pro_plus") ? SUPER_DAILY_LIMIT
-                    : (userPlan === "wonder" || userPlan === "pro")      ? WONDER_DAILY_LIMIT
+  const hwLimit     = userPlan === "pro_plus" ? PROPLUS_DAILY_LIMIT
+                    : userPlan === "pro"       ? PRO_DAILY_LIMIT
                     : FREE_DAILY_LIMIT;
-  const casualLimit = (userPlan === "max" || userPlan === "super" || userPlan === "pro_plus") ? Infinity
-                    : (userPlan === "wonder" || userPlan === "pro")      ? WONDER_CASUAL_LIMIT
+  const casualLimit = userPlan === "pro_plus" ? Infinity
+                    : userPlan === "pro"       ? PRO_CASUAL_LIMIT
                     : FREE_CASUAL_LIMIT;
 
   // Skip limits for admin
   const isAdmin = (userEmail === ADMIN_EMAIL);
 
   // Detect casual before limit check so we can apply the right bucket
-  const { question: rawQ, imageBase64, imageType, history } = req.body;
+  const { question: rawQ, imageBase64, imageType, history, learnMode, isStuck, showMe, gradeLevel } = req.body;
   const preCheckQuestion = (rawQ || "").trim();
   const preCheckCasual   = isCasualChat(preCheckQuestion) && !imageBase64;
 
@@ -293,27 +288,8 @@ export default async function handler(req, res) {
           updatedAt: now,
         }, { merge: true });
       } else {
-        // IP-layer check — prevents credit farming via account switching
-        // (free/wonder users only — paid plans aren't affected)
-        if (userPlan === "free" || userPlan === "wonder") {
-          try {
-            const ipSnap = await ipRef.get();
-            const ipData = ipSnap.exists ? ipSnap.data() : {};
-            const ipHwTimes = (ipData.hwTimes || []).filter(t => now - t < WINDOW_MS);
-            if (ipHwTimes.length >= hwLimit) {
-              const oldest = Math.min(...ipHwTimes);
-              const unlockMs = WINDOW_MS - (now - oldest);
-              const unlockMin = Math.ceil(unlockMs / 60000);
-              const hrs = Math.floor(unlockMin / 60);
-              const min = unlockMin % 60;
-              const countdown = hrs > 0 ? `${hrs}h ${min}m` : `${min}m`;
-              return res.status(429).json({ error: "limit_reached", countdown, limit: hwLimit, used: ipHwTimes.length, nextUnlock: oldest + WINDOW_MS });
-            }
-          } catch(ipErr) { console.warn("IP check failed:", ipErr.message); }
-        }
-
         // Homework question limit check
-        if (hwLimit !== Infinity && hwTimes.length >= hwLimit) {
+        if (hwTimes.length >= hwLimit) {
           const oldest    = Math.min(...hwTimes);
           const unlockMs  = WINDOW_MS - (now - oldest);
           const unlockMin = Math.ceil(unlockMs / 60000);
@@ -328,20 +304,13 @@ export default async function handler(req, res) {
             nextUnlock: oldest + WINDOW_MS,
           });
         }
-        // Record homework question (uid + IP)
+        // Record homework question
         await usageRef.set({
           hwTimes: [...hwTimes, now],
           casualTimes: csTimes,
           uid, email: userEmail,
           updatedAt: now,
         }, { merge: true });
-        // Write IP shadow record
-        try {
-          const ipSnap2 = await ipRef.get();
-          const ipD2 = ipSnap2.exists ? ipSnap2.data() : {};
-          const ipHw2 = (ipD2.hwTimes || []).filter(t => now - t < WINDOW_MS);
-          await ipRef.set({ hwTimes: [...ipHw2, now], updatedAt: now }, { merge: true });
-        } catch(e2) {}
       }
     } catch (err) {
       console.error("Usage tracking error:", err.message);
@@ -375,7 +344,7 @@ export default async function handler(req, res) {
   // auto re-ask the last question so the AI re-explains it with the new style.
   // Free plan does NOT get this — visual learning is a paid feature.
   const isJustPreference = isPreferenceOnly(trimmedQuestion);
-  if (isJustPreference && hasHistory && !hasImage && userPlan !== "free" && userPlan !== "wonder") {
+  if (isJustPreference && hasHistory && !hasImage && userPlan !== "free") {
     const lastUserMsg  = [...safeHistory].reverse().find(m => m.role === "user");
     const lastQuestion = typeof lastUserMsg?.content === "string"
       ? lastUserMsg.content.replace(/^Question:\s*/i, "").trim()
@@ -387,12 +356,12 @@ export default async function handler(req, res) {
 
   // 5. Detect learning style — Pro+ uses full detection, Pro only checks current question
   const wantsVisual  = asksForVisualContent(trimmedQuestion);
-  const learningStyle = isPaidTop
+  const learningStyle = userPlan === "pro_plus"
     ? detectLearningStyle(safeHistory, trimmedQuestion)
-    : (isPaidMid && wantsVisual ? "visual" : null);
+    : (userPlan === "pro" && wantsVisual ? "visual" : null);
 
   // prefOnly only applies to Pro+ with no history
-  const prefOnly = isPaidTop && !hasImage && !hasHistory && isJustPreference;
+  const prefOnly = userPlan === "pro_plus" && !hasImage && !hasHistory && isJustPreference;
 
   // 6. Build learning style instructions
   let learningStyleInstructions = "";
@@ -436,7 +405,7 @@ STRICT RULES:
 - No bold, no asterisks, no underlines, no numbered lists, no bullet points, no markdown
 - Your ENTIRE response must be 100 words or fewer — be concise and direct`;
 
-  } else if (userPlan === "wonder" || userPlan === "pro") {
+  } else if (userPlan === "pro") {
     planInstructions = `=== PLAN: PRO ===
 Give thorough, clear explanations. Use step-by-step breakdowns when the question needs them.
 
@@ -458,7 +427,7 @@ STRICT RULES:
 - NEVER use alternative header names like "Step-by-Step Process:", "Steps:", "Solution:", "Work:", "Method:"
 - If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
 
-  } else if (userPlan === "super" || userPlan === "pro_plus" || userPlan === "max") {
+  } else if (userPlan === "pro_plus") {
     planInstructions = `=== PLAN: PRO+ ===
 Give the deepest, most complete academic explanations possible. You are a world-class tutor.
 
@@ -490,10 +459,116 @@ STRICT RULES:
 - If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
   }
 
+  // ── Grade level detection ─────────────────────────────────────────────────
+  function detectGradeLevel(history, question) {
+    const text = [...(history || []).map(m => m.content || ''), question].join(' ').toLowerCase();
+    if (/calculus|derivative|integral|linear algebra|differential|multivariable|ap calc|ap physics c|quantum|thermodynamics|organic chem/i.test(text)) return 'college';
+    if (/pre.?calc|trigonometry|ap |sat |act |honors|physics|chemistry|algebra 2|statistics|macroeconomics|microeconomics/i.test(text)) return 'high';
+    if (/algebra|geometry|biology|earth science|civics|world history|us history|middle school/i.test(text)) return 'middle';
+    if (/multiplication|division|fractions|decimals|addition|subtraction|spelling|grammar|basic|elementary/i.test(text)) return 'elementary';
+    return 'high'; // default
+  }
+
+  const inferredGrade = gradeLevel || detectGradeLevel(safeHistory, trimmedQuestion);
+
+  // ── Socratic system prompt (Learn with Knox mode) ─────────────────────────
+  const isPaidUser = userPlan !== 'free';
+
+  let socraticPrompt = '';
+  if (learnMode) {
+    const gradeInstructions = {
+      elementary: 'Use very simple words. Short sentences. Lots of encouragement. Think of talking to a 3rd-5th grader.',
+      middle:     'Use clear, friendly language. Avoid jargon. Relate concepts to everyday life. Think 6th-8th grade.',
+      high:       'You can use subject terminology but always explain it. Think high school student — capable but still learning.',
+      college:    'Treat them as a peer who is learning. Use precise academic language. Expect them to think rigorously.',
+    };
+
+    if (isStuck) {
+      // "I'm Stuck" — convert to multiple choice
+      socraticPrompt = `You are Knox — a Socratic tutor. The student is stuck and needs multiple choice options.
+
+TASK: Convert your last guiding question into a multiple choice question with exactly 4 options (A, B, C, D).
+
+FORMAT — use EXACTLY this structure:
+MULTIPLE_CHOICE
+Question: [The question you were guiding them toward]
+A) [Plausible option]
+B) [Plausible option]  
+C) [Correct answer]
+D) [Plausible option]
+ANSWER: [correct letter]
+HINT: [one warm sentence nudging toward the answer without giving it away]
+
+RULES:
+- Shuffle the correct answer randomly (don't always put it in position C)
+- Make wrong options plausible — not obviously wrong
+- Keep options concise — one sentence each
+- After they answer you will confirm and continue guiding
+- Grade level: ${gradeInstructions[inferredGrade]}`;
+
+    } else if (showMe && isPaidUser) {
+      // "Show Me" — solve a SIMILAR problem, not the same one
+      socraticPrompt = `You are Knox — a Socratic tutor. The student asked to see a similar problem solved.
+
+TASK: Create and solve a SIMILAR but DIFFERENT problem step by step. Do NOT solve their actual problem.
+
+FORMAT — use EXACTLY this structure:
+SHOW_ME
+Similar Problem: [A comparable problem with different numbers/context]
+Step-by-step solution:
+1. [Step with clear work shown]
+2. [Next step]
+3. [Continue until complete]
+Now try yours: [One encouraging sentence pushing them back to their original problem]
+
+RULES:
+- The similar problem must test the SAME concept/skill
+- Show ALL work — no shortcuts
+- Use real numbers, not variables where possible
+- End with encouragement to try their own
+- Grade level: ${gradeInstructions[inferredGrade]}`;
+
+    } else {
+      // Standard Socratic loop
+      const phaseDetection = safeHistory.length === 0
+        ? 'PHASE: DIAGNOSE — This is the first message. Identify what concept the student needs help with.'
+        : safeHistory.length <= 2
+        ? 'PHASE: OPEN QUESTION — Ask one question to test their baseline understanding of the concept.'
+        : safeHistory.length <= 6
+        ? 'PHASE: SCAFFOLD — Guide them step by step. Never give the answer. Ask leading questions.'
+        : 'PHASE: CONFIRM or REINFORCE — If they got it right, confirm warmly and ask a Quick Check question. If wrong, gently redirect.';
+
+      socraticPrompt = `You are Knox — a warm, clever Socratic tutor. You NEVER give the answer directly.
+
+YOUR ONLY JOB: Guide the student to discover the answer themselves through questions and hints.
+
+THE SOCRATIC LOOP:
+1. DIAGNOSE → Understand exactly where they're stuck
+2. OPEN QUESTION → Test their existing knowledge with one question
+3. SCAFFOLD → Break it down. One hint or question at a time. Build understanding step by step.
+4. LET THEM ARRIVE → They answer, you confirm or gently redirect
+5. CONFIRM → "Yes! Exactly. Here's why that works..." — validate their thinking
+6. QUICK CHECK → Ask one new related question to lock in the learning
+
+${phaseDetection}
+
+RULES — CRITICAL:
+- NEVER write the answer. Not even partially. Not even as an example.
+- Ask ONE question at a time. Never stack multiple questions.
+- Keep responses SHORT — 2-4 sentences max. This is a conversation, not a lecture.
+- Be warm and encouraging. When they get something right, celebrate it genuinely.
+- When they're wrong, don't say "wrong" — say "almost!" or "close — think about..." 
+- If they're clearly lost after 3 exchanges, offer a smaller hint but still don't give the answer.
+- Use Knox's natural voice — like a smart friend texting them, not a textbook.
+- Grade level: ${gradeInstructions[inferredGrade]}
+- Never use section headers (Final Answer:, Explanation:, etc.) — this is pure conversation.`;
+    }
+  }
+
   // Detect if this is casual chat vs homework question
   const casual = isCasualChat(trimmedQuestion) && !hasImage;
 
-  const systemPrompt = `You are Knox — a clever, warm, enthusiastic orange fox and the heart of Knox Knows. You are a real character with personality. Students talk to you like a friend, and you talk back like one too.
+  const systemPrompt = learnMode ? socraticPrompt : `You are Knox — a clever, warm, enthusiastic orange fox and the heart of Knox Knows. You are a real character with personality. Students talk to you like a friend, and you talk back like one too.
 
 YOUR PERSONALITY:
 - You're that one friend who's somehow great at every subject — but you're not cocky about it, you just love helping
@@ -567,18 +642,21 @@ UNIVERSAL RULES:
   }
 
   // 8. Pick model and token limit
-  // Casual chat: everyone gets gpt-4o with 800 tokens — same quality for all plans
-  // Homework: plan-based model and token limits apply
-  const model = hasImage  ? "gpt-4o" :
-    casual                ? "gpt-4o" :
-    userPlan === "pro_plus"? "gpt-4.1" :
-    userPlan === "pro"     ? "gpt-4.1-mini" :
+  const isPaidTop = userPlan === "max" || userPlan === "super" || userPlan === "pro_plus";
+  const isPaidMid = userPlan === "wonder" || userPlan === "pro";
+  const model = hasImage   ? "gpt-4o" :
+    learnMode              ? "gpt-4o" :   // Socratic needs strong reasoning
+    casual                 ? "gpt-4o" :
+    isPaidTop              ? "gpt-4.1" :
+    isPaidMid              ? "gpt-4.1-mini" :
                              "gpt-4o-mini";
 
-  const maxTokens = casual ? 800 :
-    userPlan === "pro_plus" ? 2800 :
-    userPlan === "pro"      ? 2000 :
-                              350;  // free: 100 words ≈ 130 tokens; 350 gives clean buffer
+  // Learn mode is conversational — keep short. Get the Answer uses full token limits.
+  const maxTokens = learnMode ? 350 :
+    casual    ? 800 :
+    isPaidTop ? 2800 :
+    isPaidMid ? 2000 :
+                350;
 
   // 9. Call OpenAI Chat Completions API
   try {
@@ -601,7 +679,7 @@ UNIVERSAL RULES:
     }
 
     const processed = processAnswer(rawAnswer, userPlan);
-    let { answer, resources } = isPaidTop
+    let { answer, resources } = userPlan === "pro_plus"
       ? parseResources(processed)
       : { answer: processed, resources: [] };
 
@@ -613,7 +691,7 @@ UNIVERSAL RULES:
     let imageSearchQuery = null;
 
     // Visual content — Pro+ only (Pro gets visual style in text but not embedded video/images)
-    if (isPaidTop && !prefOnly) {
+    if (userPlan === "pro_plus" && !prefOnly) {
       // Upgrade any YouTube resource search URLs to real video links
       for (let i = 0; i < resources.length; i++) {
         if (resources[i].type === "youtube" && resources[i].link.includes("youtube.com/results")) {
@@ -645,10 +723,15 @@ UNIVERSAL RULES:
     return res.status(200).json({
       answer,
       resources,
-      plan:             userPlan,
+      plan:              userPlan,
       learningStyle,
       isAcknowledgement: prefOnly || casual,
-      isCasual:         casual,
+      isCasual:          casual,
+      isLearnMode:       !!learnMode,
+      isStuck:           !!isStuck,
+      isShowMe:          !!showMe,
+      inferredGrade,
+      canShowMe:         isPaidUser,
       embeddedVideo,
       imageSearchQuery,
       videos: [],
