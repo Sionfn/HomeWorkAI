@@ -229,8 +229,7 @@
 
       /* Pricing — stack to 1 col on mobile */
       .pricing-grid { grid-template-columns:1fr !important; }
-      /* Remove Pro Knox elevation on mobile */
-      .pricing-grid > div[style*="translateY"] { transform:none !important; }
+      /* 3-col pricing grid */
 
       /* Two ways — 1 col */
       div[style*="grid-template-columns:1fr 1fr;gap:20px;margin-top:48px"] {
@@ -1564,7 +1563,7 @@
           </div>
         </div>
         <!-- Casual credits -->
-        <div id="casualBarSection">
+        <div id="casualBarSection" style="display:none;">
           <div class="usage-bar-label">
             <span style="display:flex;align-items:center;gap:5px;">
               <span style="font-size:10px;">💬</span>
@@ -1639,7 +1638,7 @@
     </div>
 
     <!-- 4 cards in a row -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:stretch;grid-auto-rows:1fr;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch;">
 
       <!-- FREE -->
       <div class="reveal delay-1" style="background:#1CB0F6;border-radius:20px;border:3px solid #0A85C2;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;height:100%;box-sizing:border-box;">
@@ -1663,37 +1662,10 @@
         <button onclick="scrollToAI()" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#0A85C2;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);transition:all 0.15s;margin-top:auto;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.2)'">Start Free</button>
       </div>
 
-      <!-- WONDER KNOX -->
-      <div class="reveal delay-2" style="background:#58CC02;border-radius:20px;border:3px solid #46A302;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;height:100%;box-sizing:border-box;">
-        <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:16px;">⚡ Wonder Knox</div>
-        <div style="font-size:40px;font-weight:900;line-height:1;color:white;" id="proPrice">$9.99</div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;" id="proPeriod">/month</div>
-        <div class="yearly-note" id="proYearlyNote" style="background:rgba(255,255,255,0.25);color:white;border:2px solid rgba(255,255,255,0.4);">🎉 $79.99/yr — save $39.89</div>
-        <div style="font-size:14px;font-weight:800;color:white;margin:12px 0 16px;line-height:1.4;">5× more questions, smarter answers</div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>25 questions per day</strong></div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Step-by-step breakdowns</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Tips &amp; shortcuts</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Conversation memory</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Smarter AI model</div>
-          <div style="height:1px;background:rgba(255,255,255,0.2);margin:6px 0;"></div>
-          <div style="font-size:10px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px;">Upgrade to unlock</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>40 questions/day</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Best-in-class AI</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Insights &amp; Key Points</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Learn with Knox</div>
-        </div>
-        <div style="margin-top:auto;"><div id="proTrialBadge" style="display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,0.2);border-radius:10px;padding:7px;margin-bottom:10px;font-size:12px;font-weight:800;color:white;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
-          3-Day Free Trial
-        </div>
-        <button onclick="handlePurchase('Wonder')" id="proCTABtn" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#2D6A00;cursor:pointer;box-shadow:0 4px 0 #2D6A00;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #2D6A00'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #2D6A00'">Start Free Trial</button>
-      </div></div>
-
-      <!-- PRO KNOX — FEATURED -->
+      <!-- SUPER KNOX — FEATURED -->
       <div class="reveal delay-3" style="background:#FF6B00;border-radius:20px;border:3px solid #CC5500;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;position:relative;height:100%;box-sizing:border-box;">
         <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:5px 14px;border-radius:999px;white-space:nowrap;">MOST POPULAR</div>
-        <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.8);margin-bottom:16px;">⭐ Pro Knox</div>
+        <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.8);margin-bottom:16px;">⭐ Super Knox</div>
         <div style="font-size:40px;font-weight:900;line-height:1;color:white;" id="proPlusPrice">$14.99</div>
         <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;">/month</div>
         <div class="yearly-note" id="proPlusYearlyNote" style="background:rgba(255,255,255,0.25);color:white;border:2px solid rgba(255,255,255,0.4);">🎉 $119.99/yr — save $59.89</div>
@@ -1711,11 +1683,11 @@
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Unlimited casual chat</div>
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Priority speed</div>
         </div>
-        <button onclick="handlePurchase('Super')" id="superCTABtn" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#FF6B00;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);transition:all 0.15s;margin-top:auto;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.2)'">Get Pro Knox →</button>
+        <button onclick="handlePurchase('Super')" id="superCTABtn" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#FF6B00;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);transition:all 0.15s;margin-top:auto;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.2)'">Get Super Knox →</button>
       </div>
 
       <!-- MAX KNOX -->
-      <div class="reveal delay-4" style="background:linear-gradient(160deg,#2D2A6B,#5B21B6);border-radius:20px;border:3px solid #6D28D9;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;height:100%;box-sizing:border-box;">
+      <div class="reveal delay-3" style="background:linear-gradient(160deg,#2D2A6B,#5B21B6);border-radius:20px;border:3px solid #6D28D9;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;height:100%;box-sizing:border-box;">
         <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:#C4B5FD;margin-bottom:16px;">🚀 Max Knox</div>
         <div style="font-size:40px;font-weight:900;line-height:1;color:white;" id="maxPrice">$19.99</div>
         <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.6);margin-top:4px;">/month</div>
@@ -1723,8 +1695,7 @@
         <div style="font-size:14px;font-weight:800;color:white;margin:12px 0 16px;line-height:1.4;">Unlimited. No caps. No countdowns.</div>
         <div style="flex:1;display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#E9D5FF;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(167,139,250,0.4);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>Unlimited questions</strong></div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#E9D5FF;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(167,139,250,0.4);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Unlimited casual chat</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#E9D5FF;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(167,139,250,0.4);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Everything in Pro Knox</div>
+                    <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#E9D5FF;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(167,139,250,0.4);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Everything in Super Knox</div>
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#E9D5FF;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(167,139,250,0.4);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Priority speed</div>
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#E9D5FF;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(167,139,250,0.4);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Early feature access</div>
         </div>
@@ -2044,7 +2015,7 @@
     // Re-render bars with correct plan limits after auth resolves
     if (!user) {
       // Logged out — guest view: 1 use each
-      if (window.updateUsageBar) window.updateUsageBar({ hw: 0, hwLimit: 1, casual: 0, casualLimit: 1, nextUnlock: null, csNextUnlock: null });
+      if (window.updateUsageBar) window.updateUsageBar({ used: 0, limit: 1, nextUnlock: null });
     } else {
       const cached = window.loadUsageCache ? window.loadUsageCache() : null;
       if (cached) {
@@ -2219,7 +2190,7 @@
     await signOut(auth);
     window.currentUser = null;
     try { localStorage.removeItem('knox_usage_cache'); } catch(e) {}
-    if (window.updateUsageBar) updateUsageBar({ hw: 0, hwLimit: 5, casual: 0, casualLimit: 20, nextUnlock: null, csNextUnlock: null });
+    if (window.updateUsageBar) updateUsageBar({ used: 0, limit: 5, nextUnlock: null });
     updateLoginUI();
   };
 
@@ -2460,84 +2431,75 @@
   function sendLearnAction(type) {
     const chatInput = document.getElementById('chatInput');
     if (!chatInput) return;
-    chatInput.value = type === 'stuck'
-      ? "I'm stuck — give me multiple choice options please"
-      : "Can you show me a similar problem solved step by step?";
+    if (type === 'stuck') {
+      chatInput.value = "I'm stuck — give me multiple choice options please";
+    } else {
+      chatInput.value = "Can you show me a similar problem solved step by step?";
+    }
     handleAskQuestion();
   }
+
+  // Start a completely fresh Learn with Knox session
+  function startNewLearnSession() {
+    conversationHistory = [];
+    updateConversationIndicator();
+    const thread = document.getElementById('chatThread');
+    if (thread) {
+      thread.innerHTML = `<div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="width:36px;height:36px;border-radius:50%;border:2px solid #93C5FD;overflow:hidden;flex-shrink:0;background:#DBEAFE;">
+          <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+        </div>
+        <div style="background:#EFF9FF;border:2px solid #93C5FD;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
+          <p style="font-size:15px;font-weight:600;color:#1e3a5f;line-height:1.6;margin:0;"><strong>New problem! 📚</strong> What are you working on? I'll guide you to the answer step by step. 🦊</p>
+        </div>
+      </div>`;
+    }
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) { chatInput.value = ''; chatInput.focus(); }
+  }
+  window.startNewLearnSession = startNewLearnSession;
 
   // ── Update usage progress bars ────────────────────────────────────────────
   function updateUsageBar(usage) {
     if (!usage) return;
     const wrap = document.getElementById('usageBarWrap');
     if (!wrap) return;
-
-    // Save to cache so bars show correct numbers on next page load
-    saveUsageCache(usage);
-
     const uPlan = window.userPlan || 'free';
     wrap.style.display = 'block';
 
-    // ── Homework bar ──────────────────────────────────────────────────────
-    const hwUsed  = usage.hw      || 0;
-    const hwLimit = usage.hwLimit === Infinity ? 9999 : (usage.hwLimit || 5);
-    const hwLeft  = Math.max(0, hwLimit - hwUsed);
-    const hwPct   = hwLimit >= 9999 ? 0 : Math.min((hwUsed / hwLimit) * 100, 100);
+    const used  = usage.used  ?? usage.hw ?? 0;
+    const limit = usage.limit ?? usage.hwLimit ?? 5;
+    const isUnlimited = limit === null || limit === Infinity || limit >= 9999;
+    const left  = isUnlimited ? Infinity : Math.max(0, limit - used);
+    const pct   = isUnlimited ? 100 : Math.min((used / limit) * 100, 100);
+    const nextUnlock = usage.nextUnlock ?? null;
 
-    const hwLabel    = document.getElementById('usageBarLabel');
-    const hwFill     = document.getElementById('usageBarFill');
-    const hwCd       = document.getElementById('usageBarCountdown');
+    const label = document.getElementById('usageBarLabel');
+    const fill  = document.getElementById('usageBarFill');
+    const cd    = document.getElementById('usageBarCountdown');
     const hwClockWrap = document.getElementById('hwClockWrap');
-
-    if (hwLimit >= 9999) {
-      if (hwLabel) hwLabel.textContent = `Unlimited homework questions`;
-      if (hwFill)  { hwFill.style.width = '100%'; hwFill.className = 'usage-bar-fill hw-fill'; hwFill.style.background = '#58CC02'; }
-    } else {
-      if (hwLabel) hwLabel.textContent = `${hwUsed} / ${hwLimit} homework questions used`;
-      if (hwFill)  { hwFill.style.width = hwPct + '%'; hwFill.style.background = ''; hwFill.className = 'usage-bar-fill hw-fill' + (hwPct >= 100 ? ' danger' : hwPct >= 80 ? ' warn' : ''); }
-    }
-    if (hwCd) { hwCd.textContent = hwLeft === 1 ? '1 left!' : ''; hwCd.style.color = '#F59E0B'; }
-
-    if (usage.nextUnlock && hwLeft === 0) {
-      startHwClock(usage.nextUnlock);
-    } else {
-      if (_hwClockInterval) clearInterval(_hwClockInterval);
-      if (hwClockWrap) hwClockWrap.style.display = 'none';
-    }
-
-    // ── Casual bar ────────────────────────────────────────────────────────
     const casualSection = document.getElementById('casualBarSection');
-    const csLabel    = document.getElementById('casualBarLabel');
-    const csFill     = document.getElementById('casualBarFill');
-    const csCd       = document.getElementById('casualBarCountdown');
-    const csClockWrap = document.getElementById('csClockWrap');
 
-    const unlimitedCasual = uPlan === 'max' || uPlan === 'super' || uPlan === 'pro_plus';
-    if (unlimitedCasual) {
-      // Still show bar but as "Unlimited"
-      if (casualSection) casualSection.style.display = 'block';
-      if (csLabel) csLabel.textContent = 'Unlimited casual chat';
-      if (csFill)  { csFill.style.width = '100%'; csFill.style.background = '#1CB0F6'; csFill.className = 'usage-bar-fill cs-fill'; }
-      if (csCd)    csCd.textContent = '';
-      if (csClockWrap) csClockWrap.style.display = 'none';
+    // Hide casual bar — we only have ONE unified bar now
+    if (casualSection) casualSection.style.display = 'none';
+
+    if (isUnlimited) {
+      if (label) label.innerHTML = '💡 Unlimited problems';
+      if (fill)  { fill.style.width='100%'; fill.style.background='#58CC02'; fill.className='usage-bar-fill hw-fill'; }
+      if (cd)    cd.textContent = '';
+      if (hwClockWrap) hwClockWrap.style.display = 'none';
     } else {
-      if (casualSection) casualSection.style.display = 'block';
-      const csUsed  = usage.casual      || 0;
-      const csLimit = usage.casualLimit === Infinity ? 9999 : (usage.casualLimit || (uPlan === 'wonder' || uPlan === 'pro' ? 50 : 20));
-      const csLeft  = Math.max(0, csLimit - csUsed);
-      const csPct   = Math.min((csUsed / csLimit) * 100, 100);
-      if (csLabel) csLabel.textContent = `${csUsed} / ${csLimit} chat messages used`;
-      if (csFill)  { csFill.style.background = ''; csFill.style.width = csPct + '%'; csFill.className = 'usage-bar-fill cs-fill' + (csPct >= 100 ? ' danger' : csPct >= 80 ? ' warn' : ''); }
-      if (csCd)    { csCd.textContent = csLeft === 1 ? '1 left!' : ''; csCd.style.color = '#F59E0B'; }
-      if (usage.csNextUnlock && csLeft === 0) {
-        startCsClock(usage.csNextUnlock);
+      if (label) label.innerHTML = `🧠 <strong>${used} / ${limit}</strong> problems used today`;
+      if (fill)  { fill.style.width = pct+'%'; fill.style.background=''; fill.className='usage-bar-fill hw-fill'+(pct>=100?' danger':pct>=80?' warn':''); }
+      if (cd)    { cd.textContent = left===1?'1 left!':''; cd.style.color='#F59E0B'; }
+      if (nextUnlock && left === 0) {
+        startHwClock(nextUnlock);
       } else {
-        if (_csClockInterval) clearInterval(_csClockInterval);
-        if (csClockWrap) csClockWrap.style.display = 'none';
+        if (_hwClockInterval) clearInterval(_hwClockInterval);
+        if (hwClockWrap) hwClockWrap.style.display = 'none';
       }
     }
   }
-
   window.updateUsageBar = updateUsageBar;
   (function initBarsFromCache() {
     if (!window.currentUser) {
@@ -2553,17 +2515,17 @@
   // ── Show limit reached modal with countdown ───────────────────────────────
   function showLimitModal(data) {
     const uPlan     = window.userPlan || 'free';
-    const isWonder  = uPlan === 'wonder' || uPlan === 'pro';
-    const isPro     = uPlan === 'super'  || uPlan === 'pro_plus';
+    const isSuper   = uPlan === 'super' || uPlan === 'pro';
+    const isPro     = false; // removed
     const isMax     = uPlan === 'max';
     const m = document.createElement('div');
     m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;';
     const upgradeSection = isMax ? '' : `
       <div style="background:#FFF4EC;border:2px solid #FFCFA0;border-radius:14px;padding:14px 16px;margin-bottom:8px;">
-        <div style="font-size:13px;font-weight:900;color:#CC5500;margin-bottom:4px;">${isPro ? '🚀 Get unlimited questions with Max Knox' : isWonder ? '🚀 Get 40 questions/day with Pro Knox' : '🚀 Get 25 questions/day with Wonder Knox'}</div>
-        <div style="font-size:12px;font-weight:600;color:#888;">${isPro ? 'Max Knox gives you truly unlimited questions every day — no caps, no countdowns.' : isWonder ? 'Pro Knox gives you 40 questions/day, the best AI, deep explanations, and Learn with Knox.' : 'Wonder Knox gives you 25 questions/day, smarter AI, and step-by-step breakdowns.'}</div>
+        <div style="font-size:13px;font-weight:900;color:#CC5500;margin-bottom:4px;">${isMax ? '🚀 Unlimited problems with Max Knox' : isSuper ? '🚀 Go unlimited with Max Knox' : '🚀 Get 25 problems/day with Super Knox'}</div>
+        <div style="font-size:12px;font-weight:600;color:#888;">${isMax ? 'Max Knox gives you unlimited problems every day — no caps, ever.' : isSuper ? 'Max Knox gives you unlimited problems — no daily limit, ever.' : 'Super Knox gives you 25 problems/day across both Get the Answer and Learn with Knox.'}</div>
       </div>
-      <button onclick="this.closest('div[style*=fixed]').remove();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${isPro ? 'Get Max Knox →' : isWonder ? 'Get Pro Knox →' : 'Get Wonder Knox →'}</button>`;
+      <button onclick="this.closest('div[style*=fixed]').remove();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${isMax ? 'Already on Max' : isSuper ? 'Get Max Knox →' : 'Get Super Knox →'}</button>`;
     m.innerHTML = `<div style="background:white;max-width:420px;width:100%;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
       <div style="background:#FF6B00;padding:28px;text-align:center;">
         <div style="font-size:44px;margin-bottom:8px;">⏰</div>
@@ -2647,7 +2609,7 @@
       mBtn.style.background = 'transparent'; mBtn.style.color = '#9CA3AF'; mBtn.style.boxShadow = 'none';
     }
     // Update monthly/yearly display prices
-    const proEl    = document.getElementById('proPrice');
+    const proEl    = null; //
     const superEl  = document.getElementById('proPlusPrice');
     const maxEl    = document.getElementById('maxPrice');
     const proPer   = document.getElementById('proPeriod');
@@ -3113,6 +3075,8 @@
           history:     conversationHistory.slice(-6),
           learnMode:   currentMode === 'learn',
           gradeLevel:  window.knoxGradeLevel || null,
+          isNewSession: currentMode === 'learn' && conversationHistory.length === 0,
+          isSessionComplete: false, // set by SESSION_COMPLETE detection in ask.js
         }),
       });
 
@@ -3175,6 +3139,31 @@
       }
 
       const knoxRow = replaceThinkingWithResponse(responseHtml, false);
+
+      // ── Session completed — show celebration + "Start New Problem" button ──
+      if (data.sessionCompleted || data.isSessionEnd) {
+        setTimeout(() => {
+          const celebRow = document.createElement('div');
+          celebRow.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+          celebRow.innerHTML = `
+            <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;margin-top:4px;"><img src="./knox-logo.jpg" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
+            <div style="max-width:88%;">
+              <div style="background:${data.sessionCompleted ? '#D7FFB8' : '#FFF4EC'};border:2px solid ${data.sessionCompleted ? '#58CC02' : '#FFD0A0'};border-radius:6px 18px 18px 18px;padding:14px 18px;margin-bottom:10px;">
+                <p style="font-size:15px;font-weight:700;color:${data.sessionCompleted ? '#1a5c00' : '#92400E'};line-height:1.6;margin:0;">
+                  ${data.sessionCompleted
+                    ? '🎉 You got it! That\'s 1 problem solved. Ready for the next one?'
+                    : '⏱️ Session limit reached — nice work making it this far! Start a fresh session to keep going.'
+                  }
+                </p>
+              </div>
+              <button onclick="startNewLearnSession()" style="padding:11px 22px;border-radius:12px;border:none;background:#FF6B00;color:white;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                Start New Problem 🦊
+              </button>
+            </div>`;
+          chatThread.appendChild(celebRow);
+          chatThread.scrollTo({ top: celebRow.offsetTop - chatThread.offsetTop - 12, behavior: 'smooth' });
+        }, 500);
+      }
 
       // ── Learn mode action buttons ────────────────────────────────────────
       if (data.isLearnMode && !data.isStuck && !data.isShowMe) {
