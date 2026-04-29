@@ -34,13 +34,12 @@ if (!getApps().length) {
 const adminAuth = getAdminAuth();
 const db        = getFirestore();
 
-const FREE_DAILY_LIMIT    = 5;    // Free plan
-const WONDER_DAILY_LIMIT  = 25;   // Wonder Knox
-const SUPER_DAILY_LIMIT   = 40;   // Pro Knox (super)
-const MAX_DAILY_LIMIT     = Infinity; // Max Knox
-const FREE_CASUAL_LIMIT   = 20;
-const WONDER_CASUAL_LIMIT = 50;
-const WINDOW_MS           = 24 * 60 * 60 * 1000;
+// ── Plan daily limits (ONE shared pool — covers Get the Answer + Learn with Knox)
+const FREE_DAILY_LIMIT  = 5;          // Basic Knox (free)
+const SUPER_DAILY_LIMIT = 25;         // Super Knox ($9.99)
+// Max Knox = unlimited (Infinity)
+const WINDOW_MS         = 24 * 60 * 60 * 1000;
+const SESSION_STEP_LIMIT = 12;        // Max Socratic steps per session
 const ADMIN_EMAIL        = process.env.ADMIN_EMAIL || "";
 const VIP_PRO_EMAILS     = (process.env.VIP_PRO_EMAILS || "")
   .split(",").map(e => e.trim()).filter(Boolean);
@@ -280,7 +279,7 @@ export default async function handler(req, res) {
   // 2. Resolve plan server-side
   let userPlan = "free";
   if (userEmail === ADMIN_EMAIL) {
-    userPlan = "max";
+    userPlan = "max"; // Admin gets Max Knox
   } else if (VIP_PRO_EMAILS.includes(userEmail)) {
     userPlan = "pro";
   } else {
@@ -296,79 +295,56 @@ export default async function handler(req, res) {
   const now = Date.now();
   const usageRef = db.collection("usage").doc(uid);
 
-  // Limits per plan — wonder/super/max + legacy pro/pro_plus
-  const hwLimit     = (userPlan === "max")                           ? Infinity
-                    : (userPlan === "super"  || userPlan === "pro_plus") ? SUPER_DAILY_LIMIT
-                    : (userPlan === "wonder" || userPlan === "pro")      ? WONDER_DAILY_LIMIT
-                    : FREE_DAILY_LIMIT;
-  const casualLimit = (userPlan === "max" || userPlan === "super" || userPlan === "pro_plus") ? Infinity
-                    : (userPlan === "wonder" || userPlan === "pro")      ? WONDER_CASUAL_LIMIT
-                    : FREE_CASUAL_LIMIT;
+  // ONE unified daily limit — covers both Get the Answer AND Learn with Knox
+  // Sessions (not messages) count as 1 usage each
+  const dailyLimit = (userPlan === "max")                              ? Infinity
+                   : (userPlan === "super" || userPlan === "pro_plus"
+                      || userPlan === "wonder" || userPlan === "pro")  ? SUPER_DAILY_LIMIT
+                   : FREE_DAILY_LIMIT;
 
   // Skip limits for admin
   const isAdmin = (userEmail === ADMIN_EMAIL);
 
-  // Detect casual before limit check so we can apply the right bucket
-  const { question: rawQ, imageBase64, imageType, history, learnMode, isStuck, showMe, gradeLevel, isCorrectAnswer } = req.body;
+  const { question: rawQ, imageBase64, imageType, history, learnMode, isStuck, showMe,
+          gradeLevel, isCorrectAnswer, sessionId, isNewSession } = req.body;
   const preCheckQuestion = (rawQ || "").trim();
   const preCheckCasual   = isCasualChat(preCheckQuestion) && !imageBase64;
 
-  if (!isAdmin) {
-    try {
-      const snap    = await usageRef.get();
-      const data    = snap.exists ? snap.data() : {};
-      const hwTimes = (data.hwTimes     || []).filter(t => now - t < WINDOW_MS);
-      const csTimes = (data.casualTimes || []).filter(t => now - t < WINDOW_MS);
+  // ── Unified usage check ───────────────────────────────────────────────────
+  // ONE pool for everything. Casual chat is free and never counted.
+  // Learn with Knox sessions count as 1 usage at SESSION START (isNewSession=true).
+  // Subsequent messages in the same session are free.
+  // Get the Answer always counts as 1 usage per question.
+  const shouldCountUsage = !preCheckCasual && !isAdmin && !(learnMode && !isNewSession);
 
-      if (preCheckCasual) {
-        // Casual message limit check
-        if (casualLimit !== Infinity && csTimes.length >= casualLimit) {
-          const oldest    = Math.min(...csTimes);
-          const unlockMs  = WINDOW_MS - (now - oldest);
-          const unlockMin = Math.ceil(unlockMs / 60000);
-          const hrs = Math.floor(unlockMin / 60);
-          const min = unlockMin % 60;
-          const countdown = hrs > 0 ? `${hrs}h ${min}m` : `${min}m`;
-          return res.status(429).json({
-            error:     "casual_limit",
-            countdown,
-            limit:     casualLimit,
-            used:      csTimes.length,
-            nextUnlock: oldest + WINDOW_MS,
-          });
-        }
-        // Record casual message
-        await usageRef.set({
-          casualTimes: [...csTimes, now],
-          hwTimes,
-          uid, email: userEmail,
-          updatedAt: now,
-        }, { merge: true });
-      } else {
-        // Homework question limit check
-        if (hwTimes.length >= hwLimit) {
-          const oldest    = Math.min(...hwTimes);
-          const unlockMs  = WINDOW_MS - (now - oldest);
-          const unlockMin = Math.ceil(unlockMs / 60000);
-          const hrs = Math.floor(unlockMin / 60);
-          const min = unlockMin % 60;
-          const countdown = hrs > 0 ? `${hrs}h ${min}m` : `${min}m`;
-          return res.status(429).json({
-            error:     "limit_reached",
-            countdown,
-            limit:     hwLimit,
-            used:      hwTimes.length,
-            nextUnlock: oldest + WINDOW_MS,
-          });
-        }
-        // Record homework question
-        await usageRef.set({
-          hwTimes: [...hwTimes, now],
-          casualTimes: csTimes,
-          uid, email: userEmail,
-          updatedAt: now,
-        }, { merge: true });
+  if (shouldCountUsage) {
+    try {
+      const snap  = await usageRef.get();
+      const data  = snap.exists ? snap.data() : {};
+      const times = (data.times || []).filter(t => now - t < WINDOW_MS);
+
+      if (dailyLimit !== Infinity && times.length >= dailyLimit) {
+        const oldest    = Math.min(...times);
+        const unlockMs  = WINDOW_MS - (now - oldest);
+        const hrs = Math.floor(unlockMs / 3600000);
+        const min = Math.floor((unlockMs % 3600000) / 60000);
+        const sec = Math.floor((unlockMs % 60000) / 1000);
+        const countdown = hrs > 0
+          ? `${hrs}h ${min}m ${sec}s`
+          : min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+        return res.status(429).json({
+          error:      "limit_reached",
+          countdown,
+          limit:      dailyLimit,
+          used:       times.length,
+          nextUnlock: oldest + WINDOW_MS,
+        });
       }
+      // Record this usage
+      await usageRef.set({
+        times: [...times, now],
+        uid, email: userEmail, updatedAt: now,
+      }, { merge: true });
     } catch (err) {
       console.error("Usage tracking error:", err.message);
     }
@@ -401,7 +377,7 @@ export default async function handler(req, res) {
   // auto re-ask the last question so the AI re-explains it with the new style.
   // Free plan does NOT get this — visual learning is a paid feature.
   const isJustPreference = isPreferenceOnly(trimmedQuestion);
-  if (isJustPreference && hasHistory && !hasImage && (isPaidMid || isPaidTop)) {
+  if (isJustPreference && hasHistory && !hasImage && isPaid) {
     const lastUserMsg  = [...safeHistory].reverse().find(m => m.role === "user");
     const lastQuestion = typeof lastUserMsg?.content === "string"
       ? lastUserMsg.content.replace(/^Question:\s*/i, "").trim()
@@ -413,12 +389,12 @@ export default async function handler(req, res) {
 
   // 5. Detect learning style — Pro+ uses full detection, Pro only checks current question
   const wantsVisual  = asksForVisualContent(trimmedQuestion);
-  const learningStyle = isPaidTop
+  const learningStyle = isMaxPlan
     ? detectLearningStyle(safeHistory, trimmedQuestion)
-    : (isPaidMid && wantsVisual ? "visual" : null);
+    : (isPaid && wantsVisual ? "visual" : null);
 
   // prefOnly only applies to Pro+ with no history
-  const prefOnly = isPaidTop && !hasImage && !hasHistory && isJustPreference;
+  const prefOnly = isMaxPlan && !hasImage && !hasHistory && isJustPreference;
 
   // 6. Build learning style instructions
   let learningStyleInstructions = "";
@@ -462,8 +438,8 @@ STRICT RULES:
 - No bold, no asterisks, no underlines, no numbered lists, no bullet points, no markdown
 - Your ENTIRE response must be 100 words or fewer — be concise and direct`;
 
-  } else if (userPlan === "wonder" || userPlan === "pro") {
-    planInstructions = `=== PLAN: WONDER KNOX ===
+  } else if (userPlan === "super" || userPlan === "wonder" || userPlan === "pro") {
+    planInstructions = `=== PLAN: SUPER KNOX ===
 Give thorough, clear explanations. Use step-by-step breakdowns when the question needs them.
 
 USE THESE HEADERS IN THIS ORDER (only include what applies):
@@ -526,7 +502,7 @@ STRICT RULES:
     return 'high';
   }
   const inferredGrade = gradeLevel || detectGradeLevel(safeHistory, trimmedQuestion);
-  const isPaidUser = userPlan !== 'free';
+  const isPaidUser = isPaid;
 
   // ── Socratic prompt (Learn with Knox) ────────────────────────────────────
   let socraticPrompt = null;
@@ -571,14 +547,21 @@ RULES: DIFFERENT problem, same skill. Show ALL work. No shortcuts. End with enco
 Grade level: ${gradeHint}`;
 
     } else {
-      const phase = safeHistory.length === 0 ? 'DIAGNOSE — first message, identify what they need help with'
-        : safeHistory.length <= 2 ? 'OPEN QUESTION — ask one question to test their baseline understanding'
-        : safeHistory.length <= 6 ? 'SCAFFOLD — guide step by step, one hint at a time, never give the answer'
-        : 'CONFIRM or QUICK CHECK — if correct celebrate and ask a reinforcement question, if wrong gently redirect';
+      const stepCount = safeHistory.length;
+      const phase = stepCount === 0 ? 'DIAGNOSE — first message, identify what they need help with'
+        : stepCount <= 2 ? 'OPEN QUESTION — ask one question to test their baseline understanding'
+        : stepCount <= 8 ? 'SCAFFOLD — guide step by step, one hint at a time, never give the answer'
+        : stepCount <= 11 ? 'FINAL PUSH — they are close to the answer, give one strong final hint without revealing it'
+        : 'WRAP UP — session limit reached. Confirm if they got it, summarize the key concept in 1-2 sentences, and encourage them';
+
+      // Hard cap: if session exceeds step limit, always wrap up cleanly
+      const isSessionEnd = stepCount >= SESSION_STEP_LIMIT;
 
       socraticPrompt = `You are Knox — a warm clever Socratic tutor. You NEVER give the answer directly.
 
 CURRENT PHASE: ${phase}
+${isSessionEnd ? `
+⚠️ SESSION LIMIT REACHED: This is the final message of this session. Gently wrap up — confirm whether they found the answer, summarize the core concept in 1-2 sentences, and tell them they can start a new session to continue. Do NOT give the answer even now.` : ''}
 
 THE LOOP: Diagnose → Ask one opening question → Scaffold step by step → Let them arrive → Confirm → Quick Check
 
@@ -721,7 +704,7 @@ UNIVERSAL RULES:
     let imageSearchQuery = null;
 
     // Visual content — Pro+ only (Pro gets visual style in text but not embedded video/images)
-    if (isPaidTop && !prefOnly) {
+    if (isMaxPlan && !prefOnly) {
       // Upgrade any YouTube resource search URLs to real video links
       for (let i = 0; i < resources.length; i++) {
         if (resources[i].type === "youtube" && resources[i].link.includes("youtube.com/results")) {
@@ -736,25 +719,25 @@ UNIVERSAL RULES:
       }
     }
 
-    // Get current usage counts + nextUnlock for frontend progress bar
-    let hwUsed = 0, csUsed = 0, hwNextUnlock = null, csNextUnlock = null;
+    // Get current unified usage for frontend bar
+    let totalUsed = 0, nextUnlockTs = null;
     try {
       const snap  = await usageRef.get();
       const udata = snap.exists ? snap.data() : {};
-      const hwTimes2 = (udata.hwTimes     || []).filter(t => now - t < WINDOW_MS);
-      const csTimes2 = (udata.casualTimes || []).filter(t => now - t < WINDOW_MS);
-      hwUsed = hwTimes2.length;
-      csUsed = csTimes2.length;
-      // nextUnlock = when the oldest entry in the window expires
-      if (hwTimes2.length > 0) hwNextUnlock = Math.min(...hwTimes2) + WINDOW_MS;
-      if (csTimes2.length > 0) csNextUnlock = Math.min(...csTimes2) + WINDOW_MS;
+      const allTimes = (udata.times || []).filter(t => now - t < WINDOW_MS);
+      totalUsed = allTimes.length;
+      if (allTimes.length > 0) nextUnlockTs = Math.min(...allTimes) + WINDOW_MS;
     } catch(e) {}
 
     // ── Award KP + update streak ──────────────────────────────────────────────
     let gamResult = { kp: 0, streak: 1, totalKP: 0, weeklyKP: 0, streakBonus: 0 };
     if (uid && !prefOnly) {
-      // KP amounts: casual=1, Learn correct=20, Learn attempt=5, Get the Answer=3
-      let kpBase = casual ? 1 : (learnMode && isCorrectAnswer) ? 20 : learnMode ? 5 : 3;
+      // KP: casual=free(1), Learn session start=10, Learn correct=20, Get the Answer=3
+      let kpBase = casual ? 1
+        : (learnMode && isCorrectAnswer) ? 20
+        : (learnMode && isNewSession)    ? 10
+        : learnMode                      ? 2   // subsequent steps = small bonus
+        : 3;  // Get the Answer
       gamResult = await awardKP(db, uid, kpBase, casual);
     }
 
@@ -774,12 +757,12 @@ UNIVERSAL RULES:
       imageSearchQuery,
       videos: [],
       usage: {
-        hw:          hwUsed,
-        hwLimit,
-        casual:      csUsed,
-        casualLimit: casualLimit === Infinity ? null : casualLimit,
-        nextUnlock:  hwNextUnlock,
-        csNextUnlock: csNextUnlock,
+        used:       totalUsed,
+        limit:      dailyLimit === Infinity ? null : dailyLimit,
+        nextUnlock: nextUnlockTs,
+        isLearnSession: !!learnMode,
+        sessionSteps:   safeHistory.length,
+        sessionLimit:   SESSION_STEP_LIMIT,
       },
       gamification: {
         kpEarned:    gamResult.kp,
