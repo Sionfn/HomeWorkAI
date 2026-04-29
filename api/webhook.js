@@ -42,21 +42,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-04-
 // ── Map Stripe Price IDs to plan names ────────────────────────────────────
 // Replace these with your actual Stripe Price IDs from the dashboard.
 // Go to: Stripe Dashboard → Products → click your product → copy Price ID
+// ── Plan mapping — add your Stripe Price IDs as env vars in Vercel ──────────
+// Super Knox ($9.99/mo, $79.99/yr) | Max Knox ($19.99/mo, $149.99/yr)
 const PRICE_TO_PLAN = {
-  // Wonder Knox ($9.99/mo, $79.99/yr) — replace with your actual Stripe Price IDs
-  [process.env.STRIPE_PRICE_WONDER_MONTHLY]: "wonder",
-  [process.env.STRIPE_PRICE_WONDER_YEARLY]:  "wonder",
-  // Pro Knox ($14.99/mo, $119.99/yr)
-  [process.env.STRIPE_PRICE_SUPER_MONTHLY]:  "super",
-  [process.env.STRIPE_PRICE_SUPER_YEARLY]:   "super",
-  // Max Knox ($19.99/mo, $149.99/yr)
-  [process.env.STRIPE_PRICE_MAX_MONTHLY]:    "max",
-  [process.env.STRIPE_PRICE_MAX_YEARLY]:     "max",
-  // Legacy price IDs (keep so old subscribers don't break)
-  "price_1TMd55CqlxC7aoKRdJVB44hS": "wonder",
-  "price_1TMd9QCqlxC7aoKRL4PKWP54": "super",
-  "price_1TMd8KCqlxC7aoKRKmfTr4GC": "wonder",
-  "price_1TMdANCqlxC7aoKRFIMt5n55": "super",
+  [process.env.STRIPE_PRICE_SUPER_MONTHLY]: "super",
+  [process.env.STRIPE_PRICE_SUPER_YEARLY]:  "super",
+  [process.env.STRIPE_PRICE_MAX_MONTHLY]:   "max",
+  [process.env.STRIPE_PRICE_MAX_YEARLY]:    "max",
 };
 
 // ── Disable Vercel's default body parser (Stripe needs raw body) ──────────
@@ -115,7 +107,7 @@ export default async function handler(req, res) {
         // Fetch full subscription to get price ID and period end
         const subscription   = await stripe.subscriptions.retrieve(subscriptionId);
         const priceId        = subscription.items.data[0]?.price?.id;
-        const plan           = PRICE_TO_PLAN[priceId] || "wonder";
+        const plan           = PRICE_TO_PLAN[priceId] || "super";
         const renewalDate    = subscription.current_period_end; // Unix timestamp (seconds)
 
         await db.collection("users").doc(uid).set({
@@ -136,7 +128,7 @@ export default async function handler(req, res) {
         const subscription = event.data.object;
         const customerId   = subscription.customer;
         const priceId      = subscription.items.data[0]?.price?.id;
-        const plan         = PRICE_TO_PLAN[priceId] || "wonder";
+        const plan         = PRICE_TO_PLAN[priceId] || "super";
         const renewalDate  = subscription.current_period_end;
         const status       = subscription.status; // active, trialing, past_due, canceled
 
