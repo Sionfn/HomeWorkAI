@@ -19,11 +19,8 @@ if (!getApps().length) {
 
 const adminAuth = getAdminAuth();
 
+// Super Knox ($9.99/mo · $79.99/yr) | Max Knox ($19.99/mo · $149.99/yr)
 const PRICES = {
-  wonder: {
-    monthly: process.env.STRIPE_PRICE_WONDER_MONTHLY,
-    yearly:  process.env.STRIPE_PRICE_WONDER_YEARLY,
-  },
   super: {
     monthly: process.env.STRIPE_PRICE_SUPER_MONTHLY,
     yearly:  process.env.STRIPE_PRICE_SUPER_YEARLY,
@@ -31,15 +28,6 @@ const PRICES = {
   max: {
     monthly: process.env.STRIPE_PRICE_MAX_MONTHLY,
     yearly:  process.env.STRIPE_PRICE_MAX_YEARLY,
-  },
-  // Legacy keys (keep so old links don't break)
-  pro: {
-    monthly: process.env.STRIPE_PRICE_WONDER_MONTHLY,
-    yearly:  process.env.STRIPE_PRICE_WONDER_YEARLY,
-  },
-  pro_plus: {
-    monthly: process.env.STRIPE_PRICE_SUPER_MONTHLY,
-    yearly:  process.env.STRIPE_PRICE_SUPER_YEARLY,
   },
 };
 
@@ -85,7 +73,7 @@ export default async function handler(req, res) {
 
     // 3-day trial only on Pro monthly
     let subscriptionData = { metadata: { plan, billing } };
-    if ((plan === "wonder" || plan === "pro") && billing === "monthly") {
+    if (plan === "super" && billing === "monthly") {
       subscriptionData.trial_period_days = 3;
     }
 
