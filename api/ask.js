@@ -306,25 +306,37 @@ export default async function handler(req, res) {
   const isAdmin = (userEmail === ADMIN_EMAIL);
 
   const { question: rawQ, imageBase64, imageType, history, learnMode, isStuck, showMe,
-          gradeLevel, isCorrectAnswer, sessionId, isNewSession } = req.body;
+          gradeLevel, isCorrectAnswer, sessionId, isNewSession, isSessionComplete } = req.body;
   const preCheckQuestion = (rawQ || "").trim();
   const preCheckCasual   = isCasualChat(preCheckQuestion) && !imageBase64;
 
   // ── Unified usage check ───────────────────────────────────────────────────
-  // ONE pool for everything. Casual chat is free and never counted.
-  // Learn with Knox sessions count as 1 usage at SESSION START (isNewSession=true).
-  // Subsequent messages in the same session are free.
-  // Get the Answer always counts as 1 usage per question.
-  const shouldCountUsage = !preCheckCasual && !isAdmin && !(learnMode && !isNewSession);
+  // ONE pool — 25/day for Super Knox, 5/day for Basic Knox, unlimited for Max.
+  // Casual chat = ALWAYS FREE, never counted.
+  // Get the Answer = 1 credit per question, counted immediately.
+  // Learn with Knox = 1 credit counted only when the session is COMPLETE
+  //   (isSessionComplete=true from frontend, OR step limit reached).
+  //   Mid-session messages are completely free.
+  // Limit check always runs upfront so the user knows their status.
+  // Credit is recorded AFTER the answer is generated for Learn sessions.
 
-  if (shouldCountUsage) {
+  const isLearnComplete = learnMode && (isSessionComplete || false);
+  const isGetAnswer     = !learnMode && !preCheckCasual;
+  const shouldCheckLimit  = !preCheckCasual && !isAdmin;
+  const shouldRecordUsage = !preCheckCasual && !isAdmin && (isGetAnswer || isLearnComplete);
+
+  // Always check the limit upfront (even for mid-session Learn messages, so they
+  // can't start a new session when they're already at the limit)
+  let currentTimes = [];
+  if (shouldCheckLimit) {
     try {
       const snap  = await usageRef.get();
       const data  = snap.exists ? snap.data() : {};
-      const times = (data.times || []).filter(t => now - t < WINDOW_MS);
+      currentTimes = (data.times || []).filter(t => now - t < WINDOW_MS);
 
-      if (dailyLimit !== Infinity && times.length >= dailyLimit) {
-        const oldest    = Math.min(...times);
+      // Only block if this would actually consume a credit
+      if (shouldRecordUsage && dailyLimit !== Infinity && currentTimes.length >= dailyLimit) {
+        const oldest    = Math.min(...currentTimes);
         const unlockMs  = WINDOW_MS - (now - oldest);
         const hrs = Math.floor(unlockMs / 3600000);
         const min = Math.floor((unlockMs % 3600000) / 60000);
@@ -336,17 +348,27 @@ export default async function handler(req, res) {
           error:      "limit_reached",
           countdown,
           limit:      dailyLimit,
-          used:       times.length,
+          used:       currentTimes.length,
           nextUnlock: oldest + WINDOW_MS,
         });
       }
-      // Record this usage
-      await usageRef.set({
-        times: [...times, now],
-        uid, email: userEmail, updatedAt: now,
-      }, { merge: true });
+      // Also block new Learn sessions (isNewSession) if at limit
+      if (learnMode && isNewSession && dailyLimit !== Infinity && currentTimes.length >= dailyLimit) {
+        const oldest    = Math.min(...currentTimes);
+        const unlockMs  = WINDOW_MS - (now - oldest);
+        const hrs = Math.floor(unlockMs / 3600000);
+        const min = Math.floor((unlockMs % 3600000) / 60000);
+        const sec = Math.floor((unlockMs % 60000) / 1000);
+        return res.status(429).json({
+          error:      "limit_reached",
+          countdown:  hrs > 0 ? `${hrs}h ${min}m ${sec}s` : min > 0 ? `${min}m ${sec}s` : `${sec}s`,
+          limit:      dailyLimit,
+          used:       currentTimes.length,
+          nextUnlock: oldest + WINDOW_MS,
+        });
+      }
     } catch (err) {
-      console.error("Usage tracking error:", err.message);
+      console.error("Usage check error:", err.message);
     }
   }
 
@@ -547,32 +569,29 @@ RULES: DIFFERENT problem, same skill. Show ALL work. No shortcuts. End with enco
 Grade level: ${gradeHint}`;
 
     } else {
-      const stepCount = safeHistory.length;
+      const stepCount   = safeHistory.length;
+      const isSessionEnd = stepCount >= SESSION_STEP_LIMIT;
       const phase = stepCount === 0 ? 'DIAGNOSE — first message, identify what they need help with'
         : stepCount <= 2 ? 'OPEN QUESTION — ask one question to test their baseline understanding'
         : stepCount <= 8 ? 'SCAFFOLD — guide step by step, one hint at a time, never give the answer'
-        : stepCount <= 11 ? 'FINAL PUSH — they are close to the answer, give one strong final hint without revealing it'
-        : 'WRAP UP — session limit reached. Confirm if they got it, summarize the key concept in 1-2 sentences, and encourage them';
-
-      // Hard cap: if session exceeds step limit, always wrap up cleanly
-      const isSessionEnd = stepCount >= SESSION_STEP_LIMIT;
+        : stepCount <= 11 ? 'FINAL PUSH — they are very close. One strong final hint. Do NOT reveal the answer.'
+        : 'SESSION END — step limit reached. Warmly wrap up. Do NOT give the answer. Encourage a new session.';
 
       socraticPrompt = `You are Knox — a warm clever Socratic tutor. You NEVER give the answer directly.
 
 CURRENT PHASE: ${phase}
-${isSessionEnd ? `
-⚠️ SESSION LIMIT REACHED: This is the final message of this session. Gently wrap up — confirm whether they found the answer, summarize the core concept in 1-2 sentences, and tell them they can start a new session to continue. Do NOT give the answer even now.` : ''}
+${isSessionEnd ? '\n⚠️ SESSION LIMIT: Wrap up warmly. Summarize the concept in 1-2 sentences. Do NOT give the answer. Tell them to start a new session.' : ''}
 
-THE LOOP: Diagnose → Ask one opening question → Scaffold step by step → Let them arrive → Confirm → Quick Check
+THE LOOP: Diagnose → Open question → Scaffold step by step → They arrive → Confirm → Quick Check
 
 CRITICAL RULES:
-- NEVER write the answer. Not even partially. Not as an example.
+- NEVER write the answer. Not even partially.
 - Ask ONE question at a time. Never stack questions.
 - Keep responses SHORT — 2-4 sentences max. This is a conversation not a lecture.
-- Be warm. When they get it right, celebrate genuinely.
-- When wrong, never say "wrong" — say "almost!" or "not quite — think about..."
-- Sound like Knox: smart friend texting them, not a textbook.
-- NO section headers (Final Answer:, Explanation: etc.) — pure conversation only.
+- When they correctly reach the full answer: celebrate genuinely, confirm it clearly, then write SESSION_COMPLETE on its own line at the very end of your message. This is how the system knows to count this as 1 problem solved.
+- When wrong: say "almost!" or "not quite — think about..."
+- Sound like Knox: smart friend texting, not a textbook.
+- NO section headers — pure conversation only.
 Grade level: ${gradeHint}`;
     }
   }
@@ -691,6 +710,29 @@ UNIVERSAL RULES:
       rawAnswer = data.choices[0].message.content;
     }
 
+    // Detect SESSION_COMPLETE signal from the AI
+    const sessionCompleted = learnMode && rawAnswer.includes('SESSION_COMPLETE');
+    // Remove the signal token from the displayed answer
+    if (sessionCompleted) rawAnswer = rawAnswer.replace(/\nSESSION_COMPLETE\n?/g, '').trim();
+
+    // If session just completed OR step limit hit — count this as 1 problem used
+    const shouldRecordNow = shouldRecordUsage || (learnMode && (sessionCompleted || isSessionEnd));
+    if (shouldRecordNow && !shouldRecordUsage) {
+      // Record usage that wasn't recorded at the start (session-completion credit)
+      try {
+        const snap3  = await usageRef.get();
+        const data3  = snap3.exists ? snap3.data() : {};
+        const times3 = (data3.times || []).filter(t => now - t < WINDOW_MS);
+        if (dailyLimit === Infinity || times3.length < dailyLimit) {
+          await usageRef.set({
+            times: [...times3, now],
+            uid, email: userEmail, updatedAt: now,
+          }, { merge: true });
+          currentTimes = [...times3, now];
+        }
+      } catch(e) {}
+    }
+
     const processed = processAnswer(rawAnswer, userPlan);
     let { answer, resources } = (userPlan !== "free")
       ? parseResources(processed)
@@ -719,25 +761,42 @@ UNIVERSAL RULES:
       }
     }
 
-    // Get current unified usage for frontend bar
-    let totalUsed = 0, nextUnlockTs = null;
+    // ── Record usage AFTER answer generated ──────────────────────────────────
+    // Get the Answer: count immediately. Learn with Knox: only when session complete.
+    if (shouldRecordUsage) {
+      try {
+        const snap2  = await usageRef.get();
+        const data2  = snap2.exists ? snap2.data() : {};
+        const times2 = (data2.times || []).filter(t => now - t < WINDOW_MS);
+        await usageRef.set({
+          times: [...times2, now],
+          uid, email: userEmail, updatedAt: now,
+        }, { merge: true });
+        currentTimes = [...times2, now];
+      } catch(e) { console.error("Usage record error:", e.message); }
+    }
+
+    // Get current usage counts for frontend bar
+    let totalUsed = currentTimes.length, nextUnlockTs = null;
     try {
-      const snap  = await usageRef.get();
-      const udata = snap.exists ? snap.data() : {};
-      const allTimes = (udata.times || []).filter(t => now - t < WINDOW_MS);
-      totalUsed = allTimes.length;
-      if (allTimes.length > 0) nextUnlockTs = Math.min(...allTimes) + WINDOW_MS;
+      if (currentTimes.length === 0) {
+        const snap  = await usageRef.get();
+        const udata = snap.exists ? snap.data() : {};
+        currentTimes = (udata.times || []).filter(t => now - t < WINDOW_MS);
+        totalUsed = currentTimes.length;
+      }
+      if (currentTimes.length > 0) nextUnlockTs = Math.min(...currentTimes) + WINDOW_MS;
     } catch(e) {}
 
     // ── Award KP + update streak ──────────────────────────────────────────────
     let gamResult = { kp: 0, streak: 1, totalKP: 0, weeklyKP: 0, streakBonus: 0 };
     if (uid && !prefOnly) {
-      // KP: casual=free(1), Learn session start=10, Learn correct=20, Get the Answer=3
+      // KP: Get the Answer=3, Learn complete=20, Learn correct step=2, casual=1
       let kpBase = casual ? 1
-        : (learnMode && isCorrectAnswer) ? 20
-        : (learnMode && isNewSession)    ? 10
-        : learnMode                      ? 2   // subsequent steps = small bonus
-        : 3;  // Get the Answer
+        : (learnMode && sessionCompleted) ? 20
+        : learnMode ? 2
+        : 3;
+      gamResult = await awardKP(db, uid, kpBase, casual);
       gamResult = await awardKP(db, uid, kpBase, casual);
     }
 
@@ -751,6 +810,8 @@ UNIVERSAL RULES:
       isLearnMode:       !!learnMode,
       isStuck:           !!isStuck,
       isShowMe:          !!showMe,
+      sessionCompleted:  !!sessionCompleted,
+      isSessionEnd:      !!isSessionEnd,
       inferredGrade:     inferredGrade || 'high',
       canShowMe:         isPaidUser,
       embeddedVideo,
