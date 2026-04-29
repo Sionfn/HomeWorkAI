@@ -438,7 +438,7 @@ STRICT RULES:
 - No bold, no asterisks, no underlines, no numbered lists, no bullet points, no markdown
 - Your ENTIRE response must be 100 words or fewer — be concise and direct`;
 
-  } else if (userPlan === "super" || userPlan === "wonder" || userPlan === "pro") {
+  } else if (userPlan === "super") {
     planInstructions = `=== PLAN: SUPER KNOX ===
 Give thorough, clear explanations. Use step-by-step breakdowns when the question needs them.
 
@@ -460,7 +460,7 @@ STRICT RULES:
 - NEVER use alternative header names like "Step-by-Step Process:", "Steps:", "Solution:", "Work:", "Method:"
 - If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
 
-  } else if (userPlan === "super" || userPlan === "pro_plus" || userPlan === "max") {
+  } else if (userPlan === "max") {
     planInstructions = `=== PLAN: PRO KNOX / MAX KNOX ===
 Give the deepest, most complete academic explanations possible. You are a world-class tutor.
 
@@ -656,19 +656,19 @@ UNIVERSAL RULES:
   // 8. Pick model and token limit
   // Casual chat: everyone gets gpt-4o with 800 tokens — same quality for all plans
   // Homework: plan-based model and token limits apply
-  const isPaidTop = userPlan === "max"   || userPlan === "super"  || userPlan === "pro_plus";
-  const isPaidMid = userPlan === "wonder" || userPlan === "pro";
+  const isMaxPlan = userPlan === "max"   || userPlan === "super"  || userPlan === "pro_plus";
+  const isPaid = userPlan === "wonder" || userPlan === "pro";
   const model = hasImage   ? "gpt-4o" :
     learnMode              ? "gpt-4o" :
     casual                 ? "gpt-4o" :
-    isPaidTop              ? "gpt-4.1" :
-    isPaidMid              ? "gpt-4.1-mini" :
+    isMaxPlan              ? "gpt-4.1" :
+    isPaid              ? "gpt-4.1-mini" :
                              "gpt-4o-mini";
 
   const maxTokens = learnMode ? 400 :
     casual    ? 800 :
-    isPaidTop ? 2800 :
-    isPaidMid ? 2000 :
+    isMaxPlan ? 2800 :
+    isPaid ? 2000 :
                 350;
 
   // 9. Call OpenAI Chat Completions API
@@ -692,7 +692,7 @@ UNIVERSAL RULES:
     }
 
     const processed = processAnswer(rawAnswer, userPlan);
-    let { answer, resources } = userPlan === "pro_plus"
+    let { answer, resources } = (userPlan !== "free")
       ? parseResources(processed)
       : { answer: processed, resources: [] };
 
