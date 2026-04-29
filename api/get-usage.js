@@ -39,13 +39,10 @@ export default async function handler(req, res) {
     if (doc.exists) userPlan = doc.data()?.plan || "free";
   } catch {}
 
-  const hwLimit = (userPlan === "max") ? null  // null = unlimited (frontend shows ∞)
-    : (userPlan === "super"  || userPlan === "pro_plus") ? 40
-    : (userPlan === "wonder" || userPlan === "pro")      ? 25
+  // 3 tiers: Basic(free)=5, Super=25, Max=unlimited
+  const dailyLimit = userPlan === "max"   ? null   // null = unlimited
+    : (userPlan === "super" || userPlan === "wonder" || userPlan === "pro" || userPlan === "pro_plus") ? 25
     : 5;
-  const casualLimit = (userPlan === "max" || userPlan === "super" || userPlan === "pro_plus") ? null
-    : (userPlan === "wonder" || userPlan === "pro") ? 50
-    : 20;
 
   const now = Date.now();
   let hwUsed = 0, csUsed = 0, nextUnlock = null, csNextUnlock = null;
@@ -82,13 +79,10 @@ export default async function handler(req, res) {
   } catch(e) {}
 
   return res.status(200).json({
-    hw:          hwUsed,
-    hwLimit:     hwLimit ?? Infinity,
-    casual:      csUsed,
-    casualLimit: casualLimit ?? Infinity,
+    used:       totalUsed,
+    limit:      dailyLimit ?? Infinity,
     nextUnlock,
-    csNextUnlock,
-    plan:        userPlan,
+    plan:       userPlan,
     streak,
     totalKP,
     weeklyKP,
