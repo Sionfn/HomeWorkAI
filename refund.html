@@ -3,362 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Refund Policy — HomeWorkAI</title>
-  <meta name="description" content="HomeWorkAI's refund policy. 30-day money-back guarantee, no questions asked.">
+  <title>Refund Policy — Knox Knows</title>
+  <meta name="description" content="Knox Knows refund policy — 30-day money-back guarantee, no questions asked.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --purple: #c4b5fd;
-      --green:  #a7f3d0;
-      --yellow: #fde68a;
-      --blue:   #bae6fd;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      background: #ffffff;
-      color: #1f2937;
-      -webkit-font-smoothing: antialiased;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Nunito',system-ui,sans-serif; background:#F4F4F5; color:#18181B; -webkit-font-smoothing:antialiased; }
+    header { background:#FF6B00; border-bottom:3px solid #CC5500; padding:0 24px; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .logo-link { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .logo-img { width:38px; height:38px; border-radius:50%; border:2px solid rgba(255,255,255,0.4); object-fit:cover; }
+    .logo-text { font-weight:900; font-size:18px; color:white; letter-spacing:-0.01em; }
+    .back-btn { display:inline-flex; align-items:center; gap:7px; background:white; border:none; border-radius:12px; padding:9px 18px; font-size:13px; font-weight:800; color:#FF6B00; text-decoration:none; box-shadow:0 3px 0 #CC5500; transition:all 0.15s; font-family:inherit; }
+    .back-btn:hover { transform:translateY(-2px); box-shadow:0 5px 0 #CC5500; }
+    .page-hero { background:#1a1a1a; padding:56px 24px 48px; text-align:center; border-bottom:4px solid #1CB0F6; }
+    .page-hero .badge { display:inline-flex; align-items:center; gap:7px; background:rgba(28,176,246,0.15); border:2px solid #1CB0F6; border-radius:999px; padding:6px 16px; font-size:13px; font-weight:800; color:#1CB0F6; margin-bottom:18px; }
+    .page-hero h1 { font-size:clamp(28px,5vw,48px); font-weight:900; color:white; letter-spacing:-0.02em; line-height:1.1; }
+    .page-hero p { margin-top:10px; font-size:15px; color:#888; font-weight:600; }
+    .content-wrap { max-width:780px; margin:0 auto; padding:48px 24px 80px; }
 
-    /* ── NAV ─────────────────────────────────────────────── */
-    header {
-      background: var(--purple);
-      border-bottom: 4px solid black;
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .logo-link {
-      display: flex; align-items: center; gap: 10px;
-      text-decoration: none; color: inherit;
-    }
-    .logo-text {
-      font-weight: 800; font-size: 18px; letter-spacing: -0.03em; color: #0f172a;
-    }
-    .nav-back {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: white; border: 2px solid black; border-radius: 10px;
-      padding: 9px 16px; font-size: 14px; font-weight: 700;
-      text-decoration: none; color: #1f2937;
-      box-shadow: 3px 3px 0 black;
-      transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .nav-back:hover { transform: translateY(-2px); box-shadow: 5px 5px 0 black; }
+    /* Big guarantee card */
+    .guarantee-card { background:#1CB0F6; border-radius:20px; border:3px solid #0A85C2; box-shadow:0 6px 0 #0A85C2; padding:32px; margin-bottom:32px; text-align:center; }
+    .guarantee-badge { font-size:52px; margin-bottom:12px; }
+    .guarantee-card h2 { font-size:24px; font-weight:900; color:white; margin-bottom:8px; }
+    .guarantee-card p { font-size:15px; font-weight:700; color:rgba(255,255,255,0.9); line-height:1.6; max-width:480px; margin:0 auto 20px; }
+    .guarantee-btn { display:inline-flex; align-items:center; gap:8px; background:white; border-radius:12px; padding:13px 24px; font-size:15px; font-weight:900; color:#0A85C2; text-decoration:none; box-shadow:0 4px 0 rgba(0,0,0,0.2); transition:all 0.15s; font-family:'Nunito',sans-serif; border:none; cursor:pointer; }
+    .guarantee-btn:hover { transform:translateY(-2px); box-shadow:0 6px 0 rgba(0,0,0,0.2); }
 
-    /* ── HERO BANNER ─────────────────────────────────────── */
-    .page-hero {
-      background: var(--yellow);
-      border-bottom: 4px solid black;
-      padding: 56px 24px 48px;
-      text-align: center;
-    }
-    .page-hero h1 {
-      font-size: clamp(32px, 5vw, 52px);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      color: #0f172a;
-    }
-    .page-hero p {
-      margin-top: 12px;
-      font-size: 18px;
-      color: #374151;
-      font-weight: 600;
-      max-width: 520px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.6;
-    }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: white; border: 2px solid black; border-radius: 50px;
-      padding: 8px 20px; font-size: 14px; font-weight: 800;
-      box-shadow: 3px 3px 0 black; margin-top: 20px;
-    }
+    .policy-section { background:white; border-radius:18px; border:2px solid #E4E4E7; box-shadow:0 4px 0 #E4E4E7; padding:26px 30px; margin-bottom:16px; }
+    .section-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+    .section-num { width:30px; height:30px; border-radius:9px; background:#1CB0F6; color:white; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 0 #0A85C2; }
+    .section-title { font-size:17px; font-weight:900; color:#18181B; letter-spacing:-0.01em; }
+    .policy-section p { font-size:14px; line-height:1.8; color:#3F3F46; margin-bottom:10px; }
+    .policy-section p:last-child { margin-bottom:0; }
+    .policy-section ul { list-style:none; padding:0; margin:10px 0; display:flex; flex-direction:column; gap:7px; }
+    .policy-section ul li { font-size:14px; line-height:1.6; color:#3F3F46; padding-left:18px; position:relative; }
+    .policy-section ul li::before { content:'→'; position:absolute; left:0; font-weight:900; color:#1CB0F6; }
+    .highlight { background:#D7F2FD; border-radius:6px; padding:2px 8px; font-weight:800; color:#0A85C2; }
 
-    /* ── CONTENT ─────────────────────────────────────────── */
-    .content-wrap {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 56px 24px 80px;
-    }
-
-    /* Summary card */
-    .summary-card {
-      background: var(--green);
-      border: 3px solid black;
-      border-radius: 18px;
-      box-shadow: 6px 6px 0 black;
-      padding: 32px 36px;
-      margin-bottom: 48px;
-    }
-    .summary-card h2 {
-      font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px;
-    }
-    .summary-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .summary-list li {
-      display: flex; align-items: flex-start; gap: 10px;
-      font-size: 15px; font-weight: 600; line-height: 1.5;
-    }
-    .summary-list li span.check {
-      color: #065f46; font-size: 17px; flex-shrink: 0; margin-top: 1px;
-    }
-
-    /* Sections */
-    .policy-section {
-      border: 2px solid black;
-      border-radius: 16px;
-      box-shadow: 4px 4px 0 black;
-      padding: 28px 32px;
-      margin-bottom: 20px;
-      background: white;
-    }
-    .policy-section:nth-child(2) { background: var(--blue); }
-    .policy-section:nth-child(3) { background: var(--purple); }
-    .policy-section:nth-child(4) { background: var(--yellow); }
-    .policy-section:nth-child(5) { background: white; }
-    .policy-section:nth-child(6) { background: var(--green); }
-    .policy-section:nth-child(7) { background: white; }
-
-    .section-num {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; border-radius: 8px;
-      background: black; color: white; font-weight: 800; font-size: 14px;
-      flex-shrink: 0;
-    }
-    .section-header {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
-    }
-    .section-title {
-      font-size: 18px; font-weight: 800; letter-spacing: -0.02em;
-    }
-    .policy-section p {
-      font-size: 15px; line-height: 1.75; color: #1f2937; margin-bottom: 12px;
-    }
-    .policy-section p:last-child { margin-bottom: 0; }
-    .policy-section ul {
-      list-style: none; padding: 0; margin: 12px 0;
-      display: flex; flex-direction: column; gap: 8px;
-    }
-    .policy-section ul li {
-      font-size: 15px; line-height: 1.6; color: #1f2937;
-      padding-left: 20px; position: relative;
-    }
-    .policy-section ul li::before {
-      content: '→';
-      position: absolute; left: 0;
-      font-weight: 800; color: #374151;
-    }
-    .highlight {
-      background: rgba(0,0,0,0.07);
-      border-radius: 6px;
-      padding: 2px 7px;
-      font-weight: 700;
-    }
-
-    /* CTA */
-    .cta-card {
-      background: var(--purple);
-      border: 3px solid black;
-      border-radius: 18px;
-      box-shadow: 6px 6px 0 black;
-      padding: 36px;
-      text-align: center;
-      margin-top: 40px;
-    }
-    .cta-card h2 {
-      font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px;
-    }
-    .cta-card p {
-      font-size: 15px; color: #374151; line-height: 1.65; margin-bottom: 24px;
-    }
-    .cta-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: #0f172a; color: white; border: 2px solid black;
-      border-radius: 12px; padding: 14px 28px;
-      font-weight: 700; font-size: 15px; font-family: inherit;
-      text-decoration: none;
-      box-shadow: 4px 4px 0 black;
-      transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .cta-btn:hover { transform: translateY(-3px); box-shadow: 6px 6px 0 black; }
-
-    /* Footer */
-    footer {
-      background: #0f172a; color: white;
-      border-top: 4px solid black;
-      padding: 28px 24px;
-      text-align: center;
-    }
-    footer a { color: #9ca3af; font-size: 13px; font-weight: 600; text-decoration: none; margin: 0 10px; }
-    footer a:hover { color: white; }
-    footer p { color: #6b7280; font-size: 13px; margin-top: 10px; }
-
-    @media (max-width: 640px) {
-      .policy-section { padding: 22px 20px; }
-      .summary-card { padding: 24px 22px; }
-      .cta-card { padding: 28px 20px; }
-      .content-wrap { padding: 36px 16px 60px; }
-    }
+    footer { background:#1a1a1a; padding:28px 24px; text-align:center; border-top:3px solid #0A85C2; }
+    footer p { color:#666; font-size:13px; font-weight:600; }
+    footer a { color:#FF6B00; text-decoration:none; margin:0 8px; font-weight:700; font-size:13px; }
+    footer a:hover { text-decoration:underline; }
+    .footer-links { margin-bottom:8px; }
+    @media(max-width:640px) { .policy-section { padding:20px 18px; } .guarantee-card { padding:24px 20px; } .content-wrap { padding:32px 16px 60px; } }
   </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <a href="/" class="logo-link">
-    <svg width="34" height="34" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-      <rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/>
-      <rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/>
-      <path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/>
-      <path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/>
-      <rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/>
-      <rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/>
-      <g transform="translate(59.5,36)">
-        <polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/>
-        <polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/>
-        <circle cx="0" cy="0" r="1.5" fill="#FAC775"/>
-      </g>
-    </svg>
-    <span class="logo-text">HomeWorkAI</span>
+    <img src="/knox-logo.jpg" alt="Knox" class="logo-img" onerror="this.style.display='none'">
+    <span class="logo-text">Knox Knows</span>
   </a>
-  <a href="/" class="nav-back">← Back to Home</a>
+  <a href="/" class="back-btn">← Back to Knox</a>
 </header>
 
-<!-- HERO -->
 <div class="page-hero">
-  <h1>Refund Policy</h1>
-  <p>We stand behind our product. If you're not happy, we'll make it right — no hoops, no hassle.</p>
-  <div class="hero-badge">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-    30-Day Money-Back Guarantee
-  </div>
+  <div class="badge">💰 Refund Policy</div>
+  <h1>We stand behind Knox</h1>
+  <p>Last updated: April 2026 · Knox Knows</p>
 </div>
 
-<!-- CONTENT -->
 <div class="content-wrap">
 
-  <!-- Summary box -->
-  <div class="summary-card">
-    <h2>📋 The Short Version</h2>
-    <ul class="summary-list">
-      <li><span class="check">✔</span> <span>Full refund within <strong>30 days</strong> of your first payment — no questions asked.</span></li>
-      <li><span class="check">✔</span> <span>Pro and Pro+ subscriptions both qualify for the 30-day guarantee.</span></li>
-      <li><span class="check">✔</span> <span>3-day free trials: cancel before the trial ends and you are never charged.</span></li>
-      <li><span class="check">✔</span> <span>To request a refund, email <strong>support@homeworkaiapp.com</strong> with your account email.</span></li>
-      <li><span class="check">✔</span> <span>Refunds are processed within <strong>5–10 business days</strong> back to your original payment method.</span></li>
-    </ul>
+  <!-- Big guarantee -->
+  <div class="guarantee-card">
+    <div class="guarantee-badge">🛡️</div>
+    <h2>30-Day Money-Back Guarantee</h2>
+    <p>Not happy with Knox Knows? Get a full refund within 30 days of your first purchase — no questions asked, no hassle.</p>
+    <a href="mailto:support@knoxknowsapp.com?subject=Refund Request" class="guarantee-btn">📧 Request a Refund</a>
   </div>
 
-  <!-- Section 1 -->
   <div class="policy-section">
-    <div class="section-header">
-      <div class="section-num">1</div>
-      <div class="section-title">30-Day Money-Back Guarantee</div>
-    </div>
-    <p>If you subscribed to HomeWorkAI Pro or Pro+ and are not satisfied for any reason, you can request a full refund within <span class="highlight">30 calendar days</span> of your first payment. We will refund 100% of the amount charged, no questions asked.</p>
-    <p>This guarantee applies to your first payment on a new subscription. It does not apply to renewal payments after the initial 30-day window has passed.</p>
+    <div class="section-header"><div class="section-num">1</div><div class="section-title">30-day guarantee</div></div>
+    <p>If you're not satisfied with Knox Knows for any reason, contact us within <span class="highlight">30 days</span> of your first payment and we'll issue a full refund. No questions asked.</p>
+    <p>This applies to both Super Knox and Max Knox, on monthly or yearly plans.</p>
   </div>
 
-  <!-- Section 2 -->
   <div class="policy-section">
-    <div class="section-header">
-      <div class="section-num">2</div>
-      <div class="section-title">Free Trial Cancellations</div>
-    </div>
-    <p>HomeWorkAI Pro and Pro+ come with a <span class="highlight">3-day free trial</span>. Your card is authorized when you start the trial but you are <strong>not charged</strong> until the trial period ends.</p>
-    <p>To avoid being charged, cancel your subscription before the 3-day trial period is up. You can cancel at any time by:</p>
+    <div class="section-header"><div class="section-num">2</div><div class="section-title">Subscription renewals</div></div>
+    <p>After the initial 30-day guarantee window, subscription renewal payments are generally non-refundable.</p>
+    <p>However, if you believe you were charged in error or forgot to cancel before a renewal, please contact us and we will review your case on a one-time basis. We'll always try to do the right thing.</p>
+  </div>
+
+  <div class="policy-section">
+    <div class="section-header"><div class="section-num">3</div><div class="section-title">Yearly subscriptions</div></div>
+    <p>Yearly Super Knox and Max Knox subscriptions are eligible for a <span class="highlight">full refund within the first 30 days</span> of purchase.</p>
+    <p>After 30 days, yearly subscriptions are non-refundable in full, but you may cancel at any time to stop future renewals. You retain access through the end of your paid year.</p>
+  </div>
+
+  <div class="policy-section">
+    <div class="section-header"><div class="section-num">4</div><div class="section-title">Free trial</div></div>
+    <p>Super Knox monthly includes a 3-day free trial. You will not be charged until the trial ends.</p>
+    <p>Cancel before the trial ends to avoid any charge. No refund is needed since you were never billed.</p>
+  </div>
+
+  <div class="policy-section">
+    <div class="section-header"><div class="section-num">5</div><div class="section-title">Refund abuse</div></div>
+    <p>We reserve the right to deny refunds in cases of abuse, including repeatedly subscribing and requesting refunds, or accounts that have been terminated for violating our Terms of Service.</p>
+  </div>
+
+  <div class="policy-section">
+    <div class="section-header"><div class="section-num">6</div><div class="section-title">How to get a refund</div></div>
+    <p>Email us at <a href="mailto:support@knoxknowsapp.com" style="color:#1CB0F6;font-weight:800;">support@knoxknowsapp.com</a> with the subject line <strong>"Refund Request"</strong> and include:</p>
     <ul>
-      <li>Going to your Account &amp; Plan settings inside HomeWorkAI and clicking "Cancel Subscription"</li>
-      <li>Emailing us at support@homeworkaiapp.com and we will cancel it for you immediately</li>
+      <li>The email address on your Knox Knows account</li>
+      <li>The date of your purchase</li>
+      <li>A brief reason (optional — we won't make you justify it)</li>
     </ul>
-    <p>If you forget to cancel during the trial and are charged, you are still covered by our 30-day money-back guarantee on that first payment.</p>
-  </div>
-
-  <!-- Section 3 -->
-  <div class="policy-section">
-    <div class="section-header">
-      <div class="section-num">3</div>
-      <div class="section-title">How to Request a Refund</div>
-    </div>
-    <p>To request a refund, send an email to <span class="highlight">support@homeworkaiapp.com</span> with the subject line <em>"Refund Request"</em> and include:</p>
-    <ul>
-      <li>The email address associated with your HomeWorkAI account</li>
-      <li>The date of your purchase (optional — helps us find you faster)</li>
-    </ul>
-    <p>You do not need to provide a reason, though feedback is always welcome. We will confirm your refund by email and process it within <span class="highlight">5–10 business days</span>. The refund will be returned to the original payment method used at checkout.</p>
-  </div>
-
-  <!-- Section 4 -->
-  <div class="policy-section">
-    <div class="section-header">
-      <div class="section-num">4</div>
-      <div class="section-title">Renewals and Ongoing Subscriptions</div>
-    </div>
-    <p>After the initial 30-day guarantee window, subscription renewal payments are generally non-refundable. However, if you believe you were charged in error or forgot to cancel before a renewal, please contact us and we will review your case on a one-time basis.</p>
-    <p>You can cancel your subscription at any time from your Account &amp; Plan settings or through the Stripe billing portal. Cancellation stops all future charges immediately. Your access continues until the end of the current billing period.</p>
-  </div>
-
-  <!-- Section 5 -->
-  <div class="policy-section">
-    <div class="section-header">
-      <div class="section-num">5</div>
-      <div class="section-title">Yearly Subscriptions</div>
-    </div>
-    <p>Yearly Pro and Pro+ subscriptions are eligible for a full refund within the first 30 days of purchase. After 30 days, yearly subscriptions are non-refundable in full, but you may cancel to stop future renewals and retain access through the end of your paid year.</p>
-  </div>
-
-  <!-- Section 6 -->
-  <div class="policy-section">
-    <div class="section-header">
-      <div class="section-num">6</div>
-      <div class="section-title">Exceptions</div>
-    </div>
-    <p>We reserve the right to deny refunds in cases of abuse, including but not limited to repeatedly subscribing and requesting refunds, or accounts terminated for violating our Terms of Service.</p>
-    <p>The free plan does not involve any payment and therefore is not eligible for a refund.</p>
-  </div>
-
-  <!-- Section 7 -->
-  <div class="policy-section">
-    <div class="section-header">
-      <div class="section-num">7</div>
-      <div class="section-title">Last Updated</div>
-    </div>
-    <p>This Refund Policy was last updated on <span class="highlight">April 19, 2026</span>. We may update this policy from time to time. Continued use of HomeWorkAI after changes are posted constitutes your acceptance of the revised policy.</p>
-  </div>
-
-  <!-- CTA -->
-  <div class="cta-card">
-    <h2>Still have questions?</h2>
-    <p>Our support team is real people who respond within 24 hours. We're here to help — whatever you need.</p>
-    <a href="mailto:support@homeworkaiapp.com" class="cta-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-      support@homeworkaiapp.com
-    </a>
+    <p>We process refunds within <span class="highlight">3–5 business days</span>. Your bank may take an additional few days to post it.</p>
   </div>
 
 </div>
 
-<!-- FOOTER -->
 <footer>
-  <div>
-    <a href="/">Home</a>
+  <div class="footer-links">
     <a href="/privacy.html">Privacy Policy</a>
     <a href="/terms.html">Terms of Service</a>
     <a href="/refund.html">Refund Policy</a>
-    <a href="mailto:support@homeworkaiapp.com">Contact</a>
   </div>
-  <p>&copy; 2026 HomeWorkAI. All rights reserved.</p>
+  <p>© 2026 Knox Knows · All rights reserved</p>
 </footer>
 
 </body>
