@@ -3,183 +3,163 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terms of Service — HomeWorkAI</title>
-  <meta name="description" content="HomeWorkAI Terms of Service — the rules for using our platform.">
+  <title>Terms of Service — Knox Knows</title>
+  <meta name="description" content="Knox Knows Terms of Service — the rules for using our platform.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root { --purple:#c4b5fd; --green:#a7f3d0; --yellow:#fde68a; --blue:#bae6fd; }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Plus Jakarta Sans',system-ui,sans-serif; background:#fff; color:#1f2937; -webkit-font-smoothing:antialiased; }
-    header { background:var(--purple); border-bottom:4px solid black; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
-    .logo-link { display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; }
-    .logo-text { font-weight:800; font-size:18px; letter-spacing:-0.03em; color:#0f172a; }
-    .nav-back { display:inline-flex; align-items:center; gap:8px; background:white; border:2px solid black; border-radius:10px; padding:9px 16px; font-size:14px; font-weight:700; text-decoration:none; color:#1f2937; box-shadow:3px 3px 0 black; transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1); }
-    .nav-back:hover { transform:translateY(-2px); box-shadow:5px 5px 0 black; }
-    .page-hero { background:var(--yellow); border-bottom:4px solid black; padding:56px 24px 48px; text-align:center; }
-    .page-hero h1 { font-size:clamp(32px,5vw,52px); font-weight:800; letter-spacing:-0.03em; line-height:1.15; color:#0f172a; }
-    .page-hero p { margin-top:12px; font-size:16px; color:#374151; font-weight:600; }
-    .content-wrap { max-width:760px; margin:0 auto; padding:56px 24px 80px; }
-    .policy-section { border:2px solid black; border-radius:16px; box-shadow:4px 4px 0 black; padding:28px 32px; margin-bottom:20px; background:white; }
-    .policy-section:nth-child(odd) { background:#fafafa; }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Nunito',system-ui,sans-serif; background:#F4F4F5; color:#18181B; -webkit-font-smoothing:antialiased; }
+    header { background:#FF6B00; border-bottom:3px solid #CC5500; padding:0 24px; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .logo-link { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .logo-img { width:38px; height:38px; border-radius:50%; border:2px solid rgba(255,255,255,0.4); object-fit:cover; }
+    .logo-text { font-weight:900; font-size:18px; color:white; letter-spacing:-0.01em; }
+    .back-btn { display:inline-flex; align-items:center; gap:7px; background:white; border:none; border-radius:12px; padding:9px 18px; font-size:13px; font-weight:800; color:#FF6B00; text-decoration:none; box-shadow:0 3px 0 #CC5500; transition:all 0.15s; font-family:inherit; cursor:pointer; }
+    .back-btn:hover { transform:translateY(-2px); box-shadow:0 5px 0 #CC5500; }
+    .page-hero { background:#1a1a1a; padding:56px 24px 48px; text-align:center; border-bottom:4px solid #58CC02; }
+    .page-hero .badge { display:inline-flex; align-items:center; gap:7px; background:rgba(88,204,2,0.15); border:2px solid #58CC02; border-radius:999px; padding:6px 16px; font-size:13px; font-weight:800; color:#58CC02; margin-bottom:18px; }
+    .page-hero h1 { font-size:clamp(28px,5vw,48px); font-weight:900; color:white; letter-spacing:-0.02em; line-height:1.1; }
+    .page-hero p { margin-top:10px; font-size:15px; color:#888; font-weight:600; }
+    .content-wrap { max-width:780px; margin:0 auto; padding:48px 24px 80px; }
+    .summary-card { background:#58CC02; border-radius:20px; border:3px solid #46A302; box-shadow:0 6px 0 #46A302; padding:28px 32px; margin-bottom:32px; }
+    .summary-card h2 { font-size:17px; font-weight:900; color:white; margin-bottom:14px; }
+    .summary-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
+    .summary-list li { display:flex; align-items:flex-start; gap:10px; font-size:14px; font-weight:700; color:white; line-height:1.5; }
+    .summary-list li .dot { width:20px; height:20px; border-radius:6px; background:rgba(255,255,255,0.25); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; margin-top:1px; }
+    .policy-section { background:white; border-radius:18px; border:2px solid #E4E4E7; box-shadow:0 4px 0 #E4E4E7; padding:26px 30px; margin-bottom:16px; }
     .section-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
-    .section-num { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:8px; background:black; color:white; font-weight:800; font-size:14px; flex-shrink:0; }
-    .section-title { font-size:18px; font-weight:800; letter-spacing:-0.02em; }
-    .policy-section p { font-size:15px; line-height:1.75; color:#1f2937; margin-bottom:12px; }
+    .section-num { width:30px; height:30px; border-radius:9px; background:#58CC02; color:white; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 0 #46A302; }
+    .section-title { font-size:17px; font-weight:900; color:#18181B; letter-spacing:-0.01em; }
+    .policy-section p { font-size:14px; line-height:1.8; color:#3F3F46; margin-bottom:10px; }
     .policy-section p:last-child { margin-bottom:0; }
-    .policy-section ul { list-style:none; padding:0; margin:12px 0; display:flex; flex-direction:column; gap:8px; }
-    .policy-section ul li { font-size:15px; line-height:1.6; color:#1f2937; padding-left:20px; position:relative; }
-    .policy-section ul li::before { content:'→'; position:absolute; left:0; font-weight:800; color:#374151; }
-    .highlight { background:rgba(0,0,0,0.07); border-radius:6px; padding:2px 7px; font-weight:700; }
-    .summary-card { background:var(--purple); border:3px solid black; border-radius:18px; box-shadow:6px 6px 0 black; padding:32px 36px; margin-bottom:48px; }
-    .summary-card h2 { font-size:20px; font-weight:800; margin-bottom:16px; }
-    .summary-list { list-style:none; display:flex; flex-direction:column; gap:10px; }
-    .summary-list li { display:flex; align-items:flex-start; gap:10px; font-size:15px; font-weight:600; line-height:1.5; }
-    .summary-list li span.check { font-size:17px; flex-shrink:0; margin-top:1px; }
-    footer { background:#0f172a; color:white; border-top:4px solid black; padding:28px 24px; text-align:center; }
-    footer a { color:#9ca3af; font-size:13px; font-weight:600; text-decoration:none; margin:0 10px; }
-    footer a:hover { color:white; }
-    footer p { color:#6b7280; font-size:13px; margin-top:10px; }
-    @media(max-width:640px) { .policy-section { padding:22px 20px; } .summary-card { padding:24px 20px; } .content-wrap { padding:36px 16px 60px; } }
+    .policy-section ul { list-style:none; padding:0; margin:10px 0; display:flex; flex-direction:column; gap:7px; }
+    .policy-section ul li { font-size:14px; line-height:1.6; color:#3F3F46; padding-left:18px; position:relative; }
+    .policy-section ul li::before { content:'→'; position:absolute; left:0; font-weight:900; color:#58CC02; }
+    .highlight { background:#F0FDF4; border-radius:6px; padding:2px 8px; font-weight:800; color:#2D6A00; }
+    footer { background:#1a1a1a; padding:28px 24px; text-align:center; border-top:3px solid #46A302; }
+    footer p { color:#666; font-size:13px; font-weight:600; }
+    footer a { color:#FF6B00; text-decoration:none; margin:0 8px; font-weight:700; font-size:13px; }
+    footer a:hover { text-decoration:underline; }
+    .footer-links { margin-bottom:8px; }
+    @media(max-width:640px) { .policy-section { padding:20px 18px; } .summary-card { padding:22px 20px; } .content-wrap { padding:32px 16px 60px; } }
   </style>
 </head>
 <body>
 
 <header>
   <a href="/" class="logo-link">
-    <svg width="34" height="34" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="120" height="120" rx="24" fill="#EDE9FE"/><rect x="20" y="20" width="80" height="80" rx="18" fill="#7C6FE0"/><path d="M31 78 L31 52 Q31 48 36 46 Q46 43 55 44 Q58 45 58 48 L58 78 Q48 75 36 77 Z" fill="white" opacity="0.95"/><path d="M61 78 L61 48 Q61 45 64 44 Q73 43 83 46 Q88 48 88 52 L88 78 Q77 77 65 77 Z" fill="white" opacity="0.95"/><rect x="57" y="44" width="5" height="34" rx="2" fill="white" opacity="0.45"/><rect x="31" y="78" width="57" height="7" rx="3" fill="white" opacity="0.55"/><g transform="translate(59.5,36)"><polygon points="0,-9 3,0 0,9 -3,0" fill="#FAC775"/><polygon points="-9,0 0,-3 9,0 0,3" fill="#FAC775"/><circle cx="0" cy="0" r="1.5" fill="#FAC775"/></g></svg>
-    <span class="logo-text">HomeWorkAI</span>
+    <img src="/knox-logo.jpg" alt="Knox" class="logo-img" onerror="this.style.display='none'">
+    <span class="logo-text">Knox Knows</span>
   </a>
-  <a href="/" class="nav-back">← Back to Home</a>
+  <a href="/" class="back-btn">← Back to Knox</a>
 </header>
 
 <div class="page-hero">
-  <h1>Terms of Service</h1>
-  <p>Last updated: April 19, 2026</p>
+  <div class="badge">📋 Terms of Service</div>
+  <h1>The rules for using Knox</h1>
+  <p>Last updated: April 2026 · Knox Knows</p>
 </div>
 
 <div class="content-wrap">
 
   <div class="summary-card">
-    <h2>📋 The Short Version</h2>
+    <h2>⚡ Quick summary</h2>
     <ul class="summary-list">
-      <li><span class="check">✔</span><span>You must be 13 or older to use HomeWorkAI.</span></li>
-      <li><span class="check">✔</span><span>Use HomeWorkAI to learn and understand — not to cheat or misrepresent AI work as your own.</span></li>
-      <li><span class="check">✔</span><span>Don't abuse the service, attempt to bypass limits, or use it for anything harmful or illegal.</span></li>
-      <li><span class="check">✔</span><span>AI answers may not always be 100% accurate — always verify important information.</span></li>
-      <li><span class="check">✔</span><span>We can terminate accounts that violate these terms.</span></li>
+      <li><span class="dot">✔</span>You must be 13 or older to use Knox Knows</li>
+      <li><span class="dot">✔</span>Use Knox for learning — not to cheat or abuse the service</li>
+      <li><span class="dot">✔</span>Subscriptions are recurring — cancel anytime before renewal</li>
+      <li><span class="dot">✔</span>Knox is a learning aid, not a guarantee of specific grades</li>
+      <li><span class="dot">✔</span>We can suspend accounts that abuse the service</li>
     </ul>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">1</div><div class="section-title">Acceptance of Terms</div></div>
-    <p>By accessing or using HomeWorkAI at <span class="highlight">homeworkaiapp.com</span>, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use the service.</p>
-    <p>These terms apply to all users of the service, including free users, Pro subscribers, and Pro+ subscribers.</p>
+    <div class="section-header"><div class="section-num">1</div><div class="section-title">Who can use Knox Knows</div></div>
+    <p>These terms apply to all users of the service, including free users and paid subscribers.</p>
+    <p>You must be at least 13 years old to use Knox Knows. If you are between 13 and 18, your parent or legal guardian must review and agree to these Terms on your behalf.</p>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">2</div><div class="section-title">Age Requirement</div></div>
-    <p>You must be at least <span class="highlight">13 years old</span> to create an account and use HomeWorkAI. By creating an account, you confirm that you are 13 or older.</p>
-    <p>If you are between 13 and 18 years old, you represent that your parent or legal guardian has reviewed and agrees to these Terms on your behalf.</p>
-    <p>We do not knowingly allow children under 13 to use our service. If we become aware that a user is under 13, we will terminate their account immediately.</p>
-  </div>
-
-  <div class="policy-section">
-    <div class="section-header"><div class="section-num">3</div><div class="section-title">Description of Service</div></div>
-    <p>HomeWorkAI provides an AI-powered homework help service that gives step-by-step explanations across academic subjects. The service is available in three tiers:</p>
+    <div class="section-header"><div class="section-num">2</div><div class="section-title">What Knox Knows is</div></div>
+    <p>Knox Knows provides an AI-powered homework help service that gives step-by-step explanations across academic subjects. The service is available in three tiers:</p>
     <ul>
-      <li><strong>Free:</strong> 5 questions per day with basic AI answers.</li>
-      <li><strong>Pro:</strong> unlimited questions with advanced AI, step-by-step breakdowns, and a 3-day free trial on monthly billing.</li>
-      <li><strong>Pro+:</strong> everything in Pro plus the highest-quality AI responses, deeper explanations, and YouTube and Quizlet resource links.</li>
+      <li><span class="highlight">Basic Knox</span> — Free, 5 questions per day</li>
+      <li><span class="highlight">Super Knox</span> — $9.99/month, 25 questions per day</li>
+      <li><span class="highlight">Max Knox</span> — $19.99/month, unlimited questions</li>
     </ul>
-    <p>We reserve the right to modify, suspend, or discontinue any part of the service at any time with reasonable notice.</p>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">4</div><div class="section-title">Acceptable Use</div></div>
-    <p>You agree to use HomeWorkAI only for lawful purposes and in accordance with these Terms. You agree not to:</p>
+    <div class="section-header"><div class="section-num">3</div><div class="section-title">Acceptable use</div></div>
+    <p>You agree to use Knox Knows only for lawful educational purposes. You agree not to:</p>
     <ul>
-      <li>Use the service to submit work that is not your own in academic settings where doing so would constitute academic dishonesty or cheating, without understanding the content.</li>
-      <li>Attempt to bypass usage limits, rate limits, or subscription requirements through any technical means.</li>
-      <li>Reverse engineer, scrape, copy, or redistribute the service or its content.</li>
-      <li>Submit content that is illegal, harmful, threatening, abusive, harassing, defamatory, or otherwise objectionable.</li>
-      <li>Attempt to gain unauthorized access to any part of the service, our servers, or any related systems.</li>
-      <li>Use automated scripts or bots to submit questions or interact with the service.</li>
-      <li>Share your account credentials with others or allow others to use your account.</li>
+      <li>Use Knox to commit academic dishonesty in violation of your school's policies</li>
+      <li>Attempt to extract, reverse engineer, or copy Knox's AI system prompts</li>
+      <li>Create multiple accounts to bypass daily question limits</li>
+      <li>Use automated scripts or bots to make requests to Knox</li>
+      <li>Submit content that is illegal, harmful, or violates others' rights</li>
+      <li>Resell or redistribute Knox's answers commercially</li>
     </ul>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">5</div><div class="section-title">AI Accuracy Disclaimer</div></div>
-    <p>HomeWorkAI uses artificial intelligence to generate answers and explanations. While we strive for accuracy, <span class="highlight">AI responses may contain errors, inaccuracies, or outdated information.</span></p>
-    <p>You should always verify important information independently, especially for high-stakes academic work, tests, or examinations. HomeWorkAI is a learning tool to help you understand concepts — it is not a substitute for your own judgment, your teachers, or qualified human tutors.</p>
-    <p>We are not responsible for any academic outcomes, grades, or consequences resulting from your use of AI-generated answers.</p>
+    <div class="section-header"><div class="section-num">4</div><div class="section-title">AI accuracy &amp; academic responsibility</div></div>
+    <p>Knox is powered by AI and can make mistakes. Always verify important information independently, especially for high-stakes academic work, tests, or examinations.</p>
+    <p>Knox Knows is a learning tool to help you understand concepts — it is not a substitute for your own judgment, your teachers, or qualified human tutors. We do not guarantee specific academic results.</p>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">6</div><div class="section-title">Subscriptions and Billing</div></div>
-    <p>Paid subscriptions (Pro and Pro+) are billed on a recurring basis — either monthly or yearly depending on the plan you select. By subscribing, you authorize us to charge your payment method on a recurring basis until you cancel.</p>
-    <p><strong>Free Trial:</strong> Pro monthly subscriptions include a 3-day free trial. You will not be charged until the trial ends. You can cancel before the trial ends to avoid any charge.</p>
-    <p><strong>Cancellation:</strong> you can cancel your subscription at any time from your Account & Plan settings. Cancellation takes effect at the end of your current billing period — you retain access until then.</p>
-    <p><strong>Refunds:</strong> we offer a 30-day money-back guarantee on your first payment. See our <a href="/refund.html" style="color:#7c3aed;">Refund Policy</a> for full details.</p>
-    <p>All prices are in US Dollars. We reserve the right to change pricing with reasonable advance notice to existing subscribers.</p>
+    <div class="section-header"><div class="section-num">5</div><div class="section-title">Subscriptions &amp; billing</div></div>
+    <p>Paid subscriptions are billed on a recurring basis — monthly or yearly depending on your selection. By subscribing, you authorize us to charge your payment method until you cancel.</p>
+    <p><strong>Free Trial:</strong> Super Knox monthly includes a 3-day free trial. You will not be charged until the trial ends. Cancel before the trial ends to avoid any charge.</p>
+    <p>You can cancel your subscription at any time from your Account settings. Cancellation stops future renewals — you retain access through the end of your current billing period.</p>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">7</div><div class="section-title">Intellectual Property</div></div>
-    <p>The HomeWorkAI name, logo, website design, and all original content on the platform are owned by HomeWorkAI and protected by applicable intellectual property laws. You may not use our branding or copy our content without written permission.</p>
+    <div class="section-header"><div class="section-num">6</div><div class="section-title">Intellectual property</div></div>
+    <p>The Knox Knows name, logo, website design, and all original content are owned by Knox Knows and protected by applicable intellectual property laws. You may not use our branding or copy our content without written permission.</p>
     <p>The questions you submit remain yours. By submitting questions, you grant us a limited license to process them through our AI service to generate your answers. We do not claim ownership of your academic content.</p>
-    <p>AI-generated answers are provided for your personal educational use. You may not resell, republish, or redistribute AI-generated content as your own original work.</p>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">8</div><div class="section-title">Account Termination</div></div>
-    <p>We reserve the right to suspend or terminate your account at our discretion if you violate these Terms of Service, attempt to abuse or defraud the service, or engage in any behavior that is harmful to other users or to HomeWorkAI.</p>
+    <div class="section-header"><div class="section-num">7</div><div class="section-title">Account suspension</div></div>
+    <p>We reserve the right to suspend or terminate your account at our discretion if you violate these Terms, attempt to abuse or defraud the service, or engage in behavior harmful to other users or to Knox Knows.</p>
     <p>If your account is terminated for cause, you will not be entitled to a refund of any subscription fees paid.</p>
-    <p>You may delete your account at any time by contacting us at <span class="highlight">support@homeworkaiapp.com</span>.</p>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">9</div><div class="section-title">Limitation of Liability</div></div>
-    <p>To the maximum extent permitted by law, HomeWorkAI and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of data, academic outcomes, or any other damages arising from your use of the service.</p>
-    <p>Our total liability to you for any claim arising from your use of the service shall not exceed the amount you paid us in the 3 months prior to the claim.</p>
+    <div class="section-header"><div class="section-num">8</div><div class="section-title">Limitation of liability</div></div>
+    <p>To the maximum extent permitted by law, Knox Knows and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of data, academic outcomes, or any other damages arising from your use of the service.</p>
+    <p>Our total liability to you for any claim shall not exceed the amount you paid us in the 3 months prior to the claim.</p>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">10</div><div class="section-title">Disclaimer of Warranties</div></div>
-    <p>HomeWorkAI is provided "as is" and "as available" without warranties of any kind, either express or implied. We do not warrant that the service will be uninterrupted, error-free, or completely accurate.</p>
-    <p>We do not guarantee specific academic results from using HomeWorkAI. The service is an educational aid, not a guarantee of grades or outcomes.</p>
+    <div class="section-header"><div class="section-num">9</div><div class="section-title">Disclaimer of warranties</div></div>
+    <p>Knox Knows is provided "as is" and "as available" without warranties of any kind. We do not warrant that the service will be uninterrupted, error-free, or completely accurate.</p>
+    <p>We do not guarantee specific academic results from using Knox Knows. The service is an educational aid, not a guarantee of grades or outcomes.</p>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">11</div><div class="section-title">Governing Law</div></div>
-    <p>These Terms of Service are governed by the laws of the United States. Any disputes arising from these terms or your use of HomeWorkAI shall be resolved through binding arbitration or in the courts of competent jurisdiction.</p>
+    <div class="section-header"><div class="section-num">10</div><div class="section-title">Governing law</div></div>
+    <p>These Terms of Service are governed by the laws of the United States. Any disputes arising from these terms or your use of Knox Knows shall be resolved through binding arbitration or in the courts of competent jurisdiction.</p>
   </div>
 
   <div class="policy-section">
-    <div class="section-header"><div class="section-num">12</div><div class="section-title">Changes to These Terms</div></div>
-    <p>We may update these Terms of Service from time to time. When we do, we will update the "Last updated" date at the top of this page. Continued use of HomeWorkAI after changes are posted means you accept the revised terms.</p>
-    <p>For significant changes, we will make reasonable efforts to notify you by email or by displaying a notice on the site.</p>
-  </div>
-
-  <div class="policy-section">
-    <div class="section-header"><div class="section-num">13</div><div class="section-title">Contact Us</div></div>
-    <p>If you have any questions about these Terms of Service, please contact us at:</p>
-    <p><span class="highlight">support@homeworkaiapp.com</span></p>
+    <div class="section-header"><div class="section-num">11</div><div class="section-title">Contact</div></div>
+    <p>Questions about these Terms? Email us at <a href="mailto:support@knoxknowsapp.com" style="color:#58CC02;font-weight:800;">support@knoxknowsapp.com</a></p>
   </div>
 
 </div>
 
 <footer>
-  <div>
-    <a href="/">Home</a>
+  <div class="footer-links">
     <a href="/privacy.html">Privacy Policy</a>
     <a href="/terms.html">Terms of Service</a>
     <a href="/refund.html">Refund Policy</a>
-    <a href="mailto:support@homeworkaiapp.com">Contact</a>
   </div>
-  <p>&copy; 2026 HomeWorkAI. All rights reserved.</p>
+  <p>© 2026 Knox Knows · All rights reserved</p>
 </footer>
 
 </body>
