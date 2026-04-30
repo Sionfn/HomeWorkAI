@@ -1668,7 +1668,7 @@
         <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:16px;">⚡ Super Knox</div>
         <div style="font-size:40px;font-weight:900;line-height:1;color:white;" id="proPlusPrice">$9.99</div>
         <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;" id="proPlusPeriod">/month</div>
-        <div class="yearly-note" id="proPlusYearlyNote" style="background:rgba(255,255,255,0.25);color:white;border:2px solid rgba(255,255,255,0.4);">🎉 $159.99/yr</div>
+        <div class="yearly-note" id="proPlusYearlyNote" style="background:rgba(255,255,255,0.25);color:white;border:2px solid rgba(255,255,255,0.4);">🎉 $79.99/yr — save $39.89</div>
         <div style="font-size:14px;font-weight:800;color:white;margin:12px 0 16px;line-height:1.4;">5× more problems, smarter answers</div>
         <div style="flex:1;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;">
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>25 problems per day</strong></div>
@@ -1694,7 +1694,7 @@
         <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:16px;">🚀 Max Knox</div>
         <div style="font-size:40px;font-weight:900;line-height:1;color:white;" id="maxPrice">$19.99</div>
         <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;">/month</div>
-        <div class="yearly-note" id="maxYearlyNote" style="background:rgba(255,255,255,0.25);color:white;border:2px solid rgba(255,255,255,0.4);">🎉 $149.99/yr — save $89.89</div>
+        <div class="yearly-note" id="maxYearlyNote" style="background:rgba(255,255,255,0.25);color:white;border:2px solid rgba(255,255,255,0.4);">🎉 $159.99/yr — save $79.89</div>
         <div style="font-size:14px;font-weight:800;color:white;margin:12px 0 16px;line-height:1.4;">Knox without limits — the full experience</div>
         <div style="flex:1;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;">
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>Unlimited problems — no daily cap</strong></div>
@@ -2620,9 +2620,9 @@
     const superEl  = document.getElementById('proPlusPrice');
     const maxEl    = document.getElementById('maxPrice');
     const proPer   = document.getElementById('proPeriod');
-    if (proEl)   proEl.textContent   = type === 'monthly' ? '$9.99'  : '$13.33';
-    if (superEl) superEl.textContent = type === 'monthly' ? '$9.99'  : '$13.33';
-    if (maxEl)   maxEl.textContent   = type === 'monthly' ? '$19.99' : '$12.50';
+    if (proEl)   proEl.textContent   = type === 'monthly' ? '$9.99'  : '$6.67';
+    if (superEl) superEl.textContent = type === 'monthly' ? '$9.99'  : '$6.67';
+    if (maxEl)   maxEl.textContent   = type === 'monthly' ? '$19.99' : '$13.33';
     if (proPer)  proPer.textContent  = type === 'monthly' ? '/month'  : '/mo · billed yearly';
 
     // Show/hide yearly note badges with pop animation
