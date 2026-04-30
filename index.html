@@ -1508,172 +1508,56 @@
 </section>
 
 <!-- ===================== ASK AI ===================== -->
-<section id="ai-helper" style="background:var(--bg-primary);padding:72px 24px;">
-  <div style="max-width:780px;margin:0 auto;">
-    <div style="text-align:center;margin-bottom:32px;">
-      <img src="./knox-wave.png" alt="Knox waving" style="width:80px;height:auto;margin-bottom:-10px;filter:drop-shadow(0 4px 8px rgba(255,107,0,0.2));" onerror="this.style.display='none'">
-      <h2 class="section-title section-title-underline reveal" style="display:inline-block;margin-bottom:8px;color:var(--text);">Ask Knox</h2>
-      <p style="font-size:16px;font-weight:600;color:#666;">Choose how Knox helps you — then just talk to him.</p>
+<section id="ai-helper" class="py-16 md-py-24 px-6" style="background:white;">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="section-title section-title-underline mb-4">🧠 Ask HomeWorkAI</h2>
+      <p style="color:#4b5563;font-size:18px;line-height:1.65;">Type your homework question below and get instant step-by-step explanations.</p>
     </div>
-
-    <!-- Chat container -->
-    <div style="background:white;border-radius:24px;border:2px solid #E5E7EB;box-shadow:0 4px 24px rgba(0,0,0,0.07);overflow:hidden;">
-
-      <!-- ── HEADER ── -->
-      <div style="background:#FF6B00;padding:18px 20px;display:flex;align-items:center;gap:14px;">
-        <div style="width:48px;height:48px;border-radius:50%;border:3px solid rgba(255,255,255,0.4);overflow:hidden;background:#FED7AA;flex-shrink:0;">
-          <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:17px;font-weight:900;color:white;line-height:1.2;">Knox Knows</div>
-          <div id="aiHeaderDesc" style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.8);margin-top:2px;">Ready to help you ace it</div>
-        </div>
-        <button id="newChatBtn" onclick="startNewChat()" style="display:none;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.5);border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;color:white;cursor:pointer;font-family:inherit;">New Chat</button>
-      </div>
-
-      <!-- ── MODE TABS ── -->
-      <div style="padding:12px 16px;background:white;border-bottom:2px solid #F3F4F6;">
-        <div style="display:flex;gap:6px;background:#F3F4F6;border-radius:12px;padding:4px;">
-          <button id="modeAnswerBtn" onclick="setMode('answer')"
-            style="flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;">
-            Get the Answer
+    <div class="card p-6 md-p-8" style="background:var(--purple);">
+      <div class="mb-6">
+        <label class="font-extrabold mb-3 heading" style="display:block;font-size:16px;">Your Question</label>
+        <div class="relative">
+          <textarea id="questionInput" placeholder="Type your homework question here... (or upload an image below — you can add a note too)" style="width:100%;padding:16px;padding-right:116px;border:2px solid black;border-radius:10px;min-height:120px;resize:none;background:white;font-size:16px;font-family:inherit;line-height:1.5;"></textarea>
+          <input type="file" id="fileInput" accept="image/*" style="display:none;">
+          <button onclick="openCalc()" class="calc-open-btn" title="Open calculator">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>
           </button>
-          <button id="modeLearnBtn" onclick="setMode('learn')"
-            style="flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;">
-            Learn with Knox
+          <button onclick="document.getElementById('fileInput').click()" class="upload-image-btn" title="Upload image">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
           </button>
-
         </div>
       </div>
-
-      <!-- ── CHAT THREAD ── -->
-      <div id="chatThread" style="display:flex;flex-direction:column;gap:14px;padding:20px;min-height:100px;max-height:420px;overflow-y:auto;">
-        <!-- Knox greeting -->
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
-            <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
-          </div>
-          <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:84%;">
-            <p style="font-size:15px;font-weight:500;color:var(--text);line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
-          </div>
-        </div>
+      <div id="planBanner" style="display:none;margin-bottom:12px;"></div>
+      <button id="askBtn" onclick="handleAskQuestion()" class="btn w-full flex items-center justify-center gap-2" style="background:var(--green);font-size:16px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        Get Answer
+      </button>
+      <div id="usageCounter" style="margin-top:10px;text-align:right;font-size:13px;font-weight:700;color:#4b5563;"></div>
+      <button onclick="openHistory()" style="margin-top:10px;display:inline-flex;align-items:center;gap:7px;background:white;border:2px solid black;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:3px 3px 0 black;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='5px 5px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='3px 3px 0 black';">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Question History
+      </button>
+      <button id="newChatBtn" onclick="startNewChat()" style="display:none;margin-top:10px;margin-left:8px;align-items:center;gap:7px;background:white;border:2px solid black;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:3px 3px 0 black;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='5px 5px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='3px 3px 0 black';">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        New Chat
+      </button>
+      <div id="conversationIndicator" style="display:none;margin-top:8px;font-size:12px;font-weight:700;color:#7c3aed;"></div>
+      <div id="answerBox" class="mt-6 p-6 rounded-lg hidden" style="background:white;border:2px solid black;"></div>
+      <div class="mt-6 flex flex-wrap gap-2 items-center">
+        <span class="text-sm font-bold">Try asking:</span>
+        <button onclick="setQuestion('How do I solve quadratic equations?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background:white;border:2px solid black;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">Quadratic equations</button>
+        <button onclick="setQuestion('Explain photosynthesis step by step')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background:white;border:2px solid black;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">Photosynthesis</button>
+        <button onclick="setQuestion('What caused World War 1?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background:white;border:2px solid black;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">World War 1</button>
+        <button onclick="setQuestion('How do I write a thesis statement?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background:white;border:2px solid black;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">Thesis statement</button>
+        <button onclick="setQuestion('Explain the Pythagorean theorem with examples')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background:white;border:2px solid black;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">Pythagorean theorem</button>
+        <button onclick="setQuestion('What is Newton\'s second law of motion?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background:white;border:2px solid black;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">Newton's 2nd law</button>
+        <button onclick="setQuestion('How do I find the derivative of x squared?')" class="text-sm px-3 py-1 rounded-full font-semibold" style="background:white;border:2px solid black;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='2px 2px 0 black';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">Derivatives (Calculus)</button>
       </div>
-
-      <!-- Plan banner -->
-      <div id="planBanner"></div>
-      <div id="conversationIndicator" style="display:none;padding:5px 20px;font-size:12px;font-weight:700;color:var(--blue);background:var(--knox-bubble-blue);"></div>
-
-      <!-- ── INPUT AREA ── -->
-      <div style="background:white;border-top:2px solid #F3F4F6;padding:14px 16px 12px;">
-        <!-- Input box -->
-        <div id="chatInputWrapper" style="display:flex;align-items:center;background:#F9FAFB;border:2px solid #E5E7EB;border-radius:16px;padding:4px 6px 4px 16px;transition:border-color 0.2s;gap:8px;">
-          <textarea id="chatInput" placeholder="Ask Knox anything..." rows="1"
-            style="flex:1;border:none;outline:none;background:transparent;font-size:15px;font-family:inherit;font-weight:500;color:#3C3C3C;resize:none;min-height:44px;max-height:140px;overflow-y:auto;padding:10px 0;line-height:1.5;"
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();handleAskQuestion();}"
-            onfocus="document.getElementById('chatInputWrapper').style.borderColor='#FF6B00'"
-            onblur="document.getElementById('chatInputWrapper').style.borderColor='#E5E7EB'"
-            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px';"></textarea>
-          <!-- Tools -->
-          <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">
-            <input type="file" id="fileInput" accept="image/*" style="display:none;">
-            <button onclick="openCalc()" title="Calculator" class="chat-icon-btn" data-hover-color="#FF6B00"
-              style="width:34px;height:34px;border-radius:9px;border:none;background:transparent;cursor:pointer;color:#D1D5DB;display:flex;align-items:center;justify-content:center;transition:color 0.15s;"
-              onmouseover="this.style.color=(this.dataset.hoverColor||'#FF6B00')" onmouseout="this.style.color='#D1D5DB'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>
-            </button>
-            <button onclick="document.getElementById('fileInput').click()" title="Upload image" class="chat-icon-btn" data-hover-color="#FF6B00"
-              style="width:34px;height:34px;border-radius:9px;border:none;background:transparent;cursor:pointer;color:#D1D5DB;display:flex;align-items:center;justify-content:center;transition:color 0.15s;"
-              onmouseover="this.style.color=(this.dataset.hoverColor||'#FF6B00')" onmouseout="this.style.color='#D1D5DB'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-            </button>
-            <button id="askBtn" onclick="handleAskQuestion()" title="Send"
-              style="width:40px;height:40px;border-radius:12px;border:none;background:#FF6B00;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;flex-shrink:0;"
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #CC5500'"
-              onmouseout="this.style.transform='';this.style.boxShadow='0 3px 0 #CC5500'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-            </button>
-          </div>
-        </div>
-        <!-- Image pill + hint -->
-        <div style="display:flex;align-items:center;margin-top:6px;gap:8px;">
-          <div id="imagePill" style="display:none;align-items:center;gap:6px;background:#FFF4EC;border:1.5px solid #FF6B00;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:#FF6B00;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-            <span id="imagePillName">Image attached</span>
-            <button onclick="clearImage()" style="background:none;border:none;cursor:pointer;color:#FF6B00;font-size:13px;padding:0;line-height:1;">✕</button>
-          </div>
-          <span style="font-size:11px;font-weight:600;color:#D1D5DB;margin-left:auto;">Enter to send · Shift+Enter for new line</span>
-        </div>
-      </div>
-
-      <!-- Usage bars -->
-      <div id="usageBarWrap" class="usage-bar-wrap" style="display:block;">
-        <!-- Homework credits -->
-        <div style="margin-bottom:10px;">
-          <div class="usage-bar-label">
-            <span style="display:flex;align-items:center;gap:5px;">
-              <span style="font-size:10px;">📚</span>
-              <span id="usageBarLabel" style="color:#FF6B00;font-weight:800;">0 / 5 homework questions used</span>
-            </span>
-            <span id="usageBarCountdown" style="font-size:11px;font-weight:800;"></span>
-          </div>
-          <div class="usage-bar-track orange">
-            <div id="usageBarFill" class="usage-bar-fill hw-fill" style="width:0%;"></div>
-          </div>
-          <!-- Live countdown clock -->
-          <div id="hwClockWrap" style="display:none;margin-top:5px;padding:6px 10px;background:var(--red-light);border-radius:8px;border:1.5px solid #FECACA;">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-size:11px;font-weight:700;color:#DC2626;">⏱ Next homework credit unlocks in:</span>
-              <span id="hwClockDisplay" style="font-size:13px;font-weight:900;color:#DC2626;font-variant-numeric:tabular-nums;letter-spacing:0.04em;">--:--:--</span>
-            </div>
-          </div>
-        </div>
-        <!-- Casual credits -->
-        <div id="casualBarSection" style="display:none;">
-          <div class="usage-bar-label">
-            <span style="display:flex;align-items:center;gap:5px;">
-              <span style="font-size:10px;">💬</span>
-              <span id="casualBarLabel" style="color:#1CB0F6;font-weight:800;">0 / 20 chat messages used</span>
-            </span>
-            <span id="casualBarCountdown" style="font-size:11px;font-weight:800;"></span>
-          </div>
-          <div class="usage-bar-track blue">
-            <div id="casualBarFill" class="usage-bar-fill cs-fill" style="width:0%;"></div>
-          </div>
-          <!-- Live countdown clock for casual -->
-          <div id="csClockWrap" style="display:none;margin-top:5px;padding:6px 10px;background:var(--knox-bubble-blue);border-radius:8px;border:1.5px solid #BAE6FD;">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-size:11px;font-weight:700;color:#0369A1;">⏱ Next chat credit unlocks in:</span>
-              <span id="csClockDisplay" style="font-size:13px;font-weight:900;color:#0369A1;font-variant-numeric:tabular-nums;letter-spacing:0.04em;">--:--:--</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── FOOTER ── -->
-      <div style="padding:10px 16px;border-top:2px solid var(--border);background:var(--bg-elevated);display:flex;align-items:center;">
-        <button onclick="openHistory()" style="display:inline-flex;align-items:center;gap:6px;background:white;border:2px solid #E5E7EB;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:#6B7280;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#6B7280'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          History
-        </button>
-        <div id="usageCounter" style="font-size:12px;font-weight:700;color:#9CA3AF;margin-left:auto;"></div>
-      </div>
-
-    </div><!-- end chat container -->
-
-    <div id="answerBox" style="display:none;"></div>
-
-    <!-- Try asking chips -->
-    <div style="margin-top:20px;">
-      <div style="font-size:13px;font-weight:800;color:#9CA3AF;margin-bottom:10px;">Try asking Knox:</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;">
-        <button onclick="setQuestion('Explain the quadratic formula')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Quadratic formula</button>
-        <button onclick="setQuestion('How does photosynthesis work?')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Photosynthesis</button>
-        <button onclick="setQuestion('What caused World War 1?')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">World War 1</button>
-        <button onclick="setQuestion('Help me write a thesis statement')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Thesis statement</button>
-        <button onclick="setQuestion('Explain the Pythagorean theorem')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Pythagorean theorem</button>
-        <button onclick="setQuestion('Newton\'s 2nd law explained')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Newton's 2nd law</button>
-        <button onclick="setQuestion('What are derivatives in calculus?')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Derivatives</button>
-      </div>
+    </div>
+    <div class="mt-8 text-center">
+      <p style="color:#4b5563;margin-bottom:16px;">Want unlimited questions with faster responses?</p>
+      <button onclick="scrollToPricing()" class="btn" style="background:var(--yellow);">View Pricing Plans</button>
     </div>
   </div>
 </section>
@@ -2999,70 +2883,40 @@
   let guestQuestionUsed = false;
 
   function handleAskQuestion() {
-    userPlan = window.userPlan || userPlan;
-    // Normalize legacy names
-    if (userPlan === 'pro_plus') { userPlan = 'max';   window.userPlan = 'max';   }
-    if (userPlan === 'pro'     ) { userPlan = 'super'; window.userPlan = 'super'; }
-
-    const question = ((document.getElementById('chatInput')||document.getElementById('questionInput')||{value:''}).value||'').trim();
+    userPlan = window.userPlan || userPlan; // stay in sync
+    const question = document.getElementById('questionInput').value.trim();
     if (!question && !pendingImageBase64) return;
     const usage = getUsageData();
 
-    // Paid users skip ALL local limits — server enforces
-    if (userPlan === 'super' || userPlan === 'max') {
+    // Pro/Pro+ users skip ALL limits
+    if (userPlan === 'pro' || userPlan === 'pro_plus') {
       executeAskQuestion(); return;
     }
 
-    // GUEST: allow exactly 1 question, then show sign-up prompt
+    // Guests must log in — the API requires a Firebase token so unauthenticated
+    // requests would fail with 401 anyway. Show a friendly prompt instead.
     if (!window.currentUser) {
-      if (guestQuestionUsed) {
-        appendKnoxSignUpPrompt();
-        return;
-      }
-      guestQuestionUsed = true;
-      updateUsageBar({ hw: 1, hwLimit: 1, nextUnlock: null });
-      executeAskQuestion(/* afterCallback */ () => appendKnoxSignUpPrompt(true));
-      return;
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 flex items-center justify-center z-50';
+      modal.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+      modal.innerHTML = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:16px;">🎓</div>
+        <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Create a Free Account</h3>
+        <p style="color:#4b5563;margin-bottom:8px;line-height:1.6;">Sign up in seconds to get <strong>5 free questions every day</strong> — no credit card needed.</p>
+        <p style="color:#9ca3af;font-size:13px;margin-bottom:24px;">Google, Microsoft, or email — your choice.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Maybe later</button>
+          <button onclick="this.closest('.fixed').remove();openLoginModal();" class="btn" style="background:var(--purple);">Sign Up Free →</button>
+        </div>
+      </div>`;
+      modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+      document.body.appendChild(modal); return;
     }
 
-    // Free logged-in users: update local counter optimistically, server will enforce the real limit
     usage.count = (usage.count || 0) + 1;
     setUsageData(usage);
     updateUsageCounter();
     executeAskQuestion();
-  }
-
-  // Knox sends a sign-up message in the chat thread
-  function appendKnoxSignUpPrompt(afterAnswer) {
-    const chatThread = document.getElementById('chatThread');
-    if (!chatThread) return;
-
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
-    row.innerHTML = `
-      <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
-        <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
-      </div>
-      <div style="max-width:88%;display:flex;flex-direction:column;gap:10px;">
-        <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;">
-          <p style="font-size:15px;font-weight:600;color:var(--text);line-height:1.6;margin:0;">
-            ${afterAnswer
-              ? "Hope that helped! 🦊 I can keep going but I need you to be a real one first — create a free account and get <strong>5 questions every day</strong>. No card needed, takes 10 seconds."
-              : "hey, you already used your free question 😄 drop me an account real quick and I'll keep helping — it's totally free, 5 questions a day, no card needed 🦊"}
-          </p>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button onclick="switchLoginTab('signup');openLoginModal();" style="padding:12px 22px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 0 #CC5500'">
-            Create Free Account
-          </button>
-          <button onclick="switchLoginTab('signin');openLoginModal();" style="padding:12px 22px;border-radius:12px;font-size:14px;font-weight:800;font-family:inherit;border:2px solid #E5E7EB;background:white;color:#6B7280;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#6B7280'">
-            Sign In
-          </button>
-        </div>
-      </div>`;
-
-    chatThread.appendChild(row);
-    chatThread.scrollTop = chatThread.scrollHeight;
   }
 
   // ── CONVERSATION HISTORY ──────────────────────────────────────────────────
@@ -3085,103 +2939,40 @@
 
   window.startNewChat = function() {
     conversationHistory = [];
-    const chatInput = document.getElementById('chatInput');
-    if (chatInput) { chatInput.value = ''; chatInput.style.height = 'auto'; chatInput.focus(); }
-    // Reset chat thread to just the greeting
-    const thread = document.getElementById('chatThread');
-    if (thread) {
-      thread.innerHTML = `<div style="display:flex;gap:10px;align-items:flex-start;">
-        <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
-          <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
-        </div>
-        <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:84%;">
-          <p style="font-size:15px;font-weight:500;color:var(--text);line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
-        </div>
-      </div>`;
-    }
+    document.getElementById('questionInput').value = '';
+    document.getElementById('answerBox').classList.add('hidden');
+    document.getElementById('answerBox').innerHTML = '';
     updateConversationIndicator();
     if (window.clearImage) window.clearImage();
+    document.getElementById('questionInput').focus();
   };
 
-  async function executeAskQuestion(afterCallback) {
-    const chatInput   = document.getElementById('chatInput');
-    const typedQuestion = (chatInput ? chatInput.value : '').trim();
+  async function executeAskQuestion() {
+    const typedQuestion = document.getElementById('questionInput').value.trim();
     if (!typedQuestion && !pendingImageBase64) return;
 
-    const askBtn      = document.getElementById('askBtn');
-    const chatThread  = document.getElementById('chatThread');
-    const spinnerSVG  = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
-
-    // ── Helper: scroll thread to bottom ─────────────────────────────────────
-    const scrollBottom = () => { if (chatThread) chatThread.scrollTop = chatThread.scrollHeight; };
-
-    // ── Helper: append user bubble ───────────────────────────────────────────
-    function appendUserBubble(text) {
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;justify-content:flex-end;';
-      row.innerHTML = `<div style="background:#FF6B00;color:white;padding:12px 18px;border-radius:18px 18px 4px 18px;max-width:82%;font-size:15px;font-weight:600;line-height:1.5;box-shadow:0 2px 8px rgba(255,107,0,0.2);">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
-      chatThread.appendChild(row);
-      scrollBottom();
-    }
-
-    // ── Helper: append Knox thinking bubble ─────────────────────────────────
-    function appendThinkingBubble() {
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
-      row.id = 'knoxThinkingRow';
-      const label = currentMode === 'learn' ? 'Knox is working it out' : 'Knox is finding the answer';
-      row.innerHTML = `
-        <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
-        <div style="background:white;border:2px solid #E5E7EB;border-radius:6px 18px 18px 18px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
-          <span style="font-size:13px;font-weight:700;color:#9CA3AF;">${label}</span>
-          <div style="display:flex;gap:5px;align-items:center;">
-            <span style="width:8px;height:8px;border-radius:50%;background:#FF6B00;display:inline-block;animation:chatDot 1.2s ease-in-out infinite;"></span>
-            <span style="width:8px;height:8px;border-radius:50%;background:#FF6B00;display:inline-block;animation:chatDot 1.2s ease-in-out 0.2s infinite;"></span>
-            <span style="width:8px;height:8px;border-radius:50%;background:#FF6B00;display:inline-block;animation:chatDot 1.2s ease-in-out 0.4s infinite;"></span>
-          </div>
-        </div>`;
-      chatThread.appendChild(row);
-      scrollBottom();
-    }
-
-    // ── Helper: replace thinking bubble with Knox response ───────────────────
-    function replaceThinkingWithResponse(html, isError) {
-      const old = document.getElementById('knoxThinkingRow');
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
-      row.innerHTML = `
-        <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;margin-top:4px;"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
-        <div class="knox-response-wrap" style="max-width:88%;border:2px solid var(--border);border-radius:6px 18px 18px 18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);background:var(--bg-card);">${html}</div>`;
-      if (old) old.replaceWith(row);
-      else chatThread.appendChild(row);
-      // Scroll the chat thread so the TOP of Knox's response is visible
-      setTimeout(() => {
-        const rowTop = row.offsetTop - chatThread.offsetTop - 12;
-        chatThread.scrollTo({ top: rowTop, behavior: 'smooth' });
-      }, 80);
-      return row;
-    }
-
-    const resetBtn = () => {
-      if (askBtn) {
-        askBtn.disabled = false;
-        askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>';
-      }
+    const askBtn     = document.getElementById('askBtn');
+    const box        = document.getElementById('answerBox');
+    const spinnerSVG = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+    const thinkingBox = (label) => `<div style="display:flex;align-items:center;gap:12px;padding:20px;"><div style="width:40px;height:40px;border:2px solid black;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🧠</div><div><div style="font-weight:800;font-size:15px;letter-spacing:-0.01em;">HomeWorkAI</div><div style="font-size:13px;color:#6b7280;margin-top:2px;">${label}<span class="thinking-dots"></span></div></div></div>`;
+    const errorBox   = (msg) => `<div class="ai-response-box"><div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div></div><div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px 18px;color:#dc2626;font-size:14px;line-height:1.6;">${msg}</div></div>`;
+    const resetBtn   = () => {
+      askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Get Answer';
+      askBtn.disabled  = false;
     };
 
-    // ── Disable send, show user bubble, show thinking ────────────────────────
-    if (askBtn) { askBtn.disabled = true; askBtn.innerHTML = spinnerSVG; }
-    if (chatInput) { chatInput.value = ''; chatInput.style.height = 'auto'; }
+    askBtn.disabled = true;
+    askBtn.innerHTML = `${spinnerSVG} AI is thinking...`;
+    box.classList.remove('hidden');
+    box.innerHTML = thinkingBox('Thinking');
 
-    appendUserBubble(typedQuestion || '📷 Image question');
-    appendThinkingBubble();
-
-    // ── Firebase token ───────────────────────────────────────────────────────
+    // Get Firebase ID token
     let idToken = null;
     if (window.currentUser) {
       try { idToken = await window.currentUser.getIdToken(true); }
-      catch (e) { console.error('Token error:', e); }
+      catch (e) { console.error('Could not get ID token:', e); }
     }
+
     const reqHeaders = { "Content-Type": "application/json" };
     if (idToken) reqHeaders["Authorization"] = `Bearer ${idToken}`;
 
@@ -3189,184 +2980,66 @@
       const res = await fetch("/api/ask", {
         method:  "POST",
         headers: reqHeaders,
-        body: JSON.stringify({
+        body:    JSON.stringify({
           question:    typedQuestion,
           imageBase64: pendingImageBase64 || null,
           imageType:   pendingImageType   || null,
           history:     conversationHistory.slice(-6),
-          learnMode:   currentMode === 'learn',
-          gradeLevel:  window.knoxGradeLevel || null,
-          isNewSession: currentMode === 'learn' && conversationHistory.length === 0,
-          isSessionComplete: false, // set by SESSION_COMPLETE detection in ask.js
         }),
       });
 
-      if (res.status === 401) {
-        const _old401 = document.getElementById('knoxThinkingRow'); if (_old401) _old401.remove(); resetBtn(); appendKnoxSignUpPrompt(false); return;
-        resetBtn(); return;
-      }
-
+      // Handle auth/limit errors
+      if (res.status === 401) { box.innerHTML = errorBox('Session expired. Please log in again.'); resetBtn(); return; }
       if (res.status === 429) {
-        const old429 = document.getElementById('knoxThinkingRow');
-        if (old429) old429.remove();
+        box.innerHTML = '';
         resetBtn();
-        let limitData = {};
-        try { limitData = await res.json(); } catch(e) {}
-        showLimitModal(limitData);
+        const m = document.createElement('div');
+        m.className   = 'fixed inset-0 flex items-center justify-center z-50';
+        m.style.cssText = 'background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+        m.innerHTML   = `<div style="background:white;max-width:24rem;width:100%;border:4px solid black;box-shadow:8px 8px 0 black;border-radius:16px;padding:32px;text-align:center;">
+          <div style="font-size:40px;margin-bottom:16px;">&#9200;</div>
+          <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">Daily Limit Reached</h3>
+          <p style="color:#4b5563;margin-bottom:24px;">You've used all your free questions for today. Upgrade to Pro for unlimited answers.</p>
+          <div style="display:flex;gap:12px;justify-content:center;">
+            <button onclick="this.closest('.fixed').remove()" class="btn bg-white">Close</button>
+            <button onclick="this.closest('.fixed').remove();scrollToPricing();" class="btn" style="background:var(--green);">Upgrade to Pro ⚡</button>
+          </div>
+        </div>`;
+        m.onclick = (e) => { if (e.target === m) m.remove(); };
+        document.body.appendChild(m);
         return;
       }
 
-      // Handle any other non-OK status
-      if (!res.ok) {
-        let errMsg = 'Knox ran into a snag. Please try again!';
-        try { const ed = await res.json(); if (ed.error) errMsg = ed.error; } catch(e) {}
-        replaceThinkingWithResponse(`<div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
-          <div style="font-size:14px;font-weight:700;color:#DC2626;line-height:1.6;">😬 ${errMsg}</div>
-          <button onclick="handleAskQuestion()" style="padding:10px 18px;border-radius:10px;font-size:13px;font-weight:800;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 3px 0 #CC5500;align-self:flex-start;">↩ Try Again</button>
-        </div>`, true);
-        resetBtn(); return;
-      }
-
-      let data;
-      try { data = await res.json(); }
-      catch(jsonErr) {
-        replaceThinkingWithResponse(`<div style="padding:14px 16px;font-size:14px;font-weight:700;color:var(--red);">Knox couldn't read the response. Please try again.</div>`, true);
-        resetBtn(); return;
-      }
+      const data = await res.json();
       const serverPlan = data.plan || userPlan;
 
-      let responseHtml;
-      if (data.isLearnMode) {
-        responseHtml = renderLearnResponse(data);
-      } else if (data.isCasual) {
-        const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
-        if (clean.split('\n').filter(l => l.trim()).length <= 3 && clean.length < 300) {
-          responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:var(--text);line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
-        } else {
-          const planTagClass2 = serverPlan === 'max' ? 'tag-pro-plus' : serverPlan === 'super' ? 'tag-pro' : 'tag-free';
-          const planTag2 = serverPlan === 'max' ? 'Max Knox' : serverPlan === 'super' ? 'Super Knox' : 'Basic Knox';
-          responseHtml = `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(clean, serverPlan)}${renderResourcesHtml(data.resources || [])}<div style="height:10px;"></div>`;
-        }
-      } else if (data.isAcknowledgement) {
-        const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
-        responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:var(--text);line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
+      // Acknowledgement-only response (learning preference stated, no question asked)
+      if (data.isAcknowledgement) {
+        box.innerHTML = renderAcknowledgement(data.answer, serverPlan);
       } else {
-        responseHtml = renderResponse(
+        box.innerHTML = renderResponse(
           data.answer || data.error || 'No response received.',
           data.resources || [],
           serverPlan,
-          { learningStyle: data.learningStyle || null, embeddedVideo: data.embeddedVideo || null, imageSearchQuery: data.imageSearchQuery || null }
+          {
+            learningStyle:    data.learningStyle   || null,
+            embeddedVideo:    data.embeddedVideo    || null,
+            imageSearchQuery: data.imageSearchQuery || null,
+          }
         );
-      }
 
-      const knoxRow = replaceThinkingWithResponse(responseHtml, false);
-
-      // ── Session completed — show celebration + "Start New Problem" button ──
-      if (data.sessionCompleted || data.isSessionEnd) {
-        setTimeout(() => {
-          const celebRow = document.createElement('div');
-          celebRow.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
-          celebRow.innerHTML = `
-            <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;margin-top:4px;"><img src="./knox-logo.jpg" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
-            <div style="max-width:88%;">
-              <div style="background:${data.sessionCompleted ? 'var(--green-light)' : 'var(--yellow-light)'};border:2px solid ${data.sessionCompleted ? '#58CC02' : '#FFD0A0'};border-radius:6px 18px 18px 18px;padding:14px 18px;margin-bottom:10px;">
-                <p style="font-size:15px;font-weight:700;color:var(--text);line-height:1.6;margin:0;">
-                  ${data.sessionCompleted
-                    ? '🎉 You got it! That\'s 1 problem solved. Ready for the next one?'
-                    : '⏱️ Session limit reached — nice work making it this far! Start a fresh session to keep going.'
-                  }
-                </p>
-              </div>
-              <button onclick="startNewLearnSession()" style="padding:11px 22px;border-radius:12px;border:none;background:#FF6B00;color:white;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-                Start New Problem 🦊
-              </button>
-            </div>`;
-          chatThread.appendChild(celebRow);
-          chatThread.scrollTo({ top: celebRow.offsetTop - chatThread.offsetTop - 12, behavior: 'smooth' });
-        }, 500);
-      }
-
-      // ── Learn mode action buttons ────────────────────────────────────────
-      if (data.isLearnMode && !data.isStuck && !data.isShowMe) {
-        const actionBar = document.createElement('div');
-        actionBar.style.cssText = 'display:flex;gap:8px;padding:6px 14px 14px;flex-wrap:wrap;';
-
-        const stuckBtn = document.createElement('button');
-        stuckBtn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:11px;border:2px solid #E5E7EB;background:white;font-size:13px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;transition:all 0.15s;';
-        stuckBtn.innerHTML = "🤔 I'm Stuck";
-        stuckBtn.onmouseover = () => { stuckBtn.style.borderColor='#1CB0F6'; stuckBtn.style.color='#1CB0F6'; };
-        stuckBtn.onmouseout  = () => { stuckBtn.style.borderColor='#E5E7EB'; stuckBtn.style.color='#6B7280'; };
-        stuckBtn.onclick = () => sendLearnAction('stuck');
-        actionBar.appendChild(stuckBtn);
-
-        const canShowMe = data.canShowMe || (serverPlan !== 'free');
-        if (canShowMe) {
-          const showBtn = document.createElement('button');
-          showBtn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:11px;border:2px solid #E5E7EB;background:white;font-size:13px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;transition:all 0.15s;';
-          showBtn.innerHTML = '👁️ Show Me';
-          showBtn.onmouseover = () => { showBtn.style.borderColor='#FF6B00'; showBtn.style.color='#FF6B00'; };
-          showBtn.onmouseout  = () => { showBtn.style.borderColor='#E5E7EB'; showBtn.style.color='#6B7280'; };
-          showBtn.onclick = () => sendLearnAction('showMe');
-          actionBar.appendChild(showBtn);
-        }
-
-        const bubble = knoxRow.querySelector('div:nth-child(2)');
-        if (bubble) bubble.appendChild(actionBar);
-      }
-
-      // Fire optional after-answer callback (e.g. guest sign-up prompt)
-      if (typeof afterCallback === 'function') {
-        setTimeout(afterCallback, 600);
-      }
-
-      // Save button (not in learn mode)
-      if (!data.isAcknowledgement && !data.isLearnMode) {
-        const saveBtn = document.createElement('button');
-        saveBtn.style.cssText = 'display:flex;align-items:center;gap:6px;margin:0 16px 16px;padding:8px 14px;background:var(--gray);border:2px solid var(--border);border-radius:10px;font-size:12px;font-weight:800;color:#777;cursor:pointer;font-family:inherit;transition:all 0.15s;';
-        saveBtn.innerHTML = '💾 Save';
-        saveBtn.onmouseover = () => { saveBtn.style.borderColor = 'var(--orange)'; saveBtn.style.color = 'var(--orange)'; };
-        saveBtn.onmouseout  = () => { saveBtn.style.borderColor = 'var(--border)'; saveBtn.style.color = '#777'; };
-        saveBtn.onclick = () => {
+        const saveBtn     = document.createElement('button');
+        saveBtn.className = 'save-answer-btn';
+        saveBtn.innerHTML = '💾 Save Answer';
+        saveBtn.onclick   = function() {
           saveToHistory(typedQuestion, data.answer || '', serverPlan);
+          saveBtn.className = 'save-answer-btn saved';
           saveBtn.innerHTML = '✓ Saved';
-          saveBtn.style.color = 'var(--green-dark)';
-          saveBtn.style.borderColor = 'var(--green)';
         };
-        const bubble = knoxRow.querySelector('.chat-knox-bubble');
-        if (bubble) bubble.appendChild(saveBtn);
+        box.appendChild(saveBtn);
       }
 
-      // Update usage progress bar with server-authoritative data
-      if (data.usage) {
-        // Normalise: ask.js returns {used, limit, nextUnlock}; remap to {hw, hwLimit}
-        const normUsage = {
-          hw:        data.usage.used   ?? 0,
-          hwLimit:   data.usage.limit  ?? null,
-          nextUnlock: data.usage.nextUnlock ?? null,
-        };
-        updateUsageBar(normUsage);
-        if (window.saveUsageCache) window.saveUsageCache(normUsage);
-        // ── Show upgrade popup instantly when the last free question is used ──
-        // Don't wait for the next attempt to hit a 429 — show it right now.
-        const uPlan = window.userPlan || userPlan || 'free';
-        if (uPlan === 'free' && data.usage.hw >= data.usage.hwLimit && !data.isCasual) {
-          setTimeout(() => showLimitModal({
-            limit:     data.usage.hwLimit,
-            used:      data.usage.hw,
-            countdown: data.usage.nextUnlock
-              ? (() => {
-                  const ms  = data.usage.nextUnlock - Date.now();
-                  if (ms <= 0) return null;
-                  const hrs = Math.floor(ms / 3600000);
-                  const min = Math.floor((ms % 3600000) / 60000);
-                  return hrs > 0 ? `${hrs}h ${min}m` : `${min}m`;
-                })()
-              : null,
-          }), 800); // short delay so the answer renders first
-        }
-      }
-
-      // Update conversation memory
+      // Update conversation history
       conversationHistory.push(
         { role: 'user',      content: typedQuestion || 'Image question' },
         { role: 'assistant', content: (data.answer || '').substring(0, 1500) }
@@ -3375,15 +3048,11 @@
       updateConversationIndicator();
 
     } catch (err) {
-      replaceThinkingWithResponse(`<div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
-        <div style="font-size:14px;font-weight:700;color:#DC2626;line-height:1.6;">😬 Knox couldn't reach the server — check your connection and try again.</div>
-        <button onclick="handleAskQuestion()" style="padding:10px 18px;border-radius:10px;font-size:13px;font-weight:800;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 3px 0 #CC5500;align-self:flex-start;">↩ Try Again</button>
-      </div>`, true);
+      box.innerHTML = errorBox('Something went wrong. Please try again.');
       console.error(err);
     } finally {
       resetBtn();
       if (window.clearImage) window.clearImage();
-      if (chatInput) chatInput.focus();
     }
   }  // ← end of executeAskQuestion
 
@@ -3393,162 +3062,33 @@
     const clean = (message || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
     return `<div class="ai-response-box">
       <div class="resp-header">
-        <div class="resp-brain"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>
-        <div class="resp-title">Knox Knows</div>
-        <div class="resp-plan-tag tag-pro-plus">Pro+</div>
+        <div class="resp-brain">🧠</div>
+        <div class="resp-title">HomeWorkAI</div>
+        <div class="resp-plan-tag tag-pro-plus">⭐ Pro+</div>
       </div>
-      <div style="background:var(--green-light);border:2px solid #16a34a;border-radius:12px;padding:14px 18px;color:var(--text);font-size:15px;line-height:1.6;font-weight:600;">
+      <div style="background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:14px 18px;color:#14532d;font-size:15px;line-height:1.6;font-weight:600;">
         ✓ ${clean}
       </div>
     </div>`;
   }
 
-  // ── SHARED RENDER HELPERS (outer scope — used by renderResponse AND executeAskQuestion) ──
-  function stripMarkdownLinks(text) {
-    return text.replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
-  }
-
-  // ── Shared resources renderer — used by renderResponse AND all fallback paths ──
-  function renderResourcesHtml(resources) {
-    if (!resources || resources.length === 0) return '';
-    const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
-    const items = resources.map(r =>
-      `<a href="${r.link}" target="_blank" rel="noopener" class="resp-resource-link">${ytIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:800;color:#ef4444;white-space:nowrap;">YouTube ↗</span></a>`
-    ).join('');
-    return `<div style="margin:10px 14px 0;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <div style="background:#6B7280;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #374151;">Resources</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;">${items}</div>
-    </div>`;
-  }
-
-  function formatInline(text, p) {
-    let out = stripMarkdownLinks(text);
-    out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-    if (p === "max") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
-    out = out.replace(/\*\*/g, "").replace(/(?<![a-zA-Z])__(?![a-zA-Z])/g, "");
-    return out;
-  }
-
-  // Render ANY Knox response beautifully — works line-by-line
-  function renderFreeformText(rawText, plan) {
-    const textColor = "color:var(--text)";
-    const bgCard = "background:var(--bg-card)";
-      const allLines = rawText.split('\n').map(l => l.trim()).filter(l => l);
-      let html = '';
-      let isFirstPara = true;
-      let i = 0;
-
-      while (i < allLines.length) {
-        const line = allLines[i];
-
-        // ── Numbered step ─────────────────────────────────────────────────────
-        if (/^\d+\./.test(line)) {
-          // Collect all consecutive numbered lines into a step group
-          let steps = [];
-          while (i < allLines.length && /^\d+\./.test(allLines[i])) {
-            const m   = allLines[i].match(/^(\d+)\.\s*(.*)/);
-            const num = m ? m[1] : '•';
-            const txt = m ? m[2] : allLines[i];
-            steps.push({ num, txt });
-            i++;
-          }
-          html += `<div style="display:flex;flex-direction:column;gap:8px;margin:10px 14px;">`;
-          steps.forEach(({ num, txt }) => {
-            html += `<div class="freeform-step-card" style="display:flex;align-items:flex-start;gap:10px;background:var(--bg-card);border:2px solid var(--orange-light);border-radius:12px;padding:12px 14px;box-shadow:0 2px 0 rgba(204,85,0,0.15);">
-              <div style="min-width:28px;height:28px;border-radius:9px;background:#FF6B00;color:white;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${num}</div>
-              <div class="freeform-step-text" style="font-size:14px;font-weight:600;color:var(--text);line-height:1.6;padding-top:4px;">${formatInline(txt, plan)}</div>
-            </div>`;
-          });
-          html += `</div>`;
-          continue;
-        }
-
-        // ── Bullet line ───────────────────────────────────────────────────────
-        if (/^[-•*]\s/.test(line)) {
-          let bullets = [];
-          while (i < allLines.length && /^[-•*]\s/.test(allLines[i])) {
-            bullets.push(allLines[i].replace(/^[-•*]\s*/, ''));
-            i++;
-          }
-          html += `<div class="freeform-bullet-wrap" style="background:var(--bg-card);border:1.5px solid #C4B5FD;border-left:5px solid #8B5CF6;border-radius:0 12px 12px 0;padding:12px 16px;margin:10px 14px;display:flex;flex-direction:column;gap:6px;">`;
-          bullets.forEach(b => {
-            html += `<div class="freeform-bullet-text" style="display:flex;align-items:flex-start;gap:8px;font-size:14px;font-weight:600;color:var(--text);line-height:1.55;">
-              <div style="width:18px;height:18px;border-radius:50%;background:#8B5CF6;color:white;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;margin-top:2px;">✓</div>
-              <span>${formatInline(b, plan)}</span>
-            </div>`;
-          });
-          html += `</div>`;
-          continue;
-        }
-
-        // ── Labeled sections ──────────────────────────────────────────────────
-        if (/^Explanation:\s*/i.test(line)) {
-          const txt = line.replace(/^Explanation:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#1CB0F6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #0A85C2;">Explanation</div></div><div style="background:var(--bg-card);border:1.5px solid #93C5FD;border-radius:12px;padding:14px 16px;"><div style="font-size:15px;font-weight:500;color:var(--text);line-height:1.75;">${formatInline(txt, plan)}</div></div></div>`;
-          i++; continue;
-        }
-        if (/^Tip:\s*/i.test(line)) {
-          const txt = line.replace(/^Tip:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div></div><div style="background:var(--bg-card);border:1.5px solid #FCD34D;border-radius:12px;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
-          i++; continue;
-        }
-        if (/^Insight:\s*/i.test(line)) {
-          const txt = line.replace(/^Insight:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div></div><div style="background:var(--pink-light);border-left:5px solid #EC4899;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
-          i++; continue;
-        }
-        if (/^Common Mistake:\s*/i.test(line)) {
-          const txt = line.replace(/^Common Mistake:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div></div><div style="background:var(--red-light);border-left:5px solid #EF4444;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
-          i++; continue;
-        }
-        if (/^Final Answer:\s*/i.test(line)) {
-          const txt = line.replace(/^Final Answer:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#58CC02;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #46A302;">Answer</div></div><div style="background:var(--green-light);border-left:5px solid #58CC02;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:16px;font-weight:800;color:var(--text);line-height:1.5;">${formatInline(txt, plan)}</div></div></div>`;
-          isFirstPara = false; i++; continue;
-        }
-
-        // ── Plain paragraph ───────────────────────────────────────────────────
-        // Collect consecutive plain lines into one paragraph
-        let paraLines = [];
-        while (i < allLines.length
-          && !/^\d+\./.test(allLines[i])
-          && !/^[-•*]\s/.test(allLines[i])
-          && !/^(Explanation|Tip|Insight|Common Mistake|Final Answer|Key Points|Step-by-step|Resources):/i.test(allLines[i])) {
-          paraLines.push(allLines[i]);
-          i++;
-        }
-        const paraText = formatInline(paraLines.join(' '), plan);
-
-        if (isFirstPara) {
-          // First paragraph = Answer card (green)
-          html += `<div style="margin:10px 14px 0;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-              <div style="background:#58CC02;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #46A302;">Answer</div>
-            </div>
-            <div style="background:var(--green-light);border-left:5px solid #58CC02;border-radius:0 12px 12px 0;padding:14px 16px;">
-              <div style="font-size:16px;font-weight:800;color:var(--text);line-height:1.5;">${paraText}</div>
-            </div>
-          </div>`;
-          isFirstPara = false;
-        } else {
-          // Subsequent paragraphs = blue tinted explanation
-          html += `<div style="margin:6px 14px 0;">
-            <div style="background:var(--blue-light);border-left:5px solid #7DD3FC;border-radius:0 12px 12px 0;padding:12px 16px;">
-              <div style="font-size:15px;font-weight:500;color:var(--text);line-height:1.7;">${paraText}</div>
-            </div>
-          </div>`;
-        }
-      }
-
-      return html;
-    }
-
   // ── RENDER RESPONSE ───────────────────────────────────────────────────────
   function renderResponse(answer, resources, plan, extras = {}) {
     const { learningStyle, embeddedVideo, imageSearchQuery } = extras;
+
+    // Strip ALL markdown link syntax [text](url) from displayed text
+    function stripMarkdownLinks(text) {
+      return text.replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
+    }
+
+    function formatInline(text, p) {
+      let out = stripMarkdownLinks(text);
+      if (p === "pro" || p === "pro_plus") out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
+      // Strip any remaining orphaned ** or __ that didn't form valid pairs
+      out = out.replace(/\*\*/g, "").replace(/(?<![a-zA-Z])__(?![a-zA-Z])/g, "");
+      return out;
+    }
 
     // Pre-pass: ensure Resources: is always on its own line
     answer = answer.replace(/([^\n])(Resources:)/g, '$1\n\nResources:');
@@ -3559,14 +3099,17 @@
 
       // Map ALL known AI-generated header variants to canonical section names
       const mappings = [
-        // Final Answer variants — only exact matches at line start
-        [/^Answer:/gim,                'Final Answer:'],
-        // Step-by-step variants — safe ones only
+        // Step-by-step variants
         [/Step-by-Step Process:/gi,    'Step-by-step:'],
         [/Step by Step:/gi,            'Step-by-step:'],
-        // Remove dangerous mappings: Solution:, Method:, Work:, Steps:
-        // These often appear as part of the answer text itself
+        [/Steps:/gi,                   'Step-by-step:'],
+        [/Solution Steps:/gi,          'Step-by-step:'],
+        [/Method:/gi,                  'Step-by-step:'],
+        [/Work:/gi,                    'Step-by-step:'],
+        [/Solution:/gi,                'Step-by-step:'],
+        [/Walkthrough:/gi,             'Step-by-step:'],
         // Explanation variants
+        [/Explanation:/gi,             'Explanation:'],
         [/Detailed Explanation:/gi,    'Explanation:'],
         [/How it Works:/gi,            'Explanation:'],
         // Insight variants
@@ -3580,6 +3123,7 @@
         // Key Points variants
         [/Key Point:/gi,               'Key Points:'],
         [/Key Takeaways:/gi,           'Key Points:'],
+        [/Summary:/gi,                 'Key Points:'],
         [/Takeaway:/gi,                'Key Points:'],
       ];
 
@@ -3602,14 +3146,7 @@
     }
     answer = normalizeSections(answer);
 
-    const knownHeaders = ['Final Answer:', 'Explanation:', 'Step-by-step:', 'Tip:', 'Insight:', 'Common Mistake:', 'Key Points:', 'Resources:'];
     const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-
-    // If the first line isn't a known header, auto-treat it as Final Answer
-    if (lines.length > 0 && !knownHeaders.some(h => lines[0].startsWith(h))) {
-      lines[0] = 'Final Answer: ' + lines[0];
-    }
-
     let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
     let keyPointsBullets = [];
     let mode = "other", currentParaLines = [];
@@ -3625,14 +3162,8 @@
       if (line.startsWith("Resources:")) { flushPara(mode); break; }
 
       if (line.startsWith("Final Answer:")) {
-        flushPara(mode); mode = "final_answer";
-        const inl = line.replace("Final Answer:", "").trim();
-        if (inl) finalAnswerText = inl;
-      }
-      // ✅ FIX: accumulate Final Answer text that appears on the next line(s)
-      else if (mode === "final_answer" && !knownHeaders.some(h => line.startsWith(h))) {
-        if (!finalAnswerText) finalAnswerText = line;
-        else finalAnswerText += " " + line;
+        finalAnswerText = line.replace("Final Answer:", "").trim();
+        mode = "other";
       }
       else if (line.startsWith("Step-by-step:")) {
         flushPara(mode); mode = "steps";
@@ -3641,13 +3172,6 @@
         flushPara(mode); mode = "explanation";
         const inl = line.replace("Explanation:", "").trim();
         if (inl) currentParaLines.push(inl);
-      }
-      // Catch "Explanation:" appearing mid-line (e.g. "Word. Explanation: more text")
-      else if (line.includes("Explanation:") && !line.startsWith("Final Answer:")) {
-        const parts = line.split("Explanation:");
-        if (parts[0].trim()) currentParaLines.push(parts[0].trim());
-        flushPara(mode); mode = "explanation";
-        if (parts[1] && parts[1].trim()) currentParaLines.push(parts[1].trim());
       }
       else if (line.startsWith("Insight:")) {
         flushPara(mode); mode = "insight";
@@ -3684,135 +3208,84 @@
     }
     flushPara(mode);
 
-    // ── Fallback: nothing structured parsed → use smart freeform renderer ─────
-    if (!finalAnswerText && !stepsHtml && paragraphs.length === 0 && !tipText && !insightText && !commonMistakeText && keyPointsBullets.length === 0) {
-      const planTagClass2 = plan === 'max' ? 'tag-pro-plus' : plan === 'super' || plan === 'pro_plus' ? 'tag-pro' : 'tag-free';
-      const planTag2 = plan === 'max' ? 'Max Knox' : plan === 'super' || plan === 'pro_plus' ? 'Super Knox' : 'Basic Knox';
-      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(answer, plan)}${renderResourcesHtml(resources)}<div style="height:10px;"></div>`;
-    }
+    const planTag      = plan === "pro_plus" ? "⭐ Pro+" : plan === "pro" ? "⚡ Pro" : "Free";
+    const planTagClass = plan === "pro_plus" ? "tag-pro-plus" : plan === "pro" ? "tag-pro" : "tag-free";
+    let html = `<div class="ai-response-box ${plan === 'pro_plus' ? 'resp-pro-plus' : ''}">`;
+    html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
 
-    // ── Only paragraphs (no Final Answer) → smart freeform ───────────────────
-    if (!finalAnswerText && paragraphs.length > 0 && !stepsHtml) {
-      const allText = paragraphs.map(p => p.text).join('\n\n');
-      const planTagClass2 = plan === 'max' ? 'tag-pro-plus' : plan === 'super' || plan === 'pro_plus' ? 'tag-pro' : 'tag-free';
-      const planTag2 = plan === 'max' ? 'Max Knox' : plan === 'super' || plan === 'pro_plus' ? 'Super Knox' : 'Basic Knox';
-      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(allText, plan)}${renderResourcesHtml(resources)}<div style="height:10px;"></div>`;
-    }
-    const planTag      = plan === "max" ? "Max Knox" : plan === "super" || plan === "pro_plus" ? "Super Knox" : "Basic Knox";
-    const planTagClass = plan === "max" ? "tag-pro-plus" : plan === "super" || plan === "pro_plus" ? "tag-pro" : "tag-free";
-    let html = ``;
-
-    // ── Thin plan tag bar at top ──────────────────────────────────────────
-    html += `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass}">${planTag}</span></div>`;
-
-    // ── Answer ───────────────────────────────────────────────────────────────
+    // Final Answer
     if (finalAnswerText) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:var(--green);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--green-dark);">Answer</div>
-        </div>
-        <div style="background:var(--green-light);border-left:5px solid var(--green);border-radius:0 14px 14px 0;padding:14px 16px;">
-          <div style="font-size:17px;font-weight:800;color:var(--text);line-height:1.5;">${formatInline(finalAnswerText, plan)}</div>
-        </div>
-      </div>`;
+      html += `<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">${formatInline(finalAnswerText, plan)}</div></div>`;
     }
 
-    // ── Explanation — BEFORE Step-by-Step so user sees "why" then "how" ──────
+    // Steps
+    if (stepsHtml) {
+      html += `<div class="resp-steps-label">Step-by-Step</div><div class="resp-steps-wrap">${stepsHtml}</div>`;
+    }
+
+    // Explanation and other paragraphs — with label
     const explanationParas = paragraphs.filter(p => p.type === "explanation" || p.type === "other");
     if (explanationParas.length > 0) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:var(--blue);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--blue-dark);">Explanation</div>
-        </div>
-        <div style="background:var(--blue-light);border-left:5px solid var(--blue);border-radius:0 14px 14px 0;padding:14px 16px;">`;
+      html += `<div class="resp-section-label">Explanation</div>`;
       explanationParas.forEach(p => {
-        if (p.text) html += `<div style="font-size:15px;font-weight:500;color:var(--text);line-height:1.75;margin-bottom:10px;">${formatInline(p.text, plan)}</div>`;
+        if (p.text) html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
       });
-      html += `</div></div>`;
     }
 
-    // ── Step-by-Step ─────────────────────────────────────────────────────────
-    if (stepsHtml) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <div style="background:var(--orange);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Step-by-Step</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">${stepsHtml}</div>
-      </div>`;
-    }
+    // Bullets (non-explanation)
+    paragraphs.filter(p => p.type === "bullet").forEach(p => {
+      html += `<div class="resp-bullet">• ${formatInline(p.text, plan)}</div>`;
+    });
 
-    // ── Key Points ────────────────────────────────────────────────────────────
+    // Key Points
     if (keyPointsBullets.length > 0) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <div style="background:#8B5CF6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #6D28D9;">Key Points</div>
-        </div>
-        <div style="background:var(--bg-card);border:1.5px solid #C4B5FD;border-radius:0 14px 14px 0;padding:14px 18px;display:flex;flex-direction:column;gap:8px;">`;
+      html += `<div class="resp-keypoints"><div class="resp-keypoints-label">📋 Key Points</div>`;
       keyPointsBullets.forEach(b => {
-        html += `<div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:600;color:var(--text);line-height:1.55;">
-          <div style="width:20px;height:20px;border-radius:50%;background:#8B5CF6;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:10px;font-weight:900;">✓</div>
-          <span>${formatInline(b, plan)}</span>
-        </div>`;
+        html += `<div class="resp-bullet">• ${formatInline(b, plan)}</div>`;
       });
-      html += `</div></div>`;
+      html += `</div>`;
     }
 
-    // ── Insight ───────────────────────────────────────────────────────────────
+    // Insight
     if (insightText.trim()) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div>
-        </div>
-        <div style="background:var(--pink-light);border-left:5px solid #EC4899;border-radius:0 14px 14px 0;padding:14px 18px;">
-          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(insightText.trim(), plan)}</div>
-        </div>
-      </div>`;
+      html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${formatInline(insightText.trim(), plan)}</div></div>`;
     }
 
-    // ── Tip ───────────────────────────────────────────────────────────────────
+    // Tip
     if (tipText.trim()) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div>
-        </div>
-        <div style="background:var(--yellow-light);border-left:5px solid #F59E0B;border-radius:0 14px 14px 0;padding:14px 18px;">
-          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(tipText.trim(), plan)}</div>
-        </div>
-      </div>`;
+      html += `<div class="resp-tip"><div class="resp-tip-icon">💡</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">${formatInline(tipText.trim(), plan)}</div></div></div>`;
     }
 
-    // ── Common Mistake ────────────────────────────────────────────────────────
+    // Common Mistake
     if (commonMistakeText.trim()) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div>
-        </div>
-        <div style="background:var(--red-light);border-left:5px solid #EF4444;border-radius:0 14px 14px 0;padding:14px 18px;">
-          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(commonMistakeText.trim(), plan)}</div>
-        </div>
-      </div>`;
+      html += `<div class="resp-common-mistake"><div class="resp-common-mistake-icon">⚠️</div><div><div class="resp-common-mistake-label">Common Mistake</div><div class="resp-common-mistake-text">${formatInline(commonMistakeText.trim(), plan)}</div></div></div>`;
     }
 
-    // ── Resources ─────────────────────────────────────────────────────────────
-    html += renderResourcesHtml(resources);
+    // Resources
+    if (resources && resources.length > 0) {
+      const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
+      const qlIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg>`;
+      const items  = resources.map(r => {
+        const isYT = r.type === "youtube";
+        return `<a href="${r.link}" target="_blank" rel="noopener" class="resp-resource-link ${isYT ? 'yt' : 'ql'}">${isYT ? ytIcon : qlIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:700;color:${isYT ? '#ef4444' : '#3b82f6'};white-space:nowrap;">${isYT ? 'YouTube ↗' : 'Quizlet ↗'}</span></a>`;
+      }).join("");
+      html += `<div class="resp-resources"><div class="resp-resources-label">📚 Resources</div>${items}</div>`;
+    }
 
-    // ── Visual Content ────────────────────────────────────────────────────────
-    if (plan === 'max' && (embeddedVideo || imageSearchQuery)) {
-      let visualHtml = `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <div style="background:var(--blue-dark);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #075985;">Visual Content</div>
-        </div>`;
+    // Visual Learner content (Pro+ only) — show if we have video OR image search
+    if (plan === 'pro_plus' && (embeddedVideo || imageSearchQuery)) {
+      let visualHtml = '<div class="resp-visual-section"><div class="resp-visual-label">📺 Visual Content</div>';
       if (embeddedVideo) {
-        visualHtml += `<div class="resp-video-embed"><iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div style="font-size:12px;color:#6b7280;font-weight:600;margin:6px 0 10px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
+        visualHtml += `<div class="resp-video-embed"><iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:10px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
       }
       if (imageSearchQuery) {
-        visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imageSearchQuery + ' diagram')}" target="_blank" rel="noopener" class="resp-image-search-btn">View Diagrams: ${imageSearchQuery.substring(0, 40)}${imageSearchQuery.length > 40 ? '...' : ''}</a>`;
+        visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imageSearchQuery + ' diagram')}" target="_blank" rel="noopener" class="resp-image-search-btn">🖼️ View Diagrams &amp; Images: ${imageSearchQuery.substring(0, 40)}${imageSearchQuery.length > 40 ? '...' : ''}</a>`;
       }
-      visualHtml += `</div>`;
+      visualHtml += '</div>';
       html += visualHtml;
     }
 
-    html += `<div style="height:12px;"></div>`;
+    html += `</div>`;
     return html;
   }
 
@@ -4103,7 +3576,7 @@
       return;
     }
     body.innerHTML = history.map((item, i) => {
-      const planLabel = item.plan === 'max' ? '🚀 Max Knox' : item.plan === 'super' ? '⚡ Super Knox' : '🆓 Basic Knox';
+      const planLabel = item.plan === 'pro_plus' ? '\u2B50 Pro+' : item.plan === 'pro' ? '\u26A1 Pro' : '\uD83C\uDD13 Free';
       const shortQ = item.question.length > 120 ? item.question.substring(0, 120) + '\u2026' : item.question;
       return '<div class="history-item" id="hist-item-' + i + '">' +
         '<div class="history-q">' + shortQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
@@ -4120,13 +3593,13 @@
     const item = history[index];
     if (!item) return;
     closeHistory();
-    const _inp = document.getElementById('chatInput')||document.getElementById('questionInput'); if(_inp) _inp.value = item.question;
+    document.getElementById('questionInput').value = item.question;
     const box = document.getElementById('answerBox');
     box.classList.remove('hidden');
     function fi(text, p) {
       let out = text;
-      if (p === "super" || p === "max") out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-      if (p === "max") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
+      if (p === "pro" || p === "pro_plus") out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
       return out;
     }
     // Normalise sections in history items too
@@ -4164,11 +3637,11 @@
       else { cpl.push(line); }
     }
     fp(mode);
-    const planTag = item.plan === "max" ? "🚀 Max" : item.plan === "super" ? "⚡ Super" : "Basic";
-    const planTagClass = item.plan === "max" ? "tag-pro-plus" : item.plan === "super" ? "tag-pro" : "tag-free";
-    let html = '<div class="ai-response-box ' + (item.plan === "max" ? "resp-pro-plus" : item.plan === "super" ? "resp-pro" : "") + '">';
+    const planTag = item.plan === "pro_plus" ? "\u2B50 Pro+" : item.plan === "pro" ? "\u26A1 Pro" : "Free";
+    const planTagClass = item.plan === "pro_plus" ? "tag-pro-plus" : item.plan === "pro" ? "tag-pro" : "tag-free";
+    let html = '<div class="ai-response-box ' + (item.plan === "pro_plus" ? "resp-pro-plus" : "") + '">';
     html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 12px;background:#f3f4f6;border-radius:8px;font-size:12px;font-weight:700;color:#6b7280;">\uD83D\uDD50 From history &nbsp;&middot;&nbsp; ' + item.time + '</div>';
-    html += '<div class="resp-header"><div class="resp-brain">\uD83E\uDDE0</div><div class="resp-title">Knox Knows</div><div class="resp-plan-tag ' + planTagClass + '">' + planTag + '</div></div>';
+    html += '<div class="resp-header"><div class="resp-brain">\uD83E\uDDE0</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ' + planTagClass + '">' + planTag + '</div></div>';
     if (finalAnswerText) html += '<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">' + fi(finalAnswerText, item.plan) + '</div></div>';
     if (stepsHtml) html += '<div class="resp-steps-label">Step-by-step</div><div class="resp-steps-wrap">' + stepsHtml + '</div>';
     for (const p of paragraphs) {
