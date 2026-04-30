@@ -63,13 +63,23 @@
       --shadow:        0 4px 0 rgba(0,0,0,0.5);
       --chat-bg:       #242424;
       --chat-border:   #333333;
+      /* Section card tint backgrounds — dark mode versions */
+      --blue-light:    #1a2d3a;
+      --green-light:   #1a2d1a;
+      --yellow-light:  #2a2510;
+      --purple-light:  #24183a;
+      --pink-light:    #2a1828;
+      --red-light:     #2a1818;
+      /* Knox chat bubble tints */
+      --knox-bubble-orange: #2a1e10;
+      --knox-bubble-blue:   #121e2a;
     }
 
     /* ── LIGHT MODE ──────────────────────────────────────────────── */
     [data-theme="light"] {
-      --bg-primary:    #F4F4F5;   /* section bg — light grey */
-      --bg-secondary:  #FFFFFF;   /* alternate sections — pure white */
-      --bg-card:       #FFFFFF;   /* cards, modals */
+      --bg-primary:    #F4F4F5;
+      --bg-secondary:  #FFFFFF;
+      --bg-card:       #FFFFFF;
       --bg-elevated:   #FFFFFF;
       --bg-input:      #FFFFFF;
       --border:        #E4E4E7;
@@ -82,6 +92,9 @@
       --shadow:        0 4px 0 rgba(0,0,0,0.1);
       --chat-bg:       #FFFFFF;
       --chat-border:   #E4E4E7;
+      /* Knox chat bubble tints */
+      --knox-bubble-orange: #FFF4EC;
+      --knox-bubble-blue:   #EFF9FF;
     }
 
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -1533,7 +1546,7 @@
           <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
             <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
           </div>
-          <div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:84%;">
+          <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:84%;">
             <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
           </div>
         </div>
@@ -1620,7 +1633,7 @@
             <div id="casualBarFill" class="usage-bar-fill cs-fill" style="width:0%;"></div>
           </div>
           <!-- Live countdown clock for casual -->
-          <div id="csClockWrap" style="display:none;margin-top:5px;padding:6px 10px;background:#EFF9FF;border-radius:8px;border:1.5px solid #BAE6FD;">
+          <div id="csClockWrap" style="display:none;margin-top:5px;padding:6px 10px;background:var(--knox-bubble-blue);border-radius:8px;border:1.5px solid #BAE6FD;">
             <div style="display:flex;align-items:center;justify-content:space-between;">
               <span style="font-size:11px;font-weight:700;color:#0369A1;">⏱ Next chat credit unlocks in:</span>
               <span id="csClockDisplay" style="font-size:13px;font-weight:900;color:#0369A1;font-variant-numeric:tabular-nums;letter-spacing:0.04em;">--:--:--</span>
@@ -2443,7 +2456,7 @@
           <span style="font-size:14px;font-weight:600;color:var(--text);line-height:1.4;">${options[letter]}</span>
         </button>`;
       });
-      if (hint) html += `<div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:10px;padding:10px 14px;margin-top:4px;font-size:13px;font-weight:600;color:#92400E;">💡 ${hint}</div>`;
+      if (hint) html += `<div style="background:var(--yellow-light);border:1.5px solid #FCD34D;border-radius:10px;padding:10px 14px;margin-top:4px;font-size:13px;font-weight:600;color:var(--text);">💡 ${hint}</div>`;
       html += `</div></div>`;
       return html;
     }
@@ -2470,7 +2483,7 @@
           <div style="background:#FF6B00;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Similar Problem</div>
           <span style="font-size:12px;font-weight:700;color:#9CA3AF;">Not your actual problem</span>
         </div>
-        ${prob ? `<div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:15px;font-weight:700;color:#92400E;">${prob}</div>` : ''}
+        ${prob ? `<div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:15px;font-weight:700;color:var(--text);">${prob}</div>` : ''}
         <div style="margin-bottom:12px;">${stepsHtml}</div>
         <div style="background:#F0FDF4;border:2px solid #86EFAC;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:700;color:#166534;">🦊 ${tryYours}</div>
       </div>`;
@@ -2533,8 +2546,8 @@
         <div style="width:36px;height:36px;border-radius:50%;border:2px solid #93C5FD;overflow:hidden;flex-shrink:0;background:#DBEAFE;">
           <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
         </div>
-        <div style="background:#EFF9FF;border:2px solid #93C5FD;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
-          <p style="font-size:15px;font-weight:600;color:#1e3a5f;line-height:1.6;margin:0;"><strong>New problem! 📚</strong> What are you working on? I'll guide you to the answer step by step. 🦊</p>
+        <div style="background:var(--knox-bubble-blue);border:2px solid #93C5FD;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
+          <p style="font-size:15px;font-weight:600;color:var(--text);line-height:1.6;margin:0;"><strong>New problem! 📚</strong> What are you working on? I'll guide you to the answer step by step. 🦊</p>
         </div>
       </div>`;
     }
@@ -2617,7 +2630,7 @@
     const m = document.createElement('div');
     m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;';
     const upgradeSection = isMax ? '' : `
-      <div style="background:#FFF4EC;border:2px solid #FFCFA0;border-radius:14px;padding:14px 16px;margin-bottom:8px;">
+      <div style="background:var(--knox-bubble-orange);border:2px solid #FFCFA0;border-radius:14px;padding:14px 16px;margin-bottom:8px;">
         <div style="font-size:13px;font-weight:900;color:#CC5500;margin-bottom:4px;">${isMax ? '🚀 Unlimited problems with Max Knox' : isSuper ? '🚀 Go unlimited with Max Knox' : '🚀 Get 25 problems/day with Super Knox'}</div>
         <div style="font-size:12px;font-weight:600;color:#888;">${isMax ? 'Max Knox gives you unlimited problems every day — no caps, ever.' : isSuper ? 'Max Knox gives you unlimited problems — no daily limit, ever.' : 'Super Knox gives you 25 problems/day across both Get the Answer and Learn with Knox.'}</div>
       </div>
@@ -2675,8 +2688,8 @@
           <div style="width:36px;height:36px;border-radius:50%;border:2px solid #93C5FD;overflow:hidden;flex-shrink:0;background:#DBEAFE;">
             <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
           </div>
-          <div style="background:#EFF9FF;border:2px solid #93C5FD;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
-            <p style="font-size:15px;font-weight:600;color:#1e3a5f;line-height:1.6;margin:0;"><strong>Let's learn together! 📚</strong> Tell me what you're working on and I'll guide you to the answer step by step. I won't just hand it to you — you'll actually get it. 🦊</p>
+          <div style="background:var(--knox-bubble-blue);border:2px solid #93C5FD;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
+            <p style="font-size:15px;font-weight:600;color:var(--text);line-height:1.6;margin:0;"><strong>Let's learn together! 📚</strong> Tell me what you're working on and I'll guide you to the answer step by step. I won't just hand it to you — you'll actually get it. 🦊</p>
           </div>
         </div>`;
       } else {
@@ -2684,7 +2697,7 @@
           <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
             <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
           </div>
-          <div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
+          <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
             <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
           </div>
         </div>`;
@@ -2955,7 +2968,7 @@
     const banner = document.getElementById('planBanner');
     if (banner) {
       if (userPlan === 'max') {
-        banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:#FFF4EC;border-top:1.5px solid #FFCFA0;border-bottom:1.5px solid #FFCFA0;"><div style="width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:#CC5500;letter-spacing:0.01em;">Max Knox &nbsp;·&nbsp; Unlimited problems &nbsp;·&nbsp; Best AI</span></div>';
+        banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:var(--knox-bubble-orange);border-top:1.5px solid #FFCFA0;border-bottom:1.5px solid #FFCFA0;"><div style="width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:#CC5500;letter-spacing:0.01em;">Max Knox &nbsp;·&nbsp; Unlimited problems &nbsp;·&nbsp; Best AI</span></div>';
       } else if (userPlan === 'super') {
         banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:#F0FDF4;border-top:1.5px solid #86EFAC;border-bottom:1.5px solid #86EFAC;"><div style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:var(--green-dark);letter-spacing:0.01em;">Super Knox &nbsp;·&nbsp; 25 problems/day &nbsp;·&nbsp; Smarter AI &nbsp;·&nbsp; <span style="cursor:pointer;text-decoration:underline;" onclick="scrollToPricing()">Upgrade to Max</span></span></div>';
       } else {
@@ -3024,7 +3037,7 @@
         <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
       </div>
       <div style="max-width:88%;display:flex;flex-direction:column;gap:10px;">
-        <div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;">
+        <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;">
           <p style="font-size:15px;font-weight:600;color:#44403C;line-height:1.6;margin:0;">
             ${afterAnswer
               ? "Hope that helped! 🦊 I can keep going but I need you to be a real one first — create a free account and get <strong>5 questions every day</strong>. No card needed, takes 10 seconds."
@@ -3074,7 +3087,7 @@
         <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
           <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
         </div>
-        <div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:84%;">
+        <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:84%;">
           <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
         </div>
       </div>`;
@@ -3249,8 +3262,8 @@
           celebRow.innerHTML = `
             <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;margin-top:4px;"><img src="./knox-logo.jpg" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
             <div style="max-width:88%;">
-              <div style="background:${data.sessionCompleted ? '#D7FFB8' : '#FFF4EC'};border:2px solid ${data.sessionCompleted ? '#58CC02' : '#FFD0A0'};border-radius:6px 18px 18px 18px;padding:14px 18px;margin-bottom:10px;">
-                <p style="font-size:15px;font-weight:700;color:${data.sessionCompleted ? '#1a5c00' : '#92400E'};line-height:1.6;margin:0;">
+              <div style="background:${data.sessionCompleted ? 'var(--green-light)' : 'var(--yellow-light)'};border:2px solid ${data.sessionCompleted ? '#58CC02' : '#FFD0A0'};border-radius:6px 18px 18px 18px;padding:14px 18px;margin-bottom:10px;">
+                <p style="font-size:15px;font-weight:700;color:var(--text);line-height:1.6;margin:0;">
                   ${data.sessionCompleted
                     ? '🎉 You got it! That\'s 1 problem solved. Ready for the next one?'
                     : '⏱️ Session limit reached — nice work making it this far! Start a fresh session to keep going.'
@@ -3461,7 +3474,7 @@
         }
         if (/^Insight:\s*/i.test(line)) {
           const txt = line.replace(/^Insight:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div></div><div style="background:#FDF2F8;border-left:5px solid #EC4899;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div></div><div style="background:var(--pink-light);border-left:5px solid #EC4899;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
           i++; continue;
         }
         if (/^Common Mistake:\s*/i.test(line)) {
@@ -3471,7 +3484,7 @@
         }
         if (/^Final Answer:\s*/i.test(line)) {
           const txt = line.replace(/^Final Answer:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#58CC02;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #46A302;">Answer</div></div><div style="background:#D7FFB8;border-left:5px solid #58CC02;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:16px;font-weight:800;color:#1a1a1a;line-height:1.5;">${formatInline(txt, plan)}</div></div></div>`;
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#58CC02;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #46A302;">Answer</div></div><div style="background:var(--green-light);border-left:5px solid #58CC02;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:16px;font-weight:800;color:var(--text);line-height:1.5;">${formatInline(txt, plan)}</div></div></div>`;
           isFirstPara = false; i++; continue;
         }
 
@@ -3493,16 +3506,16 @@
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
               <div style="background:#58CC02;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #46A302;">Answer</div>
             </div>
-            <div style="background:#D7FFB8;border-left:5px solid #58CC02;border-radius:0 12px 12px 0;padding:14px 16px;">
-              <div style="font-size:16px;font-weight:800;color:#1a1a1a;line-height:1.5;">${paraText}</div>
+            <div style="background:var(--green-light);border-left:5px solid #58CC02;border-radius:0 12px 12px 0;padding:14px 16px;">
+              <div style="font-size:16px;font-weight:800;color:var(--text);line-height:1.5;">${paraText}</div>
             </div>
           </div>`;
           isFirstPara = false;
         } else {
           // Subsequent paragraphs = blue tinted explanation
           html += `<div style="margin:6px 14px 0;">
-            <div style="background:#EFF9FF;border-left:5px solid #7DD3FC;border-radius:0 12px 12px 0;padding:12px 16px;">
-              <div style="font-size:15px;font-weight:500;color:#1e3a5f;line-height:1.7;">${paraText}</div>
+            <div style="background:var(--blue-light);border-left:5px solid #7DD3FC;border-radius:0 12px 12px 0;padding:12px 16px;">
+              <div style="font-size:15px;font-weight:500;color:var(--text);line-height:1.7;">${paraText}</div>
             </div>
           </div>`;
         }
@@ -3677,7 +3690,7 @@
           <div style="background:var(--green);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--green-dark);">Answer</div>
         </div>
         <div style="background:var(--green-light);border-left:5px solid var(--green);border-radius:0 14px 14px 0;padding:14px 16px;">
-          <div style="font-size:17px;font-weight:800;color:#1a1a1a;line-height:1.5;">${formatInline(finalAnswerText, plan)}</div>
+          <div style="font-size:17px;font-weight:800;color:var(--text);line-height:1.5;">${formatInline(finalAnswerText, plan)}</div>
         </div>
       </div>`;
     }
@@ -3728,7 +3741,7 @@
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div>
         </div>
-        <div style="background:#FDF2F8;border-left:5px solid #EC4899;border-radius:0 14px 14px 0;padding:14px 18px;">
+        <div style="background:var(--pink-light);border-left:5px solid #EC4899;border-radius:0 14px 14px 0;padding:14px 18px;">
           <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(insightText.trim(), plan)}</div>
         </div>
       </div>`;
@@ -3740,7 +3753,7 @@
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div>
         </div>
-        <div style="background:#FFFBEB;border-left:5px solid #F59E0B;border-radius:0 14px 14px 0;padding:14px 18px;">
+        <div style="background:var(--yellow-light);border-left:5px solid #F59E0B;border-radius:0 14px 14px 0;padding:14px 18px;">
           <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(tipText.trim(), plan)}</div>
         </div>
       </div>`;
@@ -4375,7 +4388,7 @@
         <div id="settingsUsage" style="font-weight:800;font-size:14px;color:var(--text);text-align:right;">—</div>
       </div>
       <!-- Countdown row — shown when limit hit -->
-      <div id="settingsCountdownRow" style="display:none;background:#FFF4EC;border-radius:16px;padding:14px 20px;border:2px solid #FFCFA0;">
+      <div id="settingsCountdownRow" style="display:none;background:var(--knox-bubble-orange);border-radius:16px;padding:14px 20px;border:2px solid #FFCFA0;">
         <div style="font-size:11px;font-weight:900;color:#CC5500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Next question unlocks in</div>
         <div id="settingsCountdown" style="font-size:22px;font-weight:900;color:#FF6B00;">—</div>
       </div>
