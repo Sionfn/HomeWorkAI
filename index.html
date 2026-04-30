@@ -767,14 +767,14 @@
 
     /* Response cards */
     .ai-response-box {
-      background:white;
+      background:var(--bg-card);
       font-family:'Nunito',sans-serif;
       overflow:hidden;
-      border-radius:6px 18px 18px 18px;
+      border-radius:0 0 16px 16px;
     }
     .resp-header {
       display:flex; align-items:center; gap:12px;
-      padding:16px 20px; background:var(--gray);
+      padding:14px 18px; background:var(--bg-elevated);
       border-bottom:2px solid var(--border);
     }
     .resp-brain {
@@ -3391,16 +3391,7 @@
   function renderAcknowledgement(message, plan) {
     // Strip markdown links from acknowledgement text
     const clean = (message || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
-    return `<div class="ai-response-box">
-      <div class="resp-header">
-        <div class="resp-brain"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>
-        <div class="resp-title">Knox Knows</div>
-        <div class="resp-plan-tag tag-pro-plus">Pro+</div>
-      </div>
-      <div style="background:var(--green-light);border:2px solid #16a34a;border-radius:12px;padding:14px 18px;color:var(--text);font-size:15px;line-height:1.6;font-weight:600;">
-        ✓ ${clean}
-      </div>
-    </div>`;
+    return `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:var(--text);line-height:1.65;">✓ ${clean}</div>`;
   }
 
   // ── SHARED RENDER HELPERS (outer scope — used by renderResponse AND executeAskQuestion) ──
@@ -3622,6 +3613,13 @@
     answer = normalizeSections(answer);
 
     const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+
+    // If the AI didn't start with a known header, treat the first line as Final Answer
+    const knownStartHeaders = ['Final Answer:','Explanation:','Step-by-step:','Step-by-Step:','Tip:','Insight:','Common Mistake:','Key Points:'];
+    if (lines.length > 0 && !knownStartHeaders.some(h => lines[0].startsWith(h))) {
+      lines[0] = 'Final Answer: ' + lines[0];
+    }
+
     let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
     let keyPointsBullets = [];
     let mode = "other", currentParaLines = [];
@@ -3686,10 +3684,11 @@
     // Support both old (pro/pro_plus) and new (super/max) plan names
     const _isMax   = plan === "pro_plus" || plan === "max";
     const _isPro   = plan === "pro"      || plan === "super";
-    const planTag      = _isMax ? "⭐ Pro+" : _isPro ? "⚡ Pro" : "Free";
+    const planTag      = _isMax ? "🚀 Max Knox" : _isPro ? "⚡ Super Knox" : "Basic Knox";
     const planTagClass = _isMax ? "tag-pro-plus" : _isPro ? "tag-pro" : "tag-free";
     let html = `<div class="ai-response-box ${_isMax ? 'resp-pro-plus' : ''}">`;
-    html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
+    // Plan badge only — Knox chat bubble already provides the header with logo + name
+    html += `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 16px 4px;"><span class="resp-plan-tag ${planTagClass}">${planTag}</span></div>`;
 
     // Final Answer
     if (finalAnswerText) {
@@ -4115,11 +4114,11 @@
       else { cpl.push(line); }
     }
     fp(mode);
-    const planTag = item.plan === "max" ? "🚀 Max" : item.plan === "super" ? "⚡ Super" : "Basic";
+    const planTag = item.plan === "max" ? "🚀 Max Knox" : item.plan === "super" ? "⚡ Super Knox" : "Basic Knox";
     const planTagClass = item.plan === "max" ? "tag-pro-plus" : item.plan === "super" ? "tag-pro" : "tag-free";
     let html = '<div class="ai-response-box ' + (item.plan === "max" ? "resp-pro-plus" : item.plan === "super" ? "resp-pro" : "") + '">';
     html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 12px;background:#f3f4f6;border-radius:8px;font-size:12px;font-weight:700;color:#6b7280;">\uD83D\uDD50 From history &nbsp;&middot;&nbsp; ' + item.time + '</div>';
-    html += '<div class="resp-header"><div class="resp-brain">\uD83E\uDDE0</div><div class="resp-title">Knox Knows</div><div class="resp-plan-tag ' + planTagClass + '">' + planTag + '</div></div>';
+    html += '<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 16px 4px;"><span class="resp-plan-tag ' + planTagClass + '">' + planTag + '</span></div>';
     if (finalAnswerText) html += '<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">' + fi(finalAnswerText, item.plan) + '</div></div>';
     if (stepsHtml) html += '<div class="resp-steps-label">Step-by-step</div><div class="resp-steps-wrap">' + stepsHtml + '</div>';
     for (const p of paragraphs) {
