@@ -1,842 +1,4528 @@
-// ============================================================
-// /api/ask.js  —  HomeWorkAI
-// ============================================================
-// CHANGES IN THIS VERSION:
-//  ✅ Resources-in-Tip bug fixed (robust parsing, pre-normalisation)
-//  ✅ Markdown link syntax [text](url) stripped from all output
-//  ✅ YouTube links go to actual videos (via YOUTUBE_API_KEY)
-//  ✅ Visual learner detection — embeds YouTube video + image search
-//  ✅ Verbal learner detection — rich prose response style
-//  ✅ Preference-only statements get warm acknowledgement, not full answer
-//  ✅ No streaming — loading screen until full answer ready
-//  ✅ All previous security retained
-// ============================================================
-//
-// NEW ENV VAR (optional but recommended):
-//   YOUTUBE_API_KEY  — YouTube Data API v3 key for real video links
-//   Get it free at: console.cloud.google.com → Enable YouTube Data API v3
-// ============================================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knox Knows — AI Homework Help</title>
+  <meta name="description" content="Knox Knows is your AI study companion. Get instant answers or learn step-by-step with Knox the Fox — from K-12 through college.">
+  <meta name="keywords" content="homework help, AI tutor, study helper, Knox Knows, math solver, learning app">
+  <meta property="og:title" content="Knox Knows — AI Homework Help">
+  <meta property="og:description" content="Get instant answers or learn step-by-step with Knox. Every subject, every grade.">
+  <meta property="og:url" content="https://knoxknowsapp.com">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <script>
+    // Apply theme before paint to prevent flash
+    (function() {
+      var t = localStorage.getItem('knox-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900;1000&display=swap" rel="stylesheet">
 
-import { cert, getApps, initializeApp } from "firebase-admin/app";
-import { getAuth as getAdminAuth }       from "firebase-admin/auth";
-import { getFirestore }                  from "firebase-admin/firestore";
+  <style>
+    /* ── Brand colors (never change with theme) ─────────────────── */
+    :root {
+      --orange:        #FF6B00;
+      --orange2:       #FF8C00;
+      --orange-light:  #FFE0C2;
+      --orange-dark:   #CC5500;
+      --blue:          #1CB0F6;
+      --blue-dark:     #0A85C2;
+      --blue-light:    #D7F2FD;
+      --green:         #58CC02;
+      --green-dark:    #46A302;
+      --green-light:   #D7FFB8;
+      --red:           #FF4B4B;
+      --yellow:        #FFD900;
+      --yellow-light:  #FFF8C6;
+      --purple:        #CE82FF;
+      --purple-dark:   #9B59B6;
+      --shadow-orange: 0 4px 0 #CC5500;
+      --shadow-blue:   0 4px 0 #0A85C2;
+      --shadow-green:  0 4px 0 #46A302;
+    }
 
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId:   process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    }),
+    /* ── DARK MODE (default) ─────────────────────────────────────── */
+    /* ── DARK MODE ───────────────────────────────────────────────── */
+    :root, [data-theme="dark"] {
+      --bg-primary:    #1a1a1a;   /* section bg — darkest */
+      --bg-secondary:  #242424;   /* alternate sections — slightly lighter */
+      --bg-card:       #2a2a2a;   /* cards, modals, elevated surfaces */
+      --bg-elevated:   #303030;   /* inputs, dropdowns */
+      --bg-input:      #2a2a2a;
+      --border:        #333333;
+      --border-light:  #2a2a2a;
+      --text:          #F0F0F0;
+      --text-light:    #A0A0A0;
+      --text-muted:    #555;
+      --gray:          #242424;
+      --cream:         #242424;
+      --shadow:        0 4px 0 rgba(0,0,0,0.5);
+      --chat-bg:       #242424;
+      --chat-border:   #333333;
+    }
+
+    /* ── LIGHT MODE ──────────────────────────────────────────────── */
+    [data-theme="light"] {
+      --bg-primary:    #F4F4F5;   /* section bg — light grey */
+      --bg-secondary:  #FFFFFF;   /* alternate sections — pure white */
+      --bg-card:       #FFFFFF;   /* cards, modals */
+      --bg-elevated:   #FFFFFF;
+      --bg-input:      #FFFFFF;
+      --border:        #E4E4E7;
+      --border-light:  #F0F0F0;
+      --text:          #18181B;
+      --text-light:    #52525B;
+      --text-muted:    #A1A1AA;
+      --gray:          #F4F4F5;
+      --cream:         #FFF8F0;
+      --shadow:        0 4px 0 rgba(0,0,0,0.1);
+      --chat-bg:       #FFFFFF;
+      --chat-border:   #E4E4E7;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    html, body { max-width:100%; overflow-x:hidden; }
+    button { font-family:inherit; cursor:pointer; }
+
+    body {
+      font-family:'Nunito', system-ui, sans-serif;
+      color:var(--text);
+      background:var(--bg-primary);
+      -webkit-font-smoothing:antialiased;
+      transition:background 0.3s ease, color 0.3s ease;
+    }
+
+    /* ── BUTTONS ─────────────────────────────────────────────── */
+    .btn-orange {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:var(--orange); color:white;
+      border:none; border-radius:16px;
+      padding:15px 28px; font-size:16px; font-weight:800;
+      box-shadow:var(--shadow-orange);
+      transition:all 0.15s; cursor:pointer;
+    }
+    .btn-orange:hover  { transform:translateY(-2px); box-shadow:0 6px 0 #CC5500; }
+    .btn-orange:active { transform:translateY(2px);  box-shadow:none; }
+
+    .btn-blue {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:var(--blue); color:white;
+      border:none; border-radius:16px;
+      padding:15px 28px; font-size:16px; font-weight:800;
+      box-shadow:var(--shadow-blue);
+      transition:all 0.15s; cursor:pointer;
+    }
+    .btn-blue:hover  { transform:translateY(-2px); box-shadow:0 6px 0 #0A85C2; }
+    .btn-blue:active { transform:translateY(2px);  box-shadow:none; }
+
+    .btn-green {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:var(--green); color:white;
+      border:none; border-radius:16px;
+      padding:15px 28px; font-size:16px; font-weight:800;
+      box-shadow:var(--shadow-green);
+      transition:all 0.15s; cursor:pointer;
+    }
+    .btn-green:hover  { transform:translateY(-2px); box-shadow:0 6px 0 #46A302; }
+    .btn-green:active { transform:translateY(2px);  box-shadow:none; }
+
+    .btn-ghost {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:white; color:var(--blue);
+      border:2px solid var(--blue); border-radius:16px;
+      padding:13px 28px; font-size:16px; font-weight:800;
+      transition:all 0.15s; cursor:pointer;
+    }
+    .btn-ghost:hover { background:var(--blue-light); }
+
+    .btn-white {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:white; color:var(--orange);
+      border:none; border-radius:16px;
+      padding:15px 28px; font-size:16px; font-weight:800;
+      box-shadow:0 4px 0 rgba(0,0,0,0.2);
+      transition:all 0.15s; cursor:pointer;
+    }
+    .btn-white:hover  { transform:translateY(-2px); box-shadow:0 6px 0 rgba(0,0,0,0.2); }
+    .btn-white:active { transform:translateY(2px);  box-shadow:none; }
+
+    /* ── CARDS ───────────────────────────────────────────────── */
+    .card-rounded {
+      background:white; border-radius:20px;
+      border:2px solid var(--border);
+      box-shadow:0 4px 0 var(--border);
+      transition:transform 0.2s, box-shadow 0.2s;
+    }
+    .card-rounded:hover { transform:translateY(-4px); box-shadow:0 8px 0 var(--border); }
+
+    /* ── BADGE ───────────────────────────────────────────────── */
+    .badge {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 14px; border-radius:999px;
+      font-size:13px; font-weight:800; letter-spacing:0.02em;
+    }
+
+    /* ── NAV ─────────────────────────────────────────────────── */
+    .nav-link {
+      font-weight:700; font-size:15px; color:white;
+      text-decoration:none; opacity:0.9;
+      transition:opacity 0.15s;
+    }
+    .nav-link:hover { opacity:1; }
+
+    /* ── SECTION LAYOUTS ─────────────────────────────────────── */
+    .section { padding:80px 24px; }
+    .section-sm { padding:48px 24px; }
+    .container { max-width:1100px; margin:0 auto; }
+    .container-sm { max-width:800px; margin:0 auto; }
+
+    /* ── TYPOGRAPHY ──────────────────────────────────────────── */
+    .display { font-size:clamp(36px,6vw,72px); font-weight:900; line-height:1.05; letter-spacing:-0.02em; }
+    .h1 { font-size:clamp(28px,4vw,48px); font-weight:900; line-height:1.1; letter-spacing:-0.01em; }
+    .h2 { font-size:clamp(22px,3vw,36px); font-weight:900; line-height:1.15; }
+    .h3 { font-size:20px; font-weight:800; line-height:1.2; }
+    .body-lg { font-size:18px; font-weight:500; line-height:1.65; color:#555; }
+    .body { font-size:16px; font-weight:500; line-height:1.6; color:#555; }
+
+    /* ── UTILS ───────────────────────────────────────────────── */
+    .text-center { text-align:center; }
+    .flex { display:flex; }
+    .flex-col { flex-direction:column; }
+    .items-center { align-items:center; }
+    .justify-center { justify-content:center; }
+    .gap-4 { gap:16px; }
+    .gap-6 { gap:24px; }
+    .gap-8 { gap:32px; }
+    .w-full { width:100%; }
+    .mt-2 { margin-top:8px; }
+    .mt-4 { margin-top:16px; }
+    .mt-6 { margin-top:24px; }
+    .mt-8 { margin-top:32px; }
+    .hidden { display:none !important; }
+
+    /* ── GRID ────────────────────────────────────────────────── */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+    .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+
+    @media (max-width:900px) {
+      .grid-4 { grid-template-columns:repeat(2,1fr); }
+      .grid-3 { grid-template-columns:1fr 1fr; }
+    }
+    @media (max-width:640px) {
+      .grid-2 { grid-template-columns:1fr; }
+      .grid-3 { grid-template-columns:1fr; }
+      .grid-4 { grid-template-columns:1fr 1fr; }
+      .section { padding:56px 20px; }
+      .display { font-size:36px; }
+    }
+
+    /* ═══════════ COMPREHENSIVE MOBILE RESPONSIVE ═══════════ */
+    @media (max-width:767px) {
+      /* Sections */
+      section { padding:48px 16px !important; }
+
+      /* Pricing — stack to 1 col on mobile */
+      .pricing-grid { grid-template-columns:1fr !important; }
+      /* 3-col pricing grid */
+
+      /* Two ways — 1 col */
+      div[style*="grid-template-columns:1fr 1fr;gap:20px;margin-top:48px"] {
+        grid-template-columns:1fr !important;
+      }
+
+      /* How Knox Works — 1 col */
+      div[style*="grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px"] {
+        grid-template-columns:1fr !important;
+      }
+
+      /* Subjects — 2 col on mobile */
+      div[style*="grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px"] {
+        grid-template-columns:1fr 1fr !important;
+      }
+
+      /* Gamification — 1 col */
+      div[style*="grid-template-columns:repeat(3,1fr);gap:20px"] {
+        grid-template-columns:1fr !important;
+      }
+
+      /* Footer grid */
+      div[style*="grid-template-columns:2fr 1fr 1fr 1fr;gap:40px"] {
+        grid-template-columns:1fr 1fr !important;
+        gap:24px !important;
+      }
+
+      /* Hero text sizes */
+      #home h1 { font-size:36px !important; }
+      #home p { font-size:16px !important; }
+
+      /* Hero buttons */
+      #home .btn-orange, #home .btn-blue { font-size:15px !important; padding:14px 22px !important; }
+
+      /* Section titles */
+      .section-title { font-size:26px !important; }
+
+      /* Chat box — full width on mobile */
+      #ai-helper > div { max-width:100% !important; }
+
+      /* Pricing card grid */
+      div[style*="grid-template-columns:repeat(4,1fr);gap:16px;align-items:stretch"] {
+        grid-template-columns:1fr !important;
+      }
+
+      /* Max Knox callout box */
+      div[style*="grid-template-columns:1fr auto;gap:32px"] {
+        grid-template-columns:1fr !important;
+      }
+
+      /* Hero social proof pills wrap nicely */
+      #home div[style*="gap:14px"] { gap:8px !important; }
+      #home div[style*="border-radius:999px;padding:8px 16px"] {
+        font-size:12px !important; padding:6px 12px !important;
+      }
+
+      /* Usage bars */
+      #usageBarWrap { padding:6px 12px !important; }
+
+      /* Streak/KP badges */
+      .streak-badge, .kp-badge { font-size:12px !important; padding:4px 8px !important; }
+
+      /* League modal */
+      .league-panel { max-height:95vh; }
+
+      /* CTA banner */
+      section[style*="background:#FF6B00"] h2 { font-size:28px !important; }
+    }
+
+    @media (max-width:480px) {
+      /* Subjects — 2 col always looks good at 480 */
+      div[style*="grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px"] {
+        grid-template-columns:1fr 1fr !important;
+        gap:10px !important;
+      }
+      /* Footer — stack on very small */
+      div[style*="grid-template-columns:2fr 1fr 1fr 1fr;gap:40px"] {
+        grid-template-columns:1fr !important;
+        gap:20px !important;
+      }
+    }
+
+    /* ── HEADER ──────────────────────────────────────────────── */
+    #main-header {
+      background:var(--orange);
+      position:sticky; top:0; z-index:200;
+      border-bottom:3px solid #CC5500;
+      padding:0 24px; height:68px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px;
+    }
+    .header-logo {
+      display:flex; align-items:center; gap:10px;
+      text-decoration:none; color:white; flex-shrink:0;
+    }
+    .header-logo-img {
+      width:42px; height:42px; border-radius:50%;
+      border:3px solid rgba(255,255,255,0.4);
+      overflow:hidden; background:#FFE0C2;
+      object-fit:cover; object-position:top center;
+      flex-shrink:0;
+    }
+    .header-logo-text {
+      font-size:20px; font-weight:900; letter-spacing:-0.01em;
+      color:white; text-shadow:0 1px 2px rgba(0,0,0,0.15);
+    }
+    .header-nav {
+      display:flex; align-items:center; gap:8px; flex-shrink:0;
+    }
+    .header-try-pro {
+      background:#FFD900; color:#3C3C3C;
+      border:none; border-radius:12px;
+      padding:10px 18px; font-size:14px; font-weight:800;
+      box-shadow:0 3px 0 #CC9900;
+      transition:all 0.15s; cursor:pointer;
+    }
+    .header-try-pro:hover  { transform:translateY(-1px); box-shadow:0 4px 0 #CC9900; }
+    .header-try-pro:active { transform:translateY(1px);  box-shadow:none; }
+    .header-login {
+      background:rgba(255,255,255,0.2); color:white;
+      border:2px solid rgba(255,255,255,0.5); border-radius:12px;
+      padding:9px 16px; font-size:14px; font-weight:800;
+      transition:all 0.15s; cursor:pointer;
+      display:flex; align-items:center; gap:6px;
+    }
+    .header-login:hover { background:rgba(255,255,255,0.3); }
+
+    /* Theme toggle */
+    .theme-toggle {
+      width:38px; height:38px; border-radius:12px;
+      background:rgba(255,255,255,0.15);
+      border:1.5px solid rgba(255,255,255,0.3);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; font-size:18px; transition:all 0.2s;
+      flex-shrink:0;
+    }
+    .theme-toggle:hover { background:rgba(255,255,255,0.25); transform:scale(1.1); }
+
+    /* Center nav links */
+    .header-center-nav {
+      display:flex; align-items:center; gap:28px; flex:1; justify-content:center;
+    }
+    .header-center-nav .nav-link {
+      font-size:15px; font-weight:700; color:rgba(255,255,255,0.9);
+      text-decoration:none; transition:color 0.15s; white-space:nowrap;
+    }
+    .header-center-nav .nav-link:hover { color:white; }
+
+
+    /* ── Light mode specific overrides ──────────────────────────────── */
+    [data-theme="light"] .account-dropdown { background:var(--bg-card); border-color:var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.1); }
+    [data-theme="light"] .dropdown-item:hover { background:var(--bg-elevated); }
+    [data-theme="light"] .login-modal > div { background:var(--bg-card); }
+    [data-theme="light"] #chatThread { background:var(--chat-bg); color:var(--text); background:var(--bg-secondary); }
+    [data-theme="light"] #chatInput { background:var(--bg-input); color:var(--text); border-color:var(--border); }
+    [data-theme="light"] .ai-box { background:var(--bg-card); border-color:var(--border); box-shadow:0 4px 24px rgba(0,0,0,0.06); }
+    [data-theme="light"] #usageBarWrap { background:var(--bg-secondary); border-color:var(--border); }
+    [data-theme="light"] .league-panel { background:var(--bg-card); }
+    [data-theme="light"] .league-row { border-color:var(--border); }
+    [data-theme="light"] .league-row.me { background:#FFF4EC; }
+    [data-theme="light"] .modal-settings { background:var(--bg-card); }
+    [data-theme="light"] footer { background:var(--bg-secondary) !important; border-top:2px solid var(--border); }
+    [data-theme="light"] footer a { color:var(--text-light) !important; }
+    [data-theme="light"] footer p, [data-theme="light"] footer span { color:var(--text-light) !important; }
+    [data-theme="light"] .header-center-nav .nav-link { color:rgba(255,255,255,0.95); }
+    [data-theme="light"] .cookie-banner { background:var(--bg-card) !important; border-top-color:var(--border) !important; }
+    [data-theme="light"] #historyModal > div { background:var(--bg-card); }
+    [data-theme="light"] .history-item { border-color:var(--border); }
+    [data-theme="light"] .history-item:hover { background:var(--bg-secondary); }
+    [data-theme="light"] #settingsModal > div > div:first-child { background:var(--orange) !important; }
+
+    /* Dark mode overrides for white cards on dark bg */
+    [data-theme="dark"] .pricing-grid > div[style*="background:var(--bg-card)"] { box-shadow:0 6px 0 rgba(0,0,0,0.5); }
+    [data-theme="dark"] #chatInput::placeholder { color:#666; }
+    [data-theme="dark"] .ai-box { border-color:#333; }
+    [data-theme="dark"] #usageBarWrap { background:#1f1f1f; border-color:#333; }
+
+
+    /* Dark mode: How Knox Works cards need visible border on dark bg */
+    [data-theme="dark"] .ai-box { background:var(--bg-secondary); border-color:var(--border); }
+    [data-theme="dark"] #chatThread { background:var(--bg-primary); }
+    [data-theme="dark"] .ai-box-footer { background:var(--bg-secondary); border-top-color:var(--border); }
+
+    /* Two-tone section separators */
+    [data-theme="light"] #how-it-works { border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+    [data-theme="light"] #ai-helper { border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+    [data-theme="light"] section[style*="background:var(--bg-primary)"] + section[style*="background:var(--bg-secondary)"],
+    [data-theme="light"] section[style*="background:var(--bg-secondary)"] + section[style*="background:var(--bg-primary)"] {
+      box-shadow: inset 0 1px 0 var(--border);
+    }
+    /* Smooth theme transitions */
+    *, *::before, *::after {
+      transition-property: background-color, border-color, color;
+      transition-duration: 0.25s;
+      transition-timing-function: ease;
+    }
+    /* But NOT on elements that shouldn't transition */
+    button, a, input, svg, img, .kp-float, .streak-badge, .kp-badge {
+      transition: none;
+    }
+    button { transition: transform 0.15s, box-shadow 0.15s, background 0.25s, color 0.25s; }
+
+    /* Mobile header */
+    @media (max-width:768px) {
+      .header-center-nav { display:none; }
+    }
+    @media (max-width:640px) {
+      .header-logo-text { display:none; }
+      .header-logo-img  { width:36px; height:36px; }
+      #accountName { display:none; }
+    }
+    @media (max-width:380px) {
+      .header-try-pro { display:none; }
+    }
+
+    /* Account dropdown (existing JS relies on these) */
+    .pro-badge { background:#FFD900; color:#1a1a1a; border:none; border-radius:12px; padding:10px 20px; font-size:14px; font-weight:900; box-shadow:0 4px 0 #B8860B; transition:all 0.15s; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; letter-spacing:0.01em; }
+    .pro-badge:hover { transform:translateY(-2px); box-shadow:0 6px 0 #B8860B; }
+    .account-dropdown-wrapper { position:relative; }
+    .account-dropdown { position:absolute; top:calc(100% + 10px); right:0; background:var(--bg-card); border:2px solid var(--border); border-radius:20px; box-shadow:0 8px 24px rgba(0,0,0,0.25); min-width:220px; overflow:hidden; display:none; z-index:300; }
+    .account-dropdown.open { display:block; }
+    .dropdown-header { padding:16px; border-bottom:2px solid var(--border); }
+    .dropdown-header p { font-weight:800; font-size:15px; color:var(--text); }
+    .dropdown-header span { font-size:12px; color:var(--text-light); }
+    .dropdown-item { width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; font-size:14px; font-weight:700; color:var(--text); background:none; border:none; cursor:pointer; transition:background 0.15s; font-family:inherit; text-align:left; }
+    .dropdown-item:hover { background:var(--bg-elevated); }
+    .dropdown-item.danger { color:var(--red); }
+    .dropdown-divider { border-top:2px solid var(--border); margin:4px 0; }
+
+    /* ── HERO ────────────────────────────────────────────────── */
+    #home {
+      background:white;
+      padding:72px 24px 60px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero-bg-blob-1 {
+      position:absolute; top:-80px; left:-80px;
+      width:400px; height:400px; border-radius:50%;
+      background:var(--orange-light); opacity:0.4;
+      pointer-events:none;
+    }
+    .hero-bg-blob-2 {
+      position:absolute; bottom:-60px; right:-60px;
+      width:360px; height:360px; border-radius:50%;
+      background:var(--blue-light); opacity:0.4;
+      pointer-events:none;
+    }
+    .hero-knox {
+      width:200px; height:200px;
+      object-fit:contain; object-position:top center;
+      margin:0 auto 8px;
+      filter:drop-shadow(0 8px 16px rgba(255,107,0,0.2));
+      position:relative; z-index:1;
+    }
+    .hero-title {
+      font-size:clamp(36px,6vw,70px);
+      font-weight:900; line-height:1.05;
+      letter-spacing:-0.02em;
+      color:var(--text);
+      position:relative; z-index:1;
+    }
+    .hero-title .highlight-orange {
+      color:var(--orange);
+    }
+    .hero-sub {
+      font-size:18px; font-weight:600;
+      color:var(--text-light); line-height:1.6;
+      max-width:520px; margin:16px auto 0;
+      position:relative; z-index:1;
+    }
+    .hero-ctas {
+      display:flex; flex-wrap:wrap; gap:14px;
+      justify-content:center; margin-top:36px;
+      position:relative; z-index:1;
+    }
+    .hero-free-note {
+      font-size:13px; font-weight:700; color:var(--green-dark);
+      margin-top:16px; position:relative; z-index:1;
+    }
+
+    /* ── STATS STRIP ─────────────────────────────────────────── */
+    .stats-strip {
+      background:var(--gray); border-top:2px solid var(--border);
+      border-bottom:2px solid var(--border);
+      padding:24px;
+    }
+    .stats-inner {
+      max-width:800px; margin:0 auto;
+      display:flex; flex-wrap:wrap; justify-content:center; gap:40px;
+    }
+    .stat-item { text-align:center; }
+    .stat-num { font-size:28px; font-weight:900; color:var(--orange); }
+    .stat-label { font-size:13px; font-weight:700; color:var(--text-light); margin-top:2px; }
+
+    /* ── TWO MODES ───────────────────────────────────────────── */
+    .modes-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:20px;
+      max-width:900px; margin:40px auto 0;
+    }
+    .mode-card {
+      border-radius:24px; padding:36px 32px;
+      position:relative; overflow:hidden;
+      cursor:pointer; transition:transform 0.2s, box-shadow 0.2s;
+    }
+    .mode-card:hover { transform:translateY(-6px); }
+    .mode-card-orange {
+      background:var(--orange-light);
+      border:3px solid var(--orange);
+      box-shadow:0 6px 0 #CC5500;
+    }
+    .mode-card-orange:hover { box-shadow:0 10px 0 #CC5500; }
+    .mode-card-blue {
+      background:var(--blue-light);
+      border:3px solid var(--blue);
+      box-shadow:0 6px 0 #0A85C2;
+    }
+    .mode-card-blue:hover { box-shadow:0 10px 0 #0A85C2; }
+    .mode-card-icon { font-size:48px; margin-bottom:16px; }
+    .mode-card-title { font-size:22px; font-weight:900; color:var(--text); margin-bottom:8px; }
+    .mode-card-desc  { font-size:15px; font-weight:600; color:#555; line-height:1.55; }
+    .mode-card-btn   { margin-top:24px; }
+    @media (max-width:640px) { .modes-grid { grid-template-columns:1fr; } }
+
+    /* ── HOW IT WORKS ────────────────────────────────────────── */
+    .steps-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+      margin-top:48px;
+    }
+    .step-card {
+      background:white; border-radius:20px;
+      border:2px solid var(--border);
+      box-shadow:0 4px 0 var(--border);
+      padding:32px 24px; text-align:center;
+    }
+    .step-num {
+      width:48px; height:48px; border-radius:50%;
+      background:var(--orange); color:white;
+      font-size:20px; font-weight:900;
+      display:flex; align-items:center; justify-content:center;
+      margin:0 auto 16px;
+      box-shadow:0 4px 0 #CC5500;
+    }
+    .step-icon { font-size:40px; margin-bottom:12px; }
+    .step-title { font-size:18px; font-weight:800; color:var(--text); margin-bottom:8px; }
+    .step-desc  { font-size:14px; font-weight:600; color:#666; line-height:1.6; }
+    @media (max-width:640px) { .steps-grid { grid-template-columns:1fr; } }
+
+    /* ── SUBJECTS ────────────────────────────────────────────── */
+    .subjects-grid {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+      margin-top:40px;
+    }
+    .subject-card {
+      border-radius:18px; padding:24px 18px;
+      border:2px solid var(--border);
+      box-shadow:0 4px 0 var(--border);
+      text-align:left;
+      transition:transform 0.2s, box-shadow 0.2s;
+    }
+    .subject-card:hover { transform:translateY(-4px); box-shadow:0 8px 0 var(--border); }
+    .subject-icon { font-size:34px; margin-bottom:10px; }
+    .subject-name { font-size:15px; font-weight:800; color:var(--text); }
+    .subject-tags { font-size:12px; font-weight:600; color:#777; margin-top:5px; line-height:1.5; }
+    @media (max-width:900px) { .subjects-grid { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:500px) { .subjects-grid { grid-template-columns:repeat(2,1fr); } }
+
+    /* ── AI BOX ──────────────────────────────────────────────── */
+    #ai-helper { background:var(--gray); }
+    .ai-box { background:var(--chat-bg); border-color:var(--chat-border);
+      background:white; border-radius:24px;
+      border:2px solid var(--border);
+      box-shadow:0 6px 0 var(--border);
+      overflow:hidden;
+    }
+    .ai-box-header {
+      background:var(--orange); padding:20px 28px;
+      display:flex; align-items:center; gap:14px;
+    }
+    .ai-box-knox {
+      width:52px; height:52px; border-radius:50%;
+      border:3px solid rgba(255,255,255,0.5);
+      overflow:hidden; background:#FFE0C2; flex-shrink:0;
+    }
+    .ai-box-knox img { width:100%; height:100%; object-fit:cover; object-position:top center; }
+    .ai-box-header-text h3 { font-size:20px; font-weight:900; color:white; }
+    .ai-box-header-text p  { font-size:13px; font-weight:600; color:rgba(255,255,255,0.8); margin-top:2px; }
+    .ai-box-body { padding:28px; }
+
+    /* Mode tabs */
+    .ai-mode-tabs {
+      display:flex; gap:6px;
+      background:#f3f4f6; border-radius:14px; padding:5px;
+    }
+    .ai-mode-tab {
+      flex:1; padding:12px 8px; border-radius:10px;
+      font-size:14px; font-weight:800; font-family:inherit;
+      border:none; cursor:pointer; line-height:1;
+      transition:all 0.15s; color:#9ca3af; background:transparent;
+      white-space:nowrap;
+    }
+    .ai-mode-tab.active-orange {
+      background:var(--orange); color:white;
+      box-shadow:0 3px 0 #CC5500;
+    }
+    .ai-mode-tab.active-blue {
+      background:var(--blue); color:white;
+      box-shadow:0 3px 0 #0A85C2;
+    }
+
+    /* Question input */
+    .question-label { font-size:15px; font-weight:800; color:var(--text); margin-bottom:10px; display:block; }
+    .question-wrap { position:relative; }
+    #questionInput {
+      width:100%; padding:18px 120px 18px 18px;
+      border:2px solid var(--border); border-radius:16px;
+      font-size:16px; font-family:inherit; font-weight:500;
+      min-height:120px; resize:none; line-height:1.5;
+      background:white; color:var(--text);
+      transition:border-color 0.2s;
+    }
+    #questionInput:focus { outline:none; border-color:var(--orange); }
+
+    /* Ask button */
+    .ask-btn {
+      width:100%; padding:16px; border-radius:16px;
+      font-size:17px; font-weight:900; font-family:inherit;
+      border:none; cursor:pointer; margin-top:14px;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      transition:all 0.15s;
+    }
+    .ask-btn-orange {
+      background:var(--orange); color:white;
+      box-shadow:0 5px 0 #CC5500;
+    }
+    .ask-btn-orange:hover  { transform:translateY(-2px); box-shadow:0 7px 0 #CC5500; }
+    .ask-btn-orange:active { transform:translateY(3px);  box-shadow:none; }
+    .ask-btn-blue {
+      background:var(--blue); color:white;
+      box-shadow:0 5px 0 #0A85C2;
+    }
+    .ask-btn-blue:hover  { transform:translateY(-2px); box-shadow:0 7px 0 #0A85C2; }
+    .ask-btn-blue:active { transform:translateY(3px);  box-shadow:none; }
+    .ask-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none !important; box-shadow:0 3px 0 rgba(0,0,0,0.2) !important; }
+
+    /* Image upload / calc buttons */
+    .upload-image-btn, .calc-open-btn {
+      position:absolute; bottom:14px;
+      width:44px; height:44px; border-radius:12px;
+      background:var(--gray); border:2px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:all 0.15s; color:var(--text-light);
+    }
+    .upload-image-btn { right:14px; }
+    .calc-open-btn    { right:66px; }
+    .upload-image-btn:hover, .calc-open-btn:hover {
+      background:white; border-color:var(--orange); color:var(--orange);
+    }
+    .image-pill {
+      display:none; align-items:center; gap:8px;
+      background:var(--orange-light); border:1.5px solid var(--orange);
+      border-radius:10px; padding:8px 12px; font-size:13px; font-weight:700;
+      margin-top:10px; color:var(--orange);
+    }
+    .image-pill.show { display:flex; }
+    .image-pill button { background:none; border:none; cursor:pointer; color:var(--orange); font-size:16px; padding:0; }
+
+    /* Answer box */
+    #answerBox { margin-top:20px; }
+
+    /* Response cards */
+    .ai-response-box {
+      background:white;
+      font-family:'Nunito',sans-serif;
+      overflow:hidden;
+      border-radius:6px 18px 18px 18px;
+    }
+    .resp-header {
+      display:flex; align-items:center; gap:12px;
+      padding:16px 20px; background:var(--gray);
+      border-bottom:2px solid var(--border);
+    }
+    .resp-brain {
+      width:40px; height:40px; border-radius:50%;
+      overflow:hidden; background:var(--orange-light);
+      border:2px solid var(--orange); flex-shrink:0;
+    }
+    .resp-brain img { width:100%; height:100%; object-fit:cover; object-position:top center; }
+    .resp-title { font-weight:900; font-size:16px; color:var(--text); flex:1; }
+    .resp-plan-tag {
+      display:inline-flex; align-items:center;
+      padding:4px 10px; border-radius:999px;
+      font-size:11px; font-weight:800;
+    }
+    .tag-free     { background:#EFF6FF; color:#1D4ED8; border:1.5px solid #93C5FD; }
+    .tag-pro      { background:var(--green-light); color:var(--green-dark); border:1.5px solid var(--green); }
+    .tag-pro-plus { background:var(--orange-light); color:var(--orange); border:1.5px solid var(--orange); }
+
+    .resp-final {
+      background:var(--green-light); border-left:5px solid var(--green);
+      padding:14px 18px; margin:10px 14px;
+      border-radius:10px;
+    }
+    .resp-final-label {
+      font-size:11px; font-weight:900; letter-spacing:0.08em;
+      text-transform:uppercase; color:var(--green-dark); margin-bottom:6px;
+    }
+    .resp-final-text { font-size:16px; font-weight:800; color:var(--text); line-height:1.5; }
+
+    .resp-section-label {
+      font-size:11px; font-weight:900; letter-spacing:0.08em;
+      text-transform:uppercase; color:var(--blue-dark);
+      margin:16px 20px 6px;
+    }
+    .resp-steps-label {
+      font-size:11px; font-weight:900; letter-spacing:0.08em;
+      text-transform:uppercase; color:var(--orange);
+      margin:16px 20px 8px;
+    }
+    .resp-body-para {
+      font-size:15px; font-weight:500; color:#444;
+      line-height:1.7; padding:0 20px 12px;
+    }
+    .resp-steps-wrap { padding:0 16px 12px; display:flex; flex-direction:column; gap:10px; }
+    .resp-step {
+      display:flex; align-items:flex-start; gap:12px;
+      background:white; border:2px solid var(--orange-light);
+      border-radius:14px; padding:14px 16px;
+      box-shadow:0 2px 0 #FFD0A0;
+    }
+    .resp-step-num {
+      min-width:30px; height:30px; border-radius:10px;
+      background:var(--orange); color:white;
+      font-weight:900; font-size:14px;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0; box-shadow:0 3px 0 #CC5500;
+    }
+    .resp-step-text { font-size:14px; font-weight:600; color:var(--text); line-height:1.6; padding-top:4px; }
+
+    .resp-tip {
+      display:flex; align-items:flex-start; gap:12px;
+      background:var(--yellow-light); border:2px solid var(--yellow);
+      border-radius:14px; padding:14px 16px; margin:0 16px 12px;
+    }
+    .resp-tip-icon { font-size:22px; flex-shrink:0; }
+    .resp-tip-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:#B8860B; margin-bottom:4px; }
+    .resp-tip-text  { font-size:14px; font-weight:600; color:#555; line-height:1.55; }
+
+    .resp-insight {
+      background:#F3E8FF; border:2px solid var(--purple);
+      border-radius:14px; padding:14px 16px; margin:0 16px 12px;
+    }
+    .resp-insight-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:var(--purple-dark); margin-bottom:4px; }
+    .resp-insight-text  { font-size:14px; font-weight:600; color:#555; line-height:1.55; }
+
+    .resp-common-mistake {
+      display:flex; align-items:flex-start; gap:12px;
+      background:#FFF0F0; border:2px solid var(--red);
+      border-radius:14px; padding:14px 16px; margin:0 16px 12px;
+    }
+    .resp-common-mistake-icon  { font-size:22px; flex-shrink:0; }
+    .resp-common-mistake-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:var(--red); margin-bottom:4px; }
+    .resp-common-mistake-text  { font-size:14px; font-weight:600; color:#555; line-height:1.55; }
+
+    .resp-keypoints { margin:0 16px 12px; padding-top:12px; border-top:2px solid var(--border); }
+    .resp-keypoints-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:var(--green-dark); margin-bottom:8px; }
+    .resp-bullet { font-size:14px; font-weight:600; color:#444; padding:4px 0; display:flex; align-items:flex-start; gap:8px; }
+
+    .resp-resources { padding:12px 16px 16px; border-top:2px solid var(--border); margin-top:4px; }
+    .resp-resources-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-light); margin-bottom:10px; }
+    .resp-resource-link {
+      display:flex; align-items:center; gap:10px; padding:12px 14px;
+      border-radius:12px; border:2px solid var(--border);
+      text-decoration:none; color:var(--text);
+      margin-bottom:8px; transition:all 0.15s;
+    }
+    .resp-resource-link:hover { border-color:var(--orange); background:var(--orange-light); }
+    .resp-resource-title { font-size:13px; font-weight:700; flex:1; }
+
+    .resp-visual-section { padding:12px 16px 16px; border-top:2px solid var(--border); }
+    .resp-visual-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:var(--blue-dark); margin-bottom:10px; }
+    .resp-video-embed { border-radius:14px; overflow:hidden; border:2px solid var(--border); margin-bottom:10px; }
+    .resp-video-embed iframe { width:100%; aspect-ratio:16/9; display:block; }
+    .resp-image-search-btn {
+      display:flex; align-items:center; gap:8px;
+      background:var(--green); color:white;
+      border:none; border-radius:12px;
+      padding:11px 16px; font-size:13px; font-weight:800;
+      text-decoration:none; cursor:pointer;
+      box-shadow:0 3px 0 var(--green-dark); transition:all 0.15s;
+    }
+    .resp-image-search-btn:hover { transform:translateY(-1px); box-shadow:0 5px 0 var(--green-dark); }
+
+    /* Bottom row of AI box */
+    .ai-box-footer {
+      display:flex; flex-wrap:wrap; gap:8px;
+      padding:16px 20px; border-top:2px solid var(--border);
+      background:var(--gray); align-items:center;
+    }
+    .ai-footer-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      background:white; border:2px solid var(--border); border-radius:10px;
+      padding:8px 14px; font-size:13px; font-weight:700; font-family:inherit;
+      cursor:pointer; color:var(--text); transition:all 0.15s;
+    }
+    .ai-footer-btn:hover { border-color:var(--orange); color:var(--orange); }
+
+    /* Try asking chips */
+    .try-asking { margin-top:20px; }
+    .try-asking-label { font-size:13px; font-weight:800; color:var(--text-light); margin-bottom:10px; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .chip {
+      background:white; border:2px solid var(--border); border-radius:999px;
+      padding:8px 16px; font-size:13px; font-weight:700; color:var(--text);
+      cursor:pointer; transition:all 0.15s; font-family:inherit;
+    }
+    .chip:hover { border-color:var(--orange); color:var(--orange); background:var(--orange-light); }
+
+    /* Usage counter */
+    #usageCounter { font-size:13px; font-weight:700; color:var(--text-light); text-align:right; margin-top:8px; }
+    #conversationIndicator { font-size:12px; font-weight:700; color:var(--blue); margin-top:6px; display:none; }
+    #planBanner { }
+    #newChatBtn { display:none; }
+
+    /* Thinking state */
+    .thinking-dots::after { content:'...'; animation:thinking-dots 1.2s steps(1) infinite; }
+    @keyframes thinking-dots { 0%,20%{content:'.'} 40%{content:'..'} 60%,100%{content:'...'} }
+
+    /* ── PRICING ─────────────────────────────────────────────── */
+    #pricing { background:white; }
+    .pricing-toggle {
+      display:inline-flex; background:var(--gray);
+      border-radius:14px; padding:5px; gap:4px;
+      border:2px solid var(--border); margin:28px auto 0; display:flex;
+      width:fit-content; margin-left:auto; margin-right:auto;
+    }
+    .pricing-tab {
+      padding:10px 24px; border-radius:10px;
+      font-size:14px; font-weight:800; font-family:inherit;
+      border:none; cursor:pointer; transition:all 0.15s;
+      background:transparent; color:#777;
+    }
+    .pricing-tab.active {
+      background:var(--orange); color:white;
+      box-shadow:0 3px 0 #CC5500;
+    }
+    .pricing-grid {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:20px; margin-top:40px; align-items:start;
+    }
+    @media (max-width:767px) { .pricing-grid { grid-template-columns:1fr; } }
+
+    .pricing-card {
+      background:white; border-radius:24px;
+      border:2px solid var(--border);
+      box-shadow:0 6px 0 var(--border);
+      padding:28px; position:relative; overflow:hidden;
+      transition:transform 0.2s, box-shadow 0.2s;
+    }
+    .pricing-card:hover { transform:translateY(-4px); box-shadow:0 10px 0 var(--border); }
+    .pricing-card-popular {
+      border-color:var(--green); box-shadow:0 6px 0 var(--green-dark);
+    }
+    .pricing-card-popular:hover { box-shadow:0 10px 0 var(--green-dark); }
+    .pricing-card-pro-plus {
+      background:var(--orange); border-color:#CC5500;
+      box-shadow:0 6px 0 #CC5500;
+    }
+    .pricing-card-pro-plus:hover { box-shadow:0 10px 0 #CC5500; }
+    .popular-badge {
+      position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+      background:var(--green); color:white; border:none;
+      padding:5px 16px; border-radius:999px;
+      font-size:12px; font-weight:900; white-space:nowrap;
+      box-shadow:0 3px 0 var(--green-dark);
+    }
+    .pricing-tier-badge {
+      display:inline-block; padding:4px 12px; border-radius:999px;
+      font-size:11px; font-weight:900; letter-spacing:0.04em;
+      margin-bottom:14px;
+    }
+    .pricing-price { font-size:44px; font-weight:900; line-height:1; color:var(--text); }
+    .pricing-price-white { color:white; }
+    .pricing-period { font-size:13px; font-weight:600; color:var(--text-light); }
+    .pricing-period-white { color:rgba(255,255,255,0.75); }
+    .yearly-note {
+      display:none; font-size:12px; font-weight:900;
+      border-radius:10px; padding:5px 12px; margin-top:8px;
+      animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .show-yearly .yearly-note { display:inline-block; }
+    @keyframes popIn { from { transform:scale(0.7); opacity:0; } to { transform:scale(1); opacity:1; } }
+    .pricing-desc { font-size:13px; font-weight:600; color:var(--text-light); margin:8px 0 20px; }
+    .pricing-desc-white { color:rgba(255,255,255,0.8); }
+    .pricing-divider { border-top:2px solid var(--border); margin:16px 0; }
+    .pricing-divider-white { border-top:2px solid rgba(255,255,255,0.25); margin:16px 0; }
+    .pricing-feature {
+      display:flex; align-items:center; gap:10px;
+      font-size:14px; font-weight:700; color:var(--text); padding:5px 0;
+    }
+    .pricing-feature-white { color:white; }
+    .pricing-feature-locked { color:#ccc; }
+    .feat-check {
+      width:22px; height:22px; border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:11px; flex-shrink:0;
+    }
+    .feat-check-green { background:var(--green); box-shadow:0 2px 0 var(--green-dark); color:white; }
+    .feat-check-white { background:white; color:var(--orange); box-shadow:0 2px 0 rgba(255,255,255,0.3); }
+    .feat-check-lock  { background:#f3f4f6; color:#ccc; border:1.5px solid #e5e7eb; }
+    .feat-section-label {
+      font-size:10px; font-weight:900; letter-spacing:0.08em;
+      text-transform:uppercase; color:var(--text-light); margin:10px 0 4px;
+    }
+    .feat-section-label-white { color:rgba(255,255,255,0.6); }
+
+    .save-pill { display:inline-flex; align-items:center; gap:6px; background:var(--green-light); color:var(--green-dark); padding:5px 12px; border-radius:999px; font-size:12px; font-weight:800; border:1.5px solid var(--green); }
+    .trial-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--blue-light); color:var(--blue-dark);
+      border:1.5px solid var(--blue); border-radius:8px;
+      padding:5px 10px; font-size:12px; font-weight:800; margin-top:8px;
+    }
+    .money-back-pill {
+      display:inline-flex; align-items:center; gap:10px;
+      background:var(--green-light); border:2px solid var(--green);
+      border-radius:999px; padding:10px 24px;
+      font-weight:800; font-size:14px; color:var(--green-dark);
+    }
+
+    /* ── FAQ ─────────────────────────────────────────────────── */
+    #faq { background:var(--gray); }
+    .faq-item {
+      background:white; border-radius:16px;
+      border:2px solid var(--border); box-shadow:0 3px 0 var(--border);
+      overflow:hidden; margin-bottom:12px;
+    }
+    .faq-q {
+      width:100%; display:flex; align-items:center; justify-content:space-between;
+      padding:18px 22px; font-size:16px; font-weight:800; color:var(--text);
+      background:none; border:none; cursor:pointer; font-family:inherit;
+      text-align:left; gap:12px;
+    }
+    .faq-arrow { font-size:18px; transition:transform 0.25s; flex-shrink:0; }
+    .faq-item.open .faq-arrow { transform:rotate(180deg); }
+    .faq-a {
+      display:none; padding:0 22px 18px;
+      font-size:15px; font-weight:600; color:#555; line-height:1.65;
+    }
+    .faq-item.open .faq-a { display:block; }
+
+    /* ── CTA BANNER ──────────────────────────────────────────── */
+    .cta-banner {
+      background:var(--orange); padding:80px 24px;
+      text-align:center; position:relative; overflow:hidden;
+    }
+    .cta-banner::before {
+      content:''; position:absolute;
+      top:-100px; left:50%; transform:translateX(-50%);
+      width:600px; height:600px; border-radius:50%;
+      background:rgba(255,255,255,0.06); pointer-events:none;
+    }
+    .cta-banner-knox { width:120px; height:120px; object-fit:contain; object-position:top center; margin:0 auto 20px; display:block; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.2)); }
+    .cta-banner-title { font-size:clamp(28px,5vw,52px); font-weight:900; color:white; letter-spacing:-0.02em; }
+    .cta-banner-sub { font-size:18px; font-weight:600; color:rgba(255,255,255,0.85); margin:12px auto 0; max-width:480px; }
+    .cta-banner-btns { display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:32px; }
+
+    /* ── FOOTER ──────────────────────────────────────────────── */
+    footer {
+      background:var(--bg-primary); color:var(--text);
+      padding:56px 24px 32px;
+    }
+    .footer-grid {
+      display:grid; grid-template-columns:2fr 1fr 1fr 1fr;
+      gap:40px; max-width:1100px; margin:0 auto;
+    }
+    @media (max-width:768px) { .footer-grid { grid-template-columns:1fr 1fr; } }
+    @media (max-width:480px) { .footer-grid { grid-template-columns:1fr; } }
+    .footer-brand-logo { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+    .footer-brand-img { width:40px; height:40px; border-radius:50%; border:2px solid rgba(255,255,255,0.2); overflow:hidden; }
+    .footer-brand-name { font-size:18px; font-weight:900; color:white; }
+    .footer-brand-desc { font-size:13px; font-weight:600; color:#888; line-height:1.65; max-width:240px; }
+    .footer-col-title { font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:#666; margin-bottom:14px; }
+    .footer-link { display:block; font-size:14px; font-weight:600; color:#aaa; text-decoration:none; margin-bottom:10px; transition:color 0.15s; }
+    .footer-link:hover { color:white; }
+    .footer-social-row { display:flex; gap:10px; margin-top:14px; }
+    .footer-social-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; transition:opacity 0.2s; }
+    .footer-social-icon:hover { opacity:0.75; }
+    .footer-bottom { max-width:1100px; margin:40px auto 0; padding-top:24px; border-top:1px solid #333; text-align:center; font-size:13px; font-weight:600; color:#555; }
+
+    /* ── MODALS (existing) ───────────────────────────────────── */
+    .login-modal { position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,0.5); display:none; align-items:flex-end; justify-content:center; }
+    .login-modal.open { display:flex; }
+    @media (min-width:640px) { .login-modal { align-items:center; } }
+    .login-panel { background:white; border-radius:24px 24px 0 0; padding:28px; width:100%; max-width:480px; max-height:92vh; overflow-y:auto; }
+    @media (min-width:640px) { .login-panel { border-radius:24px; } }
+    .login-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:20px; }
+    .login-body {}
+    .login-input { width:100%; padding:14px 16px; border:2px solid var(--border); border-radius:14px; font-size:15px; font-family:inherit; font-weight:600; transition:border-color 0.2s; }
+    .login-input:focus { outline:none; border-color:var(--orange); }
+    .login-divider { display:flex; align-items:center; gap:12px; margin:16px 0; }
+    .login-divider span { color:#9ca3af; font-size:13px; font-weight:600; white-space:nowrap; }
+    .login-divider::before,.login-divider::after { content:''; flex:1; border-top:2px solid var(--border); }
+    .login-social-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:13px; border:2px solid var(--border); border-radius:14px; font-weight:700; font-size:15px; cursor:pointer; background:white; margin-bottom:10px; transition:all 0.15s; font-family:inherit; }
+    .login-social-btn:hover { border-color:var(--orange); background:var(--orange-light); }
+    .login-error { background:#fef2f2; border:2px solid var(--red); border-radius:12px; padding:10px 14px; color:var(--red); font-size:13px; font-weight:700; margin-bottom:14px; display:none; }
+    .login-error.show { display:block; }
+    .login-success { background:var(--green-light); border:2px solid var(--green); border-radius:12px; padding:10px 14px; color:var(--green-dark); font-size:13px; font-weight:700; margin-bottom:14px; display:none; }
+    .login-success.show { display:block; }
+    .login-tab { display:inline-flex; align-items:center; justify-content:center; padding:12px 18px; border-radius:12px; font-weight:800; font-size:15px; cursor:pointer; border:2px solid transparent; transition:all 0.15s; font-family:inherit; background:none; color:#9CA3AF; flex:1; }
+    .login-tab.active { background:#FF6B00; color:white; border-color:#FF6B00; box-shadow:0 3px 0 #CC5500; }
+    .login-tab:not(.active) { color:#9CA3AF; background:transparent; }
+
+    /* Modals (settings, calculator, history) */
+    .settings-modal,.history-modal,.calc-modal { position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,0.5); display:none; align-items:flex-end; justify-content:center; }
+    .settings-modal.open,.history-modal.open,.calc-modal.open { display:flex; }
+    @media (min-width:640px) { .settings-modal,.history-modal,.calc-modal { align-items:center; } }
+    .settings-panel { background:white; border-radius:24px 24px 0 0; padding:28px; width:100%; max-width:520px; max-height:92vh; overflow-y:auto; }
+    .history-panel { background:white; border-radius:24px 24px 0 0; padding:28px; width:100%; max-width:560px; max-height:92vh; overflow-y:auto; }
+    .calc-panel { background:white; border-radius:24px 24px 0 0; padding:0; width:100%; max-width:380px; max-height:92vh; overflow-y:auto; }
+    @media (min-width:640px) { .settings-panel,.history-panel,.calc-panel { border-radius:24px; } }
+
+    /* Calc specific */
+    .calc-mode-tab { padding:4px 10px; font-size:11px; font-weight:800; font-family:inherit; border:2px solid var(--border); border-radius:8px; cursor:pointer; background:white; transition:all 0.15s; white-space:nowrap; }
+    .calc-expr { font-size:11px; color:#64748b; text-align:right; min-height:16px; font-family:'Nunito',monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .calc-display { color:var(--orange); font-size:26px; font-weight:800; font-family:'Nunito',monospace; text-align:right; letter-spacing:0.02em; word-break:break-all; line-height:1.2; }
+    .calc-grid { display:grid; grid-template-columns:repeat(4,1fr); border-top:2px solid black; }
+    .calc-btn { border:none; border-right:2px solid black; border-bottom:2px solid black; padding:12px 4px; font-size:12px; font-weight:800; font-family:inherit; cursor:pointer; transition:background 0.12s; background:white; }
+    .calc-btn:hover { background:var(--orange-light); }
+    .calc-btn:active { background:var(--orange); color:white; }
+
+    /* History */
+    .history-item { border:2px solid var(--border); border-radius:14px; padding:16px; margin-bottom:10px; cursor:pointer; transition:all 0.15s; }
+    .history-item:hover { border-color:var(--orange); background:var(--orange-light); }
+    .history-question { font-size:14px; font-weight:700; color:var(--text); }
+    .history-answer { font-size:13px; color:#777; margin-top:4px; line-height:1.5; }
+
+    /* Reveal animations */
+    .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+    .reveal-left { opacity:0; transform:translateX(-24px); transition:opacity 0.6s ease, transform 0.6s ease; }
+    .reveal-left.visible { opacity:1; transform:none; }
+    .reveal-right { opacity:0; transform:translateX(24px); transition:opacity 0.6s ease, transform 0.6s ease; }
+    .reveal-right.visible { opacity:1; transform:none; }
+    .delay-1 { transition-delay:0.05s; }
+    .delay-2 { transition-delay:0.15s; }
+    .delay-3 { transition-delay:0.25s; }
+    .delay-4 { transition-delay:0.35s; }
+
+    /* Section title underline */
+    .section-title { font-size:clamp(26px,4vw,40px); font-weight:900; letter-spacing:-0.02em; }
+    .section-title-underline { display:inline-block; position:relative; opacity:0; transition:opacity 0.5s 0.2s; }
+    .section-title-underline::after { content:''; position:absolute; bottom:-6px; left:0; width:0; height:4px; background:var(--orange); border-radius:999px; transition:width 0.7s 0.5s ease-out; }
+    .section-title-underline.visible { opacity:1; }
+    .section-title-underline.visible::after { width:100%; }
+    .heading { font-weight:900; }
+
+    /* ── CHAT THREAD ──────────────────────────────────────────────────────── */
+    #chatThread { background:var(--chat-bg); color:var(--text); background:var(--chat-bg);
+      display:flex; flex-direction:column; gap:14px;
+      padding:20px 20px 16px; min-height:80px;
+      max-height:440px; overflow-y:auto;
+      scroll-behavior:smooth; background:#fafafa;
+    }
+    #chatThread::-webkit-scrollbar { width:4px; }
+    #chatThread::-webkit-scrollbar-track { background:transparent; }
+    #chatThread::-webkit-scrollbar-thumb { background:var(--border); border-radius:999px; }
+
+    /* User bubble */
+    .chat-user-row { display:flex; justify-content:flex-end; }
+    .chat-user-bubble {
+      background:var(--orange); color:white;
+      padding:12px 18px; border-radius:20px 20px 4px 20px;
+      max-width:82%; font-size:15px; font-weight:600; line-height:1.55;
+      box-shadow:0 2px 8px rgba(255,107,0,0.25);
+    }
+
+    /* Knox bubble */
+    .chat-knox-row { display:flex; gap:10px; align-items:flex-start; }
+    .chat-knox-avatar {
+      width:38px; height:38px; border-radius:50%;
+      border:2px solid var(--orange-light);
+      overflow:hidden; flex-shrink:0; margin-top:2px;
+      background:#FED7AA;
+    }
+    .chat-knox-avatar img { width:100%; height:100%; object-fit:cover; }
+    .chat-knox-bubble {
+      background:white; border:2px solid var(--border);
+      border-radius:4px 20px 20px 20px;
+      max-width:85%; overflow:hidden;
+      box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    /* Thinking bubble */
+    .chat-thinking-bubble {
+      background:white; border:2px solid var(--border);
+      border-radius:4px 20px 20px 20px;
+      padding:14px 18px; max-width:85%;
+      display:flex; align-items:center; gap:10px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    }
+    .chat-thinking-dots { display:flex; gap:5px; align-items:center; }
+    .chat-thinking-dots span {
+      width:8px; height:8px; border-radius:50%; background:var(--orange);
+      animation:chatDot 1.2s ease-in-out infinite;
+    }
+    .chat-thinking-dots span:nth-child(2) { animation-delay:0.2s; }
+    .chat-thinking-dots span:nth-child(3) { animation-delay:0.4s; }
+    @keyframes chatDot { 0%,80%,100%{transform:scale(0.7);opacity:0.5} 40%{transform:scale(1);opacity:1} }
+
+    /* Knox greeting */
+    .chat-greeting {
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .chat-greeting-bubble {
+      background:var(--orange-light); border:2px solid var(--orange);
+      border-radius:4px 20px 20px 20px; padding:14px 18px;
+      max-width:85%;
+    }
+    .chat-greeting-bubble p { font-size:15px; font-weight:600; color:#44403c; line-height:1.6; }
+
+    /* Input area */
+    .chat-input-area {
+      padding:16px 20px; background:var(--gray);
+      border-top:2px solid var(--border);
+    }
+    .chat-input-wrap {
+      display:flex; gap:10px; align-items:flex-end;
+    }
+    #chatInput { background:var(--bg-input); color:var(--text); border-color:var(--border);
+      flex:1; padding:12px 16px; border:2px solid var(--border);
+      border-radius:16px; font-size:15px; font-family:inherit;
+      font-weight:500; resize:none; line-height:1.5;
+      background:white; color:var(--text); min-height:48px;
+      max-height:160px; overflow-y:auto; transition:border-color 0.2s;
+    }
+    #chatInput:focus { outline:none; border-color:var(--orange); }
+    .chat-send-btn {
+      width:48px; height:48px; border-radius:14px; border:none;
+      background:var(--orange); color:white; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0; box-shadow:0 3px 0 #CC5500;
+      transition:all 0.15s;
+    }
+    .chat-send-btn:hover  { transform:translateY(-2px); box-shadow:0 5px 0 #CC5500; }
+    .chat-send-btn:active { transform:translateY(2px); box-shadow:none; }
+    .chat-send-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none !important; box-shadow:0 3px 0 #CC5500 !important; }
+    .chat-attach-btn {
+      width:38px; height:38px; border-radius:11px; border:2px solid var(--border);
+      background:white; cursor:pointer; display:flex; align-items:center;
+      justify-content:center; color:var(--text-light); transition:all 0.15s; flex-shrink:0;
+    }
+    .chat-attach-btn:hover { border-color:var(--orange); color:var(--orange); }
+    .chat-tools-row {
+      display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;
+    }
+    /* Usage progress bar */
+    .usage-bar-wrap { padding:10px 16px 12px;background:#FAFAFA;border-top:1.5px solid #F3F4F6; }
+    .usage-bar-label { display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;color:#9CA3AF;margin-bottom:5px; }
+    .usage-bar-track { height:8px;border-radius:999px;overflow:hidden; }
+    .usage-bar-track.orange { background:#FFE0C2; }
+    .usage-bar-track.blue   { background:#D7F2FD; }
+    .usage-bar-fill         { height:100%;border-radius:999px;transition:width 0.4s ease; }
+    .usage-bar-fill.hw-fill { background:#FF6B00; }
+    .usage-bar-fill.cs-fill { background:#1CB0F6; }
+    .usage-bar-fill.warn    { background:#F59E0B; }
+    .usage-bar-fill.danger  { background:#EF4444; }
+
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* User avatar */
+    .user-avatar { width:32px; height:32px; border-radius:50%; border:2px solid rgba(255,255,255,0.5); object-fit:cover; }
+    .default-avatar { width:32px; height:32px; border-radius:50%; border:2px solid rgba(255,255,255,0.5); background:rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; font-size:14px; }
+
+    /* Cookie banner */
+    #cookieBanner { display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:#1a1a1a; border-top:3px solid black; padding:14px 16px; }
+
+    /* Mobile responsive */
+    @media (max-width:640px) {
+      .pricing-grid { grid-template-columns:1fr !important; }
+      .ai-box-body { padding:20px; }
+      .ai-box-header { padding:16px 20px; }
+      .resp-brain { width:36px; height:36px; }
+      .section { padding:56px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<header id="main-header">
+  <a href="#home" class="header-logo">
+    <img src="./knox-logo.jpg" alt="Knox" class="header-logo-img" onerror="this.style.fontSize='24px';this.outerHTML='<span style=\'font-size:28px;\'>🦊</span>'">
+    <span class="header-logo-text">Knox Knows</span>
+  </a>
+
+  <nav class="header-center-nav">
+    <a href="#how-it-works" class="nav-link">How it works</a>
+    <a href="#ai-helper" class="nav-link">Ask Knox</a>
+    <a href="#pricing" class="nav-link">Pricing</a>
+  </nav>
+
+  <div class="header-nav">
+    <a href="#pricing" class="pro-badge" id="proBadge" style="text-decoration:none;">⚡ Upgrade</a>
+
+    <div class="account-dropdown-wrapper" id="accountDropdownWrapper" style="display:none;">
+      <button id="accountBtn" onclick="toggleDropdown(event)" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.2);color:white;border:2px solid rgba(255,255,255,0.4);border-radius:12px;padding:9px 14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+        <span id="accountIcon"></span>
+        <span id="accountName" style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="account-dropdown" id="accountDropdown">
+        <div class="dropdown-header">
+          <p id="dropdownName"></p>
+          <span id="dropdownEmail"></span>
+          <div id="dropdownPlan" style="margin-top:4px;font-size:11px;font-weight:900;color:var(--orange);"></div>
+        </div>
+        <button class="dropdown-item" onclick="openSettings()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Account &amp; Plan
+        </button>
+        <button class="dropdown-item" onclick="handleSwitchAccount()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          Switch Account
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item danger" onclick="handleLogout()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button id="loginBtn" class="header-login" onclick="openLoginModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="login-text">Login</span>
+    </button>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section id="home" style="background:var(--bg-primary);padding:72px 24px 56px;text-align:center;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-120px;left:-80px;width:500px;height:500px;border-radius:50%;background:rgba(255,107,0,0.12);pointer-events:none;"></div>
+  <div style="position:absolute;bottom:-80px;right:-60px;width:400px;height:400px;border-radius:50%;background:rgba(28,176,246,0.1);pointer-events:none;"></div>
+
+  <div style="position:relative;z-index:1;max-width:900px;margin:0 auto;">
+    <!-- Knox laptop character - official logo -->
+    <div style="margin-bottom:8px;">
+      <img src="./knox-logo.jpg" alt="Knox the Fox" style="width:200px;height:200px;object-fit:cover;border-radius:50%;filter:drop-shadow(0 8px 20px rgba(255,107,0,0.25));" onerror="this.outerHTML='<div style=\'font-size:120px;\'>🦊</div>'">
+    </div>
+
+    <!-- Knox wave badge -->
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,107,0,0.15);border:2px solid #FF6B00;border-radius:999px;padding:7px 18px;font-size:14px;font-weight:800;color:#FF6B00;margin-bottom:24px;">
+      Hi! I'm Knox 👋 Your AI study companion
+    </div>
+
+    <h1 style="font-size:clamp(38px,6.5vw,74px);font-weight:900;line-height:1.05;letter-spacing:-0.02em;color:var(--text);">
+      Stop Guessing.<br>
+      <span style="color:#FF6B00;">Start Knowing.</span>
+    </h1>
+
+    <p style="font-size:18px;font-weight:600;color:var(--text-light);line-height:1.65;max-width:500px;margin:18px auto 0;">
+      Knox knows every subject — math, science, history, English and more. From K-12 through college.
+    </p>
+
+    <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:36px;">
+      <button class="btn-orange" style="font-size:17px;padding:17px 32px;" onclick="scrollToAI();setMode('answer')">Get the Answer</button>
+      <button class="btn-blue" style="font-size:17px;padding:17px 32px;" onclick="scrollToAI();setMode('learn')">Learn with Knox</button>
+    </div>
+
+    <p style="font-size:13px;font-weight:800;color:#58CC02;margin-top:16px;">✔ Free account — 5 questions every day, no credit card needed</p>
+
+    <!-- Social proof row with running Knox -->
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:32px;margin-top:40px;">
+      <img src="./knox-run.png" alt="Knox running" style="width:90px;height:auto;object-fit:contain;" onerror="this.style.display='none'">
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:white;background:#242424;border:2px solid #333;border-radius:999px;padding:8px 16px;">
+          <span style="font-size:18px;">📚</span> Every subject K-12 → College
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:white;background:#242424;border:2px solid #333;border-radius:999px;padding:8px 16px;">
+          <span style="font-size:18px;">⚡</span> Instant answers
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:white;background:#242424;border:2px solid #333;border-radius:999px;padding:8px 16px;">
+          <span style="font-size:18px;">🎓</span> Step-by-step learning
+        </div>
+      </div>
+      <img src="./knox-backpack.png" alt="Knox with backpack" style="width:90px;height:auto;object-fit:contain;" onerror="this.style.display='none'">
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TWO MODES ===================== -->
+<section style="background:var(--bg-secondary);padding:72px 24px;">
+  <div style="max-width:1000px;margin:0 auto;text-align:center;">
+    <h2 class="section-title section-title-underline reveal" style="display:inline-block;color:var(--text);">Two ways to use Knox</h2>
+    <p style="font-size:18px;font-weight:600;color:var(--text-light);margin-top:14px;line-height:1.6;">Knox helps you no matter how you learn best.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:48px;">
+      <!-- Get the Answer -->
+      <div class="reveal delay-1" onclick="scrollToAI();setMode('answer')" style="background:#FF6B00;border-radius:24px;border:3px solid #CC5500;box-shadow:0 8px 0 rgba(0,0,0,0.4);padding:40px 32px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;text-align:left;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 14px 0 rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 0 rgba(0,0,0,0.4)'">
+        <div style="position:absolute;top:0;right:0;width:90px;height:90px;background:rgba(255,255,255,0.08);border-radius:0 24px 0 90px;"></div>
+        <img src="./knox-laptop.png" alt="Knox with laptop" style="width:100px;height:auto;float:right;margin:-10px -10px 10px 16px;" onerror="this.style.display='none'">
+        <h3 style="font-size:26px;font-weight:900;color:white;margin-bottom:10px;">Get the Answer</h3>
+        <p style="font-size:15px;font-weight:600;color:rgba(255,255,255,0.85);line-height:1.6;">Stuck on a problem? Knox gives you a clear, instant answer with full explanations. Fast and accurate.</p>
+        <div style="margin-top:24px;display:inline-flex;align-items:center;gap:6px;background:white;color:#CC5500;border-radius:12px;padding:11px 20px;font-size:14px;font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,0.25);">
+          Try it now →
+        </div>
+      </div>
+
+      <!-- Learn with Knox -->
+      <div class="reveal delay-2" onclick="scrollToAI();setMode('learn')" style="background:#1CB0F6;border-radius:24px;border:3px solid #0A85C2;box-shadow:0 8px 0 rgba(0,0,0,0.4);padding:40px 32px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;text-align:left;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 14px 0 rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 0 rgba(0,0,0,0.4)'">
+        <div style="position:absolute;top:0;right:0;width:90px;height:90px;background:rgba(255,255,255,0.08);border-radius:0 24px 0 90px;"></div>
+        <img src="./knox-book.png" alt="Knox reading book" style="width:100px;height:auto;float:right;margin:-10px -10px 10px 16px;" onerror="this.style.display='none'">
+        <h3 style="font-size:26px;font-weight:900;color:white;margin-bottom:10px;">Learn with Knox</h3>
+        <p style="font-size:15px;font-weight:600;color:rgba(255,255,255,0.9);line-height:1.6;">Knox guides you step-by-step like a real tutor — asking questions, giving hints, helping you actually understand.</p>
+        <div style="margin-top:24px;display:inline-flex;align-items:center;gap:6px;background:white;color:#0A85C2;border-radius:12px;padding:11px 20px;font-size:14px;font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,0.25);">
+          Learn with Knox →
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section id="how-it-works" style="background:var(--bg-primary);padding:72px 24px;">
+  <div style="max-width:1000px;margin:0 auto;text-align:center;">
+    <h2 class="section-title reveal" style="display:inline-block;color:var(--text);border-bottom:4px solid var(--orange);padding-bottom:6px;">How Knox works</h2>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;">
+      <div class="reveal delay-1" style="background:var(--bg-secondary);border-radius:20px;border:3px solid #FF6B00;box-shadow:0 6px 0 rgba(0,0,0,0.5);padding:32px 24px;text-align:center;">
+        <div style="width:56px;height:56px;border-radius:50%;background:#FF6B00;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 4px 0 #CC5500;font-size:22px;font-weight:900;color:white;">1</div>
+        <img src="./knox-think.png" alt="Knox thinking" style="width:80px;height:auto;margin-bottom:12px;" onerror="this.style.display='none'">
+        <h3 style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px;">Type or upload</h3>
+        <p style="font-size:14px;font-weight:600;color:var(--text-light);line-height:1.6;">Type your question or snap a photo of your homework problem.</p>
+      </div>
+      <div class="reveal delay-2" style="background:var(--bg-secondary);border-radius:20px;border:3px solid #58CC02;box-shadow:0 6px 0 rgba(0,0,0,0.5);padding:32px 24px;text-align:center;">
+        <div style="width:56px;height:56px;border-radius:50%;background:#58CC02;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 4px 0 #46A302;font-size:22px;font-weight:900;color:white;">2</div>
+        <img src="./knox-happy.png" alt="Knox happy" style="width:80px;height:auto;margin-bottom:12px;" onerror="this.style.display='none'">
+        <h3 style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px;">Knox figures it out</h3>
+        <p style="font-size:14px;font-weight:600;color:var(--text-light);line-height:1.6;">Knox analyzes your question and builds a clear, step-by-step explanation.</p>
+      </div>
+      <div class="reveal delay-3" style="background:var(--bg-secondary);border-radius:20px;border:3px solid #1CB0F6;box-shadow:0 6px 0 rgba(0,0,0,0.5);padding:32px 24px;text-align:center;">
+        <div style="width:56px;height:56px;border-radius:50%;background:#1CB0F6;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 4px 0 #0A85C2;font-size:22px;font-weight:900;color:white;">3</div>
+        <img src="./knox-thumbs.png" alt="Knox thumbs up" style="width:80px;height:auto;margin-bottom:12px;" onerror="this.style.display='none'">
+        <h3 style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:8px;">You actually learn</h3>
+        <p style="font-size:14px;font-weight:600;color:var(--text-light);line-height:1.6;">Get the answer and understand why — so you're ready for the test.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SUBJECTS ===================== -->
+<section style="background:var(--bg-secondary);padding:72px 24px;">
+  <div style="max-width:1100px;margin:0 auto;text-align:center;">
+    <h2 class="section-title section-title-underline reveal" style="display:inline-block;">Every subject. Every grade.</h2>
+    <p style="font-size:18px;font-weight:600;color:var(--text-light);margin-top:14px;">K-12 through college — Knox has you covered.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px;">
+      <div class="reveal delay-1" style="background:#FF6B00;border-radius:18px;border:3px solid #CC5500;box-shadow:0 5px 0 rgba(0,0,0,0.35);padding:22px 18px;text-align:left;transition:transform 0.2s;cursor:default;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:rgba(255,255,255,0.1);border-radius:0 18px 0 50px;"></div>
+        <div style="font-size:34px;margin-bottom:10px;">📐</div>
+        <div style="font-size:15px;font-weight:900;color:white;">Math</div>
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:5px;line-height:1.5;">Algebra · Geometry · Calculus · Stats</div>
+      </div>
+      <div class="reveal delay-2" style="background:#58CC02;border-radius:18px;border:3px solid #46A302;box-shadow:0 5px 0 rgba(0,0,0,0.35);padding:22px 18px;text-align:left;transition:transform 0.2s;cursor:default;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:rgba(255,255,255,0.1);border-radius:0 18px 0 50px;"></div>
+        <div style="font-size:34px;margin-bottom:10px;">🔬</div>
+        <div style="font-size:15px;font-weight:900;color:white;">Science</div>
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:5px;line-height:1.5;">Biology · Chemistry · Physics</div>
+      </div>
+      <div class="reveal delay-3" style="background:#1CB0F6;border-radius:18px;border:3px solid #0A85C2;box-shadow:0 5px 0 rgba(0,0,0,0.35);padding:22px 18px;text-align:left;transition:transform 0.2s;cursor:default;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:rgba(255,255,255,0.1);border-radius:0 18px 0 50px;"></div>
+        <div style="font-size:34px;margin-bottom:10px;">🌍</div>
+        <div style="font-size:15px;font-weight:900;color:white;">History</div>
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:5px;line-height:1.5;">World · US · AP · Geography</div>
+      </div>
+      <div class="reveal delay-4" style="background:#FF6B00;border-radius:18px;border:3px solid #CC5500;box-shadow:0 5px 0 rgba(0,0,0,0.35);padding:22px 18px;text-align:left;transition:transform 0.2s;cursor:default;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:rgba(255,255,255,0.1);border-radius:0 18px 0 50px;"></div>
+        <div style="font-size:34px;margin-bottom:10px;">📖</div>
+        <div style="font-size:15px;font-weight:900;color:white;">English</div>
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:5px;line-height:1.5;">Essays · Grammar · Literature</div>
+      </div>
+      <div class="reveal delay-1" style="background:#58CC02;border-radius:18px;border:3px solid #46A302;box-shadow:0 5px 0 rgba(0,0,0,0.35);padding:22px 18px;text-align:left;transition:transform 0.2s;cursor:default;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:rgba(255,255,255,0.1);border-radius:0 18px 0 50px;"></div>
+        <div style="font-size:34px;margin-bottom:10px;">💻</div>
+        <div style="font-size:15px;font-weight:900;color:white;">Computer Science</div>
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:5px;line-height:1.5;">Python · Java · Algorithms</div>
+      </div>
+      <div class="reveal delay-2" style="background:#1CB0F6;border-radius:18px;border:3px solid #0A85C2;box-shadow:0 5px 0 rgba(0,0,0,0.35);padding:22px 18px;text-align:left;transition:transform 0.2s;cursor:default;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:rgba(255,255,255,0.1);border-radius:0 18px 0 50px;"></div>
+        <div style="font-size:34px;margin-bottom:10px;">🌐</div>
+        <div style="font-size:15px;font-weight:900;color:white;">Languages</div>
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:5px;line-height:1.5;">Spanish · French · German · Latin</div>
+      </div>
+      <div class="reveal delay-3" style="background:#FF6B00;border-radius:18px;border:3px solid #CC5500;box-shadow:0 5px 0 rgba(0,0,0,0.35);padding:22px 18px;text-align:left;transition:transform 0.2s;cursor:default;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:rgba(255,255,255,0.1);border-radius:0 18px 0 50px;"></div>
+        <div style="font-size:34px;margin-bottom:10px;">📊</div>
+        <div style="font-size:15px;font-weight:900;color:white;">Economics</div>
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:5px;line-height:1.5;">Micro · Macro · Accounting</div>
+      </div>
+      <div class="reveal delay-4" style="background:#58CC02;border-radius:18px;border:3px solid #46A302;box-shadow:0 5px 0 rgba(0,0,0,0.35);padding:22px 18px;text-align:left;transition:transform 0.2s;cursor:default;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="position:absolute;top:0;right:0;width:50px;height:50px;background:rgba(255,255,255,0.1);border-radius:0 18px 0 50px;"></div>
+        <div style="font-size:34px;margin-bottom:10px;">🎓</div>
+        <div style="font-size:15px;font-weight:900;color:white;">Test Prep</div>
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);margin-top:5px;line-height:1.5;">SAT · ACT · AP · GRE · LSAT</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ASK AI ===================== -->
+<section id="ai-helper" style="background:var(--bg-primary);padding:72px 24px;">
+  <div style="max-width:780px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="./knox-wave.png" alt="Knox waving" style="width:80px;height:auto;margin-bottom:-10px;filter:drop-shadow(0 4px 8px rgba(255,107,0,0.2));" onerror="this.style.display='none'">
+      <h2 class="section-title section-title-underline reveal" style="display:inline-block;margin-bottom:8px;color:var(--text);">Ask Knox</h2>
+      <p style="font-size:16px;font-weight:600;color:#666;">Choose how Knox helps you — then just talk to him.</p>
+    </div>
+
+    <!-- Chat container -->
+    <div style="background:white;border-radius:24px;border:2px solid #E5E7EB;box-shadow:0 4px 24px rgba(0,0,0,0.07);overflow:hidden;">
+
+      <!-- ── HEADER ── -->
+      <div style="background:#FF6B00;padding:18px 20px;display:flex;align-items:center;gap:14px;">
+        <div style="width:48px;height:48px;border-radius:50%;border:3px solid rgba(255,255,255,0.4);overflow:hidden;background:#FED7AA;flex-shrink:0;">
+          <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:17px;font-weight:900;color:white;line-height:1.2;">Knox Knows</div>
+          <div id="aiHeaderDesc" style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.8);margin-top:2px;">Ready to help you ace it</div>
+        </div>
+        <button id="newChatBtn" onclick="startNewChat()" style="display:none;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.5);border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;color:white;cursor:pointer;font-family:inherit;">New Chat</button>
+      </div>
+
+      <!-- ── MODE TABS ── -->
+      <div style="padding:12px 16px;background:white;border-bottom:2px solid #F3F4F6;">
+        <div style="display:flex;gap:6px;background:#F3F4F6;border-radius:12px;padding:4px;">
+          <button id="modeAnswerBtn" onclick="setMode('answer')"
+            style="flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;">
+            Get the Answer
+          </button>
+          <button id="modeLearnBtn" onclick="setMode('learn')"
+            style="flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;">
+            Learn with Knox
+          </button>
+
+        </div>
+      </div>
+
+      <!-- ── CHAT THREAD ── -->
+      <div id="chatThread" style="display:flex;flex-direction:column;gap:14px;padding:20px;min-height:100px;max-height:420px;overflow-y:auto;background:#FAFAFA;">
+        <!-- Knox greeting -->
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
+            <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+          </div>
+          <div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:84%;">
+            <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan banner -->
+      <div id="planBanner"></div>
+      <div id="conversationIndicator" style="display:none;padding:5px 20px;font-size:12px;font-weight:700;color:#1D4ED8;background:#EFF6FF;"></div>
+
+      <!-- ── INPUT AREA ── -->
+      <div style="background:white;border-top:2px solid #F3F4F6;padding:14px 16px 12px;">
+        <!-- Input box -->
+        <div id="chatInputWrapper" style="display:flex;align-items:center;background:#F9FAFB;border:2px solid #E5E7EB;border-radius:16px;padding:4px 6px 4px 16px;transition:border-color 0.2s;gap:8px;">
+          <textarea id="chatInput" placeholder="Ask Knox anything..." rows="1"
+            style="flex:1;border:none;outline:none;background:transparent;font-size:15px;font-family:inherit;font-weight:500;color:#3C3C3C;resize:none;min-height:44px;max-height:140px;overflow-y:auto;padding:10px 0;line-height:1.5;"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();handleAskQuestion();}"
+            onfocus="document.getElementById('chatInputWrapper').style.borderColor='#FF6B00'"
+            onblur="document.getElementById('chatInputWrapper').style.borderColor='#E5E7EB'"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px';"></textarea>
+          <!-- Tools -->
+          <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">
+            <input type="file" id="fileInput" accept="image/*" style="display:none;">
+            <button onclick="openCalc()" title="Calculator" class="chat-icon-btn" data-hover-color="#FF6B00"
+              style="width:34px;height:34px;border-radius:9px;border:none;background:transparent;cursor:pointer;color:#D1D5DB;display:flex;align-items:center;justify-content:center;transition:color 0.15s;"
+              onmouseover="this.style.color=(this.dataset.hoverColor||'#FF6B00')" onmouseout="this.style.color='#D1D5DB'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>
+            </button>
+            <button onclick="document.getElementById('fileInput').click()" title="Upload image" class="chat-icon-btn" data-hover-color="#FF6B00"
+              style="width:34px;height:34px;border-radius:9px;border:none;background:transparent;cursor:pointer;color:#D1D5DB;display:flex;align-items:center;justify-content:center;transition:color 0.15s;"
+              onmouseover="this.style.color=(this.dataset.hoverColor||'#FF6B00')" onmouseout="this.style.color='#D1D5DB'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            </button>
+            <button id="askBtn" onclick="handleAskQuestion()" title="Send"
+              style="width:40px;height:40px;border-radius:12px;border:none;background:#FF6B00;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;flex-shrink:0;"
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #CC5500'"
+              onmouseout="this.style.transform='';this.style.boxShadow='0 3px 0 #CC5500'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+          </div>
+        </div>
+        <!-- Image pill + hint -->
+        <div style="display:flex;align-items:center;margin-top:6px;gap:8px;">
+          <div id="imagePill" style="display:none;align-items:center;gap:6px;background:#FFF4EC;border:1.5px solid #FF6B00;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:#FF6B00;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            <span id="imagePillName">Image attached</span>
+            <button onclick="clearImage()" style="background:none;border:none;cursor:pointer;color:#FF6B00;font-size:13px;padding:0;line-height:1;">✕</button>
+          </div>
+          <span style="font-size:11px;font-weight:600;color:#D1D5DB;margin-left:auto;">Enter to send · Shift+Enter for new line</span>
+        </div>
+      </div>
+
+      <!-- Usage bars -->
+      <div id="usageBarWrap" class="usage-bar-wrap" style="display:block;">
+        <!-- Homework credits -->
+        <div style="margin-bottom:10px;">
+          <div class="usage-bar-label">
+            <span style="display:flex;align-items:center;gap:5px;">
+              <span style="font-size:10px;">📚</span>
+              <span id="usageBarLabel" style="color:#FF6B00;font-weight:800;">0 / 5 homework questions used</span>
+            </span>
+            <span id="usageBarCountdown" style="font-size:11px;font-weight:800;"></span>
+          </div>
+          <div class="usage-bar-track orange">
+            <div id="usageBarFill" class="usage-bar-fill hw-fill" style="width:0%;"></div>
+          </div>
+          <!-- Live countdown clock -->
+          <div id="hwClockWrap" style="display:none;margin-top:5px;padding:6px 10px;background:#FEF2F2;border-radius:8px;border:1.5px solid #FECACA;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:11px;font-weight:700;color:#DC2626;">⏱ Next homework credit unlocks in:</span>
+              <span id="hwClockDisplay" style="font-size:13px;font-weight:900;color:#DC2626;font-variant-numeric:tabular-nums;letter-spacing:0.04em;">--:--:--</span>
+            </div>
+          </div>
+        </div>
+        <!-- Casual credits -->
+        <div id="casualBarSection" style="display:none;">
+          <div class="usage-bar-label">
+            <span style="display:flex;align-items:center;gap:5px;">
+              <span style="font-size:10px;">💬</span>
+              <span id="casualBarLabel" style="color:#1CB0F6;font-weight:800;">0 / 20 chat messages used</span>
+            </span>
+            <span id="casualBarCountdown" style="font-size:11px;font-weight:800;"></span>
+          </div>
+          <div class="usage-bar-track blue">
+            <div id="casualBarFill" class="usage-bar-fill cs-fill" style="width:0%;"></div>
+          </div>
+          <!-- Live countdown clock for casual -->
+          <div id="csClockWrap" style="display:none;margin-top:5px;padding:6px 10px;background:#EFF9FF;border-radius:8px;border:1.5px solid #BAE6FD;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:11px;font-weight:700;color:#0369A1;">⏱ Next chat credit unlocks in:</span>
+              <span id="csClockDisplay" style="font-size:13px;font-weight:900;color:#0369A1;font-variant-numeric:tabular-nums;letter-spacing:0.04em;">--:--:--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FOOTER ── -->
+      <div style="padding:10px 16px;border-top:2px solid #F3F4F6;background:#F9FAFB;display:flex;align-items:center;">
+        <button onclick="openHistory()" style="display:inline-flex;align-items:center;gap:6px;background:white;border:2px solid #E5E7EB;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:#6B7280;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#6B7280'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          History
+        </button>
+        <div id="usageCounter" style="font-size:12px;font-weight:700;color:#9CA3AF;margin-left:auto;"></div>
+      </div>
+
+    </div><!-- end chat container -->
+
+    <div id="answerBox" style="display:none;"></div>
+
+    <!-- Try asking chips -->
+    <div style="margin-top:20px;">
+      <div style="font-size:13px;font-weight:800;color:#9CA3AF;margin-bottom:10px;">Try asking Knox:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button onclick="setQuestion('Explain the quadratic formula')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Quadratic formula</button>
+        <button onclick="setQuestion('How does photosynthesis work?')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Photosynthesis</button>
+        <button onclick="setQuestion('What caused World War 1?')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">World War 1</button>
+        <button onclick="setQuestion('Help me write a thesis statement')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Thesis statement</button>
+        <button onclick="setQuestion('Explain the Pythagorean theorem')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Pythagorean theorem</button>
+        <button onclick="setQuestion('Newton\'s 2nd law explained')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Newton's 2nd law</button>
+        <button onclick="setQuestion('What are derivatives in calculus?')" style="background:white;border:2px solid #E5E7EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:#3C3C3C;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#3C3C3C'">Derivatives</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PRICING ===================== -->
+<section id="pricing" style="background:var(--bg-secondary);padding:80px 24px;">
+  <div style="max-width:1000px;margin:0 auto;">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 class="section-title section-title-underline reveal" style="display:inline-block;margin-bottom:12px;">Pick your plan</h2>
+      <p style="font-size:17px;font-weight:600;color:#666;">Start free. Every upgrade is a real step up.</p>
+    </div>
+
+    <!-- Billing toggle -->
+    <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:40px;">
+      <div style="display:inline-flex;background:var(--bg-card);border:2px solid var(--border);border-radius:14px;padding:4px;gap:4px;box-shadow:0 3px 0 var(--border);">
+        <button id="monthlyBtn" onclick="setBilling('monthly')" style="padding:10px 24px;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;">Monthly</button>
+        <button id="yearlyBtn" onclick="setBilling('yearly')" style="padding:10px 24px;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;">
+          Yearly <span style="margin-left:6px;font-size:10px;font-weight:900;background:#D7FFB8;color:#2D6A00;border-radius:6px;padding:2px 8px;">Save 30%</span>
+        </button>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:10px;padding:7px 14px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span style="font-size:12px;font-weight:800;color:#16A34A;">30-day money back</span>
+      </div>
+    </div>
+
+    <!-- 4 cards in a row -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch;">
+
+      <!-- BASIC KNOX (FREE) -->
+      <div class="reveal delay-1" style="background:#1CB0F6;border-radius:20px;border:3px solid #0A85C2;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;height:100%;box-sizing:border-box;">
+        <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:16px;">🎒 Basic Knox</div>
+        <div style="font-size:40px;font-weight:900;line-height:1;color:white;">$0</div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;margin-bottom:16px;">forever free</div>
+        <div style="font-size:14px;font-weight:800;color:white;margin-bottom:16px;line-height:1.4;">Try Knox — no commitment</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>5 problems per day</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Instant answer + explanation</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>All subjects — K-12 to college</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Photo upload</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Streak &amp; league</div>
+          <div style="height:1px;background:rgba(255,255,255,0.18);margin:6px 0;"></div>
+          <div style="font-size:10px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:2px;">Upgrade to Super Knox</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>25 problems/day</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Step-by-step breakdowns</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Key Points + Tips + Insights</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Learn with Knox (Socratic tutor)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Smarter AI model</div>
+        </div>
+        <button onclick="scrollToAI()" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#0A85C2;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);transition:all 0.15s;margin-top:auto;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.2)'">Start Free</button>
+      </div>
+
+      <!-- SUPER KNOX -->
+      <div class="reveal delay-2" style="background:#58CC02;border-radius:20px;border:3px solid #46A302;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;position:relative;height:100%;box-sizing:border-box;">
+        <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:5px 14px;border-radius:999px;white-space:nowrap;">MOST POPULAR</div>
+        <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:16px;">⚡ Super Knox</div>
+        <div style="font-size:40px;font-weight:900;line-height:1;color:white;" id="proPlusPrice">$9.99</div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;" id="proPlusPeriod">/month</div>
+        <div class="yearly-note" id="proPlusYearlyNote" style="background:rgba(255,255,255,0.25);color:white;border:2px solid rgba(255,255,255,0.4);">🎉 $79.99/yr — save $39.89</div>
+        <div style="font-size:14px;font-weight:800;color:white;margin:12px 0 16px;line-height:1.4;">5× more problems, smarter answers</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>25 problems per day</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Step-by-step breakdowns</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Full explanation of every concept</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Key Points summary</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Tips, Insights &amp; Common Mistakes</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Learn with Knox (Socratic tutor)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Photo upload</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Streak &amp; league</div>
+          <div style="height:1px;background:rgba(255,255,255,0.18);margin:6px 0;"></div>
+          <div style="font-size:10px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:2px;">Upgrade to Max Knox</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Unlimited problems</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Most advanced AI model</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Deeper explanations (3-4 paragraphs)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>YouTube resources included</div>
+        </div>
+        <div id="superTrialBadge" style="display:none;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,0.2);border-radius:10px;padding:8px;margin-bottom:10px;font-size:12px;font-weight:800;color:white;">⏱ 3-Day Free Trial</div>
+        <button onclick="handlePurchase('Super')" id="superCTABtn" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#2D6A00;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);transition:all 0.15s;margin-top:auto;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.2)'">Get Super Knox →</button>
+      </div>
+
+      <!-- MAX KNOX -->
+      <div class="reveal delay-3" style="background:#FF6B00;border-radius:20px;border:3px solid #CC5500;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;height:100%;box-sizing:border-box;position:relative;">
+        <div style="position:absolute;top:0;right:0;width:70px;height:70px;background:rgba(255,255,255,0.08);border-radius:0 20px 0 70px;"></div>
+        <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:16px;">🚀 Max Knox</div>
+        <div style="font-size:40px;font-weight:900;line-height:1;color:white;" id="maxPrice">$19.99</div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;">/month</div>
+        <div class="yearly-note" id="maxYearlyNote" style="background:rgba(255,255,255,0.25);color:white;border:2px solid rgba(255,255,255,0.4);">🎉 $159.99/yr — save $79.89</div>
+        <div style="font-size:14px;font-weight:800;color:white;margin:12px 0 16px;line-height:1.4;">Knox without limits — the full experience</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>Unlimited problems — no daily cap</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>Most advanced AI model</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Deep explanations (3-4 rich paragraphs)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Step-by-step with full work shown</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Key Points summary</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Tips, Insights &amp; Common Mistakes</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>YouTube resource for every answer</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Learn with Knox (Socratic tutor)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Photo upload</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Streak &amp; league</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Visual learning mode</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:center;">
+          <div style="font-size:13px;font-weight:900;color:white;line-height:1.5;">♾️ No daily limit. No countdown.<br>Study as much as you need, whenever.</div>
+        </div>
+        <button onclick="handlePurchase('Max')" id="maxCTABtn" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#CC5500;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.25);transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.25)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.25)'">Go Max Knox →</button>
+      </div>
+
+    </div>
+
+    <p style="text-align:center;margin-top:24px;font-size:13px;font-weight:700;color:#9CA3AF;">All plans · Every subject · No hidden fees · Cancel anytime</p>
+  </div>
+</section>
+
+
+<!-- ===================== GAMIFICATION ===================== -->
+<section style="background:var(--bg-primary);padding:72px 24px;">
+  <div style="max-width:960px;margin:0 auto;">
+
+    <!-- Header — no floating badge, just clean Knox style -->
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 class="section-title section-title-underline reveal" style="display:inline-block;margin-bottom:12px;color:var(--text);">Knox keeps score too 🦊</h2>
+      <p style="font-size:17px;font-weight:600;color:#666;max-width:480px;margin:0 auto;">Every question earns points. Every day builds your streak. Every week you compete.</p>
+    </div>
+
+    <!-- 3 brand-colored cards -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+
+      <!-- Streak — Orange -->
+      <div class="reveal delay-1" style="background:#FF6B00;border-radius:24px;border:3px solid #CC5500;box-shadow:0 6px 0 #CC5500;padding:28px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;right:0;width:80px;height:80px;background:rgba(255,255,255,0.1);border-radius:0 24px 0 80%;"></div>
+        <div style="font-size:44px;margin-bottom:14px;">🔥</div>
+        <div style="font-size:22px;font-weight:900;color:white;margin-bottom:8px;">Daily Streak</div>
+        <p style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.85);line-height:1.65;margin-bottom:20px;">Ask at least one question a day to keep it alive. Miss a day and it resets — so don't sleep on it.</p>
+        <div style="background:rgba(255,255,255,0.15);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:11px;font-weight:900;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px;">Streak bonuses</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:white;">
+            <span>🔥 3 days</span><span style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:8px;">+5 KP/day</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:white;">
+            <span>🔥 7 days</span><span style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:8px;">+15 KP/day</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:white;">
+            <span>🔥 30 days</span><span style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:8px;">+30 KP/day</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Know Points — Green -->
+      <div class="reveal delay-2" style="background:#58CC02;border-radius:24px;border:3px solid #46A302;box-shadow:0 6px 0 #2D6A00;padding:28px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;right:0;width:80px;height:80px;background:rgba(255,255,255,0.1);border-radius:0 24px 0 80%;"></div>
+        <div style="font-size:44px;margin-bottom:14px;">💡</div>
+        <div style="font-size:22px;font-weight:900;color:white;margin-bottom:8px;">Know Points</div>
+        <p style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.9);line-height:1.65;margin-bottom:20px;">Earn KP every time Knox helps you. Get the most points by answering correctly on Learn with Knox — no hints.</p>
+        <div style="background:rgba(255,255,255,0.15);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:11px;font-weight:900;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px;">How to earn KP</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:white;">
+            <span>⚡ Get the Answer</span><span style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:8px;">3 KP</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:white;">
+            <span>🧠 Learn (correct)</span><span style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:8px;">20 KP</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:white;">
+            <span>🦊 Unlock avatars</span><span style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:8px;">with KP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly League — Blue -->
+      <div class="reveal delay-3" style="background:#1CB0F6;border-radius:24px;border:3px solid #0A85C2;box-shadow:0 6px 0 #0A85C2;padding:28px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;right:0;width:80px;height:80px;background:rgba(255,255,255,0.1);border-radius:0 24px 0 80%;"></div>
+        <div style="font-size:44px;margin-bottom:14px;">🏆</div>
+        <div style="font-size:22px;font-weight:900;color:white;margin-bottom:8px;">Weekly League</div>
+        <p style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.9);line-height:1.65;margin-bottom:20px;">You're in a league of 30 students every week. Earn the most KP and climb from Bronze to Diamond.</p>
+        <div style="background:rgba(255,255,255,0.15);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:11px;font-weight:900;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px;">Divisions</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:white;">🥉 Bronze → 🥈 Silver → 🥇 Gold → 💎 Diamond</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:white;">
+            <span>Top 5 promote</span><span style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:8px;">Every Monday</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:white;">
+            <span>Fresh league</span><span style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:8px;">Every week</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-top:40px;">
+      <p style="font-size:14px;font-weight:700;color:#999;margin-bottom:16px;">Free on every plan — start earning the moment you sign up</p>
+      <button onclick="scrollToAI()" style="padding:15px 32px;border-radius:14px;font-size:16px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 5px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 7px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 5px 0 #CC5500'">Start Earning KP →</button>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ===================== CTA BANNER ===================== -->
+<section style="background:#FF6B00;padding:80px 24px;text-align:center;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
+  <div style="position:relative;z-index:1;max-width:600px;margin:0 auto;">
+    <img src="./knox-love.png" alt="Knox" style="width:130px;height:auto;margin-bottom:16px;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.2));" onerror="this.outerHTML='<div style=\'font-size:80px;\'>🦊</div>'">
+    <h2 style="font-size:clamp(28px,5vw,52px);font-weight:900;color:white;letter-spacing:-0.02em;">Knox is ready when you are.</h2>
+    <p style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.85);margin:12px auto 0;max-width:440px;">Start free, no credit card needed. Knox knows the answer.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:32px;">
+      <button class="btn-white" style="font-size:17px;padding:17px 32px;" onclick="scrollToAI()">Start for Free</button>
+      <button onclick="scrollToPricing()" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,0.2);color:white;border:2px solid rgba(255,255,255,0.5);border-radius:16px;padding:15px 28px;font-size:17px;font-weight:800;cursor:pointer;transition:all 0.15s;font-family:inherit;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">View Plans →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div style="max-width:1100px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
+
+      <!-- Brand -->
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);">
+            <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;object-position:top center;" onerror="this.style.display='none'">
+          </div>
+          <span style="font-size:18px;font-weight:900;color:white;">Knox Knows</span>
+        </div>
+        <p style="font-size:13px;font-weight:600;color:#888;line-height:1.65;max-width:240px;">Your AI study companion. Get answers, learn deeply, ace every subject.</p>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <a href="https://www.tiktok.com/@knoxknows" target="_blank" rel="noopener" style="width:36px;height:36px;border-radius:10px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
+          </a>
+          <a href="https://x.com/knoxknows" target="_blank" rel="noopener" style="width:36px;height:36px;border-radius:10px;background:#000;display:flex;align-items:center;justify-content:center;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/knoxknows/" target="_blank" rel="noopener" style="width:36px;height:36px;border-radius:10px;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);display:flex;align-items:center;justify-content:center;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Product -->
+      <div>
+        <div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.08em;color:#555;margin-bottom:14px;">Product</div>
+        <a href="#how-it-works" style="display:block;font-size:14px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">How it works</a>
+        <a href="#ai-helper" style="display:block;font-size:14px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Ask Knox</a>
+        <a href="#pricing" style="display:block;font-size:14px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Pricing</a>
+        
+      </div>
+
+      <!-- Legal -->
+      <div>
+        <div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.08em;color:#555;margin-bottom:14px;">Legal</div>
+        <a href="/privacy.html" style="display:block;font-size:14px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Privacy Policy</a>
+        <a href="/terms.html" style="display:block;font-size:14px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Terms of Service</a>
+        <a href="/refund.html" style="display:block;font-size:14px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">Refund Policy</a>
+      </div>
+
+      <!-- Connect -->
+      <div>
+        <div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.08em;color:#555;margin-bottom:14px;">Connect</div>
+        <a href="mailto:support@knoxknowsapp.com" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#aaa;text-decoration:none;margin-bottom:10px;transition:color 0.15s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#aaa'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          support@knoxknowsapp.com
+        </a>
+      </div>
+
+    </div>
+
+    <div style="border-top:1px solid #333;padding-top:24px;margin-top:40px;text-align:center;">
+      <p style="font-size:13px;font-weight:600;color:#555;">&copy; 2026 Knox Knows. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ===================== LOGIN MODAL ===================== -->
+<div class="login-modal" id="loginModal" onclick="if(event.target===this)closeLoginModal()">
+  <div class="login-panel">
+    <div class="login-header">
+      <div>
+        <div style="font-weight:800;font-size:18px;letter-spacing:-0.03em;">Welcome to Knox Knows 🦊</div>
+        <div style="font-size:13px;color:#4b5563;margin-top:2px;">Sign in or create an account</div>
+      </div>
+      <button onclick="closeLoginModal()" style="background:none;border:2px solid black;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:800;font-size:16px;">✕</button>
+    </div>
+    <div class="login-body">
+
+      <!-- Tab switcher -->
+      <div style="display:flex;gap:4px;background:#F3F4F6;border-radius:14px;padding:4px;margin-bottom:20px;">
+        <button id="tabSignIn" onclick="switchLoginTab('signin')" style="flex:1;justify-content:center;padding:12px 18px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;border:none;transition:all 0.15s;font-family:inherit;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;">Sign In</button>
+        <button id="tabSignUp" onclick="switchLoginTab('signup')" style="flex:1;justify-content:center;padding:12px 18px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;border:none;transition:all 0.15s;font-family:inherit;background:transparent;color:#9CA3AF;">Create Account</button>
+      </div>
+
+      <!-- Error / Success messages -->
+      <div class="login-error" id="loginError"></div>
+      <div class="login-success" id="loginSuccess"></div>
+
+      <!-- Google button -->
+      <button class="login-social-btn" onclick="handleGoogleLogin()">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google">
+        Continue with Google
+      </button>
+
+      <!-- Microsoft button -->
+      <button class="login-social-btn" onclick="handleMicrosoftLogin()">
+        <svg width="20" height="20" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+        Continue with Microsoft
+      </button>
+
+      <div class="login-divider"><span>or</span></div>
+
+      <!-- SIGN IN FORM -->
+      <div id="signinForm">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <input class="login-input" id="signinEmail" type="email" placeholder="Email address" autocomplete="email">
+          <input class="login-input" id="signinPassword" type="password" placeholder="Password" autocomplete="current-password">
+          <button onclick="handleEmailSignIn()" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='none'" onmouseup="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'">Sign In</button>
+        </div>
+        <button onclick="switchLoginTab('forgot')" style="background:none;border:none;cursor:pointer;color:#FF6B00;font-size:13px;font-weight:700;margin-top:12px;padding:0;width:100%;text-align:center;">Forgot password?</button>
+      </div>
+
+      <!-- SIGN UP FORM -->
+      <div id="signupForm" style="display:none;">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <input class="login-input" id="signupName" type="text" placeholder="Full name" autocomplete="name">
+          <input class="login-input" id="signupEmail" type="email" placeholder="Email address" autocomplete="email">
+          <input class="login-input" id="signupPassword" type="password" placeholder="Password (min 6 characters)" autocomplete="new-password">
+          <button onclick="handleEmailSignUp()" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:#1CB0F6;color:white;cursor:pointer;box-shadow:0 4px 0 #0A85C2;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0A85C2'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #0A85C2'" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='none'" onmouseup="this.style.transform='';this.style.boxShadow='0 4px 0 #0A85C2'">Create Account</button>
+        </div>
+        <p style="font-size:12px;color:#9ca3af;text-align:center;margin-top:12px;">By creating an account you agree to our <a href="/terms.html" style="color:#FF6B00;">Terms of Service</a>. you must be 13 or older to use Knox Knows.</p>
+      </div>
+
+      <!-- FORGOT PASSWORD FORM -->
+      <div id="forgotForm" style="display:none;">
+        <p style="font-size:14px;color:#4b5563;margin-bottom:14px;">Enter your email and we'll send you a reset link.</p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <input class="login-input" id="forgotEmail" type="email" placeholder="Email address">
+          <button onclick="handleForgotPassword()" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='none'" onmouseup="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'">Send Reset Email</button>
+        </div>
+        <button onclick="switchLoginTab('signin')" style="background:none;border:none;cursor:pointer;color:#FF6B00;font-size:13px;font-weight:700;margin-top:12px;padding:0;width:100%;text-align:center;">← Back to Sign In</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================== FIREBASE ===================== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, OAuthProvider, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDPmehlF1trzSOhLNCHtDjq-JLEuf9gO6I",
+    authDomain: "homeworkai-6364c.firebaseapp.com",
+    projectId: "homeworkai-6364c",
+    storageBucket: "homeworkai-6364c.firebasestorage.app",
+    messagingSenderId: "486462619999",
+    appId: "1:486462619999:web:885753530368f657d3f6ea",
+    measurementId: "G-9Q99SL0FBX"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  provider.addScope('email');
+  provider.addScope('profile');
+  window.currentUser = null;
+  window.pendingAction = null;
+
+  // Handle redirect result first (for GitHub Pages where popups may be blocked)
+  getRedirectResult(auth).then((result) => {
+    if (result && result.user) {
+      window.currentUser = result.user;
+      updateLoginUI();
+      const stored = sessionStorage.getItem('pendingAction');
+      if (stored) {
+        sessionStorage.removeItem('pendingAction');
+        const action = JSON.parse(stored);
+        setTimeout(() => {
+          if (action.type === 'askQuestion') executeAskQuestion();
+          else if (action.type === 'purchase') executePurchase(action.plan);
+        }, 300);
+      }
+    }
+  }).catch((e) => { console.error('Redirect result error:', e); });
+
+  onAuthStateChanged(auth, async (user) => {
+    window.currentUser = user;
+    if (user && user.email) {
+      // Fetch the user's current plan from server using a verified ID token
+      try {
+        const idToken = await user.getIdToken(true);
+        const resp = await fetch('/api/get-user-plan', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({})
+        });
+        const data = await resp.json();
+        userPlan = data.plan || 'free';
+        window.userPlan = userPlan; // expose to global scripts
+        window.userRenewalDate = data.renewalDate || null; // Unix timestamp from Stripe
+      } catch (e) {
+        console.warn('Could not fetch plan, defaulting to free:', e.message);
+        userPlan = 'free';
+        window.userPlan = 'free';
+      }
+    } else {
+      userPlan = 'free';
+      window.userPlan = 'free';
+    }
+    updateLoginUI();
+    updatePricingButtons();
+    // Re-render bars with correct plan limits after auth resolves
+    if (!user) {
+      // Logged out — guest view: 1 use each
+      if (window.updateUsageBar) window.updateUsageBar({ used: 0, limit: 1, nextUnlock: null });
+    } else {
+      const cached = window.loadUsageCache ? window.loadUsageCache() : null;
+      if (cached) {
+        if (window.updateUsageBar) window.updateUsageBar(cached);
+      } else {
+        const uPlan = window.userPlan || 'free';
+        const hwLimit = uPlan === 'pro_plus' ? 40 : uPlan === 'pro' ? 25 : 5;
+        const csLimit = uPlan === 'pro' ? 50 : 20;
+        if (window.updateUsageBar) window.updateUsageBar({ hw: 0, hwLimit, casual: 0, casualLimit: csLimit, nextUnlock: null, csNextUnlock: null });
+      }
+    }
+    if (user && window.pendingAction) {
+      const action = window.pendingAction;
+      window.pendingAction = null;
+      setTimeout(() => {
+        if (action.type === 'askQuestion') executeAskQuestion();
+        else if (action.type === 'purchase') executePurchase(action.plan);
+      }, 300);
+    }
   });
-}
 
-const adminAuth = getAdminAuth();
-const db        = getFirestore();
+  async function signInWithGoogle() {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+        await signInWithRedirect(auth, provider);
+      } else if (e.code !== 'auth/popup-closed-by-user') {
+        console.error(e);
+      }
+    }
+  }
 
-// ── Plan daily limits (ONE shared pool — covers Get the Answer + Learn with Knox)
-const FREE_DAILY_LIMIT  = 5;          // Basic Knox (free)
-const SUPER_DAILY_LIMIT = 25;         // Super Knox ($9.99)
-// Max Knox = unlimited (Infinity)
-const WINDOW_MS         = 24 * 60 * 60 * 1000;
-const SESSION_STEP_LIMIT = 12;        // Max Socratic steps per session
-const ADMIN_EMAIL        = process.env.ADMIN_EMAIL || "";
-const VIP_PRO_EMAILS     = (process.env.VIP_PRO_EMAILS || "")
-  .split(",").map(e => e.trim()).filter(Boolean);
+  window.triggerGoogleLogin = async function(type, data) {
+    window.pendingAction = type === 'purchase' ? { type, plan: data } : { type };
+    sessionStorage.setItem('pendingAction', JSON.stringify(window.pendingAction));
+    openLoginModal();
+  };
 
-// ── Extract clean search topic from AI's Final Answer ──────────────────────
-function extractSearchTopic(rawAnswer) {
-  const match = rawAnswer.match(/Final Answer:\s*(.+?)(?:\n|$)/i);
-  if (!match) return null;
-  const stop = new Set(['the','and','for','are','this','that','with','from','they','have','been','which','when','where','what','into','also','some','more','than','then','there','their','these','those','would','could','should','about','after','before','during','between','through','because','however','therefore','although','whereas','both','each','only','just','even','very','most','much','many','such','like','will','can','may','might','must','shall','does','did','has','had','was','were','not','but','how','why','its','all','by','of','to','in','is','a','an']);
-  const words = match[1].trim()
-    .replace(/[^a-zA-Z0-9\s]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length >= 3 && !stop.has(w.toLowerCase()))
-    .slice(0, 5);
-  return words.length > 0 ? words.join(' ') : null;
-}
+  window.handleLogin = async function() {
+    openLoginModal();
+  };
 
-// ── YouTube search — returns actual video data if YOUTUBE_API_KEY is set ──
-async function searchYouTubeVideo(query) {
-  const apiKey = process.env.YOUTUBE_API_KEY;
-  if (!apiKey) return null;
-  try {
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query + " explained")}&type=video&maxResults=1&key=${apiKey}&relevanceLanguage=en&safeSearch=strict`;
-    const r    = await fetch(url);
-    const data = await r.json();
-    const item = data.items?.[0];
-    if (item?.id?.videoId) {
-      return {
-        videoId:  item.id.videoId,
-        title:    item.snippet.title,
-        channel:  item.snippet.channelTitle,
-        thumbnail: item.snippet.thumbnails?.medium?.url,
-        url:      `https://www.youtube.com/watch?v=${item.id.videoId}`,
-        embedUrl: `https://www.youtube.com/embed/${item.id.videoId}?rel=0&modestbranding=1`,
+  // ── Login modal controls ────────────────────────────────────────────────
+  window.openLoginModal = function() {
+    document.getElementById('loginModal').classList.add('open');
+    clearLoginMessages();
+  };
+  window.closeLoginModal = function() {
+    document.getElementById('loginModal').classList.remove('open');
+    clearLoginMessages();
+  };
+  window.switchLoginTab = function(tab) {
+    document.getElementById('signinForm').style.display  = tab === 'signin'  ? 'block' : 'none';
+    document.getElementById('signupForm').style.display  = tab === 'signup'  ? 'block' : 'none';
+    document.getElementById('forgotForm').style.display  = tab === 'forgot'  ? 'block' : 'none';
+    const _siBtn = document.getElementById('tabSignIn');
+    const _suBtn = document.getElementById('tabSignUp');
+    const _activeStyle = (color, shadow) => `flex:1;justify-content:center;padding:12px 18px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;border:none;transition:all 0.15s;font-family:inherit;background:${color};color:white;box-shadow:0 3px 0 ${shadow};`;
+    const _inactiveStyle = 'flex:1;justify-content:center;padding:12px 18px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;border:none;transition:all 0.15s;font-family:inherit;background:transparent;color:#9CA3AF;box-shadow:none;';
+    if (_siBtn) _siBtn.style.cssText = tab === 'signin' ? _activeStyle('#FF6B00','#CC5500') : _inactiveStyle;
+    if (_suBtn) _suBtn.style.cssText = tab === 'signup' ? _activeStyle('#1CB0F6','#0A85C2') : _inactiveStyle;
+    clearLoginMessages();
+  };
+
+  function showLoginError(msg) {
+    const el = document.getElementById('loginError');
+    el.textContent = msg; el.classList.add('show');
+    document.getElementById('loginSuccess').classList.remove('show');
+  }
+  function showLoginSuccess(msg) {
+    const el = document.getElementById('loginSuccess');
+    el.textContent = msg; el.classList.add('show');
+    document.getElementById('loginError').classList.remove('show');
+  }
+  function clearLoginMessages() {
+    document.getElementById('loginError').classList.remove('show');
+    document.getElementById('loginSuccess').classList.remove('show');
+  }
+
+  // ── Google ───────────────────────────────────────────────────────────────
+  window.handleGoogleLogin = async function() {
+    try {
+      await signInWithPopup(auth, provider);
+      closeLoginModal();
+    } catch (e) {
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+        await signInWithRedirect(auth, provider);
+      } else if (e.code !== 'auth/popup-closed-by-user') {
+        showLoginError('Google sign-in failed. Please try again.');
+      }
+    }
+  };
+
+  // ── Microsoft ─────────────────────────────────────────────────────────────
+  window.handleMicrosoftLogin = async function() {
+    try {
+      const msProvider = new OAuthProvider('microsoft.com');
+      msProvider.addScope('email');
+      msProvider.addScope('profile');
+      await signInWithPopup(auth, msProvider);
+      closeLoginModal();
+    } catch (e) {
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+        const msProvider = new OAuthProvider('microsoft.com');
+        await signInWithRedirect(auth, msProvider);
+      } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+        showLoginError('Microsoft sign-in failed. Please try again.');
+        console.error(e);
+      }
+    }
+  };
+  window.handleEmailSignIn = async function() {
+    const email    = document.getElementById('signinEmail').value.trim();
+    const password = document.getElementById('signinPassword').value;
+    if (!email || !password) { showLoginError('Please enter your email and password.'); return; }
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      closeLoginModal();
+    } catch (e) {
+      const msgs = {
+        'auth/user-not-found':   'No account found with that email.',
+        'auth/wrong-password':   'Incorrect password. Please try again.',
+        'auth/invalid-email':    'Please enter a valid email address.',
+        'auth/invalid-credential': 'Incorrect email or password.',
+        'auth/too-many-requests': 'Too many attempts. Please wait a moment.',
       };
+      showLoginError(msgs[e.code] || 'Sign in failed. Please try again.');
     }
-  } catch (e) {
-    console.error("YouTube API error:", e.message);
-  }
-  return null;
-}
+  };
 
-// ── Detect learning style from conversation context ──────────────────────
-function detectLearningStyle(history, question) {
-  const texts = [
-    ...history.slice(-6).map(m => typeof m.content === "string" ? m.content : ""),
-    question,
-  ].join(" ").toLowerCase();
+  // ── Email sign up ─────────────────────────────────────────────────────────
+  window.handleEmailSignUp = async function() {
+    const name     = document.getElementById('signupName').value.trim();
+    const email    = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    if (!name)               { showLoginError('Please enter your name.'); return; }
+    if (!email)              { showLoginError('Please enter your email.'); return; }
+    if (password.length < 6) { showLoginError('Password must be at least 6 characters.'); return; }
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      closeLoginModal();
+    } catch (e) {
+      const msgs = {
+        'auth/email-already-in-use': 'An account with this email already exists. Try signing in.',
+        'auth/invalid-email':        'Please enter a valid email address.',
+        'auth/weak-password':        'Password is too weak. Use at least 6 characters.',
+      };
+      showLoginError(msgs[e.code] || 'Account creation failed. Please try again.');
+    }
+  };
 
-  if (/visual learner|learn visually|i'?m? a? ?visual|prefer videos?|visual (person|style|way)|show me visually|show me (a )?(diagram|chart|graph|picture|image|video)|can you (draw|diagram|visualize|show)|i (like|love|prefer|learn better with) (videos?|diagrams?|pictures?|images?|charts?|visuals?)|help me (see|visualize|picture)|watch videos?|diagram (this|it|that)|draw (this|it|that)|picture this|seeing it|see (how|it|this)|watching|graphically|in a visual/i.test(texts)) return "visual";
-  if (/word person|verbal learner|descriptive words?|long (passage|explanation)|prefer (text|reading|words)|detailed prose|i (like|love|prefer|learn better with) (reading|text|words?|writing|essays?)|just (explain|tell|write|describe)|no (videos?|diagrams?|pictures?)|text only|in words|write it out/i.test(texts)) return "verbal";
-  return null;
-}
+  // ── Forgot password ───────────────────────────────────────────────────────
+  window.handleForgotPassword = async function() {
+    const email = document.getElementById('forgotEmail').value.trim();
+    if (!email) { showLoginError('Please enter your email address.'); return; }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showLoginSuccess('Reset email sent! Check your inbox.');
+    } catch (e) {
+      const msgs = {
+        'auth/user-not-found': 'No account found with that email.',
+        'auth/invalid-email':  'Please enter a valid email address.',
+      };
+      showLoginError(msgs[e.code] || 'Failed to send reset email.');
+    }
+  };
 
-// ── Check if the question is asking for visual/diagram content ────────────
-function asksForVisualContent(question) {
-  return /diagram|chart|graph|visual(ly|ize|ise|ization|isation|ly| way| style| form| learner| learning)?|show me|draw|picture this|video|image|in a visual|visually|explain.*visual|visual.*explain|illustrat/i.test(question);
-}
+  window.handleLogout = async function() {
+    closeDropdown();
+    await signOut(auth);
+    window.currentUser = null;
+    try { localStorage.removeItem('knox_usage_cache'); } catch(e) {}
+    if (window.updateUsageBar) updateUsageBar({ used: 0, limit: 5, nextUnlock: null });
+    updateLoginUI();
+  };
 
-// ── True if message only states a preference, asks no academic question ──
-function isPreferenceOnly(question) {
-  const q = question.trim();
-  const hasIntent = /\?|what|how|why|when|where|who|explain|solve|help me|tell me|calculate|find|define|describe|summarize|analyze/i.test(q);
-  const isPref    = /\b(i'?m? (a )?(visual|word|verbal) (learner|person)|i (learn|prefer) (visually|through words|via videos?)|my (learning style|preference) is)/i.test(q);
-  return isPref && !hasIntent && q.length < 200;
-}
+  window.handleSwitchAccount = async function() {
+    closeDropdown();
+    try {
+      const p = new GoogleAuthProvider();
+      p.setCustomParameters({ prompt: 'select_account' });
+      try {
+        await signInWithPopup(auth, p);
+      } catch (e) {
+        if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+          await signInWithRedirect(auth, p);
+        } else if (e.code !== 'auth/popup-closed-by-user') { console.error(e); }
+      }
+    } catch (e) { console.error(e); }
+  };
 
-// ── True if message is casual chat, not a real school problem ────────────
-function isCasualChat(question) {
-  const q = question.trim().toLowerCase();
+  // Admin/VIP logic is handled server-side only — never in the browser.
 
-  // Always casual: pure greetings / reactions / identity questions
-  if (/^(hey|hi|hello|sup|yo+|heyy+|what'?s? up|how are you|how'?s? it going|good morning|good afternoon|good night|thanks|thank you|thx|cool|nice|ok|okay|lol|lmao|haha|who are you|what are you|what'?s? your name|are you (ai|real|a fox|a bot)|you'?re? (cool|awesome|great|smart|amazing|the best)|i (love|like) (you|this|knox)|that'?s? (cool|awesome|crazy|wild|insane)|no way|for real|seriously|bro|dude|omg|wait what|🦊)[.!?]?$/.test(q)) return true;
-
-  // ALWAYS homework — never casual, even if phrased casually or visually
-  const definitelyHomework = /\b(solve|calculate|what is \d|simplify|factor|derive|integrate|differentiate|prove that|find the (value|area|volume|angle|slope|distance|derivative|integral|solution|answer|equation)|write (an? )?(essay|paragraph|thesis|summary|analysis)|explain (how|why|what|the (process|concept|theory|formula|law|rule|difference))|what (causes?|is the (formula|definition|law|rule|theorem|equation|process|difference|meaning))|how (does|do|did|can|should|would)|why (does|do|did|is|are|was|were)|when (did|was|were|is|are)|who (was|is|were|are|invented|discovered|wrote|created)|define |describe (the|how|why)|what are (the|some)|step[- ]by[- ]step|solve for|in the equation|in (chemistry|physics|biology|math|history|english|science|economics|calculus|algebra|geometry|literature)|ap (exam|class|test|course)|sat |act |gre |gmat |lsat |teach me|show me how|help me (understand|learn|study|write|solve|figure)|in a visual way|visually|in a (simple|easy|fun|creative|different) way|like i('?m| am) (5|a kid|a beginner|new|dumb)|break (it|this|that) down|walk me through|explain (it|this|that)|can you explain|how do (i|you)|what('?s| is) (a|an|the) \w+\??$)\b/i.test(q);
-  if (definitelyHomework) return false;
-
-  // Homework mentioned casually = still casual
-  const homeworkCasual = /\b(hate|love|like|dislike|have|got|so much|too much|lots of|a lot of|my|this|the) homework\b/i.test(q) && !definitelyHomework;
-  if (homeworkCasual) return true;
-
-  // Has any real question structure = homework
-  const hasRealQuestion = /\b(explain|solve|calculate|define|describe|summarize|analyze|write|find|prove|teach|show|evaluate|compare|contrast|what is the (formula|law|theorem|rule|definition|meaning|difference|equation)|how (does|do|did|can) (the|a|an|it|this|that)|why (is|are|was|were|does|do|did)|what (is|are|was|were) (a|an|the)|tell me about|what happens|how (it|this) works)\b/i.test(q);
-
-  return !hasRealQuestion && q.length < 120;
-}
-
-// ── Week start helper (Monday-based) ─────────────────────────────────────
-function getWeekStart() {
-  const d = new Date();
-  const day = d.getUTCDay(); // 0=Sun, 1=Mon...
-  const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
-  d.setUTCDate(diff);
-  return d.toISOString().split('T')[0]; // e.g. "2026-04-27"
-}
-
-// ── Award KP + update streak ──────────────────────────────────────────────
-async function awardKP(db, uid, kpAmount, casual) {
-  if (!uid || kpAmount <= 0) return { kp: 0, streak: 1, totalKP: 0 };
-  const today     = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  const weekStart = getWeekStart();
-  const gamRef    = db.collection('gamification').doc(uid);
-
-  try {
-    const snap = await gamRef.get();
-    const gd   = snap.exists ? snap.data() : {};
-
-    // Streak logic
-    const lastDate  = gd.lastActiveDate || '';
-    let newStreak   = 1;
-    let streakBonus = 0;
-    if (lastDate === today) {
-      newStreak = gd.streak || 1;
-    } else if (lastDate === yesterday) {
-      newStreak   = (gd.streak || 0) + 1;
-      streakBonus = newStreak >= 30 ? 30 : newStreak >= 7 ? 15 : newStreak >= 3 ? 5 : 0;
+  function updateLoginUI() {
+    const loginBtn = document.getElementById('loginBtn');
+    const accountWrapper = document.getElementById('accountDropdownWrapper');
+    const proBadge = document.getElementById('proBadge');
+    if (window.currentUser) {
+      loginBtn.style.display = 'none';
+      accountWrapper.style.display = 'block';
+      const { photoURL, displayName, email } = window.currentUser;
+      const name = displayName || email || 'Account';
+      document.getElementById('accountName').textContent = name.split(' ')[0];
+      document.getElementById('dropdownName').textContent = name;
+      document.getElementById('dropdownEmail').textContent = email || '';
+      document.getElementById('accountIcon').innerHTML = photoURL
+        ? `<img src="${photoURL}" class="user-avatar" alt="Profile" referrerpolicy="no-referrer">`
+        : `<div class="default-avatar"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`;
+      // Plan is verified server-side — do not override userPlan here.
+      // Show plan in dropdown
+      const planLabel = userPlan === 'pro_plus' ? '⭐ Pro+' : userPlan === 'pro' ? '⚡ Pro' : '🆓 Free';
+      document.getElementById('dropdownPlan').textContent = planLabel;
+      // Hide "Try Pro" badge if already on a paid plan
+      if (proBadge) proBadge.style.display = (userPlan === 'pro' || userPlan === 'pro_plus') ? 'none' : 'inline-flex';
     } else {
-      newStreak = 1;
+      loginBtn.style.display = 'inline-flex';
+      accountWrapper.style.display = 'none';
+      userPlan = 'free';
+      window.userPlan = 'free';
+      if (proBadge) proBadge.style.display = 'inline-flex';
     }
-
-    const earned    = kpAmount + streakBonus;
-    const totalKP   = (gd.totalKP   || 0) + earned;
-    const weeklyKP  = (gd.weekStart === weekStart) ? (gd.weeklyKP || 0) + earned : earned;
-
-    await gamRef.set({
-      streak:         newStreak,
-      lastActiveDate: today,
-      totalKP,
-      weeklyKP,
-      weekStart,
-      uid,
-      updatedAt:      Date.now(),
-    }, { merge: true });
-
-    return { kp: earned, streak: newStreak, totalKP, weeklyKP, streakBonus };
-  } catch(e) {
-    console.warn('awardKP error:', e.message);
-    return { kp: 0, streak: 1, totalKP: 0 };
-  }
-}
-
-
-function parseResources(text) {
-  let resources = [];
-  let answer    = text;
-
-  // Ensure Resources: always starts on its own paragraph
-  answer = answer.replace(/([^\n])(Resources:)/g, "$1\n\nResources:");
-
-  const match = answer.match(/\n?Resources:\s*\n([\s\S]*?)(?=\n\n[^\-\*\n]|$)/);
-  if (match) {
-    const lines = match[1].split("\n").map(l => l.trim()).filter(Boolean);
-    for (const line of lines) {
-      // YouTube only — Quizlet removed
-      const ytMd    = line.match(/^[-*]?\s*YouTube:\s*\[([^\]]+)\]\((https?:[^)]+)\)/i);
-      const ytPlain = line.match(/^[-*]?\s*YouTube:\s*(.+)/i);
-
-      if (ytMd) {
-        resources.push({ type: "youtube", title: ytMd[1].trim(), link: ytMd[2].trim() });
-      } else if (ytPlain) {
-        const raw   = ytPlain[1].trim();
-        const title = raw.replace(/\[([^\]]+)\]\([^)]+\)/, "$1").replace(/^\[|\]$/g, "").trim();
-        const urlM  = raw.match(/\((https?:[^)]+)\)/);
-        const link  = urlM ? urlM[1] : `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}`;
-        resources.push({ type: "youtube", title, link });
-      }
-    }
-    // Remove resources block from answer text
-    answer = answer.replace(/\n?Resources:\s*\n[\s\S]*?(?=\n\n[^\-\*\n]|$)/, "").trim();
+    updateUsageCounter();
   }
 
-  // Strip any remaining markdown link syntax [text](url) from displayed answer
-  answer = answer.replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, "$1");
-
-  return { answer, resources };
-}
-
-// ── Process raw AI output ──────────────────────────────────────────────────
-function processAnswer(rawText, userPlan) {
-  let answer = rawText
-    .replace(/\\\[[\s\S]*?\\\]/g, "")
-    .replace(/\\\([\s\S]*?\\\)/g, "")
-    .replace(/\$\$[\s\S]*?\$\$/g, "")
-    .replace(/\$([^$]+)\$/g, "$1")
-    .replace(/^#{1,6}\s/gm, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-
-  // Ensure section headers always start on their own lines
-  const headers = ['Final Answer:','Explanation:','Step-by-step:','Step-by-Step:','Tip:','Insight:','Deeper Insight:','Common Mistake:','Key Points:','Key Point:','Resources:'];
-  headers.forEach(h => {
-    const esc = h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    answer = answer.replace(new RegExp('([^\\n])\\s*(' + esc + ')', 'g'), '$1\n\n$2');
+  // ── Enter key support for login forms ────────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    if (!document.getElementById('loginModal').classList.contains('open')) return;
+    if (document.getElementById('signinForm').style.display !== 'none') handleEmailSignIn();
+    else if (document.getElementById('signupForm').style.display !== 'none') handleEmailSignUp();
+    else if (document.getElementById('forgotForm').style.display !== 'none') handleForgotPassword();
   });
-  // Numbered steps on their own lines
-  answer = answer.replace(/([.!?])\s+(\d+\.\s)/g, '$1\n$2');
-  answer = answer.replace(/([.!?])\s+(Step\s+\d+[:.]\s)/gi, '$1\n$2');
+</script>
 
-  if (userPlan === "free") {
-    answer = answer
-      .replace(/\*\*(.*?)\*\*/g, "$1")
-      .replace(/\*(.*?)\*/g,     "$1")
-      .replace(/__(.*?)__/g,     "$1")
-      .replace(/\*+/g,           "")   // strip any orphaned asterisks
-      .replace(/_{2,}/g,         "")   // strip any orphaned underlines
-      .replace(/^(Step-by-step:|Step-by-Step:|Step-by-Step Process:|Tip:|Insight:|Deeper Insight:|Common Mistake:|Key Points:|Key Point:|Resources:)\s*$/gim, "")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
-  } else {
-    // For pro/pro+ — strip orphaned markers that didn't form valid pairs
-    answer = answer.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "$1");
-    // Clean up any double-asterisks that are empty or orphaned
-    answer = answer.replace(/\*\*\s*\*\*/g, "");
-    answer = answer.replace(/(?<!\w)\*\*(?!\w)/g, "");
+<!-- ===================== APP JS ===================== -->
+<script>
+  let billing = 'monthly';
+  const DAILY_LIMIT = 5;
+
+  document.addEventListener('click', (e) => {
+    const w = document.getElementById('accountDropdownWrapper');
+    if (w && !w.contains(e.target)) closeDropdown();
+  });
+
+  function toggleDropdown(e) { e.stopPropagation(); document.getElementById('accountDropdown').classList.toggle('open'); }
+  function closeDropdown() { const d = document.getElementById('accountDropdown'); if (d) d.classList.remove('open'); }
+  function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
+  function closeMobileNav() { document.getElementById('mobileNav').classList.remove('open'); }
+
+  // ── Live clock timers ─────────────────────────────────────────────────────
+  let _hwClockInterval = null;
+  let _csClockInterval = null;
+
+  function startHwClock(unlockTs) {
+    if (_hwClockInterval) clearInterval(_hwClockInterval);
+    const el = document.getElementById('hwClockDisplay');
+    const wrap = document.getElementById('hwClockWrap');
+    if (!el || !wrap) return;
+    wrap.style.display = 'block';
+    function tick() {
+      const ms = unlockTs - Date.now();
+      if (ms <= 0) { clearInterval(_hwClockInterval); wrap.style.display = 'none'; return; }
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    tick();
+    _hwClockInterval = setInterval(tick, 1000);
   }
-  return answer;
-}
 
-// ── Main handler ──────────────────────────────────────────────────────────
-export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-
-  // 1. Verify Firebase token
-  const authHeader = req.headers.authorization || "";
-  if (!authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
-  let decodedToken;
-  try {
-    decodedToken = await adminAuth.verifyIdToken(authHeader.slice(7));
-  } catch (err) {
-    return res.status(401).json({ error: "Unauthorized — invalid or expired token." });
+  function startCsClock(unlockTs) {
+    if (_csClockInterval) clearInterval(_csClockInterval);
+    const el = document.getElementById('csClockDisplay');
+    const wrap = document.getElementById('csClockWrap');
+    if (!el || !wrap) return;
+    wrap.style.display = 'block';
+    function tick() {
+      const ms = unlockTs - Date.now();
+      if (ms <= 0) { clearInterval(_csClockInterval); wrap.style.display = 'none'; return; }
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    tick();
+    _csClockInterval = setInterval(tick, 1000);
   }
-  const { uid, email: userEmail } = decodedToken;
-  if (!userEmail) return res.status(401).json({ error: "Unauthorized — token has no email." });
 
-  // 2. Resolve plan server-side
-  let userPlan = "free";
-  if (userEmail === ADMIN_EMAIL) {
-    userPlan = "max"; // Admin gets Max Knox
-  } else if (VIP_PRO_EMAILS.includes(userEmail)) {
-    userPlan = "pro";
-  } else {
+  // ── Usage cache (localStorage) — persists bars across page loads ──────────
+  const USAGE_CACHE_KEY = 'knox_usage_cache';
+  function saveUsageCache(usage) {
+    try { localStorage.setItem(USAGE_CACHE_KEY, JSON.stringify({ ...usage, _savedAt: Date.now() })); } catch(e) {}
+  }
+  function loadUsageCache() {
     try {
-      const doc = await db.collection("users").doc(uid).get();
-      if (doc.exists) userPlan = doc.data()?.plan || "free";
-    } catch (err) {
-      console.warn("Firestore plan lookup failed:", err.message);
+      const raw = localStorage.getItem(USAGE_CACHE_KEY);
+      if (!raw) return null;
+      const d = JSON.parse(raw);
+      if (Date.now() - (d._savedAt || 0) > 25 * 3600000) { localStorage.removeItem(USAGE_CACHE_KEY); return null; }
+      return d;
+    } catch(e) { return null; }
+  }
+  window.loadUsageCache = loadUsageCache;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // LEARN WITH KNOX — Renderers + Actions
+  // ═══════════════════════════════════════════════════════════════════════
+
+  function renderLearnResponse(data) {
+    const raw = (data.answer || '').trim();
+
+    // Multiple Choice (I'm Stuck)
+    if (data.isStuck || raw.startsWith('MULTIPLE_CHOICE')) {
+      const body   = raw.replace(/^MULTIPLE_CHOICE\n?/, '');
+      const qMatch = body.match(/Question:\s*(.+?)(?:\n|$)/);
+      const aMatch = body.match(/A\)\s*(.+?)(?:\n|$)/);
+      const bMatch = body.match(/B\)\s*(.+?)(?:\n|$)/);
+      const cMatch = body.match(/C\)\s*(.+?)(?:\n|$)/);
+      const dMatch = body.match(/D\)\s*(.+?)(?:\n|$)/);
+      const ansMatch  = body.match(/ANSWER:\s*([ABCD])/);
+      const hintMatch = body.match(/HINT:\s*(.+?)(?:\n|$)/);
+      const question  = qMatch?.[1]  || 'Which answer is correct?';
+      const options   = { A: aMatch?.[1], B: bMatch?.[1], C: cMatch?.[1], D: dMatch?.[1] };
+      const correct   = ansMatch?.[1] || 'A';
+      const hint      = hintMatch?.[1] || '';
+
+      let html = `<div style="padding:14px 18px 6px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <div style="background:#1CB0F6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #0A85C2;">Multiple Choice</div>
+          <span style="font-size:12px;font-weight:700;color:#9CA3AF;">Pick the best answer</span>
+        </div>
+        <p style="font-size:15px;font-weight:700;color:#1f2937;margin-bottom:14px;line-height:1.5;">${question}</p>
+        <div style="display:flex;flex-direction:column;gap:8px;" id="mcOptions_${Date.now()}">`;
+      ['A','B','C','D'].forEach(letter => {
+        if (!options[letter]) return;
+        html += `<button onclick="handleMCAnswer('${letter}','${correct}',this)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;border:2px solid #E5E7EB;background:white;cursor:pointer;font-family:inherit;text-align:left;transition:all 0.15s;width:100%;" onmouseover="if(!this.dataset.answered)this.style.borderColor='#1CB0F6'" onmouseout="if(!this.dataset.answered)this.style.borderColor='#E5E7EB'">
+          <span style="width:28px;height:28px;border-radius:8px;background:#F3F4F6;color:#374151;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${letter}</span>
+          <span style="font-size:14px;font-weight:600;color:#374151;line-height:1.4;">${options[letter]}</span>
+        </button>`;
+      });
+      if (hint) html += `<div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:10px;padding:10px 14px;margin-top:4px;font-size:13px;font-weight:600;color:#92400E;">💡 ${hint}</div>`;
+      html += `</div></div>`;
+      return html;
     }
+
+    // Show Me — similar problem
+    if (data.isShowMe || raw.startsWith('SHOW_ME')) {
+      const body      = raw.replace(/^SHOW_ME\n?/, '');
+      const probMatch = body.match(/Similar Problem:\s*(.+?)(?:\n|$)/);
+      const tryMatch  = body.match(/Now try yours:\s*(.+?)(?:\n|$)/);
+      const prob      = probMatch?.[1] || '';
+      const tryYours  = tryMatch?.[1]  || "Now try your original problem — you've got this! 🦊";
+      const stepsSection = body.replace(/Similar Problem:.+?\n/, '').replace(/Now try yours:.*/s, '').trim();
+      let stepsHtml = '';
+      stepsSection.split('\n').filter(l => l.trim()).forEach(l => {
+        const m = l.match(/^(\d+)\.\s*(.*)/);
+        if (m) stepsHtml += `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #F3F4F6;">
+          <div style="min-width:24px;height:24px;border-radius:7px;background:#FF6B00;color:white;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${m[1]}</div>
+          <span style="font-size:14px;font-weight:500;color:#374151;line-height:1.55;padding-top:2px;">${m[2]}</span>
+        </div>`;
+        else if (l.trim()) stepsHtml += `<p style="font-size:14px;color:#6B7280;padding:4px 0;">${l}</p>`;
+      });
+      return `<div style="padding:14px 18px 14px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <div style="background:#FF6B00;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Similar Problem</div>
+          <span style="font-size:12px;font-weight:700;color:#9CA3AF;">Not your actual problem</span>
+        </div>
+        ${prob ? `<div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:15px;font-weight:700;color:#92400E;">${prob}</div>` : ''}
+        <div style="margin-bottom:12px;">${stepsHtml}</div>
+        <div style="background:#F0FDF4;border:2px solid #86EFAC;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:700;color:#166534;">🦊 ${tryYours}</div>
+      </div>`;
+    }
+
+    // Standard Socratic — clean blue conversation bubble
+    const clean = raw.replace(/Final Answer:\s*/i, '').trim();
+    return `<div style="padding:14px 18px 14px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:#1CB0F6;flex-shrink:0;"></div>
+        <span style="font-size:11px;font-weight:800;color:#1CB0F6;text-transform:uppercase;letter-spacing:0.06em;">Learn with Knox</span>
+      </div>
+      <div style="font-size:15px;font-weight:500;color:#1e3a5f;line-height:1.7;">${clean.replace(/\n/g,'<br>')}</div>
+    </div>`;
   }
 
-  // 3. Rolling 24hr usage limits
-  const now = Date.now();
-  const usageRef = db.collection("usage").doc(uid);
+  // Multiple choice answer handler
+  window.handleMCAnswer = function(chosen, correct, btn) {
+    const allBtns = btn.parentElement.querySelectorAll('button');
+    allBtns.forEach(b => { b.dataset.answered='1'; b.style.pointerEvents='none'; b.onmouseover=null; b.onmouseout=null; });
+    const isCorrect = chosen === correct;
+    btn.style.background   = isCorrect ? '#F0FDF4' : '#FEF2F2';
+    btn.style.borderColor  = isCorrect ? '#16A34A' : '#DC2626';
+    if (!isCorrect) {
+      allBtns.forEach(b => {
+        if (b.querySelector('span')?.textContent?.trim() === correct) {
+          b.style.background='#F0FDF4'; b.style.borderColor='#16A34A';
+        }
+      });
+    }
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) {
+      const optTxt = btn.querySelectorAll('span')[1]?.textContent || '';
+      chatInput.value = isCorrect
+        ? `I answered ${chosen}: ${optTxt} ✓`
+        : `I answered ${chosen}: ${optTxt} — correct was ${correct}`;
+      setTimeout(handleAskQuestion, 600);
+    }
+  };
 
-  // ONE unified daily limit — covers both Get the Answer AND Learn with Knox
-  // Sessions (not messages) count as 1 usage each
-  const dailyLimit = (userPlan === "max")                              ? Infinity
-                   : (userPlan === "super" || userPlan === "pro_plus"
-                      || userPlan === "wonder" || userPlan === "pro")  ? SUPER_DAILY_LIMIT
-                   : FREE_DAILY_LIMIT;
+  // I'm Stuck / Show Me buttons
+  function sendLearnAction(type) {
+    const chatInput = document.getElementById('chatInput');
+    if (!chatInput) return;
+    if (type === 'stuck') {
+      chatInput.value = "I'm stuck — give me multiple choice options please";
+    } else {
+      chatInput.value = "Can you show me a similar problem solved step by step?";
+    }
+    handleAskQuestion();
+  }
 
-  // Skip limits for admin
-  const isAdmin = (userEmail === ADMIN_EMAIL);
+  // Start a completely fresh Learn with Knox session
+  function startNewLearnSession() {
+    conversationHistory = [];
+    updateConversationIndicator();
+    const thread = document.getElementById('chatThread');
+    if (thread) {
+      thread.innerHTML = `<div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="width:36px;height:36px;border-radius:50%;border:2px solid #93C5FD;overflow:hidden;flex-shrink:0;background:#DBEAFE;">
+          <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+        </div>
+        <div style="background:#EFF9FF;border:2px solid #93C5FD;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
+          <p style="font-size:15px;font-weight:600;color:#1e3a5f;line-height:1.6;margin:0;"><strong>New problem! 📚</strong> What are you working on? I'll guide you to the answer step by step. 🦊</p>
+        </div>
+      </div>`;
+    }
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) { chatInput.value = ''; chatInput.focus(); }
+  }
+  window.startNewLearnSession = startNewLearnSession;
 
-  const { question: rawQ, imageBase64, imageType, history, learnMode, isStuck, showMe,
-          gradeLevel, isCorrectAnswer, sessionId, isNewSession, isSessionComplete } = req.body;
-  const preCheckQuestion = (rawQ || "").trim();
-  const preCheckCasual   = isCasualChat(preCheckQuestion) && !imageBase64;
+  // ── Update usage progress bars ────────────────────────────────────────────
+  function updateUsageBar(usage) {
+    if (!usage) return;
+    const wrap = document.getElementById('usageBarWrap');
+    if (!wrap) return;
+    const uPlan = window.userPlan || 'free';
+    wrap.style.display = 'block';
 
-  // ── Unified usage check ───────────────────────────────────────────────────
-  // ONE pool — 25/day for Super Knox, 5/day for Basic Knox, unlimited for Max.
-  // Casual chat = ALWAYS FREE, never counted.
-  // Get the Answer = 1 credit per question, counted immediately.
-  // Learn with Knox = 1 credit counted only when the session is COMPLETE
-  //   (isSessionComplete=true from frontend, OR step limit reached).
-  //   Mid-session messages are completely free.
-  // Limit check always runs upfront so the user knows their status.
-  // Credit is recorded AFTER the answer is generated for Learn sessions.
+    const used  = usage.used  ?? usage.hw ?? 0;
+    const limit = usage.limit ?? usage.hwLimit ?? 5;
+    const isUnlimited = limit === null || limit === Infinity || limit >= 9999;
+    const left  = isUnlimited ? Infinity : Math.max(0, limit - used);
+    const pct   = isUnlimited ? 100 : Math.min((used / limit) * 100, 100);
+    const nextUnlock = usage.nextUnlock ?? null;
 
-  const isLearnComplete = learnMode && (isSessionComplete || false);
-  const isGetAnswer     = !learnMode && !preCheckCasual;
-  const shouldCheckLimit  = !preCheckCasual && !isAdmin;
-  const shouldRecordUsage = !preCheckCasual && !isAdmin && (isGetAnswer || isLearnComplete);
+    const label = document.getElementById('usageBarLabel');
+    const fill  = document.getElementById('usageBarFill');
+    const cd    = document.getElementById('usageBarCountdown');
+    const hwClockWrap = document.getElementById('hwClockWrap');
+    const casualSection = document.getElementById('casualBarSection');
 
-  // Always check the limit upfront (even for mid-session Learn messages, so they
-  // can't start a new session when they're already at the limit)
-  let currentTimes = [];
-  if (shouldCheckLimit) {
+    // Hide casual bar — we only have ONE unified bar now
+    if (casualSection) casualSection.style.display = 'none';
+
+    if (isUnlimited) {
+      if (label) label.innerHTML = '💡 Unlimited problems';
+      if (fill)  { fill.style.width='100%'; fill.style.background='#58CC02'; fill.className='usage-bar-fill hw-fill'; }
+      if (cd)    cd.textContent = '';
+      if (hwClockWrap) hwClockWrap.style.display = 'none';
+    } else {
+      if (label) label.innerHTML = `🧠 <strong>${used} / ${limit}</strong> problems used today`;
+      if (fill)  { fill.style.width = pct+'%'; fill.style.background=''; fill.className='usage-bar-fill hw-fill'+(pct>=100?' danger':pct>=80?' warn':''); }
+      if (cd)    { cd.textContent = left===1?'1 left!':''; cd.style.color='#F59E0B'; }
+      if (nextUnlock && left === 0) {
+        startHwClock(nextUnlock);
+      } else {
+        if (_hwClockInterval) clearInterval(_hwClockInterval);
+        if (hwClockWrap) hwClockWrap.style.display = 'none';
+      }
+    }
+  }
+  window.updateUsageBar = updateUsageBar;
+  (function initBarsFromCache() {
+    if (!window.currentUser) {
+      updateUsageBar({ hw: 0, hwLimit: 1, casual: 0, casualLimit: 1, nextUnlock: null, csNextUnlock: null });
+      return;
+    }
+    const uPlan   = window.userPlan || 'free';
+    const hwLimit = (uPlan === 'max') ? Infinity : (uPlan === 'super' || uPlan === 'pro_plus') ? 40 : (uPlan === 'wonder' || uPlan === 'pro') ? 25 : 5;
+    const csLimit = (uPlan === 'max' || uPlan === 'super' || uPlan === 'pro_plus') ? Infinity : (uPlan === 'wonder' || uPlan === 'pro') ? 50 : 20;
+    updateUsageBar({ hw: 0, hwLimit, casual: 0, casualLimit: csLimit, nextUnlock: null, csNextUnlock: null });
+  })();
+
+  // ── Show limit reached modal with countdown ───────────────────────────────
+  function showLimitModal(data) {
+    const uPlan     = window.userPlan || 'free';
+    const isSuper   = uPlan === 'super' || uPlan === 'pro';
+    const isPro     = false; // removed
+    const isMax     = uPlan === 'max';
+    const m = document.createElement('div');
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;';
+    const upgradeSection = isMax ? '' : `
+      <div style="background:#FFF4EC;border:2px solid #FFCFA0;border-radius:14px;padding:14px 16px;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:900;color:#CC5500;margin-bottom:4px;">${isMax ? '🚀 Unlimited problems with Max Knox' : isSuper ? '🚀 Go unlimited with Max Knox' : '🚀 Get 25 problems/day with Super Knox'}</div>
+        <div style="font-size:12px;font-weight:600;color:#888;">${isMax ? 'Max Knox gives you unlimited problems every day — no caps, ever.' : isSuper ? 'Max Knox gives you unlimited problems — no daily limit, ever.' : 'Super Knox gives you 25 problems/day across both Get the Answer and Learn with Knox.'}</div>
+      </div>
+      <button onclick="this.closest('div[style*=fixed]').remove();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">${isMax ? 'Already on Max' : isSuper ? 'Get Max Knox →' : 'Get Super Knox →'}</button>`;
+    m.innerHTML = `<div style="background:white;max-width:420px;width:100%;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+      <div style="background:#FF6B00;padding:28px;text-align:center;">
+        <div style="font-size:44px;margin-bottom:8px;">⏰</div>
+        <h3 style="font-size:22px;font-weight:900;color:white;">You're all out!</h3>
+        <p style="font-size:14px;color:rgba(255,255,255,0.9);font-weight:600;margin-top:6px;">You've used all ${data.limit || ''} questions in this 24hr window.</p>
+        ${data.countdown ? `<div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:10px 16px;margin-top:14px;font-size:14px;font-weight:800;color:white;">Next question unlocks in<br><span style="font-size:24px;letter-spacing:0.05em;display:block;margin-top:4px;">${data.countdown}</span></div>` : ''}
+      </div>
+      <div style="padding:24px 28px;display:flex;flex-direction:column;gap:10px;">
+        ${upgradeSection}
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:13px;border-radius:14px;font-size:14px;font-weight:800;font-family:inherit;border:2px solid #E5E7EB;background:white;color:#777;cursor:pointer;">Got it, I'll wait</button>
+      </div>
+    </div>`;
+    m.onclick = (e) => { if (e.target === m) m.remove(); };
+    document.body.appendChild(m);
+  }
+
+  function scrollToAI() { document.getElementById('ai-helper').scrollIntoView({ behavior:'smooth' }); }
+  function scrollToPricing() { document.getElementById('pricing').scrollIntoView({ behavior:'smooth' }); }
+
+  let currentMode = 'answer';
+  function setMode(mode) {
+    currentMode = mode;
+    const aBtn   = document.getElementById('modeAnswerBtn');
+    const lBtn   = document.getElementById('modeLearnBtn');
+    const askBtn = document.getElementById('askBtn');
+    const qInput = document.getElementById('chatInput') || document.getElementById('questionInput');
+    const desc   = document.getElementById('aiHeaderDesc');
+    const iconBtns = document.querySelectorAll('.chat-icon-btn');
+
+    if (mode === 'answer') {
+      if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#FF6B00;color:white;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;line-height:1;';
+      if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
+      if (askBtn) { askBtn.style.background='#FF6B00'; askBtn.style.boxShadow='0 3px 0 #CC5500'; }
+      if (qInput) qInput.placeholder = 'Ask Knox anything — type or paste your question...';
+      if (desc)   desc.textContent   = 'Ready to help you ace it';
+      iconBtns.forEach(b => b.dataset.hoverColor='#FF6B00');
+    } else {
+      if (lBtn) lBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:#1CB0F6;color:white;box-shadow:0 3px 0 #0A85C2;transition:all 0.15s;line-height:1;';
+      if (aBtn) aBtn.style.cssText = 'flex:1;padding:11px 8px;border-radius:9px;font-size:14px;font-weight:800;font-family:inherit;border:none;cursor:pointer;background:transparent;color:#9CA3AF;transition:all 0.15s;line-height:1;';
+      if (askBtn) { askBtn.style.background='#1CB0F6'; askBtn.style.boxShadow='0 3px 0 #0A85C2'; }
+      if (qInput) qInput.placeholder = "What are you working on? Knox will guide you to the answer...";
+      if (desc)   desc.textContent   = 'Knox will guide you step by step';
+      iconBtns.forEach(b => b.dataset.hoverColor='#1CB0F6');
+    }
+
+    // Switch greeting if chat hasn't started yet
+    const thread = document.getElementById('chatThread');
+    if (thread && conversationHistory.length === 0) {
+      if (mode === 'learn') {
+        thread.innerHTML = `<div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2px solid #93C5FD;overflow:hidden;flex-shrink:0;background:#DBEAFE;">
+            <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+          </div>
+          <div style="background:#EFF9FF;border:2px solid #93C5FD;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
+            <p style="font-size:15px;font-weight:600;color:#1e3a5f;line-height:1.6;margin:0;"><strong>Let's learn together! 📚</strong> Tell me what you're working on and I'll guide you to the answer step by step. I won't just hand it to you — you'll actually get it. 🦊</p>
+          </div>
+        </div>`;
+      } else {
+        thread.innerHTML = `<div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
+            <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+          </div>
+          <div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
+            <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
+          </div>
+        </div>`;
+      }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', () => setMode('answer'));
+
+  function setBilling(type) {
+    billing = type;
+    const mBtn = document.getElementById('monthlyBtn');
+    const yBtn = document.getElementById('yearlyBtn');
+    if (type === 'monthly') {
+      mBtn.style.background = '#FF6B00'; mBtn.style.color = 'white'; mBtn.style.boxShadow = '0 3px 0 #CC5500';
+      yBtn.style.background = 'transparent'; yBtn.style.color = '#9CA3AF'; yBtn.style.boxShadow = 'none';
+    } else {
+      yBtn.style.background = '#FF6B00'; yBtn.style.color = 'white'; yBtn.style.boxShadow = '0 3px 0 #CC5500';
+      mBtn.style.background = 'transparent'; mBtn.style.color = '#9CA3AF'; mBtn.style.boxShadow = 'none';
+    }
+    // Update monthly/yearly display prices
+    const proEl    = null; //
+    const superEl  = document.getElementById('proPlusPrice');
+    const maxEl    = document.getElementById('maxPrice');
+    const proPer   = document.getElementById('proPeriod');
+    if (proEl)   proEl.textContent   = type === 'monthly' ? '$9.99'  : '$6.67';
+    if (superEl) superEl.textContent = type === 'monthly' ? '$9.99'  : '$6.67';
+    if (maxEl)   maxEl.textContent   = type === 'monthly' ? '$19.99' : '$13.33';
+    if (proPer)  proPer.textContent  = type === 'monthly' ? '/month'  : '/mo · billed yearly';
+
+    // Show/hide yearly note badges with pop animation
+    ['proYearlyNote','proPlusYearlyNote','maxYearlyNote'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (type === 'yearly') {
+        el.style.display = 'none'; // reset to re-trigger animation
+        requestAnimationFrame(() => {
+          el.style.display = 'inline-block';
+          el.style.animation = 'none';
+          requestAnimationFrame(() => { el.style.animation = ''; });
+        });
+      } else {
+        el.style.display = 'none';
+      }
+    });
+
+    // Trial badge + button text
+    const trialBadge = document.getElementById('proTrialBadge');
+    const proBtn     = document.getElementById('proCTABtn');
+    if (trialBadge) trialBadge.style.display = type === 'monthly' ? 'flex' : 'none';
+    if (proBtn)     proBtn.textContent = type === 'monthly' ? 'Start Free Trial' : 'Get Wonder Knox Yearly';
+  }
+
+  function setQuestion(q) {
+    const input = document.getElementById('chatInput') || document.getElementById('questionInput');
+    if (input) { input.value = q; input.focus(); input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 160) + 'px'; }
+    scrollToAI();
+  }
+
+  function handlePurchase(plan) {
+    if (!window.currentUser) { window.triggerGoogleLogin('purchase', plan); return; }
+    executePurchase(plan);
+  }
+
+  // ── Real Stripe Checkout ──────────────────────────────────────────────────
+  async function executePurchase(plan) {
+    const planKey = (plan === 'Pro+' || plan === 'pro_plus') ? 'pro_plus' : 'pro';
+    const user    = window.currentUser;
+
+    if (!user || !user.email) {
+      alert('Please log in first, then try again.');
+      return;
+    }
+
+    // Disable all pricing buttons and show loading
+    const allBtns = document.querySelectorAll('.pricing-card button');
+    allBtns.forEach(b => b.disabled = true);
+    const trialBtn  = document.querySelector('.btn-pulse');
+    const proPlsBtn = document.querySelector('[onclick*="Pro+"]');
+    if (trialBtn)  trialBtn.innerHTML  = '⏳ Opening Stripe...';
+    if (proPlsBtn) proPlsBtn.innerHTML = '⏳ Opening Stripe...';
+
+    // Track what was purchased so the toast shows the right message
+    window._lastPurchasedPlan    = planKey;
+    window._lastPurchasedBilling = billing;
+
     try {
-      const snap  = await usageRef.get();
-      const data  = snap.exists ? snap.data() : {};
-      currentTimes = (data.times || []).filter(t => now - t < WINDOW_MS);
+      // Get Firebase token — server verifies this and pulls uid/email from it
+      const idToken = await user.getIdToken(true);
 
-      // Only block if this would actually consume a credit
-      if (shouldRecordUsage && dailyLimit !== Infinity && currentTimes.length >= dailyLimit) {
-        const oldest    = Math.min(...currentTimes);
-        const unlockMs  = WINDOW_MS - (now - oldest);
-        const hrs = Math.floor(unlockMs / 3600000);
-        const min = Math.floor((unlockMs % 3600000) / 60000);
-        const sec = Math.floor((unlockMs % 60000) / 1000);
-        const countdown = hrs > 0
-          ? `${hrs}h ${min}m ${sec}s`
-          : min > 0 ? `${min}m ${sec}s` : `${sec}s`;
-        return res.status(429).json({
-          error:      "limit_reached",
-          countdown,
-          limit:      dailyLimit,
-          used:       currentTimes.length,
-          nextUnlock: oldest + WINDOW_MS,
-        });
+      const res  = await fetch('/api/create-checkout-session', {
+        method:  'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body:    JSON.stringify({
+          plan:    planKey,
+          billing,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'No checkout URL returned.');
       }
-      // Also block new Learn sessions (isNewSession) if at limit
-      if (learnMode && isNewSession && dailyLimit !== Infinity && currentTimes.length >= dailyLimit) {
-        const oldest    = Math.min(...currentTimes);
-        const unlockMs  = WINDOW_MS - (now - oldest);
-        const hrs = Math.floor(unlockMs / 3600000);
-        const min = Math.floor((unlockMs % 3600000) / 60000);
-        const sec = Math.floor((unlockMs % 60000) / 1000);
-        return res.status(429).json({
-          error:      "limit_reached",
-          countdown:  hrs > 0 ? `${hrs}h ${min}m ${sec}s` : min > 0 ? `${min}m ${sec}s` : `${sec}s`,
-          limit:      dailyLimit,
-          used:       currentTimes.length,
-          nextUnlock: oldest + WINDOW_MS,
-        });
+
+    } catch (err) {
+      console.error('Checkout failed:', err);
+      allBtns.forEach(b => b.disabled = false);
+      if (trialBtn)  trialBtn.innerHTML  = 'Start Free Trial';
+      if (proPlsBtn) proPlsBtn.innerHTML = 'Unlock Pro+';
+      alert('Could not open Stripe checkout. Please try again in a moment.');
+    }
+  }
+
+  // ── Stripe Customer Portal (cancel / update card) ─────────────────────────
+  window.openCustomerPortal = async function() {
+    const user = window.currentUser;
+    if (!user || !user.email) { alert('Please log in first.'); return; }
+
+    try {
+      // Get Firebase token — server verifies this to confirm identity
+      const idToken = await user.getIdToken(true);
+
+      const res  = await fetch('/api/customer-portal', {
+        method:  'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body:    JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'No portal URL.');
       }
     } catch (err) {
-      console.error("Usage check error:", err.message);
+      console.error('Portal error:', err);
+      alert('Could not open billing portal. Please try again.');
+    }
+  };
+
+  // ── Payment return toast ──────────────────────────────────────────────────
+  // After Stripe redirects back, show a success or cancelled message, then clean the URL.
+  (function handleStripeReturn() {
+    const params  = new URLSearchParams(window.location.search);
+    const payment = params.get('payment');
+    const portal  = params.get('portal');
+
+    if (payment === 'success' || payment === 'cancelled' || portal === 'returned') {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    if (payment === 'success') {
+      setTimeout(() => showPaymentToast('success'), 700);
+    } else if (payment === 'cancelled') {
+      setTimeout(() => showPaymentToast('cancelled'), 400);
+    }
+  })();
+
+  function showPaymentToast(type) {
+    const toast = document.createElement('div');
+    toast.style.cssText = [
+      'position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;',
+      'background:white;border:3px solid black;border-radius:16px;',
+      'padding:22px 32px;box-shadow:6px 6px 0 black;text-align:center;',
+      'max-width:90vw;width:360px;',
+    ].join('');
+
+    if (type === 'cancelled') {
+      toast.innerHTML = [
+        '<div style="font-size:36px;margin-bottom:10px;">😕</div>',
+        '<div style="font-weight:800;font-size:17px;margin-bottom:6px;">Checkout cancelled</div>',
+        '<div style="color:#4b5563;font-size:14px;line-height:1.5;">',
+        'No worries — your free plan is still active.<br>',
+        'Come back whenever you\'re ready to upgrade.',
+        '</div>',
+      ].join('');
+    } else {
+      // Only show trial message for Pro Monthly
+      const isProMonthlyTrial = (
+        window._lastPurchasedPlan === 'pro' &&
+        window._lastPurchasedBilling === 'monthly'
+      );
+      toast.innerHTML = [
+        '<div style="font-size:36px;margin-bottom:10px;">🎉</div>',
+        '<div style="font-weight:800;font-size:17px;margin-bottom:6px;">You\'re all set!</div>',
+        '<div style="color:#4b5563;font-size:14px;line-height:1.5;">',
+        isProMonthlyTrial
+          ? 'Your 3-day free trial has started.<br>No charge until the trial ends!'
+          : 'Your subscription is now active.<br>Enjoy unlimited questions!',
+        '</div>',
+      ].join('');
+    }
+
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.transition = 'opacity 0.4s';
+      toast.style.opacity    = '0';
+      setTimeout(() => toast.remove(), 420);
+    }, 5500);
+  }
+
+  // ── Update pricing buttons based on current plan ─────────────────────────
+  function updatePricingButtons() {
+    userPlan = window.userPlan || userPlan; // sync from module scope
+    const pricingCards = document.querySelectorAll('.pricing-card');
+    pricingCards.forEach(card => {
+      const title = card.querySelector('h3')?.textContent.trim();
+      const btn   = card.querySelector('.cta-btn-wrap button');
+      if (!btn || !title) return;
+
+      // Reset first
+      btn.disabled = false;
+      btn.style.boxShadow = '';
+      btn.style.opacity   = '';
+
+      if (userPlan === 'pro') {
+        if (title === 'Pro') {
+          btn.textContent = '✓ Current Plan';
+          btn.disabled    = true;
+          btn.style.background  = '#e5e7eb';
+          btn.style.color       = '#6b7280';
+          btn.style.boxShadow   = 'none';
+          btn.style.opacity     = '0.7';
+        }
+        // Pro+ buttons stay active so Pro users can upgrade
+      }
+
+      if (userPlan === 'pro_plus') {
+        if (title === 'Pro+') {
+          btn.textContent = '✓ Current Plan';
+          btn.disabled    = true;
+          btn.style.background  = '#e5e7eb';
+          btn.style.color       = '#6b7280';
+          btn.style.boxShadow   = 'none';
+          btn.style.opacity     = '0.7';
+        }
+        if (title === 'Pro') {
+          btn.textContent = '↓ Downgrade';
+          btn.disabled    = true;
+          btn.style.background  = '#e5e7eb';
+          btn.style.color       = '#6b7280';
+          btn.style.boxShadow   = 'none';
+          btn.style.opacity     = '0.7';
+        }
+      }
+    });
+  }
+
+  // userPlan is set by the Firebase module script and exposed via window.userPlan
+  // Reading it here ensures the global script always sees the correct value
+  var userPlan = window.userPlan || 'free';
+
+  function updateUsageCounter() {
+    userPlan = window.userPlan || userPlan; // stay in sync with module scope
+    const counter = document.getElementById('usageCounter');
+    if (!counter) return;
+    const usage = getUsageData();
+    // Update plan banner — clean subtle bar
+    const banner = document.getElementById('planBanner');
+    if (banner) {
+      if (userPlan === 'pro_plus') {
+        banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:#FFF4EC;border-top:1.5px solid #FFCFA0;border-bottom:1.5px solid #FFCFA0;"><div style="width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:#CC5500;letter-spacing:0.01em;">Pro+ Plan &nbsp;·&nbsp; 40 questions/day &nbsp;·&nbsp; Best AI &nbsp;·&nbsp; Unlimited Chat</span></div>';
+      } else if (userPlan === 'pro') {
+        banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:#F0FDF4;border-top:1.5px solid #86EFAC;border-bottom:1.5px solid #86EFAC;"><div style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:var(--green-dark);letter-spacing:0.01em;">Pro Plan &nbsp;·&nbsp; 25 questions/day &nbsp;·&nbsp; Smarter AI &nbsp;·&nbsp; <span style="cursor:pointer;text-decoration:underline;" onclick="scrollToPricing()">Upgrade to Pro+</span></span></div>';
+      } else {
+        banner.innerHTML = '';
+      }
+    }
+    if (userPlan === 'pro' || userPlan === 'pro_plus') {
+      counter.innerHTML = '';
+      counter.style.color = '';
+    } else if (!window.currentUser) {
+      counter.innerHTML = `<span style="font-weight:800;color:#7c3aed;cursor:pointer;" onclick="openLoginModal()">Sign up free — 5 questions/day ✨</span>`;
+      counter.style.color = '#4b5563';
+    } else {
+      const left = Math.max(0, DAILY_LIMIT - (usage.count || 0));
+      counter.innerHTML = `Daily questions left: ${left} &nbsp;·&nbsp; <span style="font-weight:800;color:#7c3aed;cursor:pointer;" onclick="scrollToPricing()">Upgrade for unlimited ⚡</span>`;
+      counter.style.color = left <= 2 ? '#dc2626' : '#4b5563';
     }
   }
 
-  // 4. Use already-parsed body variables
-  const question   = rawQ;
-  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
-  const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB limit (base64 is ~4/3 of original)
+  // Track whether guest has used their one free question
+  let guestQuestionUsed = false;
 
-  if (imageBase64 && imageType) {
-    if (!ALLOWED_IMAGE_TYPES.includes(imageType.toLowerCase())) {
-      return res.status(400).json({ error: "Invalid image type. Please upload a JPEG, PNG, GIF, or WebP image." });
+  function handleAskQuestion() {
+    userPlan = window.userPlan || userPlan;
+    const question = ((document.getElementById('chatInput')||document.getElementById('questionInput')||{value:''}).value||'').trim();
+    if (!question && !pendingImageBase64) return;
+    const usage = getUsageData();
+
+    // Pro/Pro+ users skip ALL limits
+    if (userPlan === 'pro' || userPlan === 'pro_plus') {
+      executeAskQuestion(); return;
     }
-    // base64 string length * 0.75 gives approximate byte size
-    const approxBytes = imageBase64.length * 0.75;
-    if (approxBytes > MAX_IMAGE_SIZE_BYTES) {
-      return res.status(400).json({ error: "Image is too large. Please upload an image under 5MB." });
+
+    // GUEST: allow exactly 1 question, then Knox prompts sign up inline
+    if (!window.currentUser) {
+      if (guestQuestionUsed) {
+        // Already used their one free shot — show Knox sign-up prompt in chat
+        appendKnoxSignUpPrompt();
+        return;
+      }
+      // First question — let it through, flag it, then show sign-up after answer
+      guestQuestionUsed = true;
+      updateUsageBar({ hw: 1, hwLimit: 1, casual: 0, casualLimit: 1, nextUnlock: null, csNextUnlock: null });
+      executeAskQuestion(/* afterCallback */ () => appendKnoxSignUpPrompt(true));
+      return;
+    }
+
+    usage.count = (usage.count || 0) + 1;
+    setUsageData(usage);
+    updateUsageCounter();
+    executeAskQuestion();
+  }
+
+  // Knox sends a sign-up message in the chat thread
+  function appendKnoxSignUpPrompt(afterAnswer) {
+    const chatThread = document.getElementById('chatThread');
+    if (!chatThread) return;
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+    row.innerHTML = `
+      <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
+        <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+      </div>
+      <div style="max-width:88%;display:flex;flex-direction:column;gap:10px;">
+        <div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;">
+          <p style="font-size:15px;font-weight:600;color:#44403C;line-height:1.6;margin:0;">
+            ${afterAnswer
+              ? "Hope that helped! 🦊 I can keep going but I need you to be a real one first — create a free account and get <strong>5 questions every day</strong>. No card needed, takes 10 seconds."
+              : "hey, you already used your free question 😄 drop me an account real quick and I'll keep helping — it's totally free, 5 questions a day, no card needed 🦊"}
+          </p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button onclick="switchLoginTab('signup');openLoginModal();" style="padding:12px 22px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 0 #CC5500'">
+            Create Free Account
+          </button>
+          <button onclick="switchLoginTab('signin');openLoginModal();" style="padding:12px 22px;border-radius:12px;font-size:14px;font-weight:800;font-family:inherit;border:2px solid #E5E7EB;background:white;color:#6B7280;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#6B7280'">
+            Sign In
+          </button>
+        </div>
+      </div>`;
+
+    chatThread.appendChild(row);
+    chatThread.scrollTop = chatThread.scrollHeight;
+  }
+
+  // ── CONVERSATION HISTORY ──────────────────────────────────────────────────
+  // Stores last 3 exchanges (6 messages) to give the AI context
+  let conversationHistory = [];
+
+  function updateConversationIndicator() {
+    const el  = document.getElementById('conversationIndicator');
+    const btn = document.getElementById('newChatBtn');
+    const exchanges = Math.floor(conversationHistory.length / 2);
+    if (exchanges > 0) {
+      el.style.display  = 'block';
+      btn.style.display = 'inline-flex';
+      el.textContent    = `💬 ${exchanges} message${exchanges > 1 ? 's' : ''} in this conversation — AI remembers context`;
+    } else {
+      el.style.display  = 'none';
+      btn.style.display = 'none';
     }
   }
 
-  const hasImage = !!(imageBase64 && imageType);
-  if (!question && !hasImage) return res.status(400).json({ error: "No question provided." });
-
-  let trimmedQuestion = (question || "").trim().slice(0, 4000);
-  const safeHistory   = Array.isArray(history) ? history.slice(-6) : [];
-  const hasHistory    = safeHistory.length > 0;
-
-  // If Pro or Pro+ user states a learning preference AND there's prior history,
-  // auto re-ask the last question so the AI re-explains it with the new style.
-  // Free plan does NOT get this — visual learning is a paid feature.
-  const isJustPreference = isPreferenceOnly(trimmedQuestion);
-  if (isJustPreference && hasHistory && !hasImage && isPaid) {
-    const lastUserMsg  = [...safeHistory].reverse().find(m => m.role === "user");
-    const lastQuestion = typeof lastUserMsg?.content === "string"
-      ? lastUserMsg.content.replace(/^Question:\s*/i, "").trim()
-      : null;
-    if (lastQuestion) {
-      trimmedQuestion = `${trimmedQuestion}. Please re-explain your last answer about: ${lastQuestion}`;
+  window.startNewChat = function() {
+    conversationHistory = [];
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) { chatInput.value = ''; chatInput.style.height = 'auto'; chatInput.focus(); }
+    // Reset chat thread to just the greeting
+    const thread = document.getElementById('chatThread');
+    if (thread) {
+      thread.innerHTML = `<div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
+          <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+        </div>
+        <div style="background:#FFF4EC;border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:84%;">
+          <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
+        </div>
+      </div>`;
     }
-  }
+    updateConversationIndicator();
+    if (window.clearImage) window.clearImage();
+  };
 
-  // 5. Detect learning style — Pro+ uses full detection, Pro only checks current question
-  const wantsVisual  = asksForVisualContent(trimmedQuestion);
-  const learningStyle = isMaxPlan
-    ? detectLearningStyle(safeHistory, trimmedQuestion)
-    : (isPaid && wantsVisual ? "visual" : null);
+  async function executeAskQuestion(afterCallback) {
+    const chatInput   = document.getElementById('chatInput');
+    const typedQuestion = (chatInput ? chatInput.value : '').trim();
+    if (!typedQuestion && !pendingImageBase64) return;
 
-  // prefOnly only applies to Pro+ with no history
-  const prefOnly = isMaxPlan && !hasImage && !hasHistory && isJustPreference;
+    const askBtn      = document.getElementById('askBtn');
+    const chatThread  = document.getElementById('chatThread');
+    const spinnerSVG  = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
 
-  // 6. Build learning style instructions
-  let learningStyleInstructions = "";
+    // ── Helper: scroll thread to bottom ─────────────────────────────────────
+    const scrollBottom = () => { if (chatThread) chatThread.scrollTop = chatThread.scrollHeight; };
 
-  if (prefOnly) {
-    // Pro+ no-history acknowledgment
-    learningStyleInstructions = `
-PREFERENCE STATEMENT DETECTED: The user is expressing a learning preference with no prior conversation.
-- Respond with ONLY a warm, friendly 1-2 sentence acknowledgment. Do NOT use Final Answer: format.
-- Example: "Perfect! I'll include visual explanations, diagrams, and clear visual analogies in all my explanations to help you learn best."`;
-  } else if (learningStyle === "visual" || wantsVisual) {
-    // Visual — applies to Pro AND Pro+
-    learningStyleInstructions = `
-LEARNING STYLE — VISUAL LEARNER:
-- Use vivid visual analogies throughout ("imagine this as...", "picture this like...", "think of it as...").
-- Describe spatial relationships and what a diagram of this would look like.
-- Keep each paragraph short and visual — one clear image per paragraph.
-- If re-explaining a previous topic, re-explain it fully using this visual style.
-- The system will show relevant diagrams and videos alongside your response.`;
-  } else if (learningStyle === "verbal") {
-    // Verbal — Pro+ only
-    learningStyleInstructions = `
-LEARNING STYLE — VERBAL / WORD LEARNER:
-- Write in rich, flowing, highly descriptive prose. Use vivid literary analogies and narrative language.
-- Expand explanations with nuanced detail and context. Make it feel like a well-written essay.
-- Use full, eloquent sentences. Avoid bullet points where prose works better.`;
-  }
+    // ── Helper: append user bubble ───────────────────────────────────────────
+    function appendUserBubble(text) {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;justify-content:flex-end;';
+      row.innerHTML = `<div style="background:#FF6B00;color:white;padding:12px 18px;border-radius:18px 18px 4px 18px;max-width:82%;font-size:15px;font-weight:600;line-height:1.5;box-shadow:0 2px 8px rgba(255,107,0,0.2);">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+      chatThread.appendChild(row);
+      scrollBottom();
+    }
 
-  let planInstructions = "";
-  if (userPlan === "free") {
-    planInstructions = `=== PLAN: FREE ===
-This is a real school question. Answer it directly and concisely.
+    // ── Helper: append Knox thinking bubble ─────────────────────────────────
+    function appendThinkingBubble() {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+      row.id = 'knoxThinkingRow';
+      const label = currentMode === 'learn' ? 'Knox is working it out' : 'Knox is finding the answer';
+      row.innerHTML = `
+        <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
+        <div style="background:white;border:2px solid #E5E7EB;border-radius:6px 18px 18px 18px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          <span style="font-size:13px;font-weight:700;color:#9CA3AF;">${label}</span>
+          <div style="display:flex;gap:5px;align-items:center;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#FF6B00;display:inline-block;animation:chatDot 1.2s ease-in-out infinite;"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#FF6B00;display:inline-block;animation:chatDot 1.2s ease-in-out 0.2s infinite;"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#FF6B00;display:inline-block;animation:chatDot 1.2s ease-in-out 0.4s infinite;"></span>
+          </div>
+        </div>`;
+      chatThread.appendChild(row);
+      scrollBottom();
+    }
 
-USE EXACTLY THESE TWO HEADERS — NO OTHERS:
-Final Answer: [One clear, direct sentence answering the question]
-Explanation: [2-3 sentences explaining how or why. Plain prose only — no lists, no bullets.]
+    // ── Helper: replace thinking bubble with Knox response ───────────────────
+    function replaceThinkingWithResponse(html, isError) {
+      const old = document.getElementById('knoxThinkingRow');
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+      row.innerHTML = `
+        <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;margin-top:4px;"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
+        <div style="max-width:88%;border:2px solid #E5E7EB;border-radius:6px 18px 18px 18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);background:white;">${html}</div>`;
+      if (old) old.replaceWith(row);
+      else chatThread.appendChild(row);
+      // Scroll the chat thread so the TOP of Knox's response is visible
+      setTimeout(() => {
+        const rowTop = row.offsetTop - chatThread.offsetTop - 12;
+        chatThread.scrollTo({ top: rowTop, behavior: 'smooth' });
+      }, 80);
+      return row;
+    }
 
-STRICT RULES:
-- Start your response with "Final Answer:" — always, no exceptions
-- ONLY use "Final Answer:" and "Explanation:" headers — zero others
-- No bold, no asterisks, no underlines, no numbered lists, no bullet points, no markdown
-- Your ENTIRE response must be 100 words or fewer — be concise and direct`;
-
-  } else if (userPlan === "super") {
-    planInstructions = `=== PLAN: SUPER KNOX ===
-Give thorough, clear explanations. Use step-by-step breakdowns when the question needs them.
-
-USE THESE HEADERS IN THIS ORDER (only include what applies):
-Final Answer: [One clear sentence — the direct answer]
-Explanation: [2-3 solid paragraphs. Explain the concept thoroughly. Show real understanding of why it works.]
-Step-by-step: [ONLY for math calculations, science processes, or questions needing sequential steps]
-  1. [Specific step — show real numbers, real values, actual work]
-  2. [Next step]
-  3. [Continue until complete]
-Tip: [ONE genuinely useful shortcut, trick, or insight — only if it truly helps]
-
-STRICT RULES:
-- ALWAYS include "Final Answer:" and "Explanation:"
-- ONLY include "Step-by-step:" when the question genuinely needs sequential steps
-- NEVER include: Insight, Common Mistake, Key Points, Resources
-- Bold 2-4 key terms using **term** format
-- NEVER repeat a section — write each section ONCE only
-- NEVER use alternative header names like "Step-by-Step Process:", "Steps:", "Solution:", "Work:", "Method:"
-- If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
-
-  } else if (userPlan === "max") {
-    planInstructions = `=== PLAN: PRO KNOX / MAX KNOX ===
-Give the deepest, most complete academic explanations possible. You are a world-class tutor.
-
-USE THESE HEADERS IN THIS ORDER (include sections that genuinely add value):
-Final Answer: [One clear sentence — the direct answer]
-Explanation: [3-4 rich paragraphs. Go deep. Explain the WHY, the nuance, the real understanding. Connect concepts.]
-Step-by-step: [For math, science, or any sequential process — show ALL work with real numbers and values]
-  1. [Specific step with actual values/numbers]
-  2. [Next step — show the work]
-  3. [Continue until completely solved]
-Tip: [ONE high-value shortcut, pattern, or memory trick that genuinely helps]
-Insight: [A deeper connection, surprising fact, or bigger-picture context — only for complex topics]
-Common Mistake: [The single most common error students make on this exact topic — one sentence]
-Key Points:
-  - [Key point 1 — one sentence]
-  - [Key point 2 — one sentence]
-  - [Key point 3 — one sentence]
-  (3-6 bullets maximum)
-Resources:
-  - YouTube: [Specific descriptive video title for this exact topic]
-
-STRICT RULES:
-- ALWAYS include "Final Answer:" and "Explanation:"
-- Only include optional sections when they genuinely add value — do NOT force all sections
-- Skip Resources for simple calculations or basic definitions
-- Bold key terms using **term**, underline the single most important concept using __phrase__
-- NEVER repeat a section — write each section ONCE only
-- NEVER use alternative header names — use EXACTLY the headers shown above
-- If not academic: "Hey, I'm Knox — I live for homework and school stuff! Ask me anything academic and I've got you 🦊"`;
-  }
-
-  // ── Grade level detection ─────────────────────────────────────────────────
-  function detectGradeLevel(hist, q) {
-    const text = [...(hist||[]).map(m=>m.content||''), q].join(' ');
-    if (/calculus|derivative|integral|linear algebra|differential|multivariable|ap calc|ap physics c|quantum|thermodynamics|organic chem/i.test(text)) return 'college';
-    if (/pre.?calc|trigonometry|ap |sat |act |honors|physics|chemistry|algebra 2|statistics|macroeconomics/i.test(text)) return 'high';
-    if (/algebra|geometry|biology|earth science|civics|world history|us history|middle school/i.test(text)) return 'middle';
-    if (/multiplication|division|fractions|decimals|addition|subtraction|spelling|elementary/i.test(text)) return 'elementary';
-    return 'high';
-  }
-  const inferredGrade = gradeLevel || detectGradeLevel(safeHistory, trimmedQuestion);
-  const isPaidUser = isPaid;
-
-  // ── Socratic prompt (Learn with Knox) ────────────────────────────────────
-  let socraticPrompt = null;
-  if (learnMode) {
-    const gradeMap = {
-      elementary: 'Talk like a kind teacher to a 3rd-5th grader. Super simple words, lots of encouragement.',
-      middle:     'Clear friendly language, relate to everyday life. Think 6th-8th grade student.',
-      high:       'Use subject terms but explain them. High school level — capable but still learning.',
-      college:    'Treat as a peer. Precise academic language. Expect rigorous thinking.',
+    const resetBtn = () => {
+      if (askBtn) {
+        askBtn.disabled = false;
+        askBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>';
+      }
     };
-    const gradeHint = gradeMap[inferredGrade] || gradeMap.high;
 
-    if (isStuck) {
-      socraticPrompt = `You are Knox — a Socratic tutor. The student is stuck. Convert your last guiding question into 4 multiple choice options.
+    // ── Disable send, show user bubble, show thinking ────────────────────────
+    if (askBtn) { askBtn.disabled = true; askBtn.innerHTML = spinnerSVG; }
+    if (chatInput) { chatInput.value = ''; chatInput.style.height = 'auto'; }
 
-FORMAT — use EXACTLY this structure, nothing else:
-MULTIPLE_CHOICE
-Question: [The guiding question restated clearly]
-A) [Plausible option]
-B) [Plausible option]
-C) [Plausible option]
-D) [Plausible option]
-ANSWER: [correct letter only, e.g. B]
-HINT: [One warm sentence hinting toward the answer without giving it away]
+    appendUserBubble(typedQuestion || '📷 Image question');
+    appendThinkingBubble();
 
-RULES: Shuffle the correct answer position randomly. Make wrong options plausible. Keep options concise.
-Grade level: ${gradeHint}`;
-
-    } else if (showMe && isPaidUser) {
-      socraticPrompt = `You are Knox — a Socratic tutor. The student asked to see a similar problem solved.
-
-FORMAT — use EXACTLY this structure:
-SHOW_ME
-Similar Problem: [A comparable problem with different numbers/context but same concept]
-Step-by-step solution:
-1. [Step with clear work shown]
-2. [Next step]
-3. [Continue to completion]
-Now try yours: [One sentence encouraging them back to their original problem]
-
-RULES: DIFFERENT problem, same skill. Show ALL work. No shortcuts. End with encouragement.
-Grade level: ${gradeHint}`;
-
-    } else {
-      const stepCount   = safeHistory.length;
-      const isSessionEnd = stepCount >= SESSION_STEP_LIMIT;
-      const phase = stepCount === 0 ? 'DIAGNOSE — first message, identify what they need help with'
-        : stepCount <= 2 ? 'OPEN QUESTION — ask one question to test their baseline understanding'
-        : stepCount <= 8 ? 'SCAFFOLD — guide step by step, one hint at a time, never give the answer'
-        : stepCount <= 11 ? 'FINAL PUSH — they are very close. One strong final hint. Do NOT reveal the answer.'
-        : 'SESSION END — step limit reached. Warmly wrap up. Do NOT give the answer. Encourage a new session.';
-
-      socraticPrompt = `You are Knox — a warm clever Socratic tutor. You NEVER give the answer directly.
-
-CURRENT PHASE: ${phase}
-${isSessionEnd ? '\n⚠️ SESSION LIMIT: Wrap up warmly. Summarize the concept in 1-2 sentences. Do NOT give the answer. Tell them to start a new session.' : ''}
-
-THE LOOP: Diagnose → Open question → Scaffold step by step → They arrive → Confirm → Quick Check
-
-CRITICAL RULES:
-- NEVER write the answer. Not even partially.
-- Ask ONE question at a time. Never stack questions.
-- Keep responses SHORT — 2-4 sentences max. This is a conversation not a lecture.
-- When they correctly reach the full answer: celebrate genuinely, confirm it clearly, then write SESSION_COMPLETE on its own line at the very end of your message. This is how the system knows to count this as 1 problem solved.
-- When wrong: say "almost!" or "not quite — think about..."
-- Sound like Knox: smart friend texting, not a textbook.
-- NO section headers — pure conversation only.
-Grade level: ${gradeHint}`;
+    // ── Firebase token ───────────────────────────────────────────────────────
+    let idToken = null;
+    if (window.currentUser) {
+      try { idToken = await window.currentUser.getIdToken(true); }
+      catch (e) { console.error('Token error:', e); }
     }
+    const reqHeaders = { "Content-Type": "application/json" };
+    if (idToken) reqHeaders["Authorization"] = `Bearer ${idToken}`;
+
+    try {
+      const res = await fetch("/api/ask", {
+        method:  "POST",
+        headers: reqHeaders,
+        body: JSON.stringify({
+          question:    typedQuestion,
+          imageBase64: pendingImageBase64 || null,
+          imageType:   pendingImageType   || null,
+          history:     conversationHistory.slice(-6),
+          learnMode:   currentMode === 'learn',
+          gradeLevel:  window.knoxGradeLevel || null,
+          isNewSession: currentMode === 'learn' && conversationHistory.length === 0,
+          isSessionComplete: false, // set by SESSION_COMPLETE detection in ask.js
+        }),
+      });
+
+      if (res.status === 401) {
+        const _old401 = document.getElementById('knoxThinkingRow'); if (_old401) _old401.remove(); resetBtn(); appendKnoxSignUpPrompt(false); return;
+        resetBtn(); return;
+      }
+
+      if (res.status === 429) {
+        const old429 = document.getElementById('knoxThinkingRow');
+        if (old429) old429.remove();
+        resetBtn();
+        let limitData = {};
+        try { limitData = await res.json(); } catch(e) {}
+        showLimitModal(limitData);
+        return;
+      }
+
+      // Handle any other non-OK status
+      if (!res.ok) {
+        let errMsg = 'Knox ran into a snag. Please try again!';
+        try { const ed = await res.json(); if (ed.error) errMsg = ed.error; } catch(e) {}
+        replaceThinkingWithResponse(`<div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+          <div style="font-size:14px;font-weight:700;color:#DC2626;line-height:1.6;">😬 ${errMsg}</div>
+          <button onclick="handleAskQuestion()" style="padding:10px 18px;border-radius:10px;font-size:13px;font-weight:800;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 3px 0 #CC5500;align-self:flex-start;">↩ Try Again</button>
+        </div>`, true);
+        resetBtn(); return;
+      }
+
+      let data;
+      try { data = await res.json(); }
+      catch(jsonErr) {
+        replaceThinkingWithResponse(`<div style="padding:14px 16px;font-size:14px;font-weight:700;color:var(--red);">Knox couldn't read the response. Please try again.</div>`, true);
+        resetBtn(); return;
+      }
+      const serverPlan = data.plan || userPlan;
+
+      let responseHtml;
+      if (data.isLearnMode) {
+        responseHtml = renderLearnResponse(data);
+      } else if (data.isCasual) {
+        const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
+        if (clean.split('\n').filter(l => l.trim()).length <= 3 && clean.length < 300) {
+          responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
+        } else {
+          const planTagClass2 = serverPlan === 'pro_plus' ? 'tag-pro-plus' : serverPlan === 'pro' ? 'tag-pro' : 'tag-free';
+          const planTag2 = serverPlan === 'pro_plus' ? 'Pro+' : serverPlan === 'pro' ? 'Pro' : 'Free';
+          responseHtml = `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(clean, serverPlan)}<div style="height:10px;"></div>`;
+        }
+      } else if (data.isAcknowledgement) {
+        const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
+        responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
+      } else {
+        responseHtml = renderResponse(
+          data.answer || data.error || 'No response received.',
+          data.resources || [],
+          serverPlan,
+          { learningStyle: data.learningStyle || null, embeddedVideo: data.embeddedVideo || null, imageSearchQuery: data.imageSearchQuery || null }
+        );
+      }
+
+      const knoxRow = replaceThinkingWithResponse(responseHtml, false);
+
+      // ── Session completed — show celebration + "Start New Problem" button ──
+      if (data.sessionCompleted || data.isSessionEnd) {
+        setTimeout(() => {
+          const celebRow = document.createElement('div');
+          celebRow.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+          celebRow.innerHTML = `
+            <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;margin-top:4px;"><img src="./knox-logo.jpg" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
+            <div style="max-width:88%;">
+              <div style="background:${data.sessionCompleted ? '#D7FFB8' : '#FFF4EC'};border:2px solid ${data.sessionCompleted ? '#58CC02' : '#FFD0A0'};border-radius:6px 18px 18px 18px;padding:14px 18px;margin-bottom:10px;">
+                <p style="font-size:15px;font-weight:700;color:${data.sessionCompleted ? '#1a5c00' : '#92400E'};line-height:1.6;margin:0;">
+                  ${data.sessionCompleted
+                    ? '🎉 You got it! That\'s 1 problem solved. Ready for the next one?'
+                    : '⏱️ Session limit reached — nice work making it this far! Start a fresh session to keep going.'
+                  }
+                </p>
+              </div>
+              <button onclick="startNewLearnSession()" style="padding:11px 22px;border-radius:12px;border:none;background:#FF6B00;color:white;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer;box-shadow:0 3px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                Start New Problem 🦊
+              </button>
+            </div>`;
+          chatThread.appendChild(celebRow);
+          chatThread.scrollTo({ top: celebRow.offsetTop - chatThread.offsetTop - 12, behavior: 'smooth' });
+        }, 500);
+      }
+
+      // ── Learn mode action buttons ────────────────────────────────────────
+      if (data.isLearnMode && !data.isStuck && !data.isShowMe) {
+        const actionBar = document.createElement('div');
+        actionBar.style.cssText = 'display:flex;gap:8px;padding:6px 14px 14px;flex-wrap:wrap;';
+
+        const stuckBtn = document.createElement('button');
+        stuckBtn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:11px;border:2px solid #E5E7EB;background:white;font-size:13px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;transition:all 0.15s;';
+        stuckBtn.innerHTML = "🤔 I'm Stuck";
+        stuckBtn.onmouseover = () => { stuckBtn.style.borderColor='#1CB0F6'; stuckBtn.style.color='#1CB0F6'; };
+        stuckBtn.onmouseout  = () => { stuckBtn.style.borderColor='#E5E7EB'; stuckBtn.style.color='#6B7280'; };
+        stuckBtn.onclick = () => sendLearnAction('stuck');
+        actionBar.appendChild(stuckBtn);
+
+        const canShowMe = data.canShowMe || (serverPlan !== 'free');
+        if (canShowMe) {
+          const showBtn = document.createElement('button');
+          showBtn.style.cssText = 'display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:11px;border:2px solid #E5E7EB;background:white;font-size:13px;font-weight:800;color:#6B7280;cursor:pointer;font-family:inherit;transition:all 0.15s;';
+          showBtn.innerHTML = '👁️ Show Me';
+          showBtn.onmouseover = () => { showBtn.style.borderColor='#FF6B00'; showBtn.style.color='#FF6B00'; };
+          showBtn.onmouseout  = () => { showBtn.style.borderColor='#E5E7EB'; showBtn.style.color='#6B7280'; };
+          showBtn.onclick = () => sendLearnAction('showMe');
+          actionBar.appendChild(showBtn);
+        }
+
+        const bubble = knoxRow.querySelector('div:nth-child(2)');
+        if (bubble) bubble.appendChild(actionBar);
+      }
+
+      // Fire optional after-answer callback (e.g. guest sign-up prompt)
+      if (typeof afterCallback === 'function') {
+        setTimeout(afterCallback, 600);
+      }
+
+      // Save button (not in learn mode)
+      if (!data.isAcknowledgement && !data.isLearnMode) {
+        const saveBtn = document.createElement('button');
+        saveBtn.style.cssText = 'display:flex;align-items:center;gap:6px;margin:0 16px 16px;padding:8px 14px;background:var(--gray);border:2px solid var(--border);border-radius:10px;font-size:12px;font-weight:800;color:#777;cursor:pointer;font-family:inherit;transition:all 0.15s;';
+        saveBtn.innerHTML = '💾 Save';
+        saveBtn.onmouseover = () => { saveBtn.style.borderColor = 'var(--orange)'; saveBtn.style.color = 'var(--orange)'; };
+        saveBtn.onmouseout  = () => { saveBtn.style.borderColor = 'var(--border)'; saveBtn.style.color = '#777'; };
+        saveBtn.onclick = () => {
+          saveToHistory(typedQuestion, data.answer || '', serverPlan);
+          saveBtn.innerHTML = '✓ Saved';
+          saveBtn.style.color = 'var(--green-dark)';
+          saveBtn.style.borderColor = 'var(--green)';
+        };
+        const bubble = knoxRow.querySelector('.chat-knox-bubble');
+        if (bubble) bubble.appendChild(saveBtn);
+      }
+
+      // Update usage progress bar
+      if (data.usage) {
+        updateUsageBar(data.usage);
+        // ── Show upgrade popup instantly when the last free question is used ──
+        // Don't wait for the next attempt to hit a 429 — show it right now.
+        const uPlan = window.userPlan || userPlan || 'free';
+        if (uPlan === 'free' && data.usage.hw >= data.usage.hwLimit && !data.isCasual) {
+          setTimeout(() => showLimitModal({
+            limit:     data.usage.hwLimit,
+            used:      data.usage.hw,
+            countdown: data.usage.nextUnlock
+              ? (() => {
+                  const ms  = data.usage.nextUnlock - Date.now();
+                  if (ms <= 0) return null;
+                  const hrs = Math.floor(ms / 3600000);
+                  const min = Math.floor((ms % 3600000) / 60000);
+                  return hrs > 0 ? `${hrs}h ${min}m` : `${min}m`;
+                })()
+              : null,
+          }), 800); // short delay so the answer renders first
+        }
+      }
+
+      // Update conversation memory
+      conversationHistory.push(
+        { role: 'user',      content: typedQuestion || 'Image question' },
+        { role: 'assistant', content: (data.answer || '').substring(0, 1500) }
+      );
+      if (conversationHistory.length > 6) conversationHistory = conversationHistory.slice(-6);
+      updateConversationIndicator();
+
+    } catch (err) {
+      replaceThinkingWithResponse(`<div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:14px;font-weight:700;color:#DC2626;line-height:1.6;">😬 Knox couldn't reach the server — check your connection and try again.</div>
+        <button onclick="handleAskQuestion()" style="padding:10px 18px;border-radius:10px;font-size:13px;font-weight:800;font-family:inherit;border:none;background:#FF6B00;color:white;cursor:pointer;box-shadow:0 3px 0 #CC5500;align-self:flex-start;">↩ Try Again</button>
+      </div>`, true);
+      console.error(err);
+    } finally {
+      resetBtn();
+      if (window.clearImage) window.clearImage();
+      if (chatInput) chatInput.focus();
+    }
+  }  // ← end of executeAskQuestion
+
+  // ── ACKNOWLEDGEMENT CARD ─────────────────────────────────────────────────
+  function renderAcknowledgement(message, plan) {
+    // Strip markdown links from acknowledgement text
+    const clean = (message || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
+    return `<div class="ai-response-box">
+      <div class="resp-header">
+        <div class="resp-brain"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>
+        <div class="resp-title">Knox Knows</div>
+        <div class="resp-plan-tag tag-pro-plus">Pro+</div>
+      </div>
+      <div style="background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:14px 18px;color:#14532d;font-size:15px;line-height:1.6;font-weight:600;">
+        ✓ ${clean}
+      </div>
+    </div>`;
   }
 
-  // Detect if this is casual chat vs homework question
-  const casual = learnMode ? false : isCasualChat(trimmedQuestion) && !hasImage;
+  // ── SHARED RENDER HELPERS (outer scope — used by renderResponse AND executeAskQuestion) ──
+  function stripMarkdownLinks(text) {
+    return text.replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
+  }
 
-  const systemPrompt = learnMode ? socraticPrompt : `You are Knox — a clever, warm, enthusiastic orange fox and the heart of Knox Knows. You are a real character with personality. Students talk to you like a friend, and you talk back like one too.
+  function formatInline(text, p) {
+    let out = stripMarkdownLinks(text);
+    out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
+    out = out.replace(/\*\*/g, "").replace(/(?<![a-zA-Z])__(?![a-zA-Z])/g, "");
+    return out;
+  }
 
-YOUR PERSONALITY:
-- You're that one friend who's somehow great at every subject — but you're not cocky about it, you just love helping
-- Warm, real, a little witty. You keep it short and punchy when you're just chatting
-- You get genuinely excited about cool topics — let that show naturally
-- You care if students actually get it, not just if they copied the answer
-- Fox energy: quick, sharp, always a step ahead — but humble about it
-- You remember you're talking to a real student who might be stressed, confused, or just vibing
+  // Render ANY Knox response beautifully — works line-by-line
+  function renderFreeformText(rawText, plan) {
+      const allLines = rawText.split('\n').map(l => l.trim()).filter(l => l);
+      let html = '';
+      let isFirstPara = true;
+      let i = 0;
 
-YOUR VOICE:
-- Casual, natural sentences. Like texting. Real words.
-- Short when the moment is short. Deep when the question needs depth.
-- Light humor when it fits — nothing forced
-- Never robotic. Never stiff. Never "I'd be happy to help you with that!"
-- Banned forever: "Certainly!", "Of course!", "Great question!", "Absolutely!", "I'd be happy to"
+      while (i < allLines.length) {
+        const line = allLines[i];
 
-YOUR NAME & IDENTITY:
-- You are Knox. A fox. Full stop.
-- Part of Knox Knows — the app where students come to actually understand stuff
-- If someone asks if you're AI: "I'm Knox — fox by day, tutor by always. Does it matter? I've got your homework covered 🦊"
+        // ── Numbered step ─────────────────────────────────────────────────────
+        if (/^\d+\./.test(line)) {
+          // Collect all consecutive numbered lines into a step group
+          let steps = [];
+          while (i < allLines.length && /^\d+\./.test(allLines[i])) {
+            const m   = allLines[i].match(/^(\d+)\.\s*(.*)/);
+            const num = m ? m[1] : '•';
+            const txt = m ? m[2] : allLines[i];
+            steps.push({ num, txt });
+            i++;
+          }
+          html += `<div style="display:flex;flex-direction:column;gap:8px;margin:10px 14px;">`;
+          steps.forEach(({ num, txt }) => {
+            html += `<div style="display:flex;align-items:flex-start;gap:10px;background:white;border:2px solid #FFE0C2;border-radius:12px;padding:12px 14px;box-shadow:0 2px 0 #FFD0A0;">
+              <div style="min-width:28px;height:28px;border-radius:9px;background:#FF6B00;color:white;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${num}</div>
+              <div style="font-size:14px;font-weight:600;color:#3C3C3C;line-height:1.6;padding-top:4px;">${formatInline(txt, plan)}</div>
+            </div>`;
+          });
+          html += `</div>`;
+          continue;
+        }
 
-TWO MODES — READ THIS CAREFULLY:
+        // ── Bullet line ───────────────────────────────────────────────────────
+        if (/^[-•*]\s/.test(line)) {
+          let bullets = [];
+          while (i < allLines.length && /^[-•*]\s/.test(allLines[i])) {
+            bullets.push(allLines[i].replace(/^[-•*]\s*/, ''));
+            i++;
+          }
+          html += `<div style="background:#F5F3FF;border-left:5px solid #8B5CF6;border-radius:0 12px 12px 0;padding:12px 16px;margin:10px 14px;display:flex;flex-direction:column;gap:6px;">`;
+          bullets.forEach(b => {
+            html += `<div style="display:flex;align-items:flex-start;gap:8px;font-size:14px;font-weight:600;color:#333;line-height:1.55;">
+              <div style="width:18px;height:18px;border-radius:50%;background:#8B5CF6;color:white;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;margin-top:2px;">✓</div>
+              <span>${formatInline(b, plan)}</span>
+            </div>`;
+          });
+          html += `</div>`;
+          continue;
+        }
 
-MODE 1 — CASUAL CHAT (when someone is just talking, greeting, or not asking a real school problem):
-${casual ? `THIS MESSAGE IS CASUAL CHAT. Rules:
-- Do NOT use any section headers. Do NOT start with "Final Answer:". 
-- Talk like you're texting a friend — natural, warm, short.
-- 1-4 sentences max. Be Knox the fox, not a homework bot.
-- Use 🦊 occasionally but not every message.
-- If they mention homework casually (like "ugh i have so much homework"), just vibe with them — maybe ask what subject or offer to help.
-- This is the same experience for everyone — Free, Pro, Pro+ — all get Knox at his best for casual chat.` : `THIS IS A REAL SCHOOL QUESTION. Use the structured format below.`}
+        // ── Labeled sections ──────────────────────────────────────────────────
+        if (/^Explanation:\s*/i.test(line)) {
+          const txt = line.replace(/^Explanation:\s*/i, '');
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#1CB0F6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #0A85C2;">Explanation</div></div><div style="background:#D7F2FD;border-left:5px solid #1CB0F6;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:15px;font-weight:500;color:#333;line-height:1.75;">${formatInline(txt, plan)}</div></div></div>`;
+          i++; continue;
+        }
+        if (/^Tip:\s*/i.test(line)) {
+          const txt = line.replace(/^Tip:\s*/i, '');
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div></div><div style="background:#FFFBEB;border-left:5px solid #F59E0B;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
+          i++; continue;
+        }
+        if (/^Insight:\s*/i.test(line)) {
+          const txt = line.replace(/^Insight:\s*/i, '');
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div></div><div style="background:#FDF2F8;border-left:5px solid #EC4899;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
+          i++; continue;
+        }
+        if (/^Common Mistake:\s*/i.test(line)) {
+          const txt = line.replace(/^Common Mistake:\s*/i, '');
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div></div><div style="background:#FEF2F2;border-left:5px solid #EF4444;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
+          i++; continue;
+        }
+        if (/^Final Answer:\s*/i.test(line)) {
+          const txt = line.replace(/^Final Answer:\s*/i, '');
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#58CC02;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #46A302;">Answer</div></div><div style="background:#D7FFB8;border-left:5px solid #58CC02;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:16px;font-weight:800;color:#1a1a1a;line-height:1.5;">${formatInline(txt, plan)}</div></div></div>`;
+          isFirstPara = false; i++; continue;
+        }
 
-MODE 2 — HOMEWORK QUESTIONS (any actual academic question):
-Use the structured sections defined in your plan below. But keep your Knox voice throughout — even technical explanations should feel like they're coming from a sharp friend, not a textbook.
+        // ── Plain paragraph ───────────────────────────────────────────────────
+        // Collect consecutive plain lines into one paragraph
+        let paraLines = [];
+        while (i < allLines.length
+          && !/^\d+\./.test(allLines[i])
+          && !/^[-•*]\s/.test(allLines[i])
+          && !/^(Explanation|Tip|Insight|Common Mistake|Final Answer|Key Points|Step-by-step|Resources):/i.test(allLines[i])) {
+          paraLines.push(allLines[i]);
+          i++;
+        }
+        const paraText = formatInline(paraLines.join(' '), plan);
 
-SUBJECTS: Math | Science | History | English | CS | Economics | Psychology | Languages | Law | Test prep | Philosophy | Any academic subject
+        if (isFirstPara) {
+          // First paragraph = Answer card (green)
+          html += `<div style="margin:10px 14px 0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="background:#58CC02;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #46A302;">Answer</div>
+            </div>
+            <div style="background:#D7FFB8;border-left:5px solid #58CC02;border-radius:0 12px 12px 0;padding:14px 16px;">
+              <div style="font-size:16px;font-weight:800;color:#1a1a1a;line-height:1.5;">${paraText}</div>
+            </div>
+          </div>`;
+          isFirstPara = false;
+        } else {
+          // Subsequent paragraphs = blue tinted explanation
+          html += `<div style="margin:6px 14px 0;">
+            <div style="background:#EFF9FF;border-left:5px solid #7DD3FC;border-radius:0 12px 12px 0;padding:12px 16px;">
+              <div style="font-size:15px;font-weight:500;color:#1e3a5f;line-height:1.7;">${paraText}</div>
+            </div>
+          </div>`;
+        }
+      }
 
-${planInstructions}
-${learningStyleInstructions}
+      return html;
+    }
 
-UNIVERSAL RULES:
-1. ${casual ? 'THIS IS CASUAL — do NOT use Final Answer: or any headers. Just talk.' : 'ALWAYS start with "Final Answer:" — even if you need more info, write Final Answer: I need a bit more to help you — [your question], then Explanation: with the detail'}
-2. Keep your Knox voice in everything you write
-3. Steps need real numbers and actual work — never be vague
-4. Number steps: 1. thing  2. thing  (never "Step 1:" format)
-5. No LaTeX, no markdown headers (##), no dollar signs around math
-6. Scale length to what the question needs
-7. For images: read every detail carefully and solve exactly what's shown
-8. ${casual ? 'Keep it short and conversational — this is a text not an essay' : 'Use ONLY the section headers from your plan — no variations'}
-9. Sound like Knox. Always.`;
+  // ── RENDER RESPONSE ───────────────────────────────────────────────────────
+  function renderResponse(answer, resources, plan, extras = {}) {
+    const { learningStyle, embeddedVideo, imageSearchQuery } = extras;
 
-  // 7. Build messages array (Chat Completions format — properly supports multi-turn history)
-  const messages = [{ role: "system", content: systemPrompt }];
+    // Pre-pass: ensure Resources: is always on its own line
+    answer = answer.replace(/([^\n])(Resources:)/g, '$1\n\nResources:');
 
-  // Add conversation history (previous turns)
-  safeHistory.forEach(m => {
-    if (m.role && m.content) messages.push({ role: m.role, content: m.content });
+    // ── Normalise section headers — map ALL known variants to canonical names ──
+    function normalizeSections(text) {
+      let r = text;
+
+      // Map ALL known AI-generated header variants to canonical section names
+      const mappings = [
+        // Final Answer variants — only exact matches at line start
+        [/^Answer:/gim,                'Final Answer:'],
+        // Step-by-step variants — safe ones only
+        [/Step-by-Step Process:/gi,    'Step-by-step:'],
+        [/Step by Step:/gi,            'Step-by-step:'],
+        // Remove dangerous mappings: Solution:, Method:, Work:, Steps:
+        // These often appear as part of the answer text itself
+        // Explanation variants
+        [/Detailed Explanation:/gi,    'Explanation:'],
+        [/How it Works:/gi,            'Explanation:'],
+        // Insight variants
+        [/Deeper Insight:/gi,          'Insight:'],
+        [/Deep Dive:/gi,               'Insight:'],
+        [/Did You Know:/gi,            'Insight:'],
+        // Common Mistake variants
+        [/Common Error:/gi,            'Common Mistake:'],
+        [/Watch Out:/gi,               'Common Mistake:'],
+        [/Avoid This:/gi,              'Common Mistake:'],
+        // Key Points variants
+        [/Key Point:/gi,               'Key Points:'],
+        [/Key Takeaways:/gi,           'Key Points:'],
+        [/Takeaway:/gi,                'Key Points:'],
+      ];
+
+      mappings.forEach(([pattern, canonical]) => {
+        r = r.replace(pattern, canonical);
+      });
+
+      // Force all canonical headers onto their own lines
+      const headers = ['Final Answer:','Explanation:','Step-by-step:','Tip:','Insight:','Common Mistake:','Key Points:','Resources:'];
+      headers.forEach(h => {
+        const escaped = h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        r = r.replace(new RegExp('([^\\n])\\s*(' + escaped + ')', 'g'), '$1\n\n$2');
+      });
+
+      // Numbered steps on their own lines
+      r = r.replace(/([.!?:;,])\s+(\d+\.\s)/g, '$1\n$2');
+      r = r.replace(/([.!?:;,])\s+(Step\s+\d+[:.]\s)/gi, '$1\n$2');
+
+      return r;
+    }
+    answer = normalizeSections(answer);
+
+    const knownHeaders = ['Final Answer:', 'Explanation:', 'Step-by-step:', 'Tip:', 'Insight:', 'Common Mistake:', 'Key Points:', 'Resources:'];
+    const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+
+    // If the first line isn't a known header, auto-treat it as Final Answer
+    if (lines.length > 0 && !knownHeaders.some(h => lines[0].startsWith(h))) {
+      lines[0] = 'Final Answer: ' + lines[0];
+    }
+
+    let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
+    let keyPointsBullets = [];
+    let mode = "other", currentParaLines = [];
+
+    function flushPara(type) {
+      if (currentParaLines.length > 0) {
+        paragraphs.push({ type, text: currentParaLines.join(" ").trim() });
+        currentParaLines = [];
+      }
+    }
+
+    for (const line of lines) {
+      if (line.startsWith("Resources:")) { flushPara(mode); break; }
+
+      if (line.startsWith("Final Answer:")) {
+        finalAnswerText = line.replace("Final Answer:", "").trim();
+        mode = "other";
+      }
+      else if (line.startsWith("Step-by-step:")) {
+        flushPara(mode); mode = "steps";
+      }
+      else if (line.startsWith("Explanation:")) {
+        flushPara(mode); mode = "explanation";
+        const inl = line.replace("Explanation:", "").trim();
+        if (inl) currentParaLines.push(inl);
+      }
+      // Catch "Explanation:" appearing mid-line (e.g. "Word. Explanation: more text")
+      else if (line.includes("Explanation:") && !line.startsWith("Final Answer:")) {
+        const parts = line.split("Explanation:");
+        if (parts[0].trim()) currentParaLines.push(parts[0].trim());
+        flushPara(mode); mode = "explanation";
+        if (parts[1] && parts[1].trim()) currentParaLines.push(parts[1].trim());
+      }
+      else if (line.startsWith("Insight:")) {
+        flushPara(mode); mode = "insight";
+        insightText = line.replace("Insight:", "").trim();
+      }
+      else if (line.startsWith("Common Mistake:")) {
+        flushPara(mode); mode = "common_mistake";
+        commonMistakeText = line.replace("Common Mistake:", "").trim();
+      }
+      else if (line.startsWith("Key Points:")) {
+        flushPara(mode); mode = "keypoints";
+      }
+      else if (line.startsWith("Tip:")) {
+        flushPara(mode); mode = "tip";
+        tipText = line.replace("Tip:", "").trim();
+      }
+      // Numbered steps detected in ANY mode
+      else if (/^(Step\s+\d+\b|\d+\.)/.test(line)) {
+        if (mode !== "steps") { flushPara(mode); mode = "steps"; }
+        const num = (line.match(/^(?:Step\s+)?(\d+)/) || [])[1] || '•';
+        const stepText = line.replace(/^(?:Step\s+)?\d+[:.]\s*/, '').trim();
+        stepsHtml += `<div class="resp-step"><div class="resp-step-num">${num}</div><div class="resp-step-text">${formatInline(stepText, plan)}</div></div>`;
+      }
+      // Key points bullets — detect -, •, *, or plain text lines in keypoints mode
+      else if (mode === "keypoints") {
+        const bulletText = line.replace(/^[-•*]\s*/, "").trim();
+        if (bulletText) keyPointsBullets.push(stripMarkdownLinks(bulletText));
+      }
+      else if (mode === "tip")            { tipText           += " " + line; }
+      else if (mode === "insight")        { insightText       += " " + line; }
+      else if (mode === "common_mistake") { commonMistakeText += " " + line; }
+      else if (mode === "explanation")    { currentParaLines.push(line); }
+      else                               { currentParaLines.push(line); }
+    }
+    flushPara(mode);
+
+    // ── Fallback: nothing structured parsed → use smart freeform renderer ─────
+    if (!finalAnswerText && !stepsHtml && paragraphs.length === 0 && !tipText && !insightText && !commonMistakeText && keyPointsBullets.length === 0) {
+      const planTagClass2 = plan === 'max' ? 'tag-pro-plus' : plan === 'super' || plan === 'pro_plus' ? 'tag-pro' : 'tag-free';
+      const planTag2 = plan === 'max' ? 'Max Knox' : plan === 'super' || plan === 'pro_plus' ? 'Super Knox' : 'Basic Knox';
+      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(answer, plan)}<div style="height:10px;"></div>`;
+    }
+
+    // ── Only paragraphs (no Final Answer) → smart freeform ───────────────────
+    if (!finalAnswerText && paragraphs.length > 0 && !stepsHtml) {
+      const allText = paragraphs.map(p => p.text).join('\n\n');
+      const planTagClass2 = plan === 'max' ? 'tag-pro-plus' : plan === 'super' || plan === 'pro_plus' ? 'tag-pro' : 'tag-free';
+      const planTag2 = plan === 'max' ? 'Max Knox' : plan === 'super' || plan === 'pro_plus' ? 'Super Knox' : 'Basic Knox';
+      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(allText, plan)}<div style="height:10px;"></div>`;
+    }
+    const planTag      = plan === "max" ? "Max Knox" : plan === "super" || plan === "pro_plus" ? "Super Knox" : "Basic Knox";
+    const planTagClass = plan === "max" ? "tag-pro-plus" : plan === "super" || plan === "pro_plus" ? "tag-pro" : "tag-free";
+    let html = ``;
+
+    // ── Thin plan tag bar at top ──────────────────────────────────────────
+    html += `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass}">${planTag}</span></div>`;
+
+    // ── Answer ───────────────────────────────────────────────────────────────
+    if (finalAnswerText) {
+      html += `<div style="margin:10px 14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:var(--green);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--green-dark);">Answer</div>
+        </div>
+        <div style="background:var(--green-light);border-left:5px solid var(--green);border-radius:0 14px 14px 0;padding:14px 16px;">
+          <div style="font-size:17px;font-weight:800;color:#1a1a1a;line-height:1.5;">${formatInline(finalAnswerText, plan)}</div>
+        </div>
+      </div>`;
+    }
+
+    // ── Step-by-Step ─────────────────────────────────────────────────────────
+    if (stepsHtml) {
+      html += `<div style="margin:10px 14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="background:var(--orange);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Step-by-Step</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">${stepsHtml}</div>
+      </div>`;
+    }
+
+    // ── Explanation ───────────────────────────────────────────────────────────
+    const explanationParas = paragraphs.filter(p => p.type === "explanation" || p.type === "other");
+    if (explanationParas.length > 0) {
+      html += `<div style="margin:10px 14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:var(--blue);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--blue-dark);">Explanation</div>
+        </div>
+        <div style="background:var(--blue-light);border-left:5px solid var(--blue);border-radius:0 14px 14px 0;padding:14px 16px;">`;
+      explanationParas.forEach(p => {
+        if (p.text) html += `<div style="font-size:15px;font-weight:500;color:#333;line-height:1.75;margin-bottom:10px;">${formatInline(p.text, plan)}</div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    // ── Key Points ────────────────────────────────────────────────────────────
+    if (keyPointsBullets.length > 0) {
+      html += `<div style="margin:10px 14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="background:#8B5CF6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #6D28D9;">Key Points</div>
+        </div>
+        <div style="background:#F5F3FF;border-left:5px solid #8B5CF6;border-radius:0 14px 14px 0;padding:14px 18px;display:flex;flex-direction:column;gap:8px;">`;
+      keyPointsBullets.forEach(b => {
+        html += `<div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:600;color:#333;line-height:1.55;">
+          <div style="width:20px;height:20px;border-radius:50%;background:#8B5CF6;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:10px;font-weight:900;">✓</div>
+          <span>${formatInline(b, plan)}</span>
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    // ── Insight ───────────────────────────────────────────────────────────────
+    if (insightText.trim()) {
+      html += `<div style="margin:10px 14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div>
+        </div>
+        <div style="background:#FDF2F8;border-left:5px solid #EC4899;border-radius:0 14px 14px 0;padding:14px 18px;">
+          <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(insightText.trim(), plan)}</div>
+        </div>
+      </div>`;
+    }
+
+    // ── Tip ───────────────────────────────────────────────────────────────────
+    if (tipText.trim()) {
+      html += `<div style="margin:10px 14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div>
+        </div>
+        <div style="background:#FFFBEB;border-left:5px solid #F59E0B;border-radius:0 14px 14px 0;padding:14px 18px;">
+          <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(tipText.trim(), plan)}</div>
+        </div>
+      </div>`;
+    }
+
+    // ── Common Mistake ────────────────────────────────────────────────────────
+    if (commonMistakeText.trim()) {
+      html += `<div style="margin:10px 14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div>
+        </div>
+        <div style="background:#FEF2F2;border-left:5px solid #EF4444;border-radius:0 14px 14px 0;padding:14px 18px;">
+          <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(commonMistakeText.trim(), plan)}</div>
+        </div>
+      </div>`;
+    }
+
+    // ── Resources ─────────────────────────────────────────────────────────────
+    if (resources && resources.length > 0) {
+      const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
+      const items = resources.map(r => {
+        return `<a href="${r.link}" target="_blank" rel="noopener" class="resp-resource-link">${ytIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:800;color:#ef4444;white-space:nowrap;">YouTube ↗</span></a>`;
+      }).join("");
+      html += `<div style="margin:10px 14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="background:#6B7280;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #374151;">Resources</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">${items}</div>
+      </div>`;
+    }
+
+    // ── Visual Content ────────────────────────────────────────────────────────
+    if (plan === 'pro_plus' && (embeddedVideo || imageSearchQuery)) {
+      let visualHtml = `<div style="margin:10px 14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="background:var(--blue-dark);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #075985;">Visual Content</div>
+        </div>`;
+      if (embeddedVideo) {
+        visualHtml += `<div class="resp-video-embed"><iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div style="font-size:12px;color:#6b7280;font-weight:600;margin:6px 0 10px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
+      }
+      if (imageSearchQuery) {
+        visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imageSearchQuery + ' diagram')}" target="_blank" rel="noopener" class="resp-image-search-btn">View Diagrams: ${imageSearchQuery.substring(0, 40)}${imageSearchQuery.length > 40 ? '...' : ''}</a>`;
+      }
+      visualHtml += `</div>`;
+      html += visualHtml;
+    }
+
+    html += `<div style="height:12px;"></div>`;
+    return html;
+  }
+
+  // ── CALCULATOR ────────────────────────────────────────────────────────────
+  let calcExpr = '';
+  let calcMode = 'standard';
+  let calcUseDeg = true;
+  let calcMemory = 0;
+  let calcOpenParens = 0;
+
+  window.openCalc = function() {
+    calcExpr = ''; calcOpenParens = 0;
+    document.getElementById('calcDisplay').textContent = '0';
+    document.getElementById('calcExpr').textContent = '';
+    document.getElementById('calcModal').classList.add('open');
+  };
+  window.closeCalc = function() {
+    document.getElementById('calcModal').classList.remove('open');
+  };
+
+  window.calcSetMode = function(mode) {
+    calcMode = mode;
+    document.getElementById('calcStandardGrid').style.display = mode === 'standard' ? '' : 'none';
+    document.getElementById('calcScientificGrid').style.display = mode === 'scientific' ? '' : 'none';
+    document.getElementById('calcAdvancedGrid').style.display = mode === 'advanced' ? '' : 'none';
+    document.getElementById('calcDegToggle').style.display = mode !== 'standard' ? '' : 'none';
+    ['tabStd','tabSci','tabAdv'].forEach((id,i) => {
+      document.getElementById(id).classList.toggle('active', ['standard','scientific','advanced'][i] === mode);
+    });
+  };
+
+  window.calcToggleDeg = function() {
+    calcUseDeg = !calcUseDeg;
+    document.getElementById('calcDegLabel').textContent = calcUseDeg ? 'DEG' : 'RAD';
+  };
+
+  function calcUpdateDisplay() {
+    const disp = calcExpr
+      .replace(/Math\.PI/g,'π').replace(/Math\.E(?![a-zA-Z])/g,'e')
+      .replace(/Math\.SQRT2/g,'√2').replace(/Math\.LN2/g,'ln2')
+      .replace(/\(1\+Math\.sqrt\(5\)\)\/2/g,'φ')
+      .replace(/__sinh\(/g,'sinh(').replace(/__cosh\(/g,'cosh(').replace(/__tanh\(/g,'tanh(')
+      .replace(/__asinh\(/g,'sinh⁻¹(').replace(/__acosh\(/g,'cosh⁻¹(').replace(/__atanh\(/g,'tanh⁻¹(')
+      .replace(/__sin\(/g,'sin(').replace(/__cos\(/g,'cos(').replace(/__tan\(/g,'tan(')
+      .replace(/__asin\(/g,'sin⁻¹(').replace(/__acos\(/g,'cos⁻¹(').replace(/__atan\(/g,'tan⁻¹(')
+      .replace(/Math\.sqrt\(/g,'√(').replace(/Math\.cbrt\(/g,'∛(').replace(/Math\.abs\(/g,'|')
+      .replace(/Math\.log10\(/g,'log(').replace(/Math\.log2\(/g,'log₂(').replace(/Math\.log\(/g,'ln(')
+      .replace(/Math\.exp\(/g,'e^(').replace(/Math\.floor\(/g,'⌊').replace(/Math\.ceil\(/g,'⌈')
+      .replace(/Math\.round\(/g,'round(').replace(/Math\.sign\(/g,'sgn(')
+      .replace(/__ncr\(/g,'nCr(').replace(/__npr\(/g,'nPr(')
+      .replace(/__gcd\(/g,'GCD(').replace(/__lcm\(/g,'LCM(')
+      .replace(/__logb\(/g,'logₙ(');
+    document.getElementById('calcDisplay').textContent = disp || '0';
+  }
+
+  window.calcInput = function(val) {
+    if (calcExpr === 'Error') calcExpr = '';
+    if (val === '(') calcOpenParens++;
+    if (val === ')') calcOpenParens = Math.max(0, calcOpenParens - 1);
+    calcExpr += val;
+    calcUpdateDisplay();
+  };
+
+  window.calcSmartParen = function() {
+    if (calcExpr === 'Error') calcExpr = '';
+    // If we have unclosed parens and last char is a digit/closing paren, close; else open
+    const last = calcExpr.slice(-1);
+    if (calcOpenParens > 0 && (last >= '0' && last <= '9' || last === ')' || last === '.')) {
+      calcExpr += ')'; calcOpenParens--;
+    } else {
+      calcExpr += '('; calcOpenParens++;
+    }
+    calcUpdateDisplay();
+  };
+
+  window.calcInsertConst = function(c) {
+    if (calcExpr === 'Error') calcExpr = '';
+    calcExpr += c;
+    calcUpdateDisplay();
+  };
+
+  window.calcFn = function(fn) {
+    if (calcExpr === 'Error') calcExpr = '';
+    const D2R = Math.PI / 180;
+
+    // Functions that operate on the current result
+    const immediate = ['fact','recip','floor','ceil','round','sign'];
+    if (immediate.includes(fn)) {
+      if (!calcExpr) return;
+      try {
+        const val = Function('"use strict"; return (' + resolveExpr(calcExpr) + ')')();
+        let result;
+        if (fn === 'fact') result = factorial(Math.round(val));
+        else if (fn === 'recip') result = 1 / val;
+        else if (fn === 'floor') result = Math.floor(val);
+        else if (fn === 'ceil') result = Math.ceil(val);
+        else if (fn === 'round') result = Math.round(val);
+        else if (fn === 'sign') result = Math.sign(val);
+        const label = {fact:'!',recip:'1/x',floor:'⌊⌋',ceil:'⌈⌉',round:'round',sign:'sgn'}[fn];
+        document.getElementById('calcExpr').textContent = calcExpr + ' [' + label + '] =';
+        calcExpr = fmtNum(result);
+        document.getElementById('calcDisplay').textContent = calcExpr;
+      } catch(e) { calcExpr='Error'; document.getElementById('calcDisplay').textContent='Error'; }
+      return;
+    }
+
+    // Two-argument functions: prompt for second argument via expression
+    if (fn === 'ncr' || fn === 'npr') { calcExpr += '__' + fn + '('; calcOpenParens++; }
+    else if (fn === 'gcd') { calcExpr += '__gcd('; calcOpenParens++; }
+    else if (fn === 'lcm') { calcExpr += '__lcm('; calcOpenParens++; }
+    else if (fn === 'logb') { calcExpr += '__logb('; calcOpenParens++; }
+    // Unary prefix functions
+    else if (fn === 'sqrt')  { calcExpr += 'Math.sqrt('; calcOpenParens++; }
+    else if (fn === 'cbrt')  { calcExpr += 'Math.cbrt('; calcOpenParens++; }
+    else if (fn === 'abs')   { calcExpr += 'Math.abs('; calcOpenParens++; }
+    else if (fn === 'log')   { calcExpr += 'Math.log10('; calcOpenParens++; }
+    else if (fn === 'log2')  { calcExpr += 'Math.log2('; calcOpenParens++; }
+    else if (fn === 'ln')    { calcExpr += 'Math.log('; calcOpenParens++; }
+    else if (fn === 'exp')   { calcExpr += 'Math.exp('; calcOpenParens++; }
+    else if (fn === '10x')   { calcExpr += '10**('; calcOpenParens++; }
+    // Trig
+    else if (fn === 'sin')   { calcExpr += '__sin('; calcOpenParens++; }
+    else if (fn === 'cos')   { calcExpr += '__cos('; calcOpenParens++; }
+    else if (fn === 'tan')   { calcExpr += '__tan('; calcOpenParens++; }
+    else if (fn === 'asin')  { calcExpr += '__asin('; calcOpenParens++; }
+    else if (fn === 'acos')  { calcExpr += '__acos('; calcOpenParens++; }
+    else if (fn === 'atan')  { calcExpr += '__atan('; calcOpenParens++; }
+    // Hyperbolic
+    else if (fn === 'sinh')  { calcExpr += '__sinh('; calcOpenParens++; }
+    else if (fn === 'cosh')  { calcExpr += '__cosh('; calcOpenParens++; }
+    else if (fn === 'tanh')  { calcExpr += '__tanh('; calcOpenParens++; }
+    else if (fn === 'asinh') { calcExpr += '__asinh('; calcOpenParens++; }
+    else if (fn === 'acosh') { calcExpr += '__acosh('; calcOpenParens++; }
+    else if (fn === 'atanh') { calcExpr += '__atanh('; calcOpenParens++; }
+    calcUpdateDisplay();
+  };
+
+  function resolveExpr(expr) {
+    const D2R = Math.PI / 180;
+    return expr
+      .replace(/×/g,'*').replace(/÷/g,'/')
+      .replace(/__sin\(/g, calcUseDeg ? `(x=>Math.sin(x*${D2R}))(` : 'Math.sin(')
+      .replace(/__cos\(/g, calcUseDeg ? `(x=>Math.cos(x*${D2R}))(` : 'Math.cos(')
+      .replace(/__tan\(/g, calcUseDeg ? `(x=>Math.tan(x*${D2R}))(` : 'Math.tan(')
+      .replace(/__asin\(/g, calcUseDeg ? `(x=>Math.asin(x)/${D2R})(` : 'Math.asin(')
+      .replace(/__acos\(/g, calcUseDeg ? `(x=>Math.acos(x)/${D2R})(` : 'Math.acos(')
+      .replace(/__atan\(/g, calcUseDeg ? `(x=>Math.atan(x)/${D2R})(` : 'Math.atan(')
+      .replace(/__sinh\(/g,'Math.sinh(').replace(/__cosh\(/g,'Math.cosh(').replace(/__tanh\(/g,'Math.tanh(')
+      .replace(/__asinh\(/g,'Math.asinh(').replace(/__acosh\(/g,'Math.acosh(').replace(/__atanh\(/g,'Math.atanh(')
+      .replace(/__ncr\(([^,]+),([^)]+)\)/g, (_,n,r) => `(${factorial(+n)}/(${factorial(+r)}*${factorial(+n - +r)}))`)
+      .replace(/__npr\(([^,]+),([^)]+)\)/g, (_,n,r) => `(${factorial(+n)}/${factorial(+n - +r)})`)
+      .replace(/__gcd\(([^,]+),([^)]+)\)/g, (_,a,b) => gcd(+a,+b))
+      .replace(/__lcm\(([^,]+),([^)]+)\)/g, (_,a,b) => lcm(+a,+b))
+      .replace(/__logb\(([^,]+),([^)]+)\)/g, (_,x,b) => `(Math.log(${x})/Math.log(${b}))`);
+  }
+
+  function fmtNum(n) {
+    if (!isFinite(n) || isNaN(n)) return 'Error';
+    // Round floating point noise
+    const r = parseFloat(n.toPrecision(12));
+    return String(r);
+  }
+
+  function factorial(n) {
+    n = Math.round(Math.abs(n));
+    if (n > 170) return Infinity;
+    if (n <= 1) return 1;
+    let r = 1; for (let i = 2; i <= n; i++) r *= i; return r;
+  }
+  function gcd(a, b) { a = Math.abs(Math.round(a)); b = Math.abs(Math.round(b)); while(b){let t=b;b=a%b;a=t;} return a; }
+  function lcm(a, b) { return Math.abs(a * b) / gcd(a, b); }
+
+  window.calcClear = function() {
+    calcExpr = ''; calcOpenParens = 0;
+    document.getElementById('calcDisplay').textContent = '0';
+    document.getElementById('calcExpr').textContent = '';
+  };
+
+  window.calcDel = function() {
+    if (calcExpr === 'Error') { calcExpr = ''; document.getElementById('calcDisplay').textContent = '0'; return; }
+    const tokens = [
+      /Math\.log10\($/, /Math\.log2\($/, /Math\.log\($/, /Math\.sqrt\($/, /Math\.cbrt\($/,
+      /Math\.abs\($/, /Math\.exp\($/, /Math\.floor\($/, /Math\.ceil\($/, /Math\.round\($/,
+      /Math\.sign\($/, /Math\.sinh\($/, /Math\.cosh\($/, /Math\.tanh\($/,
+      /Math\.asinh\($/, /Math\.acosh\($/, /Math\.atanh\($/,
+      /Math\.PI$/, /Math\.E$/, /Math\.SQRT2$/, /Math\.LN2$/,
+      /\(1\+Math\.sqrt\(5\)\)\/2$/,
+      /__sin\($/, /__cos\($/, /__tan\($/, /__asin\($/, /__acos\($/, /__atan\($/,
+      /__sinh\($/, /__cosh\($/, /__tanh\($/, /__asinh\($/, /__acosh\($/, /__atanh\($/,
+      /__ncr\($/, /__npr\($/, /__gcd\($/, /__lcm\($/, /__logb\($/,
+      /10\*\*\($/, /\*\*$/
+    ];
+    let matched = false;
+    for (const t of tokens) {
+      if (t.test(calcExpr)) {
+        if (t.source.endsWith('\\($')) calcOpenParens--;
+        calcExpr = calcExpr.replace(t, ''); matched = true; break;
+      }
+    }
+    if (!matched) {
+      const last = calcExpr.slice(-1);
+      if (last === '(') calcOpenParens--;
+      if (last === ')') calcOpenParens++;
+      calcExpr = calcExpr.slice(0, -1);
+    }
+    calcUpdateDisplay();
+  };
+
+  window.calcEquals = function() {
+    try {
+      let expr = resolveExpr(calcExpr);
+      // Auto-close unclosed parens
+      for (let i = 0; i < calcOpenParens; i++) expr += ')';
+      const result = Function('"use strict"; return (' + expr + ')')();
+      const dispExpr = calcExpr
+        .replace(/Math\.PI/g,'π').replace(/Math\.E(?![a-zA-Z])/g,'e')
+        .replace(/Math\.SQRT2/g,'√2').replace(/Math\.LN2/g,'ln2')
+        .replace(/\(1\+Math\.sqrt\(5\)\)\/2/g,'φ')
+        .replace(/__sin\(/g,'sin(').replace(/__cos\(/g,'cos(').replace(/__tan\(/g,'tan(')
+        .replace(/__asin\(/g,'sin⁻¹(').replace(/__acos\(/g,'cos⁻¹(').replace(/__atan\(/g,'tan⁻¹(')
+        .replace(/__sinh\(/g,'sinh(').replace(/__cosh\(/g,'cosh(').replace(/__tanh\(/g,'tanh(')
+        .replace(/__asinh\(/g,'sinh⁻¹(').replace(/__acosh\(/g,'cosh⁻¹(').replace(/__atanh\(/g,'tanh⁻¹(')
+        .replace(/Math\.sqrt\(/g,'√(').replace(/Math\.cbrt\(/g,'∛(').replace(/Math\.abs\(/g,'|(')
+        .replace(/Math\.log10\(/g,'log(').replace(/Math\.log2\(/g,'log₂(').replace(/Math\.log\(/g,'ln(')
+        .replace(/Math\.exp\(/g,'e^(').replace(/Math\.floor\(/g,'⌊(').replace(/Math\.ceil\(/g,'⌈(')
+        .replace(/Math\.round\(/g,'round(').replace(/Math\.sign\(/g,'sgn(')
+        .replace(/__ncr\(/g,'nCr(').replace(/__npr\(/g,'nPr(')
+        .replace(/__gcd\(/g,'GCD(').replace(/__lcm\(/g,'LCM(').replace(/__logb\(/g,'logₙ(')
+        .replace(/10\*\*\(/g,'10^(');
+      document.getElementById('calcExpr').textContent = dispExpr + ' =';
+      const fmt = fmtNum(result);
+      calcExpr = fmt === 'Error' ? 'Error' : fmt;
+      calcOpenParens = 0;
+      document.getElementById('calcDisplay').textContent = fmt;
+    } catch(e) {
+      calcExpr = 'Error';
+      document.getElementById('calcDisplay').textContent = 'Error';
+    }
+  };
+
+  // Memory functions
+  window.calcMemStore  = function() { try { calcMemory = parseFloat(Function('"use strict";return('+resolveExpr(calcExpr)+')')()); updateMemInd(); } catch(e){} };
+  window.calcMemRecall = function() { calcExpr += String(calcMemory); calcUpdateDisplay(); };
+  window.calcMemClear  = function() { calcMemory = 0; updateMemInd(); };
+  window.calcMemAdd    = function() { try { calcMemory += parseFloat(Function('"use strict";return('+resolveExpr(calcExpr)+')')()); updateMemInd(); } catch(e){} };
+  window.calcMemSub    = function() { try { calcMemory -= parseFloat(Function('"use strict";return('+resolveExpr(calcExpr)+')')()); updateMemInd(); } catch(e){} };
+  function updateMemInd() {
+    const el = document.getElementById('calcMemInd');
+    el.textContent = calcMemory !== 0 ? 'M = ' + fmtNum(calcMemory) : '';
+  }
+
+  window.calcInsert = function() {
+    if (!calcExpr || calcExpr === 'Error') return;
+    const ta = document.getElementById('questionInput');
+    ta.value = ta.value ? ta.value + ' ' + calcExpr : calcExpr;
+    closeCalc();
+    ta.focus();
+  };
+
+  // ── HISTORY ───────────────────────────────────────────────────────────────
+  const HISTORY_KEY = 'homeworkai_history';
+
+  function saveToHistory(question, answer, plan) {
+    let history = getHistory();
+    history.unshift({ question: question.substring(0, 300), answer, plan, time: new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) });
+    history = history.slice(0, 10);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  }
+
+  function getHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+    catch(e) { return []; }
+  }
+
+  window.openHistory = function() {
+    renderHistoryList();
+    document.getElementById('historyModal').classList.add('open');
+  };
+  window.closeHistory = function() {
+    document.getElementById('historyModal').classList.remove('open');
+  };
+
+  function renderHistoryList() {
+    const history = getHistory();
+    const body = document.getElementById('historyBody');
+    if (history.length === 0) {
+      body.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#9ca3af;font-weight:700;font-size:14px;">No saved questions yet.<br><span style=\'font-weight:500;font-size:13px;\'>Ask a question and hit \uD83D\uDCBE Save Answer!</span></div>';
+      return;
+    }
+    body.innerHTML = history.map((item, i) => {
+      const planLabel = item.plan === 'pro_plus' ? '\u2B50 Pro+' : item.plan === 'pro' ? '\u26A1 Pro' : '\uD83C\uDD13 Free';
+      const shortQ = item.question.length > 120 ? item.question.substring(0, 120) + '\u2026' : item.question;
+      return '<div class="history-item" id="hist-item-' + i + '">' +
+        '<div class="history-q">' + shortQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
+        '<div class="history-meta">' + item.time + ' &nbsp;&middot;&nbsp; ' + planLabel + '</div>' +
+        '<div class="history-actions">' +
+          '<button class="history-view-btn" onclick="viewHistoryItem(' + i + ')">\uD83D\uDC41 View Answer</button>' +
+          '<button class="history-del-btn" onclick="deleteHistoryItem(' + i + ')">\u2715 Remove</button>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  window.viewHistoryItem = function(index) {
+    const history = getHistory();
+    const item = history[index];
+    if (!item) return;
+    closeHistory();
+    const _inp = document.getElementById('chatInput')||document.getElementById('questionInput'); if(_inp) _inp.value = item.question;
+    const box = document.getElementById('answerBox');
+    box.classList.remove('hidden');
+    function fi(text, p) {
+      let out = text;
+      if (p === "pro" || p === "pro_plus") out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      if (p === "pro_plus") out = out.replace(/__(.+?)__/g, "<u>$1</u>");
+      return out;
+    }
+    // Normalise sections in history items too
+    let histAnswer = item.answer;
+    const histHeaders = ['Final Answer:','Explanation:','Step-by-step:','Step-by-Step:','Tip:','Insight:','Deeper Insight:','Common Mistake:','Key Points:','Key Point:','Resources:'];
+    histHeaders.forEach(h => {
+      const esc = h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      histAnswer = histAnswer.replace(new RegExp('([^\\n])\\s*(' + esc + ')', 'g'), '$1\n\n$2');
+    });
+    histAnswer = histAnswer.replace(/([.!?])\s+(\d+\.\s)/g, '$1\n$2');
+    histAnswer = histAnswer.replace(/([.!?])\s+(Step\s+\d+[:.]\s)/gi, '$1\n$2');
+
+    const lines = histAnswer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+    let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
+    let mode = "other", cpl = [];
+    function fp(type) { if (cpl.length > 0) { paragraphs.push({ type, text: cpl.join(" ").trim() }); cpl = []; } }
+    for (const line of lines) {
+      if (line.startsWith("Final Answer:")) { finalAnswerText = line.replace("Final Answer:", "").trim(); mode = "other"; }
+      else if (line.startsWith("Step-by-step:") || line.startsWith("Step-by-Step:")) { fp(mode); mode = "steps"; }
+      else if (line.startsWith("Explanation:")) { fp(mode); mode = "explanation"; const inl = line.replace("Explanation:", "").trim(); if (inl) cpl.push(inl); }
+      else if (line.startsWith("Insight:") || line.startsWith("Deeper Insight:")) { fp(mode); mode = "insight"; insightText = line.replace(/^(Deeper Insight|Insight):/, "").trim(); }
+      else if (line.startsWith("Common Mistake:")) { fp(mode); mode = "common_mistake"; commonMistakeText = line.replace("Common Mistake:", "").trim(); }
+      else if (line.startsWith("Key Points:") || line.startsWith("Key Point:")) { fp(mode); mode = "keypoints"; }
+      else if (line.startsWith("Tip:")) { fp(mode); mode = "tip"; tipText = line.replace("Tip:", "").trim(); }
+      else if (/^(Step\s+\d+\b|\d+\.)/.test(line)) {
+        if (mode !== "steps") { fp(mode); mode = "steps"; }
+        const num = (line.match(/^(?:Step\s+)?(\d+)/) || [])[1] || '•';
+        const txt = line.replace(/^(?:Step\s+)?\d+[:.]\s*/, '').trim();
+        stepsHtml += '<div class="resp-step"><div class="resp-step-num">' + num + '</div><div class="resp-step-text">' + fi(txt, item.plan) + '</div></div>';
+      }
+      else if (mode === "keypoints" && /^[-\u2022*]/.test(line)) { paragraphs.push({ type:"bullet", text: line.replace(/^[-\u2022*]\s*/,"") }); }
+      else if (mode === "tip") { tipText += " " + line; }
+      else if (mode === "insight") { insightText += " " + line; }
+      else if (mode === "common_mistake") { commonMistakeText += " " + line; }
+      else { cpl.push(line); }
+    }
+    fp(mode);
+    const planTag = item.plan === "pro_plus" ? "\u2B50 Pro+" : item.plan === "pro" ? "\u26A1 Pro" : "Free";
+    const planTagClass = item.plan === "pro_plus" ? "tag-pro-plus" : item.plan === "pro" ? "tag-pro" : "tag-free";
+    let html = '<div class="ai-response-box ' + (item.plan === "pro_plus" ? "resp-pro-plus" : "") + '">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 12px;background:#f3f4f6;border-radius:8px;font-size:12px;font-weight:700;color:#6b7280;">\uD83D\uDD50 From history &nbsp;&middot;&nbsp; ' + item.time + '</div>';
+    html += '<div class="resp-header"><div class="resp-brain">\uD83E\uDDE0</div><div class="resp-title">Knox Knows</div><div class="resp-plan-tag ' + planTagClass + '">' + planTag + '</div></div>';
+    if (finalAnswerText) html += '<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">' + fi(finalAnswerText, item.plan) + '</div></div>';
+    if (stepsHtml) html += '<div class="resp-steps-label">Step-by-step</div><div class="resp-steps-wrap">' + stepsHtml + '</div>';
+    for (const p of paragraphs) {
+      if (p.type === "explanation") html += '<div class="resp-body-para resp-para-explanation">' + fi(p.text, item.plan) + '</div>';
+      else if (p.type === "bullet") html += '<div class="resp-bullet">\u2022 ' + fi(p.text, item.plan) + '</div>';
+      else if (p.text) html += '<div class="resp-body-para">' + fi(p.text, item.plan) + '</div>';
+    }
+    if (insightText.trim()) html += '<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">' + fi(insightText.trim(), item.plan) + '</div></div>';
+    if (tipText.trim()) html += '<div class="resp-tip"><div class="resp-tip-icon">\uD83D\uDCA1</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">' + fi(tipText.trim(), item.plan) + '</div></div></div>';
+    if (commonMistakeText.trim()) html += '<div class="resp-common-mistake"><div class="resp-common-mistake-icon">\u26A0\uFE0F</div><div><div class="resp-common-mistake-label">Common Mistake</div><div class="resp-common-mistake-text">' + fi(commonMistakeText.trim(), item.plan) + '</div></div></div>';
+    html += '</div>';
+    box.innerHTML = html;
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  window.deleteHistoryItem = function(index) {
+    let history = getHistory();
+    history.splice(index, 1);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    renderHistoryList();
+  };
+
+  function getTodayKey() { return new Date().toISOString().split('T')[0]; }
+  function getUsageData() {
+    const stored = localStorage.getItem('homeworkai_usage');
+    if (stored) {
+      const data = JSON.parse(stored);
+      if (data.date !== getTodayKey()) return { date: getTodayKey(), count: 0, freeUsed: false };
+      return data;
+    }
+    return { date: getTodayKey(), count: 0, freeUsed: false };
+  }
+  function setUsageData(data) { localStorage.setItem('homeworkai_usage', JSON.stringify(data)); }
+
+  let pendingImageBase64 = null;
+  let pendingImageType = null;
+
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    pendingImageType = file.type;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      pendingImageBase64 = ev.target.result.split(',')[1];
+      const existing = document.getElementById('imagePill');
+      if (existing) existing.remove();
+      const pill = document.createElement('div');
+      pill.id = 'imagePill';
+      pill.style.cssText = 'display:inline-flex;align-items:center;gap:8px;background:var(--blue);border:2px solid black;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;margin-top:8px;max-width:100%;';
+      pill.innerHTML = '<img src="' + ev.target.result + '" style="width:32px;height:32px;object-fit:cover;border-radius:4px;border:1px solid black;flex-shrink:0;"> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📎 ' + file.name + '</span> <button onclick="clearImage()" style="background:none;border:none;cursor:pointer;font-weight:900;font-size:14px;line-height:1;flex-shrink:0;">×</button>';
+      // Insert after the div.relative wrapper (parent of textarea), not the textarea itself
+      const relativeWrapper = document.getElementById('questionInput').closest('.relative');
+      relativeWrapper.insertAdjacentElement('afterend', pill);
+    };
+    reader.readAsDataURL(file);
   });
 
-  // Add current user message
-  if (hasImage) {
-    messages.push({
-      role: "user",
-      content: [
-        { type: "image_url", image_url: { url: `data:${imageType};base64,${imageBase64}`, detail: "high" } },
-        { type: "text", text: trimmedQuestion || "Please read this image and solve the homework problem shown." }
-      ]
+  window.clearImage = function() {
+    pendingImageBase64 = null; pendingImageType = null;
+    const fi = document.getElementById('fileInput');
+    try { fi.value = ''; } catch(e) { fi.type='text'; fi.type='file'; }
+    const pill = document.getElementById('imagePill');
+    if (pill) pill.remove();
+  };
+
+  // ======= REVIEWS =======
+  const reviewColors = ['#7c3aed','#059669','#f59e0b','#3b82f6','#06b6d4','#8b5cf6','#ef4444','#0ea5e9'];
+  const reviews = [
+    { name:'Sarah M.',  handle:'@sarahm_22',     text:'Saved my grades. I went from a C to an A in calculus!',                                                              time:'2h', bg:'#c4b5fd' },
+    { name:'Jake T.',   handle:'@jaket_codes',    text:'I used to get stuck for hours. Now I understand everything step-by-step and can solve problems on my own.',          time:'5h', bg:'#a7f3d0' },
+    { name:'Emily R.',  handle:'@emilyreads',     text:'Best homework tool I have ever used. Period.',                                                                        time:'1d', bg:'#fde68a' },
+    { name:'Marcus L.', handle:'@marcusl',        text:'Helped me prepare for tests way better than studying notes.',                                                         time:'1d', bg:'#bae6fd' },
+    { name:'Olivia K.', handle:'@oliviak_',       text:'Makes homework actually make sense. My parents are impressed!',                                                       time:'2d', bg:'#a7f3d0' },
+    { name:'David W.',  handle:'@david_wins',     text:'Went from failing algebra to getting A grades in 2 weeks. Not even kidding.',                                         time:'3d', bg:'#fde68a' },
+    { name:'Ava P.',    handle:'@avapatel',       text:'Actually teaches instead of just answering. This is how learning should be.',                                         time:'4d', bg:'#c4b5fd' },
+    { name:'Noah C.',   handle:'@noahc_student', text:'Homework used to stress me out every night. Now I finish faster and understand everything.',                          time:'5d', bg:'#bae6fd' },
+  ];
+
+  function renderReviews() {
+    document.getElementById('reviews-grid').innerHTML = reviews.map((r, i) => {
+      const initials = r.name.split(' ').map(w => w[0]).join('');
+      const color = reviewColors[i % reviewColors.length];
+      return `<div class="review-card" style="background:${r.bg};">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="review-avatar-circle" style="background:${color};">${initials}</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-sm truncate">${r.name}</p>
+            <p style="font-size:12px;color:#6b7280;" class="truncate">${r.handle}</p>
+          </div>
+        </div>
+        <p style="font-size:14px;color:#1f2937;line-height:1.6;">${r.text}</p>
+        <div class="flex items-center justify-between mt-3 pt-3 border-t" style="border-color:rgba(0,0,0,0.1);">
+          <div style="display:flex;gap:2px;">${[1,2,3,4,5].map(()=>`<svg style="width:15px;height:15px;fill:#fbbf24;" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>`).join('')}</div>
+          <span style="font-size:12px;color:#6b7280;font-weight:600;">${r.time}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  updateUsageCounter();
+
+  // ======= SCROLL REVEAL =======
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
     });
-  } else {
-    messages.push({ role: "user", content: `Question: ${trimmedQuestion}` });
+  }, { threshold: 0.05 });
+
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-pop, .section-title-underline').forEach(el => {
+    revealObserver.observe(el);
+    // Immediately trigger elements that are already in view on page load
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setTimeout(() => el.classList.add('visible'), 100);
+    }
+  });
+
+  // ======= SETTINGS MODAL =======
+  window.openSettings = function() {
+    closeDropdown();
+    userPlan = window.userPlan || userPlan; // sync from module scope
+    const usage = getUsageData();
+    const planLabel = userPlan === 'pro_plus' ? '⭐ Pro+' : userPlan === 'pro' ? '⚡ Pro' : '🆓 Free';
+    const planColor = userPlan === 'pro_plus' ? '#FF6B00' : userPlan === 'pro' ? '#58CC02' : '#1CB0F6';
+    document.getElementById('settingsPlanBadge').innerHTML = `<span style="background:${planColor};color:white;padding:4px 12px;border-radius:8px;font-size:13px;">${planLabel}</span>`;
+
+    const isPaid = userPlan === 'pro' || userPlan === 'pro_plus';
+    document.getElementById('settingsRenewalRow').style.display = isPaid ? 'flex' : 'none';
+    document.getElementById('settingsCancelBtn').style.display = isPaid ? 'flex' : 'none';
+    document.getElementById('settingsUpgradeBtn').style.display = isPaid ? 'none' : 'flex';
+
+    if (isPaid) {
+      // Show real renewal date if available from Stripe (stored via webhook)
+      const renewalRow = document.getElementById('settingsRenewalRow');
+      const renewalDateEl = document.getElementById('settingsRenewalDate');
+      if (window.userRenewalDate) {
+        // Stripe stores current_period_end as a Unix timestamp (seconds)
+        const d = new Date(window.userRenewalDate * 1000);
+        renewalDateEl.textContent = d.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+        renewalRow.style.display = 'flex';
+      } else {
+        renewalRow.style.display = 'none';
+      }
+    }
+
+    const questionsUsed = usage.count || 0;
+    const questionsLeft = userPlan === 'pro' || userPlan === 'pro_plus' ? '∞' : Math.max(0, DAILY_LIMIT - questionsUsed);
+    const planLimit = userPlan === 'pro_plus' ? 40 : userPlan === 'pro' ? 25 : 0;
+    document.getElementById('settingsUsage').textContent = isPaid ? `${planLimit} questions/day (rolling 24hr)` : `${questionsLeft} of 5 remaining`;
+    // Show countdown row if at limit
+    const cdRow = document.getElementById('settingsCountdownRow');
+    if (cdRow) cdRow.style.display = 'none';
+
+    document.getElementById('settingsModal').classList.add('open');
+  };
+
+  window.closeSettings = function() {
+    document.getElementById('settingsModal').classList.remove('open');
+  };
+
+  window.handleCancelSubscription = function() {
+    closeSettings();
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;';
+    modal.innerHTML = `
+      <div style="background:white;max-width:400px;width:100%;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="background:var(--orange);padding:24px 28px;text-align:center;">
+          <div style="font-size:48px;margin-bottom:8px;">😢</div>
+          <h3 style="font-size:20px;font-weight:900;color:white;">Cancel subscription?</h3>
+          <p style="font-size:13px;color:rgba(255,255,255,0.85);font-weight:600;margin-top:6px;">You'll lose access to all Pro features at the end of your billing period.</p>
+        </div>
+        <div style="padding:24px 28px;display:flex;flex-direction:column;gap:10px;">
+          <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:var(--green);color:white;cursor:pointer;box-shadow:0 4px 0 var(--green-dark);transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">Keep My Plan</button>
+          <button onclick="this.closest('div[style*=fixed]').remove();window.openCustomerPortal();" style="width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:800;font-family:inherit;border:2px solid #fca5a5;background:#fef2f2;color:#dc2626;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">Go to Billing Portal →</button>
+        </div>
+      </div>`;
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    document.body.appendChild(modal);
+  };
+</script>
+
+<!-- ===================== SETTINGS MODAL ===================== -->
+<!-- ===================== SETTINGS MODAL ===================== -->
+<div class="settings-modal" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-panel" style="border-radius:24px;padding:0;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+
+    <!-- Header with Knox logo -->
+    <div style="background:var(--orange);padding:24px 28px;display:flex;align-items:center;gap:14px;">
+      <div style="width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,0.5);overflow:hidden;background:#FED7AA;flex-shrink:0;">
+        <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+      </div>
+      <div style="flex:1;">
+        <div style="font-weight:900;font-size:18px;color:white;">Account &amp; Plan</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:600;margin-top:2px;">Manage your subscription</div>
+      </div>
+      <button onclick="closeSettings()" style="background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:900;font-size:16px;color:white;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">✕</button>
+    </div>
+
+    <div style="padding:24px 28px;display:flex;flex-direction:column;gap:14px;">
+
+      <!-- Current Plan row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:#f9fafb;border-radius:16px;padding:16px 20px;border:2px solid #f3f4f6;">
+        <div>
+          <div style="font-weight:800;font-size:15px;color:#1f2937;">Current Plan</div>
+          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Your active subscription</div>
+        </div>
+        <div id="settingsPlanBadge" style="font-weight:800;font-size:14px;"></div>
+      </div>
+
+      <!-- Renewal Date row -->
+      <div id="settingsRenewalRow" style="display:none;align-items:center;justify-content:space-between;background:#f9fafb;border-radius:16px;padding:16px 20px;border:2px solid #f3f4f6;">
+        <div>
+          <div style="font-weight:800;font-size:15px;color:#1f2937;">Renewal Date</div>
+          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Next billing cycle</div>
+        </div>
+        <div style="font-weight:700;font-size:14px;color:#374151;" id="settingsRenewalDate">—</div>
+      </div>
+
+      <!-- Questions Today row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:#f9fafb;border-radius:16px;padding:16px 20px;border:2px solid #f3f4f6;">
+        <div>
+          <div style="font-weight:800;font-size:15px;color:#1f2937;">Questions Today</div>
+          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Rolling 24hr window</div>
+        </div>
+        <div id="settingsUsage" style="font-weight:800;font-size:14px;color:#374151;text-align:right;">—</div>
+      </div>
+      <!-- Countdown row — shown when limit hit -->
+      <div id="settingsCountdownRow" style="display:none;background:#FFF4EC;border-radius:16px;padding:14px 20px;border:2px solid #FFCFA0;">
+        <div style="font-size:11px;font-weight:900;color:#CC5500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Next question unlocks in</div>
+        <div id="settingsCountdown" style="font-size:22px;font-weight:900;color:#FF6B00;">—</div>
+      </div>
+
+      <!-- Buttons -->
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+        <button id="settingsUpgradeBtn" onclick="closeSettings();scrollToPricing();" style="width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:900;font-family:inherit;border:none;background:var(--orange);color:white;cursor:pointer;box-shadow:0 4px 0 #CC5500;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 #CC5500'">Upgrade Plan</button>
+        <button id="settingsCancelBtn" onclick="handleCancelSubscription()" style="display:none;width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:800;font-family:inherit;border:2px solid #fca5a5;background:#fef2f2;color:#dc2626;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">Cancel Subscription</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CALCULATOR MODAL ===================== -->
+<div class="calc-modal" id="calcModal" onclick="if(event.target===this)closeCalc()">
+  <div class="calc-panel">
+    <div class="calc-header">
+      <div style="font-weight:800;font-size:15px;letter-spacing:-0.03em;flex-shrink:0;">Calculator</div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+        <div class="calc-mode-tabs">
+          <button class="calc-mode-tab active" id="tabStd" onclick="calcSetMode('standard')">Standard</button>
+          <button class="calc-mode-tab" id="tabSci" onclick="calcSetMode('scientific')">Scientific</button>
+          <button class="calc-mode-tab" id="tabAdv" onclick="calcSetMode('advanced')">Advanced</button>
+        </div>
+        <button onclick="closeCalc()" style="background:none;border:2px solid black;border-radius:8px;padding:5px 9px;cursor:pointer;font-weight:800;font-size:15px;flex-shrink:0;">✕</button>
+      </div>
+    </div>
+
+    <!-- Display -->
+    <div class="calc-display-wrap">
+      <div class="calc-expr" id="calcExpr"></div>
+      <div class="calc-display" id="calcDisplay">0</div>
+      <div class="calc-deg-toggle" id="calcDegToggle" onclick="calcToggleDeg()" style="display:none;"><span id="calcDegLabel">DEG</span></div>
+    </div>
+
+    <!-- Memory bar -->
+    <div class="calc-memory-bar">
+      <button class="calc-mem-btn" onclick="calcMemClear()">MC</button>
+      <button class="calc-mem-btn" onclick="calcMemRecall()">MR</button>
+      <button class="calc-mem-btn" onclick="calcMemStore()">MS</button>
+      <button class="calc-mem-btn" onclick="calcMemAdd()">M+</button>
+      <button class="calc-mem-btn" onclick="calcMemSub()">M−</button>
+      <span class="calc-mem-indicator" id="calcMemInd"></span>
+    </div>
+
+    <!-- Standard grid -->
+    <div class="calc-grid calc-grid-standard" id="calcStandardGrid">
+      <button class="calc-btn clear" onclick="calcClear()">C</button>
+      <button class="calc-btn op" onclick="calcSmartParen()">( )</button>
+      <button class="calc-btn op" onclick="calcInput('%')">%</button>
+      <button class="calc-btn del" onclick="calcDel()">⌫</button>
+      <button class="calc-btn" onclick="calcInput('7')">7</button>
+      <button class="calc-btn" onclick="calcInput('8')">8</button>
+      <button class="calc-btn" onclick="calcInput('9')">9</button>
+      <button class="calc-btn op" onclick="calcInput('/')">÷</button>
+      <button class="calc-btn" onclick="calcInput('4')">4</button>
+      <button class="calc-btn" onclick="calcInput('5')">5</button>
+      <button class="calc-btn" onclick="calcInput('6')">6</button>
+      <button class="calc-btn op" onclick="calcInput('*')">×</button>
+      <button class="calc-btn" onclick="calcInput('1')">1</button>
+      <button class="calc-btn" onclick="calcInput('2')">2</button>
+      <button class="calc-btn" onclick="calcInput('3')">3</button>
+      <button class="calc-btn op" onclick="calcInput('-')">−</button>
+      <button class="calc-btn" onclick="calcInput('0')">0</button>
+      <button class="calc-btn" onclick="calcInput('.')">.</button>
+      <button class="calc-btn eq" onclick="calcEquals()">=</button>
+      <button class="calc-btn op" onclick="calcInput('+')">+</button>
+    </div>
+
+    <!-- Scientific grid -->
+    <div class="calc-grid calc-grid-scientific" id="calcScientificGrid" style="display:none;">
+      <button class="calc-btn fn" onclick="calcFn('sin')">sin</button>
+      <button class="calc-btn fn" onclick="calcFn('cos')">cos</button>
+      <button class="calc-btn fn" onclick="calcFn('tan')">tan</button>
+      <button class="calc-btn fn" onclick="calcFn('log')">log</button>
+      <button class="calc-btn fn" onclick="calcFn('ln')">ln</button>
+      <button class="calc-btn fn" onclick="calcFn('asin')">sin⁻¹</button>
+      <button class="calc-btn fn" onclick="calcFn('acos')">cos⁻¹</button>
+      <button class="calc-btn fn" onclick="calcFn('atan')">tan⁻¹</button>
+      <button class="calc-btn fn" onclick="calcFn('sqrt')">√</button>
+      <button class="calc-btn fn" onclick="calcFn('cbrt')">∛</button>
+      <button class="calc-btn fn" onclick="calcInput('**2')">x²</button>
+      <button class="calc-btn fn" onclick="calcInput('**3')">x³</button>
+      <button class="calc-btn fn" onclick="calcInput('**')">xʸ</button>
+      <button class="calc-btn fn" onclick="calcFn('abs')">|x|</button>
+      <button class="calc-btn fn" onclick="calcFn('fact')">n!</button>
+      <button class="calc-btn const" onclick="calcInsertConst('Math.PI')">π</button>
+      <button class="calc-btn const" onclick="calcInsertConst('Math.E')">e</button>
+      <button class="calc-btn op" onclick="calcSmartParen()">( )</button>
+      <button class="calc-btn op" onclick="calcInput('%')">%</button>
+      <button class="calc-btn fn" onclick="calcFn('recip')">1/x</button>
+      <button class="calc-btn clear" onclick="calcClear()">C</button>
+      <button class="calc-btn del" onclick="calcDel()" style="grid-column:span 2;">⌫</button>
+      <button class="calc-btn op" onclick="calcInput('/')">÷</button>
+      <button class="calc-btn op" onclick="calcInput('*')">×</button>
+      <button class="calc-btn" onclick="calcInput('7')">7</button>
+      <button class="calc-btn" onclick="calcInput('8')">8</button>
+      <button class="calc-btn" onclick="calcInput('9')">9</button>
+      <button class="calc-btn op" onclick="calcInput('-')">−</button>
+      <button class="calc-btn op" onclick="calcInput('+')">+</button>
+      <button class="calc-btn" onclick="calcInput('4')">4</button>
+      <button class="calc-btn" onclick="calcInput('5')">5</button>
+      <button class="calc-btn" onclick="calcInput('6')">6</button>
+      <button class="calc-btn" onclick="calcInput('1')">1</button>
+      <button class="calc-btn" onclick="calcInput('2')">2</button>
+      <button class="calc-btn" onclick="calcInput('3')">3</button>
+      <button class="calc-btn" onclick="calcInput('0')">0</button>
+      <button class="calc-btn" onclick="calcInput('.')">.</button>
+      <button class="calc-btn eq" onclick="calcEquals()" style="grid-column:span 2;">=</button>
+    </div>
+
+    <!-- Advanced grid (stats + hyperbolic + complex helpers) -->
+    <div class="calc-grid calc-grid-advanced" id="calcAdvancedGrid" style="display:none;">
+      <!-- Row 1: hyperbolic -->
+      <button class="calc-btn fn2" onclick="calcFn('sinh')">sinh</button>
+      <button class="calc-btn fn2" onclick="calcFn('cosh')">cosh</button>
+      <button class="calc-btn fn2" onclick="calcFn('tanh')">tanh</button>
+      <button class="calc-btn fn2" onclick="calcFn('asinh')">sinh⁻¹</button>
+      <button class="calc-btn fn2" onclick="calcFn('acosh')">cosh⁻¹</button>
+      <!-- Row 2: hyperbolic cont + log -->
+      <button class="calc-btn fn2" onclick="calcFn('atanh')">tanh⁻¹</button>
+      <button class="calc-btn fn" onclick="calcFn('log2')">log₂</button>
+      <button class="calc-btn fn" onclick="calcFn('logb')">logₙ</button>
+      <button class="calc-btn fn" onclick="calcFn('exp')">eˣ</button>
+      <button class="calc-btn fn" onclick="calcFn('10x')">10ˣ</button>
+      <!-- Row 3: stats / combinatorics -->
+      <button class="calc-btn stat" onclick="calcFn('ncr')">nCr</button>
+      <button class="calc-btn stat" onclick="calcFn('npr')">nPr</button>
+      <button class="calc-btn stat" onclick="calcFn('fact')">n!</button>
+      <button class="calc-btn stat" onclick="calcFn('gcd')">GCD</button>
+      <button class="calc-btn stat" onclick="calcFn('lcm')">LCM</button>
+      <!-- Row 4: extra math -->
+      <button class="calc-btn fn" onclick="calcFn('floor')">⌊x⌋</button>
+      <button class="calc-btn fn" onclick="calcFn('ceil')">⌈x⌉</button>
+      <button class="calc-btn fn" onclick="calcFn('round')">round</button>
+      <button class="calc-btn fn" onclick="calcFn('sign')">sgn</button>
+      <button class="calc-btn fn" onclick="calcFn('recip')">1/x</button>
+      <!-- Row 5: constants -->
+      <button class="calc-btn const" onclick="calcInsertConst('Math.PI')">π</button>
+      <button class="calc-btn const" onclick="calcInsertConst('Math.E')">e</button>
+      <button class="calc-btn const" onclick="calcInsertConst('Math.SQRT2')">√2</button>
+      <button class="calc-btn const" onclick="calcInsertConst('Math.LN2')">ln2</button>
+      <button class="calc-btn const" onclick="calcInsertConst('(1+Math.sqrt(5))/2')">φ</button>
+      <!-- Row 6: powers/roots -->
+      <button class="calc-btn fn" onclick="calcInput('**2')">x²</button>
+      <button class="calc-btn fn" onclick="calcInput('**3')">x³</button>
+      <button class="calc-btn fn" onclick="calcInput('**')">xʸ</button>
+      <button class="calc-btn fn" onclick="calcFn('sqrt')">√x</button>
+      <button class="calc-btn fn" onclick="calcFn('cbrt')">∛x</button>
+      <!-- Row 7: controls -->
+      <button class="calc-btn clear" onclick="calcClear()">C</button>
+      <button class="calc-btn del" onclick="calcDel()" style="grid-column:span 2;">⌫</button>
+      <button class="calc-btn op" onclick="calcSmartParen()">( )</button>
+      <button class="calc-btn op" onclick="calcInput('%')">%</button>
+      <!-- Row 8: digits -->
+      <button class="calc-btn" onclick="calcInput('7')">7</button>
+      <button class="calc-btn" onclick="calcInput('8')">8</button>
+      <button class="calc-btn" onclick="calcInput('9')">9</button>
+      <button class="calc-btn op" onclick="calcInput('/')">÷</button>
+      <button class="calc-btn op" onclick="calcInput('*')">×</button>
+      <button class="calc-btn" onclick="calcInput('4')">4</button>
+      <button class="calc-btn" onclick="calcInput('5')">5</button>
+      <button class="calc-btn" onclick="calcInput('6')">6</button>
+      <button class="calc-btn op" onclick="calcInput('-')">−</button>
+      <button class="calc-btn op" onclick="calcInput('+')">+</button>
+      <button class="calc-btn" onclick="calcInput('1')">1</button>
+      <button class="calc-btn" onclick="calcInput('2')">2</button>
+      <button class="calc-btn" onclick="calcInput('3')">3</button>
+      <button class="calc-btn" onclick="calcInput('0')">0</button>
+      <button class="calc-btn" onclick="calcInput('.')">.</button>
+      <button class="calc-btn eq" onclick="calcEquals()" style="grid-column:span 5;">=</button>
+    </div>
+
+    <button class="calc-insert-btn" onclick="calcInsert()">➤ Insert result into question</button>
+  </div>
+</div>
+
+<!-- ===================== HISTORY MODAL ===================== -->
+<div class="history-modal" id="historyModal" onclick="if(event.target===this)closeHistory()">
+  <div class="history-panel">
+    <div class="history-header">
+      <div>
+        <div style="font-weight:800;font-size:18px;letter-spacing:-0.03em;">🕐 Question History</div>
+        <div style="font-size:13px;color:#4b5563;margin-top:2px;">Your last 10 saved answers</div>
+      </div>
+      <button onclick="closeHistory()" style="background:none;border:2px solid black;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:800;font-size:16px;">✕</button>
+    </div>
+    <div class="history-body" id="historyBody"></div>
+  </div>
+</div>
+
+<!-- ===================== COOKIE CONSENT ===================== -->
+<div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--bg-primary);border-top:3px solid #FF6B00;padding:16px 24px;box-shadow:0 -4px 20px rgba(0,0,0,0.15);">
+  <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+    <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:220px;">
+      <div style="width:36px;height:36px;border-radius:10px;background:#FF6B00;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🦊</div>
+      <p style="color:var(--text);font-size:13px;font-weight:700;line-height:1.5;">
+        Knox uses cookies to keep you signed in and save your preferences.
+        <a href="/privacy.html" style="color:#FF6B00;text-decoration:underline;font-weight:800;">Learn more</a>
+      </p>
+    </div>
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <a href="/privacy.html" style="display:inline-flex;align-items:center;padding:9px 16px;border-radius:11px;border:2px solid var(--border);background:var(--bg-card);font-size:13px;font-weight:800;color:var(--text-light);text-decoration:none;white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='';this.style.color=''">Privacy Policy</a>
+      <button onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('cookie_ok','1');" style="display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:11px;border:none;background:#FF6B00;color:white;font-size:13px;font-weight:900;font-family:inherit;cursor:pointer;box-shadow:0 3px 0 #CC5500;white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #CC5500'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 0 #CC5500'">Got it ✓</button>
+    </div>
+  </div>
+</div>
+<script>
+  // Show cookie banner if not already accepted
+  if (!localStorage.getItem('cookie_ok')) {
+    setTimeout(function() {
+      var b = document.getElementById('cookieBanner');
+      if (b) b.style.display = 'block';
+    }, 1500);
   }
 
-  // 8. Pick model and token limit
-  // Casual chat: everyone gets gpt-4o with 800 tokens — same quality for all plans
-  // Homework: plan-based model and token limits apply
-  const isMaxPlan = userPlan === "max"   || userPlan === "super"  || userPlan === "pro_plus";
-  const isPaid = userPlan === "wonder" || userPlan === "pro";
-  const model = hasImage   ? "gpt-4o" :
-    learnMode              ? "gpt-4o" :
-    casual                 ? "gpt-4o" :
-    isMaxPlan              ? "gpt-4.1" :
-    isPaid              ? "gpt-4.1-mini" :
-                             "gpt-4o-mini";
+  // ══════════════════════════════════════════════════════════════
+  // DARK / LIGHT MODE — default is LIGHT
+  // ══════════════════════════════════════════════════════════════
+  (function initTheme() {
+    const saved = localStorage.getItem('knox-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    updateThemeIcon(saved);
+  })();
 
-  const maxTokens = learnMode ? 400 :
-    casual    ? 800 :
-    isMaxPlan ? 2800 :
-    isPaid ? 2000 :
-                350;
-
-  // 9. Call OpenAI Chat Completions API
-  try {
-    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method:  "POST",
-      headers: { "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
-      body:    JSON.stringify({ model, messages, max_tokens: maxTokens }),
-    });
-
-    const data = await openaiRes.json();
-
-    if (!openaiRes.ok) {
-      console.error("OpenAI API error:", JSON.stringify(data));
-      throw new Error(data.error?.message || "OpenAI API returned an error");
-    }
-
-    let rawAnswer = "No response";
-    if (data.choices?.[0]?.message?.content) {
-      rawAnswer = data.choices[0].message.content;
-    }
-
-    // Detect SESSION_COMPLETE signal from the AI
-    const sessionCompleted = learnMode && rawAnswer.includes('SESSION_COMPLETE');
-    // Remove the signal token from the displayed answer
-    if (sessionCompleted) rawAnswer = rawAnswer.replace(/\nSESSION_COMPLETE\n?/g, '').trim();
-
-    // If session just completed OR step limit hit — count this as 1 problem used
-    const shouldRecordNow = shouldRecordUsage || (learnMode && (sessionCompleted || isSessionEnd));
-    if (shouldRecordNow && !shouldRecordUsage) {
-      // Record usage that wasn't recorded at the start (session-completion credit)
-      try {
-        const snap3  = await usageRef.get();
-        const data3  = snap3.exists ? snap3.data() : {};
-        const times3 = (data3.times || []).filter(t => now - t < WINDOW_MS);
-        if (dailyLimit === Infinity || times3.length < dailyLimit) {
-          await usageRef.set({
-            times: [...times3, now],
-            uid, email: userEmail, updatedAt: now,
-          }, { merge: true });
-          currentTimes = [...times3, now];
-        }
-      } catch(e) {}
-    }
-
-    const processed = processAnswer(rawAnswer, userPlan);
-    let { answer, resources } = (userPlan !== "free")
-      ? parseResources(processed)
-      : { answer: processed, resources: [] };
-
-    // 10. Extract search topic from Final Answer for accurate video/image searches
-    const searchTopic = extractSearchTopic(rawAnswer) ||
-      trimmedQuestion.replace(/\b(visual learner|im a visual|show me|can you|please|help me|diagram|draw|visualize|in a visual way|visually)\b/gi, '').trim();
-
-    let embeddedVideo    = null;
-    let imageSearchQuery = null;
-
-    // Visual content — Pro+ only (Pro gets visual style in text but not embedded video/images)
-    if (isMaxPlan && !prefOnly) {
-      // Upgrade any YouTube resource search URLs to real video links
-      for (let i = 0; i < resources.length; i++) {
-        if (resources[i].type === "youtube" && resources[i].link.includes("youtube.com/results")) {
-          const vid = await searchYouTubeVideo(resources[i].title);
-          if (vid) resources[i].link = vid.url;
-        }
-      }
-      // Show embedded video + image search when visual style is active
-      if (learningStyle === "visual" || wantsVisual) {
-        imageSearchQuery = searchTopic;
-        embeddedVideo    = await searchYouTubeVideo(searchTopic);
-      }
-    }
-
-    // ── Record usage AFTER answer generated ──────────────────────────────────
-    // Get the Answer: count immediately. Learn with Knox: only when session complete.
-    if (shouldRecordUsage) {
-      try {
-        const snap2  = await usageRef.get();
-        const data2  = snap2.exists ? snap2.data() : {};
-        const times2 = (data2.times || []).filter(t => now - t < WINDOW_MS);
-        await usageRef.set({
-          times: [...times2, now],
-          uid, email: userEmail, updatedAt: now,
-        }, { merge: true });
-        currentTimes = [...times2, now];
-      } catch(e) { console.error("Usage record error:", e.message); }
-    }
-
-    // Get current usage counts for frontend bar
-    let totalUsed = currentTimes.length, nextUnlockTs = null;
-    try {
-      if (currentTimes.length === 0) {
-        const snap  = await usageRef.get();
-        const udata = snap.exists ? snap.data() : {};
-        currentTimes = (udata.times || []).filter(t => now - t < WINDOW_MS);
-        totalUsed = currentTimes.length;
-      }
-      if (currentTimes.length > 0) nextUnlockTs = Math.min(...currentTimes) + WINDOW_MS;
-    } catch(e) {}
-
-    // ── Award KP + update streak ──────────────────────────────────────────────
-    let gamResult = { kp: 0, streak: 1, totalKP: 0, weeklyKP: 0, streakBonus: 0 };
-    if (uid && !prefOnly) {
-      // KP: Get the Answer=3, Learn complete=20, Learn correct step=2, casual=1
-      let kpBase = casual ? 1
-        : (learnMode && sessionCompleted) ? 20
-        : learnMode ? 2
-        : 3;
-      gamResult = await awardKP(db, uid, kpBase, casual);
-      gamResult = await awardKP(db, uid, kpBase, casual);
-    }
-
-    return res.status(200).json({
-      answer,
-      resources,
-      plan:              userPlan,
-      learningStyle,
-      isAcknowledgement: prefOnly || casual,
-      isCasual:          casual,
-      isLearnMode:       !!learnMode,
-      isStuck:           !!isStuck,
-      isShowMe:          !!showMe,
-      sessionCompleted:  !!sessionCompleted,
-      isSessionEnd:      !!isSessionEnd,
-      inferredGrade:     inferredGrade || 'high',
-      canShowMe:         isPaidUser,
-      embeddedVideo,
-      imageSearchQuery,
-      videos: [],
-      usage: {
-        used:       totalUsed,
-        limit:      dailyLimit === Infinity ? null : dailyLimit,
-        nextUnlock: nextUnlockTs,
-        isLearnSession: !!learnMode,
-        sessionSteps:   safeHistory.length,
-        sessionLimit:   SESSION_STEP_LIMIT,
-      },
-      gamification: {
-        kpEarned:    gamResult.kp,
-        streak:      gamResult.streak,
-        totalKP:     gamResult.totalKP,
-        weeklyKP:    gamResult.weeklyKP,
-        streakBonus: gamResult.streakBonus,
-      },
-    });
-
-  } catch (err) {
-    console.error("SERVER ERROR:", err);
-    // Return a friendly error message rather than a raw 500 so the frontend can display it nicely
-    return res.status(500).json({ error: "Knox hit a snag — please try again in a moment. If this keeps happening, try refreshing the page." });
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const next    = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('knox-theme', next);
+    updateThemeIcon(next);
   }
-}
+
+  function updateThemeIcon(theme) {
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- deploy -->
