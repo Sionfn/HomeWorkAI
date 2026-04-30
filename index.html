@@ -380,8 +380,8 @@
 
 
     /* ── Light mode specific overrides ──────────────────────────────── */
-    [data-theme="light"] .account-dropdown { background:var(--bg-card); border-color:var(--border); }
-    [data-theme="light"] .dropdown-item:hover { background:var(--gray); }
+    [data-theme="light"] .account-dropdown { background:var(--bg-card); border-color:var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.1); }
+    [data-theme="light"] .dropdown-item:hover { background:var(--bg-elevated); }
     [data-theme="light"] .login-modal > div { background:var(--bg-card); }
     [data-theme="light"] #chatThread { background:var(--chat-bg); color:var(--text); background:var(--bg-secondary); }
     [data-theme="light"] #chatInput { background:var(--bg-input); color:var(--text); border-color:var(--border); }
@@ -449,13 +449,13 @@
     .pro-badge { background:#FFD900; color:#1a1a1a; border:none; border-radius:12px; padding:10px 20px; font-size:14px; font-weight:900; box-shadow:0 4px 0 #B8860B; transition:all 0.15s; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; letter-spacing:0.01em; }
     .pro-badge:hover { transform:translateY(-2px); box-shadow:0 6px 0 #B8860B; }
     .account-dropdown-wrapper { position:relative; }
-    .account-dropdown { position:absolute; top:calc(100% + 10px); right:0; background:white; border:2px solid var(--border); border-radius:20px; box-shadow:0 8px 24px rgba(0,0,0,0.12); min-width:220px; overflow:hidden; display:none; z-index:300; }
+    .account-dropdown { position:absolute; top:calc(100% + 10px); right:0; background:var(--bg-card); border:2px solid var(--border); border-radius:20px; box-shadow:0 8px 24px rgba(0,0,0,0.25); min-width:220px; overflow:hidden; display:none; z-index:300; }
     .account-dropdown.open { display:block; }
     .dropdown-header { padding:16px; border-bottom:2px solid var(--border); }
     .dropdown-header p { font-weight:800; font-size:15px; color:var(--text); }
     .dropdown-header span { font-size:12px; color:var(--text-light); }
-    .dropdown-item { width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; font-size:14px; font-weight:700; color:var(--text); background:none; border:none; cursor:pointer; transition:background 0.15s; font-family:inherit; }
-    .dropdown-item:hover { background:var(--gray); }
+    .dropdown-item { width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; font-size:14px; font-weight:700; color:var(--text); background:none; border:none; cursor:pointer; transition:background 0.15s; font-family:inherit; text-align:left; }
+    .dropdown-item:hover { background:var(--bg-elevated); }
     .dropdown-item.danger { color:var(--red); }
     .dropdown-divider { border-top:2px solid var(--border); margin:4px 0; }
 
@@ -1324,7 +1324,7 @@
 </section>
 
 <!-- ===================== TWO MODES ===================== -->
-<section style="background:var(--bg-secondary);padding:72px 24px;border-top:5px solid #FF6B00;">
+<section style="background:var(--bg-secondary);padding:72px 24px;">
   <div style="max-width:1000px;margin:0 auto;text-align:center;">
     <h2 class="section-title section-title-underline reveal" style="display:inline-block;color:var(--text);">Two ways to use Knox</h2>
     <p style="font-size:18px;font-weight:600;color:var(--text-light);margin-top:14px;line-height:1.6;">Knox helps you no matter how you learn best.</p>
@@ -1356,7 +1356,7 @@
 </section>
 
 <!-- ===================== HOW IT WORKS ===================== -->
-<section id="how-it-works" style="background:var(--bg-primary);padding:72px 24px;border-top:5px solid #1CB0F6;">
+<section id="how-it-works" style="background:var(--bg-primary);padding:72px 24px;">
   <div style="max-width:1000px;margin:0 auto;text-align:center;">
     <h2 class="section-title reveal" style="display:inline-block;color:var(--text);border-bottom:4px solid var(--orange);padding-bottom:6px;">How Knox works</h2>
 
@@ -1384,7 +1384,7 @@
 </section>
 
 <!-- ===================== SUBJECTS ===================== -->
-<section style="background:var(--bg-secondary);padding:72px 24px;border-top:5px solid #58CC02;">
+<section style="background:var(--bg-secondary);padding:72px 24px;">
   <div style="max-width:1100px;margin:0 auto;text-align:center;">
     <h2 class="section-title section-title-underline reveal" style="display:inline-block;">Every subject. Every grade.</h2>
     <p style="font-size:18px;font-weight:600;color:var(--text-light);margin-top:14px;">K-12 through college — Knox has you covered.</p>
@@ -1443,7 +1443,7 @@
 </section>
 
 <!-- ===================== ASK AI ===================== -->
-<section id="ai-helper" style="background:var(--bg-primary);padding:72px 24px;border-top:5px solid #FF6B00;">
+<section id="ai-helper" style="background:var(--bg-primary);padding:72px 24px;">
   <div style="max-width:780px;margin:0 auto;">
     <div style="text-align:center;margin-bottom:32px;">
       <img src="./knox-wave.png" alt="Knox waving" style="width:80px;height:auto;margin-bottom:-10px;filter:drop-shadow(0 4px 8px rgba(255,107,0,0.2));" onerror="this.style.display='none'">
@@ -1614,7 +1614,7 @@
 </section>
 
 <!-- ===================== PRICING ===================== -->
-<section id="pricing" style="background:var(--bg-secondary);padding:80px 24px;border-top:5px solid #1CB0F6;">
+<section id="pricing" style="background:var(--bg-secondary);padding:80px 24px;">
   <div style="max-width:1000px;margin:0 auto;">
 
     <!-- Header -->
@@ -1642,73 +1642,76 @@
 
       <!-- FREE -->
       <div class="reveal delay-1" style="background:#1CB0F6;border-radius:20px;border:3px solid #0A85C2;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;height:100%;box-sizing:border-box;">
-        <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:16px;">Free</div>
+        <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:16px;">🎒 Basic Knox</div>
         <div style="font-size:40px;font-weight:900;line-height:1;color:white;">$0</div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;margin-bottom:16px;">forever</div>
-        <div style="font-size:14px;font-weight:800;color:white;margin-bottom:16px;line-height:1.4;">Try Knox, no commitment</div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>5 questions per day</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Answer + explanation</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>All subjects</div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;margin-bottom:16px;">forever free</div>
+        <div style="font-size:14px;font-weight:800;color:white;margin-bottom:16px;line-height:1.4;">Try Knox — no commitment</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>5 problems per day</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Instant answers with explanation</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>All subjects — K-12 to college</div>
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Photo upload</div>
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Streak &amp; league</div>
-          <div style="height:1px;background:rgba(255,255,255,0.2);margin:6px 0;"></div>
-          <div style="font-size:10px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px;">Upgrade to unlock</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>25 questions/day</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Step-by-step breakdowns</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Best-in-class AI</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Learn with Knox</div>
+          <div style="height:1px;background:rgba(255,255,255,0.18);margin:6px 0;"></div>
+          <div style="font-size:10px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:2px;">Upgrade to Super Knox</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>25 problems/day</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Step-by-step breakdowns</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Learn with Knox (Socratic)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Smarter AI model</div>
         </div>
         <button onclick="scrollToAI()" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#0A85C2;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);transition:all 0.15s;margin-top:auto;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.2)'">Start Free</button>
       </div>
 
-      <!-- SUPER KNOX — FEATURED -->
+      <!-- SUPER KNOX -->
       <div class="reveal delay-2" style="background:#58CC02;border-radius:20px;border:3px solid #46A302;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;position:relative;height:100%;box-sizing:border-box;">
         <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:5px 14px;border-radius:999px;white-space:nowrap;">MOST POPULAR</div>
         <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:16px;">⚡ Super Knox</div>
         <div style="font-size:40px;font-weight:900;line-height:1;color:white;" id="proPlusPrice">$9.99</div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;">/month</div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;" id="proPlusPeriod">/month</div>
         <div class="yearly-note" id="proPlusYearlyNote" style="background:rgba(255,255,255,0.25);color:white;border:2px solid rgba(255,255,255,0.4);">🎉 $79.99/yr — save $39.89</div>
         <div style="font-size:14px;font-weight:800;color:white;margin:12px 0 16px;line-height:1.4;">5× more problems, smarter answers</div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        <div style="flex:1;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;">
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>25 problems per day</strong></div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Step-by-step breakdowns</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Learn with Knox (Socratic)</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Tips &amp; shortcuts</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Smarter AI model</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Conversation memory</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Photo upload</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Streak &amp; league</div>
-          <div style="height:1px;background:rgba(255,255,255,0.2);margin:6px 0;"></div>
-          <div style="font-size:10px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:2px;">Upgrade to Max to unlock</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Unlimited problems</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Best-in-class AI</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Priority speed</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Early feature access</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Step-by-step breakdowns</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Learn with Knox (Socratic tutor)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Smarter AI model (GPT-4.1 mini)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Tips &amp; shortcuts</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Photo upload</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Streak &amp; league</div>
+          <div style="height:1px;background:rgba(255,255,255,0.18);margin:6px 0;"></div>
+          <div style="font-size:10px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:2px;">Upgrade to Max Knox</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Unlimited problems — no cap</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Best AI model (GPT-4.1)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">🔒</span>Priority speed</div>
         </div>
         <div id="superTrialBadge" style="display:none;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,0.2);border-radius:10px;padding:8px;margin-bottom:10px;font-size:12px;font-weight:800;color:white;">⏱ 3-Day Free Trial</div>
         <button onclick="handlePurchase('Super')" id="superCTABtn" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#2D6A00;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);transition:all 0.15s;margin-top:auto;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.2)'">Get Super Knox →</button>
       </div>
 
       <!-- MAX KNOX -->
-      <div class="reveal delay-3" style="background:linear-gradient(160deg,#2D2A6B,#5B21B6);border-radius:20px;border:3px solid #6D28D9;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;height:100%;box-sizing:border-box;">
-        <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:#C4B5FD;margin-bottom:16px;">🚀 Max Knox</div>
+      <div class="reveal delay-3" style="background:#FF6B00;border-radius:20px;border:3px solid #CC5500;box-shadow:0 8px 0 rgba(0,0,0,0.25);padding:24px;display:flex;flex-direction:column;height:100%;box-sizing:border-box;position:relative;">
+        <div style="position:absolute;top:0;right:0;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:0 20px 0 80px;"></div>
+        <div style="font-size:11px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:16px;">🚀 Max Knox</div>
         <div style="font-size:40px;font-weight:900;line-height:1;color:white;" id="maxPrice">$19.99</div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.6);margin-top:4px;">/month</div>
-        <div class="yearly-note" id="maxYearlyNote" style="background:rgba(167,139,250,0.3);color:#E9D5FF;border:2px solid rgba(167,139,250,0.5);">🎉 $149.99/yr — save $89.89</div>
-        <div style="font-size:14px;font-weight:800;color:white;margin:12px 0 16px;line-height:1.4;">Unlimited. No caps. No countdowns.</div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#E9D5FF;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(167,139,250,0.4);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>Unlimited questions</strong></div>
-                    <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#E9D5FF;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(167,139,250,0.4);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Everything in Super Knox</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#E9D5FF;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(167,139,250,0.4);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Priority speed</div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#E9D5FF;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(167,139,250,0.4);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Early feature access</div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;">/month</div>
+        <div class="yearly-note" id="maxYearlyNote" style="background:rgba(255,255,255,0.25);color:white;border:2px solid rgba(255,255,255,0.4);">🎉 $149.99/yr — save $89.89</div>
+        <div style="font-size:14px;font-weight:800;color:white;margin:12px 0 16px;line-height:1.4;">Knox without limits — the full experience</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>Unlimited problems — no daily cap</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span><strong>Best AI model (GPT-4.1)</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Priority speed — faster answers</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Step-by-step breakdowns</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Learn with Knox (Socratic tutor)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Deep explanations &amp; key insights</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Tips &amp; shortcuts</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Photo upload</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Streak &amp; league</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:white;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,0.3);color:white;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;">✔</span>Early feature access</div>
         </div>
-        <!-- Max Knox callout -->
-        <div style="background:rgba(139,92,246,0.25);border:1.5px solid rgba(167,139,250,0.4);border-radius:14px;padding:14px 16px;margin-bottom:16px;text-align:center;">
-          <div style="font-size:22px;margin-bottom:6px;">♾️</div>
-          <div style="font-size:14px;font-weight:900;color:white;line-height:1.4;">No daily limit. No countdown. Knox is yours — whenever, however much you need.</div>
+        <div style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:center;">
+          <div style="font-size:13px;font-weight:900;color:white;line-height:1.5;">♾️ No daily limit. No countdown.<br>Study as much as you need, whenever.</div>
         </div>
-        <button onclick="handlePurchase('Max')" id="maxCTABtn" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#7C3AED;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.3);transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.3)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.3)'">Go Max Knox</button>
+        <button onclick="handlePurchase('Max')" id="maxCTABtn" style="width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:900;font-family:inherit;border:none;background:white;color:#CC5500;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.25);transition:all 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 rgba(0,0,0,0.25)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.25)'">Go Max Knox →</button>
       </div>
 
     </div>
@@ -1719,7 +1722,7 @@
 
 
 <!-- ===================== GAMIFICATION ===================== -->
-<section style="background:var(--bg-primary);padding:72px 24px;border-top:5px solid #58CC02;">
+<section style="background:var(--bg-primary);padding:72px 24px;">
   <div style="max-width:960px;margin:0 auto;">
 
     <!-- Header — no floating badge, just clean Knox style -->
@@ -1802,7 +1805,7 @@
 
 
 <!-- ===================== CTA BANNER ===================== -->
-<section style="background:#FF6B00;padding:80px 24px;text-align:center;position:relative;overflow:hidden;border-top:5px solid #CC5500;">
+<section style="background:#FF6B00;padding:80px 24px;text-align:center;position:relative;overflow:hidden;">
   <div style="position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
   <div style="position:relative;z-index:1;max-width:600px;margin:0 auto;">
     <img src="./knox-love.png" alt="Knox" style="width:130px;height:auto;margin-bottom:16px;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.2));" onerror="this.outerHTML='<div style=\'font-size:80px;\'>🦊</div>'">
@@ -2618,7 +2621,7 @@
     const maxEl    = document.getElementById('maxPrice');
     const proPer   = document.getElementById('proPeriod');
     if (proEl)   proEl.textContent   = type === 'monthly' ? '$9.99'  : '$6.67';
-    if (superEl) superEl.textContent = type === 'monthly' ? '$14.99' : '$10.00';
+    if (superEl) superEl.textContent = type === 'monthly' ? '$9.99'  : '$6.67';
     if (maxEl)   maxEl.textContent   = type === 'monthly' ? '$19.99' : '$12.50';
     if (proPer)  proPer.textContent  = type === 'monthly' ? '/month'  : '/mo · billed yearly';
 
