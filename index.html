@@ -92,6 +92,13 @@
       --shadow:        0 4px 0 rgba(0,0,0,0.1);
       --chat-bg:       #FFFFFF;
       --chat-border:   #E4E4E7;
+      /* Section card tint backgrounds — light mode */
+      --blue-light:    #D7F2FD;
+      --green-light:   #D7FFB8;
+      --yellow-light:  #FFFBEB;
+      --purple-light:  #F3E8FF;
+      --pink-light:    #FDF2F8;
+      --red-light:     #FFF0F0;
       /* Knox chat bubble tints */
       --knox-bubble-orange: #FFF4EC;
       --knox-bubble-blue:   #EFF9FF;
@@ -1246,7 +1253,7 @@
       display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;
     }
     /* Usage progress bar */
-    .usage-bar-wrap { padding:10px 16px 12px;background:#FAFAFA;border-top:1.5px solid #F3F4F6; }
+    .usage-bar-wrap { padding:10px 16px 12px;background:var(--bg-elevated);border-top:1.5px solid var(--border); }
     .usage-bar-label { display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;color:#9CA3AF;margin-bottom:5px; }
     .usage-bar-track { height:8px;border-radius:999px;overflow:hidden; }
     .usage-bar-track.orange { background:#FFE0C2; }
@@ -1547,14 +1554,14 @@
             <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
           </div>
           <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:84%;">
-            <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
+            <p style="font-size:15px;font-weight:500;color:var(--text);line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
           </div>
         </div>
       </div>
 
       <!-- Plan banner -->
       <div id="planBanner"></div>
-      <div id="conversationIndicator" style="display:none;padding:5px 20px;font-size:12px;font-weight:700;color:#1D4ED8;background:#EFF6FF;"></div>
+      <div id="conversationIndicator" style="display:none;padding:5px 20px;font-size:12px;font-weight:700;color:var(--blue);background:var(--knox-bubble-blue);"></div>
 
       <!-- ── INPUT AREA ── -->
       <div style="background:white;border-top:2px solid #F3F4F6;padding:14px 16px 12px;">
@@ -1613,7 +1620,7 @@
             <div id="usageBarFill" class="usage-bar-fill hw-fill" style="width:0%;"></div>
           </div>
           <!-- Live countdown clock -->
-          <div id="hwClockWrap" style="display:none;margin-top:5px;padding:6px 10px;background:#FEF2F2;border-radius:8px;border:1.5px solid #FECACA;">
+          <div id="hwClockWrap" style="display:none;margin-top:5px;padding:6px 10px;background:var(--red-light);border-radius:8px;border:1.5px solid #FECACA;">
             <div style="display:flex;align-items:center;justify-content:space-between;">
               <span style="font-size:11px;font-weight:700;color:#DC2626;">⏱ Next homework credit unlocks in:</span>
               <span id="hwClockDisplay" style="font-size:13px;font-weight:900;color:#DC2626;font-variant-numeric:tabular-nums;letter-spacing:0.04em;">--:--:--</span>
@@ -1643,7 +1650,7 @@
       </div>
 
       <!-- ── FOOTER ── -->
-      <div style="padding:10px 16px;border-top:2px solid #F3F4F6;background:#F9FAFB;display:flex;align-items:center;">
+      <div style="padding:10px 16px;border-top:2px solid var(--border);background:var(--bg-elevated);display:flex;align-items:center;">
         <button onclick="openHistory()" style="display:inline-flex;align-items:center;gap:6px;background:white;border:2px solid #E5E7EB;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:#6B7280;transition:all 0.15s;" onmouseover="this.style.borderColor='#FF6B00';this.style.color='#FF6B00'" onmouseout="this.style.borderColor='#E5E7EB';this.style.color='#6B7280'">
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           History
@@ -2472,20 +2479,20 @@
       let stepsHtml = '';
       stepsSection.split('\n').filter(l => l.trim()).forEach(l => {
         const m = l.match(/^(\d+)\.\s*(.*)/);
-        if (m) stepsHtml += `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #F3F4F6;">
+        if (m) stepsHtml += `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
           <div style="min-width:24px;height:24px;border-radius:7px;background:#FF6B00;color:white;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${m[1]}</div>
           <span style="font-size:14px;font-weight:500;color:var(--text);line-height:1.55;padding-top:2px;">${m[2]}</span>
         </div>`;
-        else if (l.trim()) stepsHtml += `<p style="font-size:14px;color:#6B7280;padding:4px 0;">${l}</p>`;
+        else if (l.trim()) stepsHtml += `<p style="font-size:14px;color:var(--text-light);padding:4px 0;">${l}</p>`;
       });
       return `<div style="padding:14px 18px 14px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
           <div style="background:#FF6B00;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Similar Problem</div>
-          <span style="font-size:12px;font-weight:700;color:#9CA3AF;">Not your actual problem</span>
+          <span style="font-size:12px;font-weight:700;color:var(--text-light);">Not your actual problem</span>
         </div>
         ${prob ? `<div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:15px;font-weight:700;color:var(--text);">${prob}</div>` : ''}
         <div style="margin-bottom:12px;">${stepsHtml}</div>
-        <div style="background:#F0FDF4;border:2px solid #86EFAC;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:700;color:#166534;">🦊 ${tryYours}</div>
+        <div style="background:var(--green-light);border:2px solid #86EFAC;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:700;color:var(--text);">🦊 ${tryYours}</div>
       </div>`;
     }
 
@@ -2505,12 +2512,12 @@
     const allBtns = btn.parentElement.querySelectorAll('button');
     allBtns.forEach(b => { b.dataset.answered='1'; b.style.pointerEvents='none'; b.onmouseover=null; b.onmouseout=null; });
     const isCorrect = chosen === correct;
-    btn.style.background   = isCorrect ? '#F0FDF4' : '#FEF2F2';
+    btn.style.background   = isCorrect ? 'var(--green-light)' : 'var(--red-light)';
     btn.style.borderColor  = isCorrect ? '#16A34A' : '#DC2626';
     if (!isCorrect) {
       allBtns.forEach(b => {
         if (b.querySelector('span')?.textContent?.trim() === correct) {
-          b.style.background='#F0FDF4'; b.style.borderColor='#16A34A';
+          b.style.background='var(--green-light)'; b.style.borderColor='#16A34A';
         }
       });
     }
@@ -2698,7 +2705,7 @@
             <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
           </div>
           <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:88%;">
-            <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
+            <p style="font-size:15px;font-weight:500;color:var(--text);line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
           </div>
         </div>`;
       }
@@ -2876,7 +2883,7 @@
       toast.innerHTML = [
         '<div style="font-size:36px;margin-bottom:10px;">😕</div>',
         '<div style="font-weight:800;font-size:17px;margin-bottom:6px;">Checkout cancelled</div>',
-        '<div style="color:#4b5563;font-size:14px;line-height:1.5;">',
+        '<div style="color:var(--text-light);font-size:14px;line-height:1.5;">', 
         'No worries — your free plan is still active.<br>',
         'Come back whenever you\'re ready to upgrade.',
         '</div>',
@@ -2890,7 +2897,7 @@
       toast.innerHTML = [
         '<div style="font-size:36px;margin-bottom:10px;">🎉</div>',
         '<div style="font-weight:800;font-size:17px;margin-bottom:6px;">You\'re all set!</div>',
-        '<div style="color:#4b5563;font-size:14px;line-height:1.5;">',
+        '<div style="color:var(--text-light);font-size:14px;line-height:1.5;">', 
         isProMonthlyTrial
           ? 'Your 3-day free trial has started.<br>No charge until the trial ends!'
           : 'Your subscription is now active.<br>Enjoy unlimited questions!',
@@ -2970,7 +2977,7 @@
       if (userPlan === 'max') {
         banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:var(--knox-bubble-orange);border-top:1.5px solid #FFCFA0;border-bottom:1.5px solid #FFCFA0;"><div style="width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:#CC5500;letter-spacing:0.01em;">Max Knox &nbsp;·&nbsp; Unlimited problems &nbsp;·&nbsp; Best AI</span></div>';
       } else if (userPlan === 'super') {
-        banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:#F0FDF4;border-top:1.5px solid #86EFAC;border-bottom:1.5px solid #86EFAC;"><div style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:var(--green-dark);letter-spacing:0.01em;">Super Knox &nbsp;·&nbsp; 25 problems/day &nbsp;·&nbsp; Smarter AI &nbsp;·&nbsp; <span style="cursor:pointer;text-decoration:underline;" onclick="scrollToPricing()">Upgrade to Max</span></span></div>';
+        banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:7px 20px;background:var(--green-light);border-top:1.5px solid #86EFAC;border-bottom:1.5px solid #86EFAC;"><div style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;"></div><span style="font-size:12px;font-weight:800;color:var(--green-dark);letter-spacing:0.01em;">Super Knox &nbsp;·&nbsp; 25 problems/day &nbsp;·&nbsp; Smarter AI &nbsp;·&nbsp; <span style="cursor:pointer;text-decoration:underline;" onclick="scrollToPricing()">Upgrade to Max</span></span></div>';
       } else {
         banner.innerHTML = '';
       }
@@ -3038,7 +3045,7 @@
       </div>
       <div style="max-width:88%;display:flex;flex-direction:column;gap:10px;">
         <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;">
-          <p style="font-size:15px;font-weight:600;color:#44403C;line-height:1.6;margin:0;">
+          <p style="font-size:15px;font-weight:600;color:var(--text);line-height:1.6;margin:0;">
             ${afterAnswer
               ? "Hope that helped! 🦊 I can keep going but I need you to be a real one first — create a free account and get <strong>5 questions every day</strong>. No card needed, takes 10 seconds."
               : "hey, you already used your free question 😄 drop me an account real quick and I'll keep helping — it's totally free, 5 questions a day, no card needed 🦊"}
@@ -3088,7 +3095,7 @@
           <img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
         </div>
         <div style="background:var(--knox-bubble-orange);border:2px solid #FFD0A0;border-radius:6px 18px 18px 18px;padding:14px 18px;max-width:84%;">
-          <p style="font-size:15px;font-weight:500;color:#44403C;line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
+          <p style="font-size:15px;font-weight:500;color:var(--text);line-height:1.55;margin:0;"><strong>Hey! I'm Knox.</strong> Ask me anything — homework, essays, math, science, history. I've got you. 🦊</p>
         </div>
       </div>`;
     }
@@ -3390,7 +3397,7 @@
         <div class="resp-title">Knox Knows</div>
         <div class="resp-plan-tag tag-pro-plus">Pro+</div>
       </div>
-      <div style="background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:14px 18px;color:#14532d;font-size:15px;line-height:1.6;font-weight:600;">
+      <div style="background:var(--green-light);border:2px solid #16a34a;border-radius:12px;padding:14px 18px;color:var(--text);font-size:15px;line-height:1.6;font-weight:600;">
         ✓ ${clean}
       </div>
     </div>`;
@@ -4248,7 +4255,7 @@
             <p style="font-size:12px;color:#6b7280;" class="truncate">${r.handle}</p>
           </div>
         </div>
-        <p style="font-size:14px;color:#1f2937;line-height:1.6;">${r.text}</p>
+        <p style="font-size:14px;color:var(--text);line-height:1.6;">${r.text}</p>
         <div class="flex items-center justify-between mt-3 pt-3 border-t" style="border-color:rgba(0,0,0,0.1);">
           <div style="display:flex;gap:2px;">${[1,2,3,4,5].map(()=>`<svg style="width:15px;height:15px;fill:#fbbf24;" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>`).join('')}</div>
           <span style="font-size:12px;color:#6b7280;font-weight:600;">${r.time}</span>
