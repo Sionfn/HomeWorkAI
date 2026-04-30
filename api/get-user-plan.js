@@ -1,10 +1,6 @@
-// ============================================================
-// /api/get-user-plan.js  —  HomeWorkAI
-// ============================================================
-// Returns the user's current plan AND their renewal date.
-// The frontend stores renewalDate in window.userRenewalDate
-// and displays it in the Account & Plan settings modal.
-// ============================================================
+// /api/get-user-plan.js — Knox Knows
+// Returns the user's current plan + renewal date.
+// All plan names normalised to "free" | "super" | "max" — frontend never sees legacy values.
 
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth as getAdminAuth }       from "firebase-admin/auth";
@@ -20,52 +16,50 @@ if (!getApps().length) {
   });
 }
 
-const adminAuth = getAdminAuth();
-const db        = getFirestore();
-
-const ADMIN_EMAIL    = process.env.ADMIN_EMAIL    || "";
-const VIP_PRO_EMAILS = (process.env.VIP_PRO_EMAILS || "")
+const adminAuth   = getAdminAuth();
+const db          = getFirestore();
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL    || "";
+const VIP_EMAILS  = (process.env.VIP_PRO_EMAILS || "")
   .split(",").map(e => e.trim()).filter(Boolean);
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+function normalizePlan(raw) {
+  if (!raw) return "free";
+  if (raw === "max" || raw === "pro_plus")             return "max";
+  if (raw === "super" || raw === "pro" || raw === "wonder") return "super";
+  return "free";
+}
 
-  // 1. Verify Firebase token
+export default async function handler(req, res) {
+  if (req.method !== "POST")
+    return res.status(405).json({ error: "Method not allowed" });
+
   const authHeader = req.headers.authorization || "";
-  if (!authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
+  if (!authHeader.startsWith("Bearer "))
+    return res.status(401).json({ error: "Unauthorized" });
 
   let decodedToken;
-  try {
-    decodedToken = await adminAuth.verifyIdToken(authHeader.slice(7));
-  } catch (err) {
-    return res.status(401).json({ error: "Unauthorized — invalid or expired token." });
-  }
+  try { decodedToken = await adminAuth.verifyIdToken(authHeader.slice(7)); }
+  catch { return res.status(401).json({ error: "Unauthorized — invalid or expired token." }); }
 
   const { uid, email: userEmail } = decodedToken;
   if (!userEmail) return res.status(401).json({ error: "Unauthorized — token has no email." });
 
-  // 2. Resolve plan + renewal date from Firestore
-  let plan        = "free";
-  let renewalDate = null; // Unix timestamp (seconds) — set by stripe-webhook.js
+  let plan = "free", renewalDate = null;
 
   if (userEmail === ADMIN_EMAIL) {
-    plan = "pro_plus";
-  } else if (VIP_PRO_EMAILS.includes(userEmail)) {
-    plan = "pro";
+    plan = "max";
+  } else if (VIP_EMAILS.includes(userEmail)) {
+    plan = "super";
   } else {
     try {
       const doc = await db.collection("users").doc(uid).get();
       if (doc.exists) {
-        const data = doc.data();
-        plan        = data?.plan        || "free";
-        renewalDate = data?.renewalDate ?? null; // ← comes from stripe-webhook.js
+        const d  = doc.data();
+        plan        = normalizePlan(d?.plan);
+        renewalDate = d?.renewalDate ?? null;
       }
-    } catch (err) {
-      console.warn("Firestore plan lookup failed:", err.message);
-    }
+    } catch (err) { console.warn("Firestore plan lookup failed:", err.message); }
   }
 
-  // 3. Return both plan and renewalDate to the frontend
   return res.status(200).json({ plan, renewalDate });
 }
-
