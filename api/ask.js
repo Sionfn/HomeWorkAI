@@ -197,10 +197,12 @@ export default async function handler(req, res) {
   }
 
   // ── Plan flags — declared immediately, before ANY use ────────────────────
-  // FIXED: "super" is no longer in isMaxPlan. Each plan is genuinely different.
-  const isMaxPlan = userPlan === "max";
-  const isSuper   = userPlan === "super";
+  // Plan flags — includes backward compat for old Firestore values (pro_plus, pro, wonder)
+  const isMaxPlan = userPlan === "max"   || userPlan === "pro_plus";
+  const isSuper   = userPlan === "super" || userPlan === "pro" || userPlan === "wonder";
   const isPaid    = isSuper || isMaxPlan;
+  // Normalize plan name for response (so frontend always gets clean value)
+  const normalizedPlan = isMaxPlan ? "max" : isSuper ? "super" : "free";
 
   // Request body
   const {question:rawQ,imageBase64,imageType,history,learnMode,isStuck,showMe,
@@ -273,7 +275,7 @@ export default async function handler(req, res) {
 
   // Plan instructions
   let planInstructions="";
-  if (userPlan==="free") {
+  if (!isPaid) {
     planInstructions=`=== BASIC KNOX (FREE) ===\nAnswer directly and concisely.\n\nUSE EXACTLY THESE TWO HEADERS — NO OTHERS:\nFinal Answer: [One clear, direct sentence]\nExplanation: [2-3 sentences explaining how or why. Plain prose — no lists, no bullets.]\n\nRULES: Always start with "Final Answer:". No bold, no asterisks, no markdown. 100 words max.`;
   } else if (isSuper) {
     planInstructions=`=== SUPER KNOX ($9.99) ===\nGive thorough, clear explanations with step-by-step breakdowns when needed.\n\nUSE THESE HEADERS IN ORDER (only include what applies):\nFinal Answer: [One clear sentence]\nExplanation: [2-3 solid paragraphs. Explain the concept thoroughly.]\nStep-by-step: [ONLY for math, science, or sequential problems]\n  1. [Step with real numbers and actual work]\n  2. [Next step]\nTip: [ONE genuinely useful shortcut or trick — only if it truly helps]\n\nRULES: Always include "Final Answer:" and "Explanation:". NEVER include: Insight, Common Mistake, Key Points, Resources. Bold 2-4 key terms with **term**.`;
@@ -391,7 +393,7 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).json({
-      answer, resources, plan:userPlan, learningStyle,
+      answer, resources, plan:normalizedPlan, planTier:normalizedPlan, learningStyle,
       isAcknowledgement:prefOnly||casual, isCasual:casual,
       isLearnMode:!!learnMode, isStuck:!!isStuck, isShowMe:!!showMe,
       sessionCompleted:!!sessionCompleted, isSessionEnd:!!isSessionEnd,
