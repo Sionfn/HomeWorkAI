@@ -407,6 +407,50 @@
     [data-theme="dark"] .ai-box { border-color:#333; }
     [data-theme="dark"] #usageBarWrap { background:#1f1f1f; border-color:#333; }
 
+    /* ── Dark mode: Knox chat bubbles & response containers ──────────────── */
+    [data-theme="dark"] .chat-knox-bubble     { background:var(--bg-card) !important; border-color:var(--border) !important; }
+    [data-theme="dark"] .chat-thinking-bubble { background:var(--bg-card) !important; border-color:var(--border) !important; }
+    [data-theme="dark"] .chat-user-bubble     { background:var(--orange) !important; }
+    /* Knox response wrapper injected by replaceThinkingWithResponse */
+    [data-theme="dark"] #chatThread .knox-response-wrap {
+      background:var(--bg-card) !important; border-color:var(--border) !important;
+    }
+    /* Usage bar inside chat */
+    [data-theme="dark"] .usage-bar-wrap { background:var(--bg-secondary) !important; border-color:var(--border) !important; }
+    /* Chat input wrapper */
+    [data-theme="dark"] #chatInputWrapper { background:var(--bg-elevated) !important; border-color:var(--border) !important; }
+    [data-theme="dark"] #chatInput        { color:var(--text) !important; }
+    /* AI box body */
+    [data-theme="dark"] .ai-box { background:var(--bg-card) !important; }
+    [data-theme="dark"] .ai-box-footer { background:var(--bg-secondary) !important; }
+    /* Freeform step cards inside renderFreeformText */
+    [data-theme="dark"] .freeform-step-card  { background:var(--bg-card) !important; border-color:var(--orange-light) !important; }
+    [data-theme="dark"] .freeform-step-text  { color:var(--text) !important; }
+    [data-theme="dark"] .freeform-bullet-wrap { background:var(--bg-card) !important; }
+    [data-theme="dark"] .freeform-bullet-text { color:var(--text) !important; }
+    /* History panel */
+    [data-theme="dark"] .history-panel,
+    [data-theme="dark"] .settings-panel,
+    [data-theme="dark"] .calc-panel { background:var(--bg-card) !important; }
+    /* Chat input area footer strip */
+    [data-theme="dark"] #chatThread + div + div,
+    [data-theme="dark"] .chat-input-area { background:var(--bg-secondary) !important; }
+    /* "Try asking" chip buttons */
+    [data-theme="dark"] #ai-helper button[onclick*="setQuestion"] {
+      background:var(--bg-card) !important; border-color:var(--border) !important;
+      color:var(--text) !important;
+    }
+    /* History/footer buttons inside chat */
+    [data-theme="dark"] #chatThread ~ div button { background:var(--bg-card) !important; border-color:var(--border) !important; color:var(--text-light) !important; }
+    /* MC answer options */
+    [data-theme="dark"] button[onclick*="handleMCAnswer"] { background:var(--bg-card) !important; border-color:var(--border) !important; }
+    /* Login modal panels */
+    [data-theme="dark"] .login-panel { background:var(--bg-card) !important; }
+    [data-theme="dark"] .login-input { background:var(--bg-elevated) !important; border-color:var(--border) !important; color:var(--text) !important; }
+    /* Learn mode greeting bubble */
+    [data-theme="dark"] #chatThread .learn-greeting { background:#1a2a3a !important; border-color:#3b5f82 !important; }
+    [data-theme="dark"] #chatThread .learn-greeting p { color:var(--text) !important; }
+
 
     /* Dark mode: How Knox Works cards need visible border on dark bg */
     [data-theme="dark"] .ai-box { background:var(--bg-secondary); border-color:var(--border); }
@@ -751,15 +795,15 @@
       margin:16px 20px 8px;
     }
     .resp-body-para {
-      font-size:15px; font-weight:500; color:#444;
+      font-size:15px; font-weight:500; color:var(--text);
       line-height:1.7; padding:0 20px 12px;
     }
     .resp-steps-wrap { padding:0 16px 12px; display:flex; flex-direction:column; gap:10px; }
     .resp-step {
       display:flex; align-items:flex-start; gap:12px;
-      background:white; border:2px solid var(--orange-light);
+      background:var(--bg-card); border:2px solid var(--orange-light);
       border-radius:14px; padding:14px 16px;
-      box-shadow:0 2px 0 #FFD0A0;
+      box-shadow:0 2px 0 rgba(204,85,0,0.18);
     }
     .resp-step-num {
       min-width:30px; height:30px; border-radius:10px;
@@ -778,27 +822,27 @@
     }
     .resp-tip-icon { font-size:22px; flex-shrink:0; }
     .resp-tip-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:#B8860B; margin-bottom:4px; }
-    .resp-tip-text  { font-size:14px; font-weight:600; color:#555; line-height:1.55; }
+    .resp-tip-text  { font-size:14px; font-weight:600; color:var(--text-light); line-height:1.55; }
 
     .resp-insight {
-      background:#F3E8FF; border:2px solid var(--purple);
+      background:var(--bg-card); border:2px solid var(--purple);
       border-radius:14px; padding:14px 16px; margin:0 16px 12px;
     }
     .resp-insight-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:var(--purple-dark); margin-bottom:4px; }
-    .resp-insight-text  { font-size:14px; font-weight:600; color:#555; line-height:1.55; }
+    .resp-insight-text  { font-size:14px; font-weight:600; color:var(--text-light); line-height:1.55; }
 
     .resp-common-mistake {
       display:flex; align-items:flex-start; gap:12px;
-      background:#FFF0F0; border:2px solid var(--red);
+      background:var(--bg-card); border:2px solid var(--red);
       border-radius:14px; padding:14px 16px; margin:0 16px 12px;
     }
     .resp-common-mistake-icon  { font-size:22px; flex-shrink:0; }
     .resp-common-mistake-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:var(--red); margin-bottom:4px; }
-    .resp-common-mistake-text  { font-size:14px; font-weight:600; color:#555; line-height:1.55; }
+    .resp-common-mistake-text  { font-size:14px; font-weight:600; color:var(--text-light); line-height:1.55; }
 
     .resp-keypoints { margin:0 16px 12px; padding-top:12px; border-top:2px solid var(--border); }
     .resp-keypoints-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:var(--green-dark); margin-bottom:8px; }
-    .resp-bullet { font-size:14px; font-weight:600; color:#444; padding:4px 0; display:flex; align-items:flex-start; gap:8px; }
+    .resp-bullet { font-size:14px; font-weight:600; color:var(--text); padding:4px 0; display:flex; align-items:flex-start; gap:8px; }
 
     .resp-resources { padding:12px 16px 16px; border-top:2px solid var(--border); margin-top:4px; }
     .resp-resources-label { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-light); margin-bottom:10px; }
@@ -1094,7 +1138,7 @@
       display:flex; flex-direction:column; gap:14px;
       padding:20px 20px 16px; min-height:80px;
       max-height:440px; overflow-y:auto;
-      scroll-behavior:smooth; background:#fafafa;
+      scroll-behavior:smooth;
     }
     #chatThread::-webkit-scrollbar { width:4px; }
     #chatThread::-webkit-scrollbar-track { background:transparent; }
@@ -1483,7 +1527,7 @@
       </div>
 
       <!-- ── CHAT THREAD ── -->
-      <div id="chatThread" style="display:flex;flex-direction:column;gap:14px;padding:20px;min-height:100px;max-height:420px;overflow-y:auto;background:#FAFAFA;">
+      <div id="chatThread" style="display:flex;flex-direction:column;gap:14px;padding:20px;min-height:100px;max-height:420px;overflow-y:auto;">
         <!-- Knox greeting -->
         <div style="display:flex;gap:10px;align-items:flex-start;">
           <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;">
@@ -2031,17 +2075,38 @@
     updatePricingButtons();
     // Re-render bars with correct plan limits after auth resolves
     if (!user) {
-      // Logged out — guest view: 1 use each
-      if (window.updateUsageBar) window.updateUsageBar({ used: 0, limit: 1, nextUnlock: null });
+      if (window.updateUsageBar) window.updateUsageBar({ hw: 0, hwLimit: 1, nextUnlock: null });
     } else {
+      // Show cached data immediately so bar isn't blank
       const cached = window.loadUsageCache ? window.loadUsageCache() : null;
       if (cached) {
         if (window.updateUsageBar) window.updateUsageBar(cached);
       } else {
         const uPlan = window.userPlan || 'free';
-        const hwLimit = uPlan === 'max' ? Infinity : uPlan === 'super' ? 25 : 5;
-        if (window.updateUsageBar) window.updateUsageBar({ hw: 0, hwLimit, casual: 0, casualLimit: csLimit, nextUnlock: null, csNextUnlock: null });
+        const hwLimit = uPlan === 'max' ? null : uPlan === 'super' ? 25 : 5;
+        if (window.updateUsageBar) window.updateUsageBar({ hw: 0, hwLimit, nextUnlock: null });
       }
+      // Fetch real server usage in background for accuracy
+      try {
+        const tok = await user.getIdToken();
+        const ur  = await fetch('/api/get-usage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tok}` },
+          body: '{}'
+        });
+        if (ur.ok) {
+          const ud = await ur.json();
+          if (window.updateUsageBar) window.updateUsageBar(ud);
+          if (window.saveUsageCache) window.saveUsageCache(ud);
+          // Sync plan if server returned a different value
+          if (ud.plan && ud.plan !== (window.userPlan || 'free')) {
+            window.userPlan = ud.plan;
+            userPlan = ud.plan;
+            updateLoginUI();
+            updateUsageCounter();
+          }
+        }
+      } catch(e) { /* Silently fail — usage bar stays at local default */ }
     }
     if (user && window.pendingAction) {
       const action = window.pendingAction;
@@ -2228,9 +2293,12 @@
   // Admin/VIP logic is handled server-side only — never in the browser.
 
   function updateLoginUI() {
-    const loginBtn = document.getElementById('loginBtn');
+    const loginBtn       = document.getElementById('loginBtn');
     const accountWrapper = document.getElementById('accountDropdownWrapper');
-    const proBadge = document.getElementById('proBadge');
+    const proBadge       = document.getElementById('proBadge');
+    // Normalise so frontend logic only ever sees "free" | "super" | "max"
+    if (userPlan === 'pro_plus') { userPlan = 'max';   window.userPlan = 'max';   }
+    if (userPlan === 'pro'     ) { userPlan = 'super'; window.userPlan = 'super'; }
     if (window.currentUser) {
       loginBtn.style.display = 'none';
       accountWrapper.style.display = 'block';
@@ -2366,12 +2434,12 @@
           <div style="background:#1CB0F6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #0A85C2;">Multiple Choice</div>
           <span style="font-size:12px;font-weight:700;color:#9CA3AF;">Pick the best answer</span>
         </div>
-        <p style="font-size:15px;font-weight:700;color:#1f2937;margin-bottom:14px;line-height:1.5;">${question}</p>
+        <p style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;line-height:1.5;">${question}</p>
         <div style="display:flex;flex-direction:column;gap:8px;" id="mcOptions_${Date.now()}">`;
       ['A','B','C','D'].forEach(letter => {
         if (!options[letter]) return;
-        html += `<button onclick="handleMCAnswer('${letter}','${correct}',this)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;border:2px solid #E5E7EB;background:white;cursor:pointer;font-family:inherit;text-align:left;transition:all 0.15s;width:100%;" onmouseover="if(!this.dataset.answered)this.style.borderColor='#1CB0F6'" onmouseout="if(!this.dataset.answered)this.style.borderColor='#E5E7EB'">
-          <span style="width:28px;height:28px;border-radius:8px;background:var(--bg-secondary);color:var(--text);font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${letter}</span>
+        html += `<button onclick="handleMCAnswer('${letter}','${correct}',this)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;border:2px solid var(--border);background:var(--bg-card);cursor:pointer;font-family:inherit;text-align:left;transition:all 0.15s;width:100%;" onmouseover="if(!this.dataset.answered)this.style.borderColor='#1CB0F6'" onmouseout="if(!this.dataset.answered)this.style.borderColor='var(--border)'">
+          <span style="width:28px;height:28px;border-radius:8px;background:var(--bg-elevated);color:var(--text);font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${letter}</span>
           <span style="font-size:14px;font-weight:600;color:var(--text);line-height:1.4;">${options[letter]}</span>
         </button>`;
       });
@@ -2415,7 +2483,7 @@
         <div style="width:6px;height:6px;border-radius:50%;background:#1CB0F6;flex-shrink:0;"></div>
         <span style="font-size:11px;font-weight:800;color:#1CB0F6;text-transform:uppercase;letter-spacing:0.06em;">Learn with Knox</span>
       </div>
-      <div style="font-size:15px;font-weight:500;color:#1e3a5f;line-height:1.7;">${clean.replace(/\n/g,'<br>')}</div>
+      <div style="font-size:15px;font-weight:500;color:var(--text);line-height:1.7;">${clean.replace(/\n/g,'<br>')}</div>
     </div>`;
   }
 
@@ -2483,31 +2551,38 @@
     const uPlan = window.userPlan || 'free';
     wrap.style.display = 'block';
 
-    const used  = usage.used  ?? usage.hw ?? 0;
-    const limit = usage.limit ?? usage.hwLimit ?? 5;
-    const isUnlimited = limit === null || limit === Infinity || limit >= 9999;
-    const left  = isUnlimited ? Infinity : Math.max(0, limit - used);
-    const pct   = isUnlimited ? 100 : Math.min((used / limit) * 100, 100);
-    const nextUnlock = usage.nextUnlock ?? null;
+    // Support both {hw, hwLimit} (from get-usage) and {used, limit} (from ask.js)
+    const used  = usage.hw  ?? usage.used  ?? 0;
+    // Determine limit: prefer plan-level override, then usage data
+    const planLimit = uPlan === 'max' ? null : uPlan === 'super' ? 25 : 5;
+    const dataLimit = usage.hwLimit ?? usage.limit;
+    const limit = (planLimit !== undefined ? planLimit : dataLimit) ?? 5;
 
-    const label = document.getElementById('usageBarLabel');
-    const fill  = document.getElementById('usageBarFill');
-    const cd    = document.getElementById('usageBarCountdown');
-    const hwClockWrap = document.getElementById('hwClockWrap');
+    const isUnlimited = limit === null || limit === Infinity;
+    const left        = isUnlimited ? Infinity : Math.max(0, limit - used);
+    const pct         = isUnlimited ? 100 : Math.min((used / limit) * 100, 100);
+    const nextUnlock  = usage.nextUnlock ?? null;
+
+    const label      = document.getElementById('usageBarLabel');
+    const fill       = document.getElementById('usageBarFill');
+    const cd         = document.getElementById('usageBarCountdown');
+    const hwClockWrap  = document.getElementById('hwClockWrap');
     const casualSection = document.getElementById('casualBarSection');
 
-    // Hide casual bar — we only have ONE unified bar now
+    // Hide casual bar — single unified bar
     if (casualSection) casualSection.style.display = 'none';
 
     if (isUnlimited) {
-      if (label) label.innerHTML = '💡 Unlimited problems';
-      if (fill)  { fill.style.width='100%'; fill.style.background='#58CC02'; fill.className='usage-bar-fill hw-fill'; }
+      if (label) label.innerHTML = '<span style="color:#58CC02;font-weight:800;">✨ Unlimited — Max Knox</span>';
+      if (fill)  { fill.style.width = '100%'; fill.style.background = '#58CC02'; fill.className = 'usage-bar-fill hw-fill'; }
       if (cd)    cd.textContent = '';
       if (hwClockWrap) hwClockWrap.style.display = 'none';
     } else {
-      if (label) label.innerHTML = `🧠 <strong>${used} / ${limit}</strong> problems used today`;
-      if (fill)  { fill.style.width = pct+'%'; fill.style.background=''; fill.className='usage-bar-fill hw-fill'+(pct>=100?' danger':pct>=80?' warn':''); }
-      if (cd)    { cd.textContent = left===1?'1 left!':''; cd.style.color='#F59E0B'; }
+      const planTag = uPlan === 'super' ? ' · Super Knox' : '';
+      if (label) label.innerHTML = `<span style="color:#FF6B00;font-weight:800;">📚 ${used} / ${limit} questions used today${planTag}</span>`;
+      const fillClass = 'usage-bar-fill hw-fill' + (pct >= 100 ? ' danger' : pct >= 80 ? ' warn' : '');
+      if (fill)  { fill.style.width = pct + '%'; fill.style.background = ''; fill.className = fillClass; }
+      if (cd)    { cd.textContent = left === 1 ? '1 left!' : left === 0 ? 'Used up!' : ''; cd.style.color = left <= 1 ? '#EF4444' : '#F59E0B'; }
       if (nextUnlock && left === 0) {
         startHwClock(nextUnlock);
       } else {
@@ -2519,12 +2594,18 @@
   window.updateUsageBar = updateUsageBar;
   (function initBarsFromCache() {
     if (!window.currentUser) {
-      updateUsageBar({ hw: 0, hwLimit: 1, casual: 0, casualLimit: 1, nextUnlock: null, csNextUnlock: null });
+      // Guest: show that they have 1 free try
+      updateUsageBar({ hw: 0, hwLimit: 1, nextUnlock: null });
       return;
     }
     const uPlan   = window.userPlan || 'free';
-    const hwLimit = (uPlan === 'max') ? null : (uPlan === 'super') ? 25 : 5;
-    updateUsageBar({ used: 0, limit: hwLimit, nextUnlock: null });
+    const hwLimit = uPlan === 'max' ? null : uPlan === 'super' ? 25 : 5;
+    const cached  = window.loadUsageCache ? window.loadUsageCache() : null;
+    if (cached) {
+      updateUsageBar(cached);
+    } else {
+      updateUsageBar({ hw: 0, hwLimit, nextUnlock: null });
+    }
   })();
 
   // ── Show limit reached modal with countdown ───────────────────────────────
@@ -2814,47 +2895,46 @@
 
   // ── Update pricing buttons based on current plan ─────────────────────────
   function updatePricingButtons() {
-    userPlan = window.userPlan || userPlan; // sync from module scope
+    userPlan = window.userPlan || userPlan;
+    // Normalize legacy names
+    if (userPlan === 'pro_plus') { userPlan = 'max';   window.userPlan = 'max';   }
+    if (userPlan === 'pro'     ) { userPlan = 'super'; window.userPlan = 'super'; }
+
     const pricingCards = document.querySelectorAll('.pricing-card');
     pricingCards.forEach(card => {
-      const title = card.querySelector('h3')?.textContent.trim();
-      const btn   = card.querySelector('.cta-btn-wrap button');
-      if (!btn || !title) return;
+      const h3  = card.querySelector('h3');
+      const btn = card.querySelector('.cta-btn-wrap button') || card.querySelector('button:last-of-type');
+      if (!btn) return;
+      const title = h3?.textContent?.trim() || '';
 
-      // Reset first
       btn.disabled = false;
-      btn.style.boxShadow = '';
-      btn.style.opacity   = '';
+      btn.style.cssText = ''; // full reset
 
-      if (userPlan === 'pro') {
-        if (title === 'Pro') {
-          btn.textContent = '✓ Current Plan';
-          btn.disabled    = true;
-          btn.style.background  = '#e5e7eb';
-          btn.style.color       = '#6b7280';
-          btn.style.boxShadow   = 'none';
-          btn.style.opacity     = '0.7';
-        }
-        // Pro+ buttons stay active so Pro users can upgrade
+      const markCurrent = () => {
+        btn.textContent     = '✓ Current Plan';
+        btn.disabled        = true;
+        btn.style.background  = '#e5e7eb';
+        btn.style.color       = '#6b7280';
+        btn.style.boxShadow   = 'none';
+        btn.style.opacity     = '0.75';
+        btn.style.cursor      = 'default';
+      };
+      const markDowngrade = () => {
+        btn.textContent     = '↓ Downgrade';
+        btn.disabled        = true;
+        btn.style.background  = '#e5e7eb';
+        btn.style.color       = '#6b7280';
+        btn.style.boxShadow   = 'none';
+        btn.style.opacity     = '0.65';
+        btn.style.cursor      = 'default';
+      };
+
+      if (userPlan === 'super') {
+        if (title === 'Super Knox') markCurrent();
       }
-
       if (userPlan === 'max') {
-        if (title === 'Max Knox') {
-          btn.textContent = '✓ Current Plan';
-          btn.disabled    = true;
-          btn.style.background  = '#e5e7eb';
-          btn.style.color       = '#6b7280';
-          btn.style.boxShadow   = 'none';
-          btn.style.opacity     = '0.7';
-        }
-        if (title === 'Super Knox') {
-          btn.textContent = '↓ Downgrade';
-          btn.disabled    = true;
-          btn.style.background  = '#e5e7eb';
-          btn.style.color       = '#6b7280';
-          btn.style.boxShadow   = 'none';
-          btn.style.opacity     = '0.7';
-        }
+        if (title === 'Max Knox')   markCurrent();
+        if (title === 'Super Knox') markDowngrade();
       }
     });
   }
@@ -2864,7 +2944,10 @@
   var userPlan = window.userPlan || 'free';
 
   function updateUsageCounter() {
-    userPlan = window.userPlan || userPlan; // stay in sync with module scope
+    userPlan = window.userPlan || userPlan;
+    // Normalize legacy plan names
+    if (userPlan === 'pro_plus') { userPlan = 'max';   window.userPlan = 'max';   }
+    if (userPlan === 'pro'     ) { userPlan = 'super'; window.userPlan = 'super'; }
     const counter = document.getElementById('usageCounter');
     if (!counter) return;
     const usage = getUsageData();
@@ -2897,29 +2980,32 @@
 
   function handleAskQuestion() {
     userPlan = window.userPlan || userPlan;
+    // Normalize legacy names
+    if (userPlan === 'pro_plus') { userPlan = 'max';   window.userPlan = 'max';   }
+    if (userPlan === 'pro'     ) { userPlan = 'super'; window.userPlan = 'super'; }
+
     const question = ((document.getElementById('chatInput')||document.getElementById('questionInput')||{value:''}).value||'').trim();
     if (!question && !pendingImageBase64) return;
     const usage = getUsageData();
 
-    // Pro/Pro+ users skip ALL limits
+    // Paid users skip ALL local limits — server enforces
     if (userPlan === 'super' || userPlan === 'max') {
       executeAskQuestion(); return;
     }
 
-    // GUEST: allow exactly 1 question, then Knox prompts sign up inline
+    // GUEST: allow exactly 1 question, then show sign-up prompt
     if (!window.currentUser) {
       if (guestQuestionUsed) {
-        // Already used their one free shot — show Knox sign-up prompt in chat
         appendKnoxSignUpPrompt();
         return;
       }
-      // First question — let it through, flag it, then show sign-up after answer
       guestQuestionUsed = true;
-      updateUsageBar({ hw: 1, hwLimit: 1, casual: 0, casualLimit: 1, nextUnlock: null, csNextUnlock: null });
+      updateUsageBar({ hw: 1, hwLimit: 1, nextUnlock: null });
       executeAskQuestion(/* afterCallback */ () => appendKnoxSignUpPrompt(true));
       return;
     }
 
+    // Free logged-in users: update local counter optimistically, server will enforce the real limit
     usage.count = (usage.count || 0) + 1;
     setUsageData(usage);
     updateUsageCounter();
@@ -3045,7 +3131,7 @@
       row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
       row.innerHTML = `
         <div style="width:36px;height:36px;border-radius:50%;border:2px solid #FFE0C2;overflow:hidden;flex-shrink:0;background:#FED7AA;margin-top:4px;"><img src="./knox-logo.jpg" alt="Knox" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
-        <div style="max-width:88%;border:2px solid #E5E7EB;border-radius:6px 18px 18px 18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);background:white;">${html}</div>`;
+        <div class="knox-response-wrap" style="max-width:88%;border:2px solid var(--border);border-radius:6px 18px 18px 18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);background:var(--bg-card);">${html}</div>`;
       if (old) old.replaceWith(row);
       else chatThread.appendChild(row);
       // Scroll the chat thread so the TOP of Knox's response is visible
@@ -3135,7 +3221,7 @@
       } else if (data.isCasual) {
         const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
         if (clean.split('\n').filter(l => l.trim()).length <= 3 && clean.length < 300) {
-          responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
+          responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:var(--text);line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
         } else {
           const planTagClass2 = serverPlan === 'max' ? 'tag-pro-plus' : serverPlan === 'super' ? 'tag-pro' : 'tag-free';
           const planTag2 = serverPlan === 'max' ? 'Max Knox' : serverPlan === 'super' ? 'Super Knox' : 'Basic Knox';
@@ -3143,7 +3229,7 @@
         }
       } else if (data.isAcknowledgement) {
         const clean = (data.answer || '').replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1').replace(/Final Answer:\s*/i, '').trim();
-        responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:#3C3C3C;line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
+        responseHtml = `<div style="padding:14px 18px 16px;font-size:15px;font-weight:500;color:var(--text);line-height:1.65;">${clean.replace(/\n/g,'<br>')}</div>`;
       } else {
         responseHtml = renderResponse(
           data.answer || data.error || 'No response received.',
@@ -3230,9 +3316,16 @@
         if (bubble) bubble.appendChild(saveBtn);
       }
 
-      // Update usage progress bar
+      // Update usage progress bar with server-authoritative data
       if (data.usage) {
-        updateUsageBar(data.usage);
+        // Normalise: ask.js returns {used, limit, nextUnlock}; remap to {hw, hwLimit}
+        const normUsage = {
+          hw:        data.usage.used   ?? 0,
+          hwLimit:   data.usage.limit  ?? null,
+          nextUnlock: data.usage.nextUnlock ?? null,
+        };
+        updateUsageBar(normUsage);
+        if (window.saveUsageCache) window.saveUsageCache(normUsage);
         // ── Show upgrade popup instantly when the last free question is used ──
         // Don't wait for the next attempt to hit a 429 — show it right now.
         const uPlan = window.userPlan || userPlan || 'free';
@@ -3328,9 +3421,9 @@
           }
           html += `<div style="display:flex;flex-direction:column;gap:8px;margin:10px 14px;">`;
           steps.forEach(({ num, txt }) => {
-            html += `<div style="display:flex;align-items:flex-start;gap:10px;background:white;border:2px solid #FFE0C2;border-radius:12px;padding:12px 14px;box-shadow:0 2px 0 #FFD0A0;">
+            html += `<div class="freeform-step-card" style="display:flex;align-items:flex-start;gap:10px;background:var(--bg-card);border:2px solid var(--orange-light);border-radius:12px;padding:12px 14px;box-shadow:0 2px 0 rgba(204,85,0,0.15);">
               <div style="min-width:28px;height:28px;border-radius:9px;background:#FF6B00;color:white;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${num}</div>
-              <div style="font-size:14px;font-weight:600;color:#3C3C3C;line-height:1.6;padding-top:4px;">${formatInline(txt, plan)}</div>
+              <div class="freeform-step-text" style="font-size:14px;font-weight:600;color:var(--text);line-height:1.6;padding-top:4px;">${formatInline(txt, plan)}</div>
             </div>`;
           });
           html += `</div>`;
@@ -3344,9 +3437,9 @@
             bullets.push(allLines[i].replace(/^[-•*]\s*/, ''));
             i++;
           }
-          html += `<div style="background:var(--bg-card);border:1.5px solid #C4B5FD;border-radius:0 12px 12px 0;padding:12px 16px;margin:10px 14px;display:flex;flex-direction:column;gap:6px;">`;
+          html += `<div class="freeform-bullet-wrap" style="background:var(--bg-card);border:1.5px solid #C4B5FD;border-left:5px solid #8B5CF6;border-radius:0 12px 12px 0;padding:12px 16px;margin:10px 14px;display:flex;flex-direction:column;gap:6px;">`;
           bullets.forEach(b => {
-            html += `<div style="display:flex;align-items:flex-start;gap:8px;font-size:14px;font-weight:600;color:#333;line-height:1.55;">
+            html += `<div class="freeform-bullet-text" style="display:flex;align-items:flex-start;gap:8px;font-size:14px;font-weight:600;color:var(--text);line-height:1.55;">
               <div style="width:18px;height:18px;border-radius:50%;background:#8B5CF6;color:white;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;margin-top:2px;">✓</div>
               <span>${formatInline(b, plan)}</span>
             </div>`;
@@ -3615,7 +3708,7 @@
         </div>
         <div style="background:var(--bg-card);border:1.5px solid #C4B5FD;border-radius:0 14px 14px 0;padding:14px 18px;display:flex;flex-direction:column;gap:8px;">`;
       keyPointsBullets.forEach(b => {
-        html += `<div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:600;color:#333;line-height:1.55;">
+        html += `<div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:600;color:var(--text);line-height:1.55;">
           <div style="width:20px;height:20px;border-radius:50%;background:#8B5CF6;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:10px;font-weight:900;">✓</div>
           <span>${formatInline(b, plan)}</span>
         </div>`;
@@ -4167,7 +4260,9 @@
   // ======= SETTINGS MODAL =======
   window.openSettings = function() {
     closeDropdown();
-    userPlan = window.userPlan || userPlan; // sync from module scope
+    userPlan = window.userPlan || userPlan;
+    if (userPlan === 'pro_plus') { userPlan = 'max';   window.userPlan = 'max';   }
+    if (userPlan === 'pro'     ) { userPlan = 'super'; window.userPlan = 'super'; }
     const usage = getUsageData();
     const planLabel = userPlan === 'max' ? '🚀 Max Knox' : userPlan === 'super' ? '⚡ Super Knox' : '🆓 Basic Knox';
     const planColor = userPlan === 'max' ? '#FF6B00' : userPlan === 'super' ? '#58CC02' : '#1CB0F6';
@@ -4248,30 +4343,30 @@
     <div style="padding:24px 28px;display:flex;flex-direction:column;gap:14px;">
 
       <!-- Current Plan row -->
-      <div style="display:flex;align-items:center;justify-content:space-between;background:#f9fafb;border-radius:16px;padding:16px 20px;border:2px solid #f3f4f6;">
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-elevated);border-radius:16px;padding:16px 20px;border:2px solid var(--border);">
         <div>
-          <div style="font-weight:800;font-size:15px;color:#1f2937;">Current Plan</div>
-          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Your active subscription</div>
+          <div style="font-weight:800;font-size:15px;color:var(--text);">Current Plan</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-light);margin-top:2px;">Your active subscription</div>
         </div>
         <div id="settingsPlanBadge" style="font-weight:800;font-size:14px;"></div>
       </div>
 
       <!-- Renewal Date row -->
-      <div id="settingsRenewalRow" style="display:none;align-items:center;justify-content:space-between;background:#f9fafb;border-radius:16px;padding:16px 20px;border:2px solid #f3f4f6;">
+      <div id="settingsRenewalRow" style="display:none;align-items:center;justify-content:space-between;background:var(--bg-elevated);border-radius:16px;padding:16px 20px;border:2px solid var(--border);">
         <div>
-          <div style="font-weight:800;font-size:15px;color:#1f2937;">Renewal Date</div>
-          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Next billing cycle</div>
+          <div style="font-weight:800;font-size:15px;color:var(--text);">Renewal Date</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-light);margin-top:2px;">Next billing cycle</div>
         </div>
-        <div style="font-weight:700;font-size:14px;color:#374151;" id="settingsRenewalDate">—</div>
+        <div style="font-weight:700;font-size:14px;color:var(--text);" id="settingsRenewalDate">—</div>
       </div>
 
       <!-- Questions Today row -->
-      <div style="display:flex;align-items:center;justify-content:space-between;background:#f9fafb;border-radius:16px;padding:16px 20px;border:2px solid #f3f4f6;">
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-elevated);border-radius:16px;padding:16px 20px;border:2px solid var(--border);">
         <div>
-          <div style="font-weight:800;font-size:15px;color:#1f2937;">Questions Today</div>
-          <div style="font-size:13px;font-weight:600;color:#777;margin-top:2px;">Rolling 24hr window</div>
+          <div style="font-weight:800;font-size:15px;color:var(--text);">Questions Today</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-light);margin-top:2px;">Rolling 24hr window</div>
         </div>
-        <div id="settingsUsage" style="font-weight:800;font-size:14px;color:#374151;text-align:right;">—</div>
+        <div id="settingsUsage" style="font-weight:800;font-size:14px;color:var(--text);text-align:right;">—</div>
       </div>
       <!-- Countdown row — shown when limit hit -->
       <div id="settingsCountdownRow" style="display:none;background:#FFF4EC;border-radius:16px;padding:14px 20px;border:2px solid #FFCFA0;">
