@@ -769,6 +769,7 @@
       flex-shrink:0; box-shadow:0 3px 0 #CC5500;
     }
     .resp-step-text { font-size:14px; font-weight:600; color:var(--text); line-height:1.6; padding-top:4px; }
+    .resp-step-num  { color:white !important; }
 
     .resp-tip {
       display:flex; align-items:flex-start; gap:12px;
@@ -2370,8 +2371,8 @@
       ['A','B','C','D'].forEach(letter => {
         if (!options[letter]) return;
         html += `<button onclick="handleMCAnswer('${letter}','${correct}',this)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;border:2px solid #E5E7EB;background:white;cursor:pointer;font-family:inherit;text-align:left;transition:all 0.15s;width:100%;" onmouseover="if(!this.dataset.answered)this.style.borderColor='#1CB0F6'" onmouseout="if(!this.dataset.answered)this.style.borderColor='#E5E7EB'">
-          <span style="width:28px;height:28px;border-radius:8px;background:#F3F4F6;color:#374151;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${letter}</span>
-          <span style="font-size:14px;font-weight:600;color:#374151;line-height:1.4;">${options[letter]}</span>
+          <span style="width:28px;height:28px;border-radius:8px;background:var(--bg-secondary);color:var(--text);font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${letter}</span>
+          <span style="font-size:14px;font-weight:600;color:var(--text);line-height:1.4;">${options[letter]}</span>
         </button>`;
       });
       if (hint) html += `<div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:10px;padding:10px 14px;margin-top:4px;font-size:13px;font-weight:600;color:#92400E;">💡 ${hint}</div>`;
@@ -2392,7 +2393,7 @@
         const m = l.match(/^(\d+)\.\s*(.*)/);
         if (m) stepsHtml += `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #F3F4F6;">
           <div style="min-width:24px;height:24px;border-radius:7px;background:#FF6B00;color:white;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 0 #CC5500;">${m[1]}</div>
-          <span style="font-size:14px;font-weight:500;color:#374151;line-height:1.55;padding-top:2px;">${m[2]}</span>
+          <span style="font-size:14px;font-weight:500;color:var(--text);line-height:1.55;padding-top:2px;">${m[2]}</span>
         </div>`;
         else if (l.trim()) stepsHtml += `<p style="font-size:14px;color:#6B7280;padding:4px 0;">${l}</p>`;
       });
@@ -3304,6 +3305,8 @@
 
   // Render ANY Knox response beautifully — works line-by-line
   function renderFreeformText(rawText, plan) {
+    const textColor = "color:var(--text)";
+    const bgCard = "background:var(--bg-card)";
       const allLines = rawText.split('\n').map(l => l.trim()).filter(l => l);
       let html = '';
       let isFirstPara = true;
@@ -3341,7 +3344,7 @@
             bullets.push(allLines[i].replace(/^[-•*]\s*/, ''));
             i++;
           }
-          html += `<div style="background:#F5F3FF;border-left:5px solid #8B5CF6;border-radius:0 12px 12px 0;padding:12px 16px;margin:10px 14px;display:flex;flex-direction:column;gap:6px;">`;
+          html += `<div style="background:var(--bg-card);border:1.5px solid #C4B5FD;border-radius:0 12px 12px 0;padding:12px 16px;margin:10px 14px;display:flex;flex-direction:column;gap:6px;">`;
           bullets.forEach(b => {
             html += `<div style="display:flex;align-items:flex-start;gap:8px;font-size:14px;font-weight:600;color:#333;line-height:1.55;">
               <div style="width:18px;height:18px;border-radius:50%;background:#8B5CF6;color:white;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;margin-top:2px;">✓</div>
@@ -3355,22 +3358,22 @@
         // ── Labeled sections ──────────────────────────────────────────────────
         if (/^Explanation:\s*/i.test(line)) {
           const txt = line.replace(/^Explanation:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#1CB0F6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #0A85C2;">Explanation</div></div><div style="background:#D7F2FD;border-left:5px solid #1CB0F6;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:15px;font-weight:500;color:#333;line-height:1.75;">${formatInline(txt, plan)}</div></div></div>`;
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#1CB0F6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #0A85C2;">Explanation</div></div><div style="background:var(--bg-card);border:1.5px solid #93C5FD;border-radius:12px;padding:14px 16px;"><div style="font-size:15px;font-weight:500;color:var(--text);line-height:1.75;">${formatInline(txt, plan)}</div></div></div>`;
           i++; continue;
         }
         if (/^Tip:\s*/i.test(line)) {
           const txt = line.replace(/^Tip:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div></div><div style="background:#FFFBEB;border-left:5px solid #F59E0B;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div></div><div style="background:var(--bg-card);border:1.5px solid #FCD34D;border-radius:12px;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
           i++; continue;
         }
         if (/^Insight:\s*/i.test(line)) {
           const txt = line.replace(/^Insight:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div></div><div style="background:#FDF2F8;border-left:5px solid #EC4899;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div></div><div style="background:#FDF2F8;border-left:5px solid #EC4899;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
           i++; continue;
         }
         if (/^Common Mistake:\s*/i.test(line)) {
           const txt = line.replace(/^Common Mistake:\s*/i, '');
-          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div></div><div style="background:#FEF2F2;border-left:5px solid #EF4444;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
+          html += `<div style="margin:10px 14px 0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div></div><div style="background:var(--bg-card);border:1.5px solid #FCA5A5;border-radius:0 12px 12px 0;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(txt, plan)}</div></div></div>`;
           i++; continue;
         }
         if (/^Final Answer:\s*/i.test(line)) {
@@ -3599,7 +3602,7 @@
         </div>
         <div style="background:var(--blue-light);border-left:5px solid var(--blue);border-radius:0 14px 14px 0;padding:14px 16px;">`;
       explanationParas.forEach(p => {
-        if (p.text) html += `<div style="font-size:15px;font-weight:500;color:#333;line-height:1.75;margin-bottom:10px;">${formatInline(p.text, plan)}</div>`;
+        if (p.text) html += `<div style="font-size:15px;font-weight:500;color:var(--text);line-height:1.75;margin-bottom:10px;">${formatInline(p.text, plan)}</div>`;
       });
       html += `</div></div>`;
     }
@@ -3610,7 +3613,7 @@
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
           <div style="background:#8B5CF6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #6D28D9;">Key Points</div>
         </div>
-        <div style="background:#F5F3FF;border-left:5px solid #8B5CF6;border-radius:0 14px 14px 0;padding:14px 18px;display:flex;flex-direction:column;gap:8px;">`;
+        <div style="background:var(--bg-card);border:1.5px solid #C4B5FD;border-radius:0 14px 14px 0;padding:14px 18px;display:flex;flex-direction:column;gap:8px;">`;
       keyPointsBullets.forEach(b => {
         html += `<div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:600;color:#333;line-height:1.55;">
           <div style="width:20px;height:20px;border-radius:50%;background:#8B5CF6;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:10px;font-weight:900;">✓</div>
@@ -3627,7 +3630,7 @@
           <div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div>
         </div>
         <div style="background:#FDF2F8;border-left:5px solid #EC4899;border-radius:0 14px 14px 0;padding:14px 18px;">
-          <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(insightText.trim(), plan)}</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(insightText.trim(), plan)}</div>
         </div>
       </div>`;
     }
@@ -3639,7 +3642,7 @@
           <div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div>
         </div>
         <div style="background:#FFFBEB;border-left:5px solid #F59E0B;border-radius:0 14px 14px 0;padding:14px 18px;">
-          <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(tipText.trim(), plan)}</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(tipText.trim(), plan)}</div>
         </div>
       </div>`;
     }
@@ -3650,8 +3653,8 @@
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div>
         </div>
-        <div style="background:#FEF2F2;border-left:5px solid #EF4444;border-radius:0 14px 14px 0;padding:14px 18px;">
-          <div style="font-size:14px;font-weight:600;color:#333;line-height:1.65;">${formatInline(commonMistakeText.trim(), plan)}</div>
+        <div style="background:var(--bg-card);border:1.5px solid #FCA5A5;border-radius:0 14px 14px 0;padding:14px 18px;">
+          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(commonMistakeText.trim(), plan)}</div>
         </div>
       </div>`;
     }
