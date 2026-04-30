@@ -3590,8 +3590,14 @@
       if (line.startsWith("Resources:")) { flushPara(mode); break; }
 
       if (line.startsWith("Final Answer:")) {
-        finalAnswerText = line.replace("Final Answer:", "").trim();
-        mode = "other";
+        flushPara(mode); mode = "final_answer";
+        const inl = line.replace("Final Answer:", "").trim();
+        if (inl) finalAnswerText = inl;
+      }
+      // ✅ FIX: accumulate Final Answer text that appears on the next line(s)
+      else if (mode === "final_answer" && !knownHeaders.some(h => line.startsWith(h))) {
+        if (!finalAnswerText) finalAnswerText = line;
+        else finalAnswerText += " " + line;
       }
       else if (line.startsWith("Step-by-step:")) {
         flushPara(mode); mode = "steps";
@@ -3676,17 +3682,7 @@
       </div>`;
     }
 
-    // ── Step-by-Step ─────────────────────────────────────────────────────────
-    if (stepsHtml) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <div style="background:var(--orange);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Step-by-Step</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">${stepsHtml}</div>
-      </div>`;
-    }
-
-    // ── Explanation ───────────────────────────────────────────────────────────
+    // ── Explanation — BEFORE Step-by-Step so user sees "why" then "how" ──────
     const explanationParas = paragraphs.filter(p => p.type === "explanation" || p.type === "other");
     if (explanationParas.length > 0) {
       html += `<div style="margin:10px 14px 0;">
@@ -3698,6 +3694,17 @@
         if (p.text) html += `<div style="font-size:15px;font-weight:500;color:var(--text);line-height:1.75;margin-bottom:10px;">${formatInline(p.text, plan)}</div>`;
       });
       html += `</div></div>`;
+    }
+
+    // ── Step-by-Step ─────────────────────────────────────────────────────────
+    if (stepsHtml) {
+      html += `<div style="margin:10px 14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="background:var(--orange);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Step-by-Step</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">${stepsHtml}</div>
+      </div>`;
+    }
     }
 
     // ── Key Points ────────────────────────────────────────────────────────────
