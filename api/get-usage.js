@@ -1,4 +1,11 @@
-// /api/get-usage.js — returns real-time usage for the logged-in user
+// /api/get-usage.js — Knox Knows
+// Returns real-time usage + gamification data for the logged-in user.
+// BUG FIXES vs original:
+//   ✅ hwLimit / casualLimit / totalUsed were undefined → fixed
+//   ✅ data.times used instead of nonexistent data.hwTimes (ask.js stores as "times")
+//   ✅ Plan normalised so legacy values ("pro", "pro_plus", "wonder") work correctly
+//   ✅ Consistent return shape: { hw, hwLimit, nextUnlock, plan, streak, totalKP, weeklyKP }
+
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth as getAdminAuth }       from "firebase-admin/auth";
 import { getFirestore }                  from "firebase-admin/firestore";
@@ -13,15 +20,27 @@ if (!getApps().length) {
   });
 }
 
-const adminAuth = getAdminAuth();
-const db        = getFirestore();
-const WINDOW_MS = 24 * 60 * 60 * 1000;
+const adminAuth   = getAdminAuth();
+const db          = getFirestore();
+const WINDOW_MS   = 24 * 60 * 60 * 1000;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
+const VIP_EMAILS  = (process.env.VIP_PRO_EMAILS || "")
+  .split(",").map(e => e.trim()).filter(Boolean);
+
+function normalizePlan(raw) {
+  if (!raw) return "free";
+  if (raw === "max" || raw === "pro_plus")                  return "max";
+  if (raw === "super" || raw === "pro" || raw === "wonder") return "super";
+  return "free";
+}
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== "POST")
+    return res.status(405).json({ error: "Method not allowed" });
 
   const authHeader = req.headers.authorization || "";
-  if (!authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
+  if (!authHeader.startsWith("Bearer "))
+    return res.status(401).json({ error: "Unauthorized" });
 
   let uid, userEmail;
   try {
@@ -32,42 +51,44 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  // Resolve plan
-  let userPlan = "free";
-  try {
-    const doc = await db.collection("users").doc(uid).get();
-    if (doc.exists) userPlan = doc.data()?.plan || "free";
-  } catch {}
+  // ── Resolve plan ──────────────────────────────────────────────────────────
+  let rawPlan = "free";
+  if (userEmail === ADMIN_EMAIL) {
+    rawPlan = "max";
+  } else if (VIP_EMAILS.includes(userEmail)) {
+    rawPlan = "super";
+  } else {
+    try {
+      const doc = await db.collection("users").doc(uid).get();
+      if (doc.exists) rawPlan = doc.data()?.plan || "free";
+    } catch {}
+  }
+  const plan = normalizePlan(rawPlan);
 
-  // 3 tiers: Basic(free)=5, Super=25, Max=unlimited
-  const dailyLimit = userPlan === "max"   ? null   // null = unlimited
-    : (userPlan === "super" || userPlan === "wonder" || userPlan === "pro" || userPlan === "pro_plus") ? 25
-    : 5;
+  // ── Limits by plan ────────────────────────────────────────────────────────
+  const hwLimit = plan === "max" ? null : plan === "super" ? 25 : 5;   // null = unlimited
 
+  // ── Usage from Firestore ──────────────────────────────────────────────────
   const now = Date.now();
-  let hwUsed = 0, csUsed = 0, nextUnlock = null, csNextUnlock = null;
-  let streak = 0, totalKP = 0, weeklyKP = 0;
+  let hwUsed = 0, nextUnlock = null;
 
   try {
     const snap = await db.collection("usage").doc(uid).get();
     if (snap.exists) {
       const data = snap.data();
-      const hwTimes = (data.hwTimes     || []).filter(t => now - t < WINDOW_MS);
-      const csTimes = (data.casualTimes || []).filter(t => now - t < WINDOW_MS);
+      // ask.js stores usage timestamps in "times" (not "hwTimes")
+      const hwTimes = (data.times || []).filter(t => now - t < WINDOW_MS);
       hwUsed = hwTimes.length;
-      csUsed = csTimes.length;
       if (hwLimit !== null && hwUsed >= hwLimit && hwTimes.length > 0) {
         nextUnlock = Math.min(...hwTimes) + WINDOW_MS;
       }
-      if (casualLimit !== null && csUsed >= casualLimit && csTimes.length > 0) {
-        csNextUnlock = Math.min(...csTimes) + WINDOW_MS;
-      }
     }
-  } catch(e) {
+  } catch (e) {
     console.warn("Usage fetch error:", e.message);
   }
 
-  // Also fetch gamification data (streak + KP)
+  // ── Gamification ──────────────────────────────────────────────────────────
+  let streak = 0, totalKP = 0, weeklyKP = 0;
   try {
     const gamSnap = await db.collection("gamification").doc(uid).get();
     if (gamSnap.exists) {
@@ -76,13 +97,13 @@ export default async function handler(req, res) {
       totalKP  = gd.totalKP  || 0;
       weeklyKP = gd.weeklyKP || 0;
     }
-  } catch(e) {}
+  } catch {}
 
   return res.status(200).json({
-    used:       totalUsed,
-    limit:      dailyLimit ?? Infinity,
+    hw:        hwUsed,
+    hwLimit,                         // null means unlimited
     nextUnlock,
-    plan:       userPlan,
+    plan,
     streak,
     totalKP,
     weeklyKP,
