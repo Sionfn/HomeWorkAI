@@ -3550,6 +3550,21 @@
   function renderResponse(answer, resources, plan, extras = {}) {
     const { learningStyle, embeddedVideo, imageSearchQuery } = extras;
 
+    // Strip ALL markdown link syntax [text](url) from displayed text
+    function stripMarkdownLinks(text) {
+      return text.replace(/\[([^\]]+)\]\(https?:[^)]+\)/g, '$1');
+    }
+
+    function formatInline(text, p) {
+      let out = stripMarkdownLinks(text);
+      const _fi_isMax = p === "pro_plus" || p === "max";
+      const _fi_isPro = p === "pro"      || p === "super";
+      if (_fi_isPro || _fi_isMax) out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      if (_fi_isMax) out = out.replace(/__(.+?)__/g, "<u>$1</u>");
+      out = out.replace(/\*\*/g, "").replace(/(?<![a-zA-Z])__(?![a-zA-Z])/g, "");
+      return out;
+    }
+
     // Pre-pass: ensure Resources: is always on its own line
     answer = answer.replace(/([^\n])(Resources:)/g, '$1\n\nResources:');
 
@@ -3559,14 +3574,17 @@
 
       // Map ALL known AI-generated header variants to canonical section names
       const mappings = [
-        // Final Answer variants — only exact matches at line start
-        [/^Answer:/gim,                'Final Answer:'],
-        // Step-by-step variants — safe ones only
+        // Step-by-step variants
         [/Step-by-Step Process:/gi,    'Step-by-step:'],
         [/Step by Step:/gi,            'Step-by-step:'],
-        // Remove dangerous mappings: Solution:, Method:, Work:, Steps:
-        // These often appear as part of the answer text itself
+        [/Steps:/gi,                   'Step-by-step:'],
+        [/Solution Steps:/gi,          'Step-by-step:'],
+        [/Method:/gi,                  'Step-by-step:'],
+        [/Work:/gi,                    'Step-by-step:'],
+        [/Solution:/gi,                'Step-by-step:'],
+        [/Walkthrough:/gi,             'Step-by-step:'],
         // Explanation variants
+        [/Explanation:/gi,             'Explanation:'],
         [/Detailed Explanation:/gi,    'Explanation:'],
         [/How it Works:/gi,            'Explanation:'],
         // Insight variants
@@ -3580,6 +3598,7 @@
         // Key Points variants
         [/Key Point:/gi,               'Key Points:'],
         [/Key Takeaways:/gi,           'Key Points:'],
+        [/Summary:/gi,                 'Key Points:'],
         [/Takeaway:/gi,                'Key Points:'],
       ];
 
@@ -3602,14 +3621,7 @@
     }
     answer = normalizeSections(answer);
 
-    const knownHeaders = ['Final Answer:', 'Explanation:', 'Step-by-step:', 'Tip:', 'Insight:', 'Common Mistake:', 'Key Points:', 'Resources:'];
     const lines = answer.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-
-    // If the first line isn't a known header, auto-treat it as Final Answer
-    if (lines.length > 0 && !knownHeaders.some(h => lines[0].startsWith(h))) {
-      lines[0] = 'Final Answer: ' + lines[0];
-    }
-
     let finalAnswerText = "", stepsHtml = "", paragraphs = [], tipText = "", insightText = "", commonMistakeText = "";
     let keyPointsBullets = [];
     let mode = "other", currentParaLines = [];
@@ -3625,14 +3637,8 @@
       if (line.startsWith("Resources:")) { flushPara(mode); break; }
 
       if (line.startsWith("Final Answer:")) {
-        flushPara(mode); mode = "final_answer";
-        const inl = line.replace("Final Answer:", "").trim();
-        if (inl) finalAnswerText = inl;
-      }
-      // ✅ FIX: accumulate Final Answer text that appears on the next line(s)
-      else if (mode === "final_answer" && !knownHeaders.some(h => line.startsWith(h))) {
-        if (!finalAnswerText) finalAnswerText = line;
-        else finalAnswerText += " " + line;
+        finalAnswerText = line.replace("Final Answer:", "").trim();
+        mode = "other";
       }
       else if (line.startsWith("Step-by-step:")) {
         flushPara(mode); mode = "steps";
@@ -3641,13 +3647,6 @@
         flushPara(mode); mode = "explanation";
         const inl = line.replace("Explanation:", "").trim();
         if (inl) currentParaLines.push(inl);
-      }
-      // Catch "Explanation:" appearing mid-line (e.g. "Word. Explanation: more text")
-      else if (line.includes("Explanation:") && !line.startsWith("Final Answer:")) {
-        const parts = line.split("Explanation:");
-        if (parts[0].trim()) currentParaLines.push(parts[0].trim());
-        flushPara(mode); mode = "explanation";
-        if (parts[1] && parts[1].trim()) currentParaLines.push(parts[1].trim());
       }
       else if (line.startsWith("Insight:")) {
         flushPara(mode); mode = "insight";
@@ -3684,135 +3683,87 @@
     }
     flushPara(mode);
 
-    // ── Fallback: nothing structured parsed → use smart freeform renderer ─────
-    if (!finalAnswerText && !stepsHtml && paragraphs.length === 0 && !tipText && !insightText && !commonMistakeText && keyPointsBullets.length === 0) {
-      const planTagClass2 = plan === 'max' ? 'tag-pro-plus' : plan === 'super' || plan === 'pro_plus' ? 'tag-pro' : 'tag-free';
-      const planTag2 = plan === 'max' ? 'Max Knox' : plan === 'super' || plan === 'pro_plus' ? 'Super Knox' : 'Basic Knox';
-      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(answer, plan)}${renderResourcesHtml(resources)}<div style="height:10px;"></div>`;
-    }
+    // Support both old (pro/pro_plus) and new (super/max) plan names
+    const _isMax   = plan === "pro_plus" || plan === "max";
+    const _isPro   = plan === "pro"      || plan === "super";
+    const planTag      = _isMax ? "⭐ Pro+" : _isPro ? "⚡ Pro" : "Free";
+    const planTagClass = _isMax ? "tag-pro-plus" : _isPro ? "tag-pro" : "tag-free";
+    let html = `<div class="ai-response-box ${_isMax ? 'resp-pro-plus' : ''}">`;
+    html += `<div class="resp-header"><div class="resp-brain">🧠</div><div class="resp-title">HomeWorkAI</div><div class="resp-plan-tag ${planTagClass}">${planTag}</div></div>`;
 
-    // ── Only paragraphs (no Final Answer) → smart freeform ───────────────────
-    if (!finalAnswerText && paragraphs.length > 0 && !stepsHtml) {
-      const allText = paragraphs.map(p => p.text).join('\n\n');
-      const planTagClass2 = plan === 'max' ? 'tag-pro-plus' : plan === 'super' || plan === 'pro_plus' ? 'tag-pro' : 'tag-free';
-      const planTag2 = plan === 'max' ? 'Max Knox' : plan === 'super' || plan === 'pro_plus' ? 'Super Knox' : 'Basic Knox';
-      return `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass2}">${planTag2}</span></div>${renderFreeformText(allText, plan)}${renderResourcesHtml(resources)}<div style="height:10px;"></div>`;
-    }
-    const planTag      = plan === "max" ? "Max Knox" : plan === "super" || plan === "pro_plus" ? "Super Knox" : "Basic Knox";
-    const planTagClass = plan === "max" ? "tag-pro-plus" : plan === "super" || plan === "pro_plus" ? "tag-pro" : "tag-free";
-    let html = ``;
-
-    // ── Thin plan tag bar at top ──────────────────────────────────────────
-    html += `<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 14px 4px;"><span class="resp-plan-tag ${planTagClass}">${planTag}</span></div>`;
-
-    // ── Answer ───────────────────────────────────────────────────────────────
+    // Final Answer
     if (finalAnswerText) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:var(--green);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--green-dark);">Answer</div>
-        </div>
-        <div style="background:var(--green-light);border-left:5px solid var(--green);border-radius:0 14px 14px 0;padding:14px 16px;">
-          <div style="font-size:17px;font-weight:800;color:var(--text);line-height:1.5;">${formatInline(finalAnswerText, plan)}</div>
-        </div>
-      </div>`;
+      html += `<div class="resp-final"><div class="resp-final-label">Answer</div><div class="resp-final-text">${formatInline(finalAnswerText, plan)}</div></div>`;
     }
 
-    // ── Explanation — BEFORE Step-by-Step so user sees "why" then "how" ──────
+    // Steps
+    if (stepsHtml) {
+      html += `<div class="resp-steps-label">Step-by-Step</div><div class="resp-steps-wrap">${stepsHtml}</div>`;
+    }
+
+    // Explanation and other paragraphs — with label
     const explanationParas = paragraphs.filter(p => p.type === "explanation" || p.type === "other");
     if (explanationParas.length > 0) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:var(--blue);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 var(--blue-dark);">Explanation</div>
-        </div>
-        <div style="background:var(--blue-light);border-left:5px solid var(--blue);border-radius:0 14px 14px 0;padding:14px 16px;">`;
+      html += `<div class="resp-section-label">Explanation</div>`;
       explanationParas.forEach(p => {
-        if (p.text) html += `<div style="font-size:15px;font-weight:500;color:var(--text);line-height:1.75;margin-bottom:10px;">${formatInline(p.text, plan)}</div>`;
+        if (p.text) html += `<div class="resp-body-para resp-para-explanation">${formatInline(p.text, plan)}</div>`;
       });
-      html += `</div></div>`;
     }
 
-    // ── Step-by-Step ─────────────────────────────────────────────────────────
-    if (stepsHtml) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <div style="background:var(--orange);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #CC5500;">Step-by-Step</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">${stepsHtml}</div>
-      </div>`;
-    }
+    // Bullets (non-explanation)
+    paragraphs.filter(p => p.type === "bullet").forEach(p => {
+      html += `<div class="resp-bullet">• ${formatInline(p.text, plan)}</div>`;
+    });
 
-    // ── Key Points ────────────────────────────────────────────────────────────
+    // Key Points
     if (keyPointsBullets.length > 0) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <div style="background:#8B5CF6;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #6D28D9;">Key Points</div>
-        </div>
-        <div style="background:var(--bg-card);border:1.5px solid #C4B5FD;border-radius:0 14px 14px 0;padding:14px 18px;display:flex;flex-direction:column;gap:8px;">`;
+      html += `<div class="resp-keypoints"><div class="resp-keypoints-label">📋 Key Points</div>`;
       keyPointsBullets.forEach(b => {
-        html += `<div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:600;color:var(--text);line-height:1.55;">
-          <div style="width:20px;height:20px;border-radius:50%;background:#8B5CF6;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:10px;font-weight:900;">✓</div>
-          <span>${formatInline(b, plan)}</span>
-        </div>`;
+        html += `<div class="resp-bullet">• ${formatInline(b, plan)}</div>`;
       });
-      html += `</div></div>`;
+      html += `</div>`;
     }
 
-    // ── Insight ───────────────────────────────────────────────────────────────
+    // Insight
     if (insightText.trim()) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:#EC4899;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #BE185D;">Insight</div>
-        </div>
-        <div style="background:var(--pink-light);border-left:5px solid #EC4899;border-radius:0 14px 14px 0;padding:14px 18px;">
-          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(insightText.trim(), plan)}</div>
-        </div>
-      </div>`;
+      html += `<div class="resp-insight"><div class="resp-insight-label">Insight</div><div class="resp-insight-text">${formatInline(insightText.trim(), plan)}</div></div>`;
     }
 
-    // ── Tip ───────────────────────────────────────────────────────────────────
+    // Tip
     if (tipText.trim()) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:#F59E0B;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B45309;">Tip</div>
-        </div>
-        <div style="background:var(--yellow-light);border-left:5px solid #F59E0B;border-radius:0 14px 14px 0;padding:14px 18px;">
-          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(tipText.trim(), plan)}</div>
-        </div>
-      </div>`;
+      html += `<div class="resp-tip"><div class="resp-tip-icon">💡</div><div><div class="resp-tip-label">Tip</div><div class="resp-tip-text">${formatInline(tipText.trim(), plan)}</div></div></div>`;
     }
 
-    // ── Common Mistake ────────────────────────────────────────────────────────
+    // Common Mistake
     if (commonMistakeText.trim()) {
-      html += `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:#EF4444;color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #B91C1C;">Common Mistake</div>
-        </div>
-        <div style="background:var(--red-light);border-left:5px solid #EF4444;border-radius:0 14px 14px 0;padding:14px 18px;">
-          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.65;">${formatInline(commonMistakeText.trim(), plan)}</div>
-        </div>
-      </div>`;
+      html += `<div class="resp-common-mistake"><div class="resp-common-mistake-icon">⚠️</div><div><div class="resp-common-mistake-label">Common Mistake</div><div class="resp-common-mistake-text">${formatInline(commonMistakeText.trim(), plan)}</div></div></div>`;
     }
 
-    // ── Resources ─────────────────────────────────────────────────────────────
-    html += renderResourcesHtml(resources);
+    // Resources
+    if (resources && resources.length > 0) {
+      const ytIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ef4444"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;
+      const qlIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg>`;
+      const items  = resources.map(r => {
+        const isYT = r.type === "youtube";
+        return `<a href="${r.link}" target="_blank" rel="noopener" class="resp-resource-link ${isYT ? 'yt' : 'ql'}">${isYT ? ytIcon : qlIcon}<span class="resp-resource-title">${r.title}</span><span style="font-size:11px;font-weight:700;color:${isYT ? '#ef4444' : '#3b82f6'};white-space:nowrap;">${isYT ? 'YouTube ↗' : 'Quizlet ↗'}</span></a>`;
+      }).join("");
+      html += `<div class="resp-resources"><div class="resp-resources-label">📚 Resources</div>${items}</div>`;
+    }
 
-    // ── Visual Content ────────────────────────────────────────────────────────
-    if (plan === 'max' && (embeddedVideo || imageSearchQuery)) {
-      let visualHtml = `<div style="margin:10px 14px 0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <div style="background:var(--blue-dark);color:white;font-size:10px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;box-shadow:0 2px 0 #075985;">Visual Content</div>
-        </div>`;
+    // Visual Learner content (Pro+ only) — show if we have video OR image search
+    if ((plan === 'pro_plus' || plan === 'max') && (embeddedVideo || imageSearchQuery)) {
+      let visualHtml = '<div class="resp-visual-section"><div class="resp-visual-label">📺 Visual Content</div>';
       if (embeddedVideo) {
-        visualHtml += `<div class="resp-video-embed"><iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div style="font-size:12px;color:#6b7280;font-weight:600;margin:6px 0 10px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
+        visualHtml += `<div class="resp-video-embed"><iframe src="${embeddedVideo.embedUrl}" title="${embeddedVideo.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:10px;">${embeddedVideo.title} · ${embeddedVideo.channel}</div>`;
       }
       if (imageSearchQuery) {
-        visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imageSearchQuery + ' diagram')}" target="_blank" rel="noopener" class="resp-image-search-btn">View Diagrams: ${imageSearchQuery.substring(0, 40)}${imageSearchQuery.length > 40 ? '...' : ''}</a>`;
+        visualHtml += `<a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imageSearchQuery + ' diagram')}" target="_blank" rel="noopener" class="resp-image-search-btn">🖼️ View Diagrams &amp; Images: ${imageSearchQuery.substring(0, 40)}${imageSearchQuery.length > 40 ? '...' : ''}</a>`;
       }
-      visualHtml += `</div>`;
+      visualHtml += '</div>';
       html += visualHtml;
     }
 
-    html += `<div style="height:12px;"></div>`;
+    html += `</div>`;
     return html;
   }
 
